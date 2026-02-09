@@ -2,10 +2,10 @@
 Project Setup Guide
 1. Clone Repository ke Local
 Kalau pakai GitHub Desktop:
-<li>Klik Add → pilih Clone repository.</li>
-<li>Pilih URL, lalu paste URL repository.</li>
-<li>Pilih lokasi project di laptop.</li>
-<li>Klik Clone.</li>
+<ul><li>Klik Add → pilih Clone repository.</li></ul>
+<ul><li>Pilih URL, lalu paste URL repository.</li></ul>
+<ul><li>Pilih lokasi project di laptop.</li></ul>
+<ul><li>Klik Clone.</li></ul>
 
 2. Install Dependencies
 Backend (Laravel)
@@ -20,6 +20,6 @@ Frontend (Vite / npm)
 <ul>Ctrl+Click link atau copy-paste ke browser untuk menjalankan project frontend.</ul>
 
 4. Catatan
-<li>Pastikan PHP, Composer, Node.js, dan npm sudah terinstall di laptop.</li>
-<li>Untuk pertama kali, backend dan frontend harus diinstall dependencies-nya masing-masing.</li>
-<li>Setelah dijalankan, backend Laravel dan frontend Vite dapat berjalan secara bersamaan.</li>
+<ul><li>Pastikan PHP, Composer, Node.js, dan npm sudah terinstall di laptop.</li></ul>
+<ul><li>Untuk pertama kali, backend dan frontend harus diinstall dependencies-nya masing-masing.</li></ul>
+<ul><li>Setelah dijalankan, backend Laravel dan frontend Vite dapat berjalan secara bersamaan.</li></ul>
