@@ -11,8 +11,16 @@ class MstKegiatan extends Model
     protected $table = 'mst_kegiatan';
     protected $primaryKey = 'ID_KEGIATAN';
     public $timestamps = false;
+    public $incrementing = false;
+
+    // protected $fillable = [
+    //     'MST_ID_KEGIATAN',
+    //     'DESKRIPSI_KEGIATAN',
+    //     'IS_DELETE',
+    // ];
 
     protected $fillable = [
+        'ID_KEGIATAN',
         'MST_ID_KEGIATAN',
         'DESKRIPSI_KEGIATAN',
         'IS_DELETE',
