@@ -36,20 +36,29 @@ class RefTahunAnggaranController extends Controller
     /**
      * Menambah Tahun Anggaran
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'DESKRIPSI_TAHUN_ANGGARAN' => 'required|unique:REF_TAHUN_ANGGARAN,DESKRIPSI_TAHUN_ANGGARAN',
-            'IS_CURRENT' => 'required|boolean',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'DESKRIPSI_TAHUN_ANGGARAN' => 'required|unique:REF_TAHUN_ANGGARAN,DESKRIPSI_TAHUN_ANGGARAN',
+        'IS_CURRENT' => 'required|boolean',
+    ]);
 
-        // hanya 1 yang aktif
-        if ($request->IS_CURRENT == 1) {
-            RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
-        }
+    $last = RefTahunAnggaran::orderBy('ID_TA_ANGGARAN', 'desc')->first();
 
-        return RefTahunAnggaran::create($request->all());
+    $newId = $last ? $last->ID_TA_ANGGARAN + 1 : 1;
+
+    if ($request->IS_CURRENT == 1) {
+        RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
     }
+
+    $data = RefTahunAnggaran::create([
+        'ID_TA_ANGGARAN' => $newId,
+        'DESKRIPSI_TAHUN_ANGGARAN' => $request->DESKRIPSI_TAHUN_ANGGARAN,
+        'IS_CURRENT' => $request->IS_CURRENT,
+    ]);
+
+    return response()->json($data, 201);
+}
 
     /**
      * Mengubah Tahun Anggaran

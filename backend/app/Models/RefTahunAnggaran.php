@@ -12,11 +12,14 @@ class RefTahunAnggaran extends Model
 
     protected $primaryKey = 'ID_TA_ANGGARAN';
 
+    public $incrementing = false; // 
+
     public $timestamps = false;
 
     protected $fillable = [
-        'IS_CURRENT',
+        'ID_TA_ANGGARAN',
         'DESKRIPSI_TAHUN_ANGGARAN',
+        'IS_CURRENT',
     ];
 
     protected $casts = [
@@ -26,7 +29,6 @@ class RefTahunAnggaran extends Model
 
     /**
      * Relasi ke MST_PROGRAM_KERJA
-     * 1 Tahun Anggaran bisa punya banyak Program Kerja
      */
     public function programKerja(): HasMany
     {
