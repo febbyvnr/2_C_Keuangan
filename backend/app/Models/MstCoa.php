@@ -12,7 +12,15 @@ class MstCoa extends Model
     protected $primaryKey = 'ID_MASTER_COA';
     public $timestamps = false;
 
+    // protected $fillable = [
+    //     'MST_ID_MASTER_COA',
+    //     'KODE_COA',
+    //     'DESKRIPSI_COA',
+    //     'IS_DELETE',
+    // ];
+
     protected $fillable = [
+    'ID_MASTER_COA',
         'MST_ID_MASTER_COA',
         'KODE_COA',
         'DESKRIPSI_COA',
