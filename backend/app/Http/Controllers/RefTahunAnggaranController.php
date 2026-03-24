@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class RefTahunAnggaranController extends Controller
 {
     /**
-     * 18. Menampilkan semua data
+     * Menampilkan semua data
      */
     public function index()
     {
@@ -16,7 +16,7 @@ class RefTahunAnggaranController extends Controller
     }
 
     /**
-     * 19. Mencari data
+     * Mencari data
      */
     public function search(Request $request)
     {
@@ -34,7 +34,7 @@ class RefTahunAnggaranController extends Controller
     }
 
     /**
-     * 15. Menambah Tahun Anggaran
+     * Menambah Tahun Anggaran
      */
     public function store(Request $request)
     {
@@ -52,13 +52,12 @@ class RefTahunAnggaranController extends Controller
     }
 
     /**
-     * 16. Mengubah Tahun Anggaran
+     * Mengubah Tahun Anggaran
      */
     public function update(Request $request, $id)
     {
         $data = RefTahunAnggaran::findOrFail($id);
 
-        // tidak boleh diubah kalau sudah dipakai
         if ($data->programKerja()->exists()) {
             return response()->json([
                 'message' => 'Tidak boleh mengubah, sudah dipakai program kerja'
@@ -81,13 +80,12 @@ class RefTahunAnggaranController extends Controller
     }
 
     /**
-     * 17. Menghapus Tahun Anggaran
+     * Menghapus Tahun Anggaran
      */
     public function destroy($id)
     {
         $data = RefTahunAnggaran::findOrFail($id);
 
-        // tidak boleh dihapus kalau dipakai
         if ($data->programKerja()->exists()) {
             return response()->json([
                 'message' => 'Tidak bisa dihapus, sudah dipakai program kerja'
