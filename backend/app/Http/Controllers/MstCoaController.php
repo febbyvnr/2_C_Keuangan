@@ -130,6 +130,7 @@ class MstCoaController extends Controller
 
     /**
      * Menghapus COA (soft delete)
+     * Hanya boleh jika belum dipakai program kerja dan tidak punya child aktif
      */
     public function destroy(int $id): JsonResponse
     {
