@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 
+use App\Http\Controllers\RefTahunAnggaranController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -27,4 +28,13 @@ Route::prefix('kegiatan')->group(function () {
     Route::post('/store', [MstKegiatanController::class, 'store']);
     Route::put('/update/{id}', [MstKegiatanController::class, 'update']);
     Route::delete('/delete/{id}', [MstKegiatanController::class, 'destroy']);
+});
+
+Route::prefix('tahun-anggaran')->group(function () {
+    Route::get('/', [RefTahunAnggaranController::class, 'index']);
+    Route::get('/search', [RefTahunAnggaranController::class, 'search']);
+    Route::get('/{id}', [RefTahunAnggaranController::class, 'show']);
+    Route::post('/store', [RefTahunAnggaranController::class, 'store']);
+    Route::put('/update/{id}', [RefTahunAnggaranController::class, 'update']);
+    Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
 });
