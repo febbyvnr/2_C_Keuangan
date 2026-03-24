@@ -72,6 +72,7 @@ class MstCoaController extends Controller
             'IS_DELETE' => 'nullable|boolean',
         ]);
 
+        $validated['ID_MASTER_COA'] = (MstCoa::max('ID_MASTER_COA') ?? 0) + 1;
         $validated['IS_DELETE'] = $validated['IS_DELETE'] ?? 0;
 
         $data = MstCoa::create($validated);

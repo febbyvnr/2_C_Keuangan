@@ -12,7 +12,7 @@ Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
     Route::get('/parents', [MstCoaController::class, 'parents']);
     Route::get('/{id}', [MstCoaController::class, 'show']);
-    Route::post('/', [MstCoaController::class, 'store']);
-    Route::put('/{id}', [MstCoaController::class, 'update']);
-    Route::delete('/{id}', [MstCoaController::class, 'destroy']);
+    Route::post('/store', [MstCoaController::class, 'store']);
+    Route::put('/update/{id}', [MstCoaController::class, 'update']);
+    Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
 });
