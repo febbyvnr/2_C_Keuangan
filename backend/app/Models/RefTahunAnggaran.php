@@ -42,9 +42,14 @@ class RefTahunAnggaran extends Model
     /**
      * Scope: hanya yang aktif
      */
-    public function scopeActive(Builder $query): Builder
-    {
-        return $query->where('IS_CURRENT', 1);
+    // public function scopeActive(Builder $query): Builder
+    // {
+    //     return $query->where('IS_CURRENT', 1);
+    // }
+
+    public function scopeLatestData(Builder $query): Builder
+    {  
+        return $query->orderBy('ID_TA_ANGGARAN', 'desc');
     }
 
     /**

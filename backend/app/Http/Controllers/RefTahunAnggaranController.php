@@ -12,7 +12,7 @@ class RefTahunAnggaranController extends Controller
      */
     public function index()
     {
-        return RefTahunAnggaran::latest()->get();
+        return RefTahunAnggaran::orderBy('ID_TA_ANGGARAN', 'desc')->get();
     }
 
     /**
