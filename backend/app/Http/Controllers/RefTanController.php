@@ -44,7 +44,15 @@ class RefTanController extends Controller
             'IS_CURRENT'=>'required|boolean',
             'DESKRIPSI_TAN'=>'required'
         ]);
-        $data = RefTan::create($request->all());
+        $lastId = RefTan::max('ID_TAN');
+        $newId = $lastId ? $lastId + 1 : 1;
+        $data = RefTan::create([
+            'ID_TAN' => $newId,
+            'TAHUN' => $request->TAHUN,
+            'IS_CURRENT' => $request->IS_CURRENT,
+            'DESKRIPSI_TAN' => $request->DESKRIPSI_TAN
+        ]);
+
         return response()->json($data,201);
     }
 
