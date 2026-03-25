@@ -4,8 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
-
 use App\Http\Controllers\RefTahunAnggaranController;
+use App\Http\Controllers\RefTanController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,4 +37,13 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::post('/store', [RefTahunAnggaranController::class, 'store']);
     Route::put('/update/{id}', [RefTahunAnggaranController::class, 'update']);
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
+});
+
+Route::prefix('tan')->group(function () {
+    Route::get('/', [RefTanController::class, 'index']);
+    Route::get('/search', [RefTanController::class, 'search']);
+    Route::get('/{id}', [RefTanController::class, 'show']);
+    Route::post('/store', [RefTanController::class, 'store']);
+    Route::put('/update/{id}', [RefTanController::class, 'update']);
+    Route::delete('/delete/{id}', [RefTanController::class, 'destroy']);
 });
