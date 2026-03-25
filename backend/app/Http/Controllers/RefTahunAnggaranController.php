@@ -43,16 +43,11 @@ class RefTahunAnggaranController extends Controller
             'IS_CURRENT' => 'required|boolean',
         ]);
 
-        $last = RefTahunAnggaran::orderBy('ID_TA_ANGGARAN', 'desc')->first();
-
-        $newId = $last ? $last->ID_TA_ANGGARAN + 1 : 1;
-
         if ($request->IS_CURRENT == 1) {
             RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
         }
 
         $data = RefTahunAnggaran::create([
-            'ID_TA_ANGGARAN' => $newId,
             'DESKRIPSI_TAHUN_ANGGARAN' => $request->DESKRIPSI_TAHUN_ANGGARAN,
             'IS_CURRENT' => $request->IS_CURRENT,
         ]);
@@ -87,6 +82,7 @@ class RefTahunAnggaranController extends Controller
             return response()->json($data);
         }
 
+        // hanya 1 aktif
         if ($request->IS_CURRENT == 1) {
             RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
         }

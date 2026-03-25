@@ -12,12 +12,13 @@ class RefTahunAnggaran extends Model
 
     protected $primaryKey = 'ID_TA_ANGGARAN';
 
-    public $incrementing = false; // 
+    public $incrementing = true; 
+
+    protected $keyType = 'int'; 
 
     public $timestamps = false;
 
     protected $fillable = [
-        'ID_TA_ANGGARAN',
         'DESKRIPSI_TAHUN_ANGGARAN',
         'IS_CURRENT',
     ];
@@ -42,10 +43,10 @@ class RefTahunAnggaran extends Model
     /**
      * Scope: hanya yang aktif
      */
-    // public function scopeActive(Builder $query): Builder
-    // {
-    //     return $query->where('IS_CURRENT', 1);
-    // }
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('IS_CURRENT', 1);
+    }
 
     public function scopeLatestData(Builder $query): Builder
     {  
