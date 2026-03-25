@@ -7,13 +7,11 @@ use Illuminate\Http\Request;
 
 class RefTanController extends Controller
 {
-    // fetch all data - get
     public function index()
     {
         return response()->json(RefTan::all());
     }
 
-    // show by id - get
     public function show($id)
     {
         $data = RefTan::find($id);
@@ -23,7 +21,6 @@ class RefTanController extends Controller
         return response()->json($data);
     }
 
-    //search by TAHUN - get
     public function search(Request $request)
     {
         $query = RefTan::query();
@@ -36,13 +33,15 @@ class RefTanController extends Controller
         return response()->json($query->get());
     }
 
-    // add - post
     public function store(Request $request)
     {
         $request->validate([
-            'TAHUN'=>'required|integer',
-            'IS_CURRENT'=>'required|boolean',
-            'DESKRIPSI_TAN'=>'required'
+            'TAHUN' => 'required|integer|unique:REF_TAN,TAHUN',
+            'IS_CURRENT' => 'required|boolean',
+            'DESKRIPSI_TAN' => 'required'
+        ],[
+            'TAHUN.unique' => 'Tahun akademik sudah ada.',
+            'TAHUN.required' => 'Tahun wajib diisi.'
         ]);
         $lastId = RefTan::max('ID_TAN');
         $newId = $lastId ? $lastId + 1 : 1;
@@ -56,25 +55,45 @@ class RefTanController extends Controller
         return response()->json($data,201);
     }
 
-    // update - put
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         $data = RefTan::find($id);
-        if(!$data){
-            return response()->json(['message'=>'Data tidak ditemukan'],404);
+        if (!$data) {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
-        $data->update($request->all());
+        if ($data->IS_CURRENT == 1) {
+            return response()->json(['message' => 'Tahun aktif tidak boleh diubah'], 400);
+        }
+        $request->validate([
+            'TAHUN' => 'required|integer|unique:REF_TAN,TAHUN,' . $id . ',ID_TAN',
+            'IS_CURRENT' => 'required|boolean',
+            'DESKRIPSI_TAN' => 'required'
+        ], [
+            'TAHUN.unique' => 'Tahun akademik sudah ada.',
+            'TAHUN.required' => 'Tahun wajib diisi.'
+        ]);
+        $data->update($request->only([
+            'TAHUN',
+            'IS_CURRENT',
+            'DESKRIPSI_TAN'
+        ]));
         return response()->json($data);
     }
 
-    // del - destroy
     public function destroy($id)
     {
         $data = RefTan::find($id);
-        if(!$data){
-            return response()->json(['message'=>'Data tidak ditemukan'],404);
+        if (!$data) {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
+        // if ($data->tagihan()->exists()) {
+        //     return response()->json([
+        //         'message' => 'Data tidak dapat dihapus karena sudah dipakai di tagihan/pembayaran siswa'
+        //     ], 400);
+        // }
         $data->delete();
-        return response()->json(['message'=>'Data berhasil dihapus']);
+        return response()->json([
+            'message' => 'Data berhasil dihapus'
+        ]);
     }
 }

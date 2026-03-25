@@ -33,7 +33,10 @@ class RefSumberDanaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'REF_ID_REF_DANA' => 'nullable|integer'
+            'REF_ID_REF_DANA' => 'nullable|exists:ref_sumber_dana,ID_REF_DANA'
+        ], [
+            'REF_ID_REF_DANA.exists' => 'Sumber dana induk tidak valid.',
+            'REF_ID_REF_DANA.integer' => 'Sumber dana harus berupa angka.',
         ]);
         $lastId = RefSumberDana::max('ID_REF_DANA');
         $newId = $lastId ? $lastId + 1 : 1;
@@ -41,7 +44,7 @@ class RefSumberDanaController extends Controller
             'ID_REF_DANA' => $newId,
             'REF_ID_REF_DANA' => $request->REF_ID_REF_DANA
         ]);
-        return response()->json($data,201);
+        return response()->json($data, 201);
     }
 
     public function update(Request $request, $id)
@@ -50,6 +53,18 @@ class RefSumberDanaController extends Controller
         if(!$data){
             return response()->json(['message'=>'Data tidak ditemukan'],404);
         }
+        //tunggu bkk bkm rka laporan
+        // if($data->rka()->exists() || $data->bkm()->exists()){
+        //     return response()->json(['message'=>'Sumber dana tidak bisa diubah karena sudah dipakai'],400);
+        // }
+        // $request->validate([
+        //     'REF_ID_REF_DANA' => 'nullable|exists:ref_sumber_dana,ID_REF_DANA'
+        // ], [
+        //     'REF_ID_REF_DANA.exists' => 'Sumber dana induk tidak valid.'
+        // ]);
+        // if($data->rka()->exists() || $data->bkm()->exists() || $data->bkk()->exists()){
+        //     return response()->json(['message'=>'Sumber dana tidak bisa diubah karena sudah dipakai di RKA/BKM/BKK/laporan'],400);
+        // }
         $data->update([
             'REF_ID_REF_DANA' => $request->REF_ID_REF_DANA
         ]);
@@ -62,6 +77,10 @@ class RefSumberDanaController extends Controller
         if(!$data){
             return response()->json(['message'=>'Data tidak ditemukan'],404);
         }
+        //tgg bkm bkk lap rka
+        // if($data->rka()->exists() || $data->bkm()->exists() || $data->bkk()->exists()){
+        //     return response()->json(['message'=>'Sumber dana tidak bisa dihapus karena sudah dipakai di RKA/BKM/BKK/laporan'],400);
+        // }
         $data->delete();
         return response()->json(['message'=>'Data berhasil dihapus']);
     }

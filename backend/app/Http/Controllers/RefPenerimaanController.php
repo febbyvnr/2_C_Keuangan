@@ -37,8 +37,11 @@ class RefPenerimaanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'REF_ID_REF_PENERIMAAN' => 'nullable|integer',
-            'DESKRIPSI_REF_PENERIMAAN' => 'required'
+            'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
+            'DESKRIPSI_REF_PENERIMAAN' => 'required|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+        ],[
+            'REF_ID_REF_PENERIMAAN.exists' => 'Referensi induk tidak valid.',
+            'DESKRIPSI_REF_PENERIMAAN.unique' => 'Deskripsi penerimaan sudah ada.',
         ]);
         $lastId = RefPenerimaan::max('ID_REF_PENERIMAAN');
         $newId = $lastId ? $lastId + 1 : 1;
@@ -56,6 +59,9 @@ class RefPenerimaanController extends Controller
         if(!$data){
             return response()->json(['message'=>'Data tidak ditemukan'],404);
         }
+        // if($data->transaksi()->exists()){
+        //     return response()->json(['message'=>'Referensi penerimaan tidak bisa diubah karena sudah dipakai di transaksi'],400);
+        // }
         $data->update([
             'REF_ID_REF_PENERIMAAN' => $request->REF_ID_REF_PENERIMAAN,
             'DESKRIPSI_REF_PENERIMAAN' => $request->DESKRIPSI_REF_PENERIMAAN
@@ -69,6 +75,10 @@ class RefPenerimaanController extends Controller
         if(!$data){
             return response()->json(['message'=>'Data tidak ditemukan'],404);
         }
+        //tgg transaksi
+        // if($data->transaksi()->exists()){
+        //     return response()->json(['message'=>'Referensi penerimaan tidak bisa dihapus karena sudah dipakai di transaksi'],400);
+        // }
         $data->delete();
         return response()->json(['message'=>'Data berhasil dihapus']);
     }
