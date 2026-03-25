@@ -6,6 +6,10 @@ use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\RefTahunAnggaranController;
 use App\Http\Controllers\RefTanController;
+use App\Http\Controllers\RefSumberDanaController;
+use App\Http\Controllers\RefPenerimaanController;
+
+use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -46,4 +50,22 @@ Route::prefix('tan')->group(function () {
     Route::post('/store', [RefTanController::class, 'store']);
     Route::put('/update/{id}', [RefTanController::class, 'update']);
     Route::delete('/delete/{id}', [RefTanController::class, 'destroy']);
+});
+
+Route::prefix('sumber-dana')->group(function () {
+    Route::get('/', [RefSumberDanaController::class, 'index']);
+    Route::get('/search', [RefSumberDanaController::class, 'search']);
+    Route::get('/{id}', [RefSumberDanaController::class, 'show']);
+    Route::post('/store', [RefSumberDanaController::class, 'store']);
+    Route::put('/update/{id}', [RefSumberDanaController::class, 'update']);
+    Route::delete('/delete/{id}', [RefSumberDanaController::class, 'destroy']);
+});
+
+Route::prefix('penerimaan')->group(function () {
+    Route::get('/', [RefPenerimaanController::class, 'index']);
+    Route::get('/search', [RefPenerimaanController::class, 'search']);
+    Route::get('/{id}', [RefPenerimaanController::class, 'show']);
+    Route::post('/store', [RefPenerimaanController::class, 'store']);
+    Route::put('/update/{id}', [RefPenerimaanController::class, 'update']);
+    Route::delete('/delete/{id}', [RefPenerimaanController::class, 'destroy']);
 });
