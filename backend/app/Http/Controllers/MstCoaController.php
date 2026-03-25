@@ -83,24 +83,36 @@ class MstCoaController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'MST_ID_MASTER_COA' => [
-                    'nullable',
-                    'integer',
-                    'exists:mst_coa,ID_MASTER_COA',
+            $validated = $request->validate(
+                [
+                    'MST_ID_MASTER_COA' => [
+                        'nullable',
+                        'integer',
+                        Rule::exists('mst_coa', 'ID_MASTER_COA')->where(function ($query) {
+                            $query->where('IS_DELETE', 0);
+                        }),
+                    ],
+                    'KODE_COA' => [
+                        'required',
+                        'string',
+                        'max:10',
+                        'unique:mst_coa,KODE_COA',
+                    ],
+                    'DESKRIPSI_COA' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
                 ],
-                'KODE_COA' => [
-                    'required',
-                    'string',
-                    'max:10',
-                    'unique:mst_coa,KODE_COA',
-                ],
-                'DESKRIPSI_COA' => [
-                    'required',
-                    'string',
-                    'max:100',
-                ],
-            ]);
+                [
+                    'MST_ID_MASTER_COA.exists' => 'Parent COA tidak valid.',
+                    'KODE_COA.required' => 'Kode COA wajib diisi.',
+                    'KODE_COA.unique' => 'Kode COA sudah digunakan.',
+                    'KODE_COA.max' => 'Kode COA maksimal 10 karakter.',
+                    'DESKRIPSI_COA.required' => 'Deskripsi COA wajib diisi.',
+                    'DESKRIPSI_COA.max' => 'Deskripsi COA maksimal 100 karakter.',
+                ]
+            );
 
             $data = DB::transaction(function () use ($validated) {
                 $nextId = ((int) MstCoa::max('ID_MASTER_COA')) + 1;
@@ -128,13 +140,15 @@ class MstCoaController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (QueryException $e) {
-            if (str_contains(strtolower($e->getMessage()), 'unique') ||
-                str_contains(strtolower($e->getMessage()), 'duplicate')) {
+            if (
+                str_contains(strtolower($e->getMessage()), 'unique') ||
+                str_contains(strtolower($e->getMessage()), 'duplicate')
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'KODE_COA sudah digunakan',
                     'errors' => [
-                        'KODE_COA' => ['KODE_COA sudah digunakan.'],
+                        'KODE_COA' => ['Kode COA sudah digunakan.'],
                     ],
                 ], 422);
             }
@@ -180,24 +194,36 @@ class MstCoaController extends Controller
                 ], 422);
             }
 
-            $validated = $request->validate([
-                'MST_ID_MASTER_COA' => [
-                    'nullable',
-                    'integer',
-                    'exists:mst_coa,ID_MASTER_COA',
+            $validated = $request->validate(
+                [
+                    'MST_ID_MASTER_COA' => [
+                        'nullable',
+                        'integer',
+                        Rule::exists('mst_coa', 'ID_MASTER_COA')->where(function ($query) {
+                            $query->where('IS_DELETE', 0);
+                        }),
+                    ],
+                    'KODE_COA' => [
+                        'required',
+                        'string',
+                        'max:10',
+                        Rule::unique('mst_coa', 'KODE_COA')->ignore($id, 'ID_MASTER_COA'),
+                    ],
+                    'DESKRIPSI_COA' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
                 ],
-                'KODE_COA' => [
-                    'required',
-                    'string',
-                    'max:10',
-                    Rule::unique('mst_coa', 'KODE_COA')->ignore($id, 'ID_MASTER_COA'),
-                ],
-                'DESKRIPSI_COA' => [
-                    'required',
-                    'string',
-                    'max:100',
-                ],
-            ]);
+                [
+                    'MST_ID_MASTER_COA.exists' => 'Parent COA tidak valid.',
+                    'KODE_COA.required' => 'Kode COA wajib diisi.',
+                    'KODE_COA.unique' => 'Kode COA sudah digunakan.',
+                    'KODE_COA.max' => 'Kode COA maksimal 10 karakter.',
+                    'DESKRIPSI_COA.required' => 'Deskripsi COA wajib diisi.',
+                    'DESKRIPSI_COA.max' => 'Deskripsi COA maksimal 100 karakter.',
+                ]
+            );
 
             if (
                 isset($validated['MST_ID_MASTER_COA']) &&
@@ -230,13 +256,15 @@ class MstCoaController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (QueryException $e) {
-            if (str_contains(strtolower($e->getMessage()), 'unique') ||
-                str_contains(strtolower($e->getMessage()), 'duplicate')) {
+            if (
+                str_contains(strtolower($e->getMessage()), 'unique') ||
+                str_contains(strtolower($e->getMessage()), 'duplicate')
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'KODE_COA sudah digunakan',
                     'errors' => [
-                        'KODE_COA' => ['KODE_COA sudah digunakan.'],
+                        'KODE_COA' => ['Kode COA sudah digunakan.'],
                     ],
                 ], 422);
             }
