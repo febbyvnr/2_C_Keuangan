@@ -11,6 +11,7 @@ class MstCoa extends Model
     protected $table = 'mst_coa';
     protected $primaryKey = 'ID_MASTER_COA';
     public $timestamps = false;
+    public $incrementing = false;
 
     // protected $fillable = [
     //     'MST_ID_MASTER_COA',
