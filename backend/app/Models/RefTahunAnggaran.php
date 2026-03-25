@@ -19,8 +19,8 @@ class RefTahunAnggaran extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'DESKRIPSI_TAHUN_ANGGARAN',
         'IS_CURRENT',
+        'DESKRIPSI_TAHUN_ANGGARAN',
     ];
 
     protected $casts = [
