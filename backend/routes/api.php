@@ -7,6 +7,11 @@ use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\RefJenisTarifController;
 use App\Http\Controllers\RefTarifController;
 use App\Http\Controllers\RefTahunAnggaranController;
+use App\Http\Controllers\DtlFpdController;
+use App\Http\Controllers\FpdAnggaranController;
+use App\Http\Controllers\RefSumberDanaController;
+use App\Http\Controllers\TrPmController;
+use App\Http\Controllers\RefPmController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -40,6 +45,50 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
 });
 
+Route::prefix('dtl-fpd')->group(function () {
+    Route::get('/', [DtlFpdController::class, 'index']);        
+    Route::get('/search', [DtlFpdController::class, 'search']); 
+    Route::get('/{id}', [DtlFpdController::class, 'show']);     
+    Route::post('/store', [DtlFpdController::class, 'store']);  
+    Route::put('/update/{id}', [DtlFpdController::class, 'update']); 
+    Route::delete('/delete/{id}', [DtlFpdController::class, 'destroy']); 
+});
+
+Route::prefix('fpd-anggaran')->group(function () {
+    Route::get('/', [FpdAnggaranController::class, 'index']);
+    Route::get('/search', [FpdAnggaranController::class, 'search']);
+    Route::get('/{id}', [FpdAnggaranController::class, 'show']);
+    Route::post('/store', [FpdAnggaranController::class, 'store']);
+    Route::put('/update/{id}', [FpdAnggaranController::class, 'update']);
+    Route::delete('/delete/{id}', [FpdAnggaranController::class, 'destroy']);
+});
+
+Route::prefix('ref-sumber-dana')->group(function () {
+    Route::get('/', [RefSumberDanaController::class, 'index']);
+    Route::get('/search', [RefSumberDanaController::class, 'search']);
+    Route::get('/{id}', [RefSumberDanaController::class, 'show']);
+    Route::post('/store', [RefSumberDanaController::class, 'store']);
+    Route::put('/update/{id}', [RefSumberDanaController::class, 'update']);
+    Route::delete('/delete/{id}', [RefSumberDanaController::class, 'destroy']);
+});
+
+Route::prefix('tr-pm')->group(function () {
+    Route::get('/', [TrPmController::class, 'index']);
+    Route::get('/search', [TrPmController::class, 'search']);
+    Route::get('/{id}', [TrPmController::class, 'show']);
+    Route::post('/store', [TrPmController::class, 'store']);
+    Route::put('/update/{id}', [TrPmController::class, 'update']);
+    Route::delete('/delete/{id}', [TrPmController::class, 'destroy']);
+});
+
+Route::prefix('ref-pm')->group(function () {
+    Route::get('/', [RefPmController::class, 'index']);
+    Route::get('/search', [RefPmController::class, 'search']);
+    Route::get('/{id}', [RefPmController::class, 'show']);
+    Route::post('/store', [RefPmController::class, 'store']);
+    Route::put('/update/{id}', [RefPmController::class, 'update']);
+    Route::delete('/delete/{id}', [RefPmController::class, 'destroy']);
+});
 Route::prefix('jenis-tarif')->group(function () {
     Route::get('/', [RefJenisTarifController::class, 'index']);
     Route::get('/search', [RefJenisTarifController::class, 'search']);
