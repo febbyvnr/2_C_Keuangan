@@ -91,7 +91,7 @@ class DtlFpdController extends Controller
         }
     }
 
-    public function store(Request $request): JsonResponse
+ public function store(Request $request): JsonResponse
 {
     try {
         $validated = $request->validate([
@@ -105,28 +105,16 @@ class DtlFpdController extends Controller
             'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
         ]);
 
-        $data = DB::transaction(function () use ($validated) {
-
-            $maxId = DB::table('dtl_fpd')
-                ->lockForUpdate()
-                ->max('ID_DT_FPD');
-
-            $nextId = $maxId ? $maxId + 1 : 1;
-
-            $dtlFpd = DtlFpd::create([
-                'ID_DT_FPD' => $nextId,
-                'ID_FPD' => $validated['ID_FPD'],
-                'ID_DT_PROGKER' => $validated['ID_DT_PROGKER'],
-                'QTY' => $validated['QTY'],
-                'HARGA_SATUAN' => $validated['HARGA_SATUAN'],
-                'VOLUME' => $validated['VOLUME'],
-                'SATUAN' => $validated['SATUAN'],
-                'TOTAL' => $validated['TOTAL'],
-                'LINK_BUKTI_NOTA_FPD' => $validated['LINK_BUKTI_NOTA_FPD'] ?? null,
-            ]);
-
-            return $dtlFpd->fresh();
-        });
+        $data = DtlFpd::create([
+            'ID_FPD' => $validated['ID_FPD'],
+            'ID_DT_PROGKER' => $validated['ID_DT_PROGKER'],
+            'QTY' => $validated['QTY'],
+            'HARGA_SATUAN' => $validated['HARGA_SATUAN'],
+            'VOLUME' => $validated['VOLUME'],
+            'SATUAN' => $validated['SATUAN'],
+            'TOTAL' => $validated['TOTAL'],
+            'LINK_BUKTI_NOTA_FPD' => $validated['LINK_BUKTI_NOTA_FPD'] ?? null,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -134,24 +122,10 @@ class DtlFpdController extends Controller
             'data' => $data,
         ], 201);
 
-    } catch (ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Validasi gagal',
-            'errors' => $e->errors(),
-        ], 422);
-
-    } catch (QueryException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Terjadi kesalahan pada database saat menambahkan detail FPD',
-            'error' => $e->getMessage(),
-        ], 500);
-
     } catch (\Throwable $e) {
         return response()->json([
             'success' => false,
-            'message' => 'Terjadi kesalahan saat menambahkan detail FPD',
+            'message' => 'Error',
             'error' => $e->getMessage(),
         ], 500);
     }
