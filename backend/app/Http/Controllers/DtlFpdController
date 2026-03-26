@@ -36,6 +36,42 @@ class DtlFpdController extends Controller
     }
 
     /**
+     * SEARCH
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $keyword = trim((string) $request->query('keyword', ''));
+
+            $query = DtlFpd::query();
+
+            if ($keyword !== '') {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('SATUAN', 'like', "%{$keyword}%")
+                      ->orWhere('LINK_BUKTI_NOTA_FPD', 'like', "%{$keyword}%");
+                });
+            }
+
+            $data = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data tidak ditemukan'
+                    : 'Data berhasil ditemukan',
+                'data' => $data,
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat search',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Menampilkan detail berdasarkan ID
      */
     public function show(int $id): JsonResponse
@@ -66,7 +102,7 @@ class DtlFpdController extends Controller
     }
 
     /**
-     * Menambahkan data baru (AUTO INCREMENT MANUAL)
+     * CREATE (AUTO INCREMENT MANUAL)
      */
     public function store(Request $request): JsonResponse
     {
@@ -84,7 +120,7 @@ class DtlFpdController extends Controller
 
             $data = DB::transaction(function () use ($validated) {
 
-                // 🔥 AUTO INCREMENT MANUAL
+                // AUTO INCREMENT MANUAL
                 $nextId = ((int) DtlFpd::max('ID_DT_FPD')) + 1;
 
                 return DtlFpd::create([
@@ -130,7 +166,7 @@ class DtlFpdController extends Controller
     }
 
     /**
-     * Update data
+     * UPDATE
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -181,7 +217,7 @@ class DtlFpdController extends Controller
     }
 
     /**
-     * Hard delete
+     * DELETE (HARD DELETE)
      */
     public function destroy(int $id): JsonResponse
     {
