@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
+use App\Http\Controllers\MstProgramKerjaController;
+
+use App\Http\Controllers\RefTahunAnggaranController;
+use App\Http\Controllers\RefTanController;
 use App\Http\Controllers\RefJenisTarifController;
 use App\Http\Controllers\RefTarifController;
 use App\Http\Controllers\RefTahunAnggaranController;
@@ -45,6 +49,22 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
 });
 
+Route::prefix('ref-tan')->group(function () {
+    Route::get('/', [RefTanController::class, 'index']);
+    Route::get('/current', [RefTanController::class, 'current']);
+    Route::get('/{id}', [RefTanController::class, 'show']);
+    Route::post('/store', [RefTanController::class, 'store']);
+    Route::put('/update/{id}', [RefTanController::class, 'update']);
+    Route::delete('/delete/{id}', [RefTanController::class, 'destroy']);
+});
+
+Route::prefix('rkt')->group(function () {
+    Route::get('/', [MstProgramKerjaController::class, 'index']);
+    Route::get('/{id}', [MstProgramKerjaController::class, 'show']);
+    Route::post('/store', [MstProgramKerjaController::class, 'store']);
+    Route::put('/update/{id}', [MstProgramKerjaController::class, 'update']);
+    Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy']);
+});
 Route::prefix('dtl-fpd')->group(function () {
     Route::get('/', [DtlFpdController::class, 'index']);        
     Route::get('/search', [DtlFpdController::class, 'search']); 

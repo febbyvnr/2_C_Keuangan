@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class MstUnit extends Model
 {
-    //
+    protected $table = 'mst_unit';
 }
