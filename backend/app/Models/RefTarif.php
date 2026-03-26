@@ -10,7 +10,7 @@ class RefTarif extends Model
 {
     protected $table = 'REF_TARIF';
 
-    // ⚠️ Tidak ada primary key di tabel → pakai composite key (manual)
+    // Tidak ada primary key di tabel → pakai composite key (manual)
     protected $primaryKey = null;
 
     public $incrementing = false;
