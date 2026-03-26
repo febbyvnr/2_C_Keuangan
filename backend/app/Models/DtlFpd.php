@@ -9,9 +9,12 @@ class DtlFpd extends Model
 {
     protected $table = 'dtl_fpd';
     protected $primaryKey = 'ID_DT_FPD';
+    public $incrementing = false;
+    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
+        'ID_DT_FPD',
         'ID_FPD',
         'ID_DT_PROGKER',
         'QTY',
