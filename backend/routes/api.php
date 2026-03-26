@@ -4,7 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
-
+use App\Http\Controllers\RefJenisTarifController;
+use App\Http\Controllers\RefTarifController;
 use App\Http\Controllers\RefTahunAnggaranController;
 
 Route::get('/user', function (Request $request) {
@@ -38,3 +39,23 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::put('/update/{id}', [RefTahunAnggaranController::class, 'update']);
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
 });
+
+Route::prefix('jenis-tarif')->group(function () {
+    Route::get('/', [RefJenisTarifController::class, 'index']);
+    Route::get('/search', [RefJenisTarifController::class, 'search']);
+    Route::get('/{id}', [RefJenisTarifController::class, 'show']);
+    Route::post('/store', [RefJenisTarifController::class, 'store']);
+    Route::put('/update/{id}', [RefJenisTarifController::class, 'update']);
+    Route::delete('/delete/{id}', [RefJenisTarifController::class, 'destroy']);
+});
+
+Route::prefix('tarif')->group(function () {
+    Route::get('/', [RefTarifController::class, 'index']);
+    Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
+    Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
+    Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
+    Route::post('/store', [RefTarifController::class, 'store']);
+    Route::put('/update', [RefTarifController::class, 'update']);
+    Route::delete('/delete', [RefTarifController::class, 'destroy']);
+});
+
