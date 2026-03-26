@@ -1,0 +1,205 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\DtlFpd;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class DtlFpdController extends Controller
+{
+    public function index(): JsonResponse
+    {
+        try {
+            $data = DtlFpd::all();
+
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data detail FPD tidak ditemukan'
+                    : 'Data detail FPD berhasil diambil',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $keyword = trim((string) $request->query('keyword', ''));
+
+            $query = DtlFpd::query();
+
+            if ($keyword !== '') {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('SATUAN', 'like', "%{$keyword}%")
+                      ->orWhere('LINK_BUKTI_NOTA_FPD', 'like', "%{$keyword}%");
+                });
+            }
+
+            $data = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data tidak ditemukan'
+                    : 'Data berhasil ditemukan',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat search',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function show($id): JsonResponse
+    {
+        try {
+            $id = (int) $id;
+            $data = DtlFpd::find($id);
+
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan',
+                    'data' => null,
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail FPD berhasil diambil',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'QTY' => 'required|integer|min:1',
+                'HARGA_SATUAN' => 'required|numeric|min:0',
+                'VOLUME' => 'required|integer|min:1',
+                'SATUAN' => 'required|string|max:10',
+                'TOTAL' => 'required|numeric|min:0',
+                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
+            ]);
+
+            $data = DtlFpd::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail FPD berhasil ditambahkan',
+                'data' => $data,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $id = (int) $id;
+            $data = DtlFpd::find($id);
+
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan',
+                    'data' => null,
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'QTY' => 'required|integer|min:1',
+                'HARGA_SATUAN' => 'required|numeric|min:0',
+                'VOLUME' => 'required|integer|min:1',
+                'SATUAN' => 'required|string|max:10',
+                'TOTAL' => 'required|numeric|min:0',
+                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
+            ]);
+
+            $data->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil diupdate',
+                'data' => $data,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        try {
+            $id = (int) $id;
+            $data = DtlFpd::find($id);
+
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan',
+                    'data' => null,
+                ], 404);
+            }
+
+            $data->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus',
+                'data' => null,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+}
