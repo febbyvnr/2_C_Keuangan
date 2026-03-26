@@ -6,6 +6,7 @@ use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 
 use App\Http\Controllers\RefTahunAnggaranController;
+use App\Http\Controllers\DtlFpdController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,4 +38,12 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::post('/store', [RefTahunAnggaranController::class, 'store']);
     Route::put('/update/{id}', [RefTahunAnggaranController::class, 'update']);
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
+});
+
+Route::prefix('dtl-fpd')->group(function () {
+    Route::get('/', [DtlFpdController::class, 'index']);
+    Route::get('/{id}', [DtlFpdController::class, 'show']);
+    Route::post('/store', [DtlFpdController::class, 'store']); 
+    Route::put('/update/{id}', [DtlFpdController::class, 'update']);
+    Route::delete('/delete/{id}', [DtlFpdController::class, 'destroy']);
 });
