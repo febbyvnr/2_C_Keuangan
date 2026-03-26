@@ -92,20 +92,29 @@ class DtlFpdController extends Controller
     }
 
     public function store(Request $request): JsonResponse
-    {
-        try {
-            $validated = $request->validate([
-                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
-                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
-                'QTY' => 'required|integer|min:1',
-                'HARGA_SATUAN' => 'required|numeric|min:0',
-                'VOLUME' => 'required|integer|min:1',
-                'SATUAN' => 'required|string|max:10',
-                'TOTAL' => 'required|numeric|min:0',
-                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
-            ]);
+{
+    try {
+        $validated = $request->validate([
+            'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+            'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+            'QTY' => 'required|integer|min:1',
+            'HARGA_SATUAN' => 'required|numeric|min:0',
+            'VOLUME' => 'required|integer|min:1',
+            'SATUAN' => 'required|string|max:10',
+            'TOTAL' => 'required|numeric|min:0',
+            'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
+        ]);
 
-            $data = DtlFpd::create([
+        $data = DB::transaction(function () use ($validated) {
+
+            $maxId = DB::table('dtl_fpd')
+                ->lockForUpdate()
+                ->max('ID_DT_FPD');
+
+            $nextId = $maxId ? $maxId + 1 : 1;
+
+            $dtlFpd = DtlFpd::create([
+                'ID_DT_FPD' => $nextId,
                 'ID_FPD' => $validated['ID_FPD'],
                 'ID_DT_PROGKER' => $validated['ID_DT_PROGKER'],
                 'QTY' => $validated['QTY'],
@@ -116,34 +125,37 @@ class DtlFpdController extends Controller
                 'LINK_BUKTI_NOTA_FPD' => $validated['LINK_BUKTI_NOTA_FPD'] ?? null,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Detail FPD berhasil ditambahkan',
-                'data' => $data,
-            ], 201);
+            return $dtlFpd->fresh();
+        });
 
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
-            ], 422);
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail FPD berhasil ditambahkan',
+            'data' => $data,
+        ], 201);
 
-        } catch (QueryException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Kesalahan database',
-                'error' => $e->getMessage(),
-            ], 500);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors(),
+        ], 422);
 
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    } catch (QueryException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan pada database saat menambahkan detail FPD',
+            'error' => $e->getMessage(),
+        ], 500);
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat menambahkan detail FPD',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     public function update(Request $request, int $id): JsonResponse
     {
