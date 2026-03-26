@@ -41,9 +41,10 @@ Route::prefix('tahun-anggaran')->group(function () {
 });
 
 Route::prefix('dtl-fpd')->group(function () {
-    Route::get('/', [DtlFpdController::class, 'index']);
-    Route::get('/{id}', [DtlFpdController::class, 'show']);
-    Route::post('/store', [DtlFpdController::class, 'store']); 
-    Route::put('/update/{id}', [DtlFpdController::class, 'update']);
-    Route::delete('/delete/{id}', [DtlFpdController::class, 'destroy']);
+    Route::get('/', [DtlFpdController::class, 'index']);        
+    Route::get('/search', [DtlFpdController::class, 'search']); 
+    Route::get('/{id}', [DtlFpdController::class, 'show']);     
+    Route::post('/store', [DtlFpdController::class, 'store']);  
+    Route::put('/update/{id}', [DtlFpdController::class, 'update']); 
+    Route::delete('/delete/{id}', [DtlFpdController::class, 'destroy']); 
 });
