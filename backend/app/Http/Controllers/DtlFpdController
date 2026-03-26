@@ -11,9 +11,6 @@ use Illuminate\Database\QueryException;
 
 class DtlFpdController extends Controller
 {
-    /**
-     * Menampilkan semua data detail FPD
-     */
     public function index(): JsonResponse
     {
         try {
@@ -35,9 +32,6 @@ class DtlFpdController extends Controller
         }
     }
 
-    /**
-     * SEARCH
-     */
     public function search(Request $request): JsonResponse
     {
         try {
@@ -71,9 +65,6 @@ class DtlFpdController extends Controller
         }
     }
 
-    /**
-     * Menampilkan detail berdasarkan ID
-     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -101,9 +92,6 @@ class DtlFpdController extends Controller
         }
     }
 
-    /**
-     * CREATE (AUTO INCREMENT MANUAL)
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -120,8 +108,9 @@ class DtlFpdController extends Controller
 
             $data = DB::transaction(function () use ($validated) {
 
-                // AUTO INCREMENT MANUAL
-                $nextId = ((int) DtlFpd::max('ID_DT_FPD')) + 1;
+                // FIX DI SINI (AMAN KALAU TABEL KOSONG)
+                $maxId = DtlFpd::max('ID_DT_FPD');
+                $nextId = $maxId ? $maxId + 1 : 1;
 
                 return DtlFpd::create([
                     'ID_DT_FPD' => $nextId,
@@ -165,9 +154,6 @@ class DtlFpdController extends Controller
         }
     }
 
-    /**
-     * UPDATE
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -216,9 +202,6 @@ class DtlFpdController extends Controller
         }
     }
 
-    /**
-     * DELETE (HARD DELETE)
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
