@@ -19,7 +19,6 @@ class RefJenisTarif extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'ID_JENIS_TARIF',
         'DESKRIPSI_JENIS_TARIF',
     ];
 
