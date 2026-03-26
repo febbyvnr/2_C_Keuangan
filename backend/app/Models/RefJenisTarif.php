@@ -12,15 +12,17 @@ class RefJenisTarif extends Model
 
     protected $primaryKey = 'ID_JENIS_TARIF';
 
-    public $incrementing = true;
+    public $incrementing = false;
 
     protected $keyType = 'int';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'DESKRIPSI_JENIS_TARIF',
-    ];
+    'ID_JENIS_TARIF',
+    'DESKRIPSI_JENIS_TARIF',
+    
+];
 
     protected $casts = [
         'ID_JENIS_TARIF' => 'integer',

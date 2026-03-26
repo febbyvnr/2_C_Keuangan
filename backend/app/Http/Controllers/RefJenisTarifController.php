@@ -38,7 +38,12 @@ class RefJenisTarifController extends Controller
         'DESKRIPSI_JENIS_TARIF' => 'required|unique:REF_JENIS_TARIF,DESKRIPSI_JENIS_TARIF',
     ]);
 
+    $lastId = RefJenisTarif::max('ID_JENIS_TARIF');
+
+    $newId = $lastId ? $lastId + 1 : 1;
+
     $data = RefJenisTarif::create([
+        'ID_JENIS_TARIF' => $newId,
         'DESKRIPSI_JENIS_TARIF' => $request->DESKRIPSI_JENIS_TARIF,
     ]);
 
