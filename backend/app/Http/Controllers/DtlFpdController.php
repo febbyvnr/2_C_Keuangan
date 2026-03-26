@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DtlFpd;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\QueryException;
 
 class DtlFpdController extends Controller
 {
@@ -64,9 +62,10 @@ class DtlFpdController extends Controller
         }
     }
 
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         try {
+            $id = (int) $id;
             $data = DtlFpd::find($id);
 
             if (!$data) {
@@ -91,49 +90,46 @@ class DtlFpdController extends Controller
         }
     }
 
- public function store(Request $request): JsonResponse
-{
-    try {
-        $validated = $request->validate([
-            'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
-            'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
-            'QTY' => 'required|integer|min:1',
-            'HARGA_SATUAN' => 'required|numeric|min:0',
-            'VOLUME' => 'required|integer|min:1',
-            'SATUAN' => 'required|string|max:10',
-            'TOTAL' => 'required|numeric|min:0',
-            'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
-        ]);
-
-        $data = DtlFpd::create([
-            'ID_FPD' => $validated['ID_FPD'],
-            'ID_DT_PROGKER' => $validated['ID_DT_PROGKER'],
-            'QTY' => $validated['QTY'],
-            'HARGA_SATUAN' => $validated['HARGA_SATUAN'],
-            'VOLUME' => $validated['VOLUME'],
-            'SATUAN' => $validated['SATUAN'],
-            'TOTAL' => $validated['TOTAL'],
-            'LINK_BUKTI_NOTA_FPD' => $validated['LINK_BUKTI_NOTA_FPD'] ?? null,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Detail FPD berhasil ditambahkan',
-            'data' => $data,
-        ], 201);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error',
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-}
-
-    public function update(Request $request, int $id): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         try {
+            $validated = $request->validate([
+                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'QTY' => 'required|integer|min:1',
+                'HARGA_SATUAN' => 'required|numeric|min:0',
+                'VOLUME' => 'required|integer|min:1',
+                'SATUAN' => 'required|string|max:10',
+                'TOTAL' => 'required|numeric|min:0',
+                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
+            ]);
+
+            $data = DtlFpd::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail FPD berhasil ditambahkan',
+                'data' => $data,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $id = (int) $id;
             $data = DtlFpd::find($id);
 
             if (!$data) {
@@ -162,14 +158,12 @@ class DtlFpdController extends Controller
                 'message' => 'Data berhasil diupdate',
                 'data' => $data,
             ]);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -179,9 +173,10 @@ class DtlFpdController extends Controller
         }
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy($id): JsonResponse
     {
         try {
+            $id = (int) $id;
             $data = DtlFpd::find($id);
 
             if (!$data) {
@@ -199,7 +194,6 @@ class DtlFpdController extends Controller
                 'message' => 'Data berhasil dihapus',
                 'data' => null,
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,

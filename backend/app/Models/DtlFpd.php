@@ -25,6 +25,18 @@ class DtlFpd extends Model
         'TOTAL' => 'double',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->ID_DT_FPD) {
+                $maxId = static::max('ID_DT_FPD') ?? 0;
+                $model->ID_DT_FPD = $maxId + 1;
+            }
+        });
+    }
+
     public function fpd(): BelongsTo
     {
         return $this->belongsTo(FpdAnggaran::class, 'ID_FPD', 'ID_FPD');
