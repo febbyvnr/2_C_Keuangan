@@ -9,21 +9,11 @@ class DtlFpd extends Model
 {
     protected $table = 'dtl_fpd';
     protected $primaryKey = 'ID_DT_FPD';
+    public $incrementing = false;
+    protected $keyType = 'int';
     public $timestamps = false;
 
-    // AUTO INCREMENT (DEFAULT TRUE, jadi ga usah set false)
-    public $incrementing = true;
-
-    protected $fillable = [
-        'ID_FPD',
-        'ID_DT_PROGKER',
-        'QTY',
-        'HARGA_SATUAN',
-        'VOLUME',
-        'SATUAN',
-        'TOTAL',
-        'LINK_BUKTI_NOTA_FPD',
-    ];
+    protected $guarded = []; 
 
     protected $casts = [
         'ID_DT_FPD' => 'integer',
