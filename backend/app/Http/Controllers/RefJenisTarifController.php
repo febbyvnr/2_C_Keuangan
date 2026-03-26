@@ -33,21 +33,17 @@ class RefJenisTarifController extends Controller
      * Menambah Jenis Tarif
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'DESKRIPSI_JENIS_TARIF' => 'required|unique:REF_JENIS_TARIF,DESKRIPSI_JENIS_TARIF',
-        ]);
+{
+    $request->validate([
+        'DESKRIPSI_JENIS_TARIF' => 'required|unique:REF_JENIS_TARIF,DESKRIPSI_JENIS_TARIF',
+    ]);
 
-        $last = RefJenisTarif::orderBy('ID_JENIS_TARIF', 'desc')->first();
-        $newId = $last ? $last->ID_JENIS_TARIF + 1 : 1;
+    $data = RefJenisTarif::create([
+        'DESKRIPSI_JENIS_TARIF' => $request->DESKRIPSI_JENIS_TARIF,
+    ]);
 
-        $data = RefJenisTarif::create([
-            'ID_JENIS_TARIF' => $newId,
-            'DESKRIPSI_JENIS_TARIF' => $request->DESKRIPSI_JENIS_TARIF,
-        ]);
-
-        return response()->json($data, 201);
-    }
+    return response()->json($data, 201);
+}
 
     /**
      * Mengubah Jenis Tarif
