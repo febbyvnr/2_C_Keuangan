@@ -26,7 +26,7 @@ class DtlFpdController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data',
+                'message' => 'Terjadi kesalahan saat mengambil data detail FPD',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -55,7 +55,6 @@ class DtlFpdController extends Controller
                     : 'Data berhasil ditemukan',
                 'data' => $data,
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -86,7 +85,7 @@ class DtlFpdController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan',
+                'message' => 'Terjadi kesalahan saat mengambil detail FPD',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -108,11 +107,9 @@ class DtlFpdController extends Controller
 
             $data = DB::transaction(function () use ($validated) {
 
-                // FIX DI SINI (AMAN KALAU TABEL KOSONG)
-                $maxId = DtlFpd::max('ID_DT_FPD');
-                $nextId = $maxId ? $maxId + 1 : 1;
+                $nextId = ((int) DtlFpd::max('ID_DT_FPD')) + 1;
 
-                return DtlFpd::create([
+                $dtlFpd = DtlFpd::create([
                     'ID_DT_FPD' => $nextId,
                     'ID_FPD' => $validated['ID_FPD'],
                     'ID_DT_PROGKER' => $validated['ID_DT_PROGKER'],
@@ -123,6 +120,8 @@ class DtlFpdController extends Controller
                     'TOTAL' => $validated['TOTAL'],
                     'LINK_BUKTI_NOTA_FPD' => $validated['LINK_BUKTI_NOTA_FPD'] ?? null,
                 ]);
+
+                return $dtlFpd->fresh();
             });
 
             return response()->json([
@@ -141,14 +140,14 @@ class DtlFpdController extends Controller
         } catch (QueryException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kesalahan database',
+                'message' => 'Terjadi kesalahan pada database saat menambahkan detail FPD',
                 'error' => $e->getMessage(),
             ], 500);
 
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan',
+                'message' => 'Terjadi kesalahan saat menambahkan detail FPD',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -179,6 +178,7 @@ class DtlFpdController extends Controller
             ]);
 
             $data->update($validated);
+            $data->refresh();
 
             return response()->json([
                 'success' => true,
@@ -193,10 +193,17 @@ class DtlFpdController extends Controller
                 'errors' => $e->errors(),
             ], 422);
 
+        } catch (QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada database saat update detail FPD',
+                'error' => $e->getMessage(),
+            ], 500);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan',
+                'message' => 'Terjadi kesalahan saat update detail FPD',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -222,7 +229,6 @@ class DtlFpdController extends Controller
                 'message' => 'Data berhasil dihapus',
                 'data' => null,
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
