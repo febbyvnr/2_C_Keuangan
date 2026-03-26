@@ -14,12 +14,15 @@ class MstProgramKerjaController extends Controller
 {
     /**
      * Menampilkan daftar program kerja aktif
-     * Search berdasarkan program kerja, indikator, sasaran
+     * Search berdasarkan program kerja, indikator, sasaran, keluaran, PJ
+     * Filter opsional berdasarkan ID_TAN dan ID_TA_ANGGARAN
      */
     public function index(Request $request): JsonResponse
     {
         try {
             $search = trim((string) $request->query('search', ''));
+            $idTan = $request->query('ID_TAN');
+            $idTaAnggaran = $request->query('ID_TA_ANGGARAN');
 
             $query = MstProgramKerja::query()
                 ->with([
@@ -31,7 +34,7 @@ class MstProgramKerjaController extends Controller
                     'detailProgramKerja',
                     'trPm',
                 ])
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->orderBy('ID_PROGRAM_KERJA', 'asc');
 
             if ($search !== '') {
@@ -42,6 +45,14 @@ class MstProgramKerjaController extends Controller
                         ->orWhere('KELUARAN_PROGKER', 'like', "%{$search}%")
                         ->orWhere('NIP_PENANGGUNG_JAWAB', 'like', "%{$search}%");
                 });
+            }
+
+            if (!is_null($idTan) && $idTan !== '') {
+                $query->where('ID_TAN', $idTan);
+            }
+
+            if (!is_null($idTaAnggaran) && $idTaAnggaran !== '') {
+                $query->where('ID_TA_ANGGARAN', $idTaAnggaran);
             }
 
             $data = $query->get();
@@ -78,7 +89,7 @@ class MstProgramKerjaController extends Controller
                     'detailProgramKerja',
                     'trPm',
                 ])
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->find($id);
 
             if (!$data) {
@@ -109,165 +120,15 @@ class MstProgramKerjaController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            // $validated = $request->validate(
-            //     [
-            //         'ID_TA_ANGGARAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
-            //         ],
-            //         'ID_UNIT' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_unit', 'ID_UNIT'),
-            //         ],
-            //         'ID_TAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('ref_tan', 'ID_TAN'),
-            //         ],
-            //         'ID_MASTER_COA' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_coa', 'ID_MASTER_COA'),
-            //         ],
-            //         'ID_KEGIATAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_kegiatan', 'ID_KEGIATAN')->where(function ($query) {
-            //                 $query->where('IS_DELETE', 0);
-            //             }),
-            //         ],
-            //         'NOMINAL' => [
-            //             'nullable',
-            //             'numeric',
-            //             'min:0',
-            //         ],
-            //         'INDIKATOR' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'SASARAN' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'WAKTU_AWAL' => [
-            //             'nullable',
-            //             'date',
-            //         ],
-            //         'WAKTU_AKHIR' => [
-            //             'nullable',
-            //             'date',
-            //             'after_or_equal:WAKTU_AWAL',
-            //         ],
-            //         'KELUARAN_PROGKER' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'PROGRAM_KERJA' => [
-            //             'required',
-            //             'string',
-            //             'max:255',
-            //         ],
-            //         'NIP_PENANGGUNG_JAWAB' => [
-            //             'nullable',
-            //             'string',
-            //             'max:20',
-            //         ],
-            //     ]
-                $validated = $request->validate([
-                    'ID_TA_ANGGARAN' => [
-                        'required',
-                        'integer',
-                        Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
-                    ],
-                    'ID_UNIT' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_unit', 'ID_UNIT'),
-                    ],
-                    'ID_TAN' => [
-                        'nullable',
-                        'integer',
-                        Rule::exists('ref_tan', 'ID_TAN'),
-                    ],
-                    'ID_MASTER_COA' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_coa', 'ID_MASTER_COA'),
-                    ],
-                    'ID_KEGIATAN' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
-                    ],
-                    'NOMINAL' => [
-                        'required',
-                        'numeric',
-                        'min:0',
-                    ],
-                    'INDIKATOR' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'SASARAN' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'WAKTU_AWAL' => [
-                        'required',
-                        'date',
-                    ],
-                    'WAKTU_AKHIR' => [
-                        'required',
-                        'date',
-                        'after_or_equal:WAKTU_AWAL',
-                    ],
-                    'KELUARAN_PROGKER' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'PROGRAM_KERJA' => [
-                        'required',
-                        'string',
-                        'max:255',
-                    ],
-                    'NIP_PENANGGUNG_JAWAB' => [
-                        'required',
-                        'string',
-                        'max:20',
-                    ],
-                ],
-                [
-                    'ID_TA_ANGGARAN.exists' => 'Tahun anggaran tidak valid.',
-                    'ID_UNIT.exists' => 'Unit tidak valid.',
-                    'ID_TAN.exists' => 'TAN tidak valid.',
-                    'ID_MASTER_COA.exists' => 'COA tidak valid.',
-                    'ID_KEGIATAN.exists' => 'Kegiatan tidak valid.',
-                    'NOMINAL.numeric' => 'Nominal harus berupa angka.',
-                    'NOMINAL.min' => 'Nominal tidak boleh kurang dari 0.',
-                    'INDIKATOR.max' => 'Indikator maksimal 100 karakter.',
-                    'SASARAN.max' => 'Sasaran maksimal 100 karakter.',
-                    'WAKTU_AWAL.date' => 'Waktu awal harus berupa tanggal yang valid.',
-                    'WAKTU_AKHIR.date' => 'Waktu akhir harus berupa tanggal yang valid.',
-                    'WAKTU_AKHIR.after_or_equal' => 'Waktu akhir tidak boleh lebih awal dari waktu awal.',
-                    'KELUARAN_PROGKER.max' => 'Keluaran program kerja maksimal 100 karakter.',
-                    'PROGRAM_KERJA.required' => 'Program kerja wajib diisi.',
-                    'PROGRAM_KERJA.max' => 'Program kerja maksimal 255 karakter.',
-                    'NIP_PENANGGUNG_JAWAB.max' => 'NIP penanggung jawab maksimal 20 karakter.',
-                ]
+            $validated = $request->validate(
+                $this->rules(),
+                $this->messages()
             );
 
             $isDuplicate = MstProgramKerja::query()
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->where('PROGRAM_KERJA', $validated['PROGRAM_KERJA'])
-                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'] ?? null)
+                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'])
                 ->exists();
 
             if ($isDuplicate) {
@@ -287,19 +148,19 @@ class MstProgramKerjaController extends Controller
 
                 $programKerja = MstProgramKerja::create([
                     'ID_PROGRAM_KERJA' => $nextId,
-                    'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'] ?? null,
-                    'ID_UNIT' => $validated['ID_UNIT'] ?? null,
+                    'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
+                    'ID_UNIT' => $validated['ID_UNIT'],
                     'ID_TAN' => $validated['ID_TAN'] ?? null,
-                    'ID_MASTER_COA' => $validated['ID_MASTER_COA'] ?? null,
-                    'ID_KEGIATAN' => $validated['ID_KEGIATAN'] ?? null,
-                    'NOMINAL' => $validated['NOMINAL'] ?? null,
-                    'INDIKATOR' => $validated['INDIKATOR'] ?? null,
-                    'SASARAN' => $validated['SASARAN'] ?? null,
-                    'WAKTU_AWAL' => $validated['WAKTU_AWAL'] ?? null,
-                    'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'] ?? null,
-                    'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'] ?? null,
+                    'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
+                    'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
+                    'NOMINAL' => $validated['NOMINAL'],
+                    'INDIKATOR' => $validated['INDIKATOR'],
+                    'SASARAN' => $validated['SASARAN'],
+                    'WAKTU_AWAL' => $validated['WAKTU_AWAL'],
+                    'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'],
+                    'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'],
                     'PROGRAM_KERJA' => $validated['PROGRAM_KERJA'],
-                    'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'] ?? null,
+                    'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'],
                     'IS_DELETE' => 0,
                 ]);
 
@@ -347,7 +208,7 @@ class MstProgramKerjaController extends Controller
     {
         try {
             $programKerja = MstProgramKerja::query()
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->find($id);
 
             if (!$programKerja) {
@@ -358,165 +219,15 @@ class MstProgramKerjaController extends Controller
                 ], 404);
             }
 
-            // $validated = $request->validate(
-            //     [
-            //         'ID_TA_ANGGARAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
-            //         ],
-            //         'ID_UNIT' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_unit', 'ID_UNIT'),
-            //         ],
-            //         'ID_TAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('ref_tan', 'ID_TAN'),
-            //         ],
-            //         'ID_MASTER_COA' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_coa', 'ID_MASTER_COA'),
-            //         ],
-            //         'ID_KEGIATAN' => [
-            //             'nullable',
-            //             'integer',
-            //             Rule::exists('mst_kegiatan', 'ID_KEGIATAN')->where(function ($query) {
-            //                 $query->where('IS_DELETE', 0);
-            //             }),
-            //         ],
-            //         'NOMINAL' => [
-            //             'nullable',
-            //             'numeric',
-            //             'min:0',
-            //         ],
-            //         'INDIKATOR' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'SASARAN' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'WAKTU_AWAL' => [
-            //             'nullable',
-            //             'date',
-            //         ],
-            //         'WAKTU_AKHIR' => [
-            //             'nullable',
-            //             'date',
-            //             'after_or_equal:WAKTU_AWAL',
-            //         ],
-            //         'KELUARAN_PROGKER' => [
-            //             'nullable',
-            //             'string',
-            //             'max:100',
-            //         ],
-            //         'PROGRAM_KERJA' => [
-            //             'required',
-            //             'string',
-            //             'max:255',
-            //         ],
-            //         'NIP_PENANGGUNG_JAWAB' => [
-            //             'nullable',
-            //             'string',
-            //             'max:20',
-            //         ],
-            //     ]
-                 $validated = $request->validate([
-                    'ID_TA_ANGGARAN' => [
-                        'required',
-                        'integer',
-                        Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
-                    ],
-                    'ID_UNIT' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_unit', 'ID_UNIT'),
-                    ],
-                    'ID_TAN' => [
-                        'nullable',
-                        'integer',
-                        Rule::exists('ref_tan', 'ID_TAN'),
-                    ],
-                    'ID_MASTER_COA' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_coa', 'ID_MASTER_COA'),
-                    ],
-                    'ID_KEGIATAN' => [
-                        'required',
-                        'integer',
-                        Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
-                    ],
-                    'NOMINAL' => [
-                        'required',
-                        'numeric',
-                        'min:0',
-                    ],
-                    'INDIKATOR' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'SASARAN' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'WAKTU_AWAL' => [
-                        'required',
-                        'date',
-                    ],
-                    'WAKTU_AKHIR' => [
-                        'required',
-                        'date',
-                        'after_or_equal:WAKTU_AWAL',
-                    ],
-                    'KELUARAN_PROGKER' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
-                    'PROGRAM_KERJA' => [
-                        'required',
-                        'string',
-                        'max:255',
-                    ],
-                    'NIP_PENANGGUNG_JAWAB' => [
-                        'required',
-                        'string',
-                        'max:20',
-                    ],
-                ],
-                [
-                    'ID_TA_ANGGARAN.exists' => 'Tahun anggaran tidak valid.',
-                    'ID_UNIT.exists' => 'Unit tidak valid.',
-                    'ID_TAN.exists' => 'TAN tidak valid.',
-                    'ID_MASTER_COA.exists' => 'COA tidak valid.',
-                    'ID_KEGIATAN.exists' => 'Kegiatan tidak valid.',
-                    'NOMINAL.numeric' => 'Nominal harus berupa angka.',
-                    'NOMINAL.min' => 'Nominal tidak boleh kurang dari 0.',
-                    'INDIKATOR.max' => 'Indikator maksimal 100 karakter.',
-                    'SASARAN.max' => 'Sasaran maksimal 100 karakter.',
-                    'WAKTU_AWAL.date' => 'Waktu awal harus berupa tanggal yang valid.',
-                    'WAKTU_AKHIR.date' => 'Waktu akhir harus berupa tanggal yang valid.',
-                    'WAKTU_AKHIR.after_or_equal' => 'Waktu akhir tidak boleh lebih awal dari waktu awal.',
-                    'KELUARAN_PROGKER.max' => 'Keluaran program kerja maksimal 100 karakter.',
-                    'PROGRAM_KERJA.required' => 'Program kerja wajib diisi.',
-                    'PROGRAM_KERJA.max' => 'Program kerja maksimal 255 karakter.',
-                    'NIP_PENANGGUNG_JAWAB.max' => 'NIP penanggung jawab maksimal 20 karakter.',
-                ]
+            $validated = $request->validate(
+                $this->rules(),
+                $this->messages()
             );
 
             $isDuplicate = MstProgramKerja::query()
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->where('PROGRAM_KERJA', $validated['PROGRAM_KERJA'])
-                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'] ?? null)
+                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'])
                 ->where('ID_PROGRAM_KERJA', '!=', $id)
                 ->exists();
 
@@ -533,19 +244,19 @@ class MstProgramKerjaController extends Controller
             }
 
             $programKerja->update([
-                'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'] ?? null,
-                'ID_UNIT' => $validated['ID_UNIT'] ?? null,
+                'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
+                'ID_UNIT' => $validated['ID_UNIT'],
                 'ID_TAN' => $validated['ID_TAN'] ?? null,
-                'ID_MASTER_COA' => $validated['ID_MASTER_COA'] ?? null,
-                'ID_KEGIATAN' => $validated['ID_KEGIATAN'] ?? null,
-                'NOMINAL' => $validated['NOMINAL'] ?? null,
-                'INDIKATOR' => $validated['INDIKATOR'] ?? null,
-                'SASARAN' => $validated['SASARAN'] ?? null,
-                'WAKTU_AWAL' => $validated['WAKTU_AWAL'] ?? null,
-                'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'] ?? null,
-                'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'] ?? null,
+                'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
+                'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
+                'NOMINAL' => $validated['NOMINAL'],
+                'INDIKATOR' => $validated['INDIKATOR'],
+                'SASARAN' => $validated['SASARAN'],
+                'WAKTU_AWAL' => $validated['WAKTU_AWAL'],
+                'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'],
+                'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'],
                 'PROGRAM_KERJA' => $validated['PROGRAM_KERJA'],
-                'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'] ?? null,
+                'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'],
             ]);
 
             $programKerja->refresh();
@@ -592,8 +303,7 @@ class MstProgramKerjaController extends Controller
     {
         try {
             $programKerja = MstProgramKerja::query()
-                ->with(['detailProgramKerja', 'trPm'])
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->find($id);
 
             if (!$programKerja) {
@@ -631,15 +341,127 @@ class MstProgramKerjaController extends Controller
     }
 
     /**
+     * Rules validasi
+     */
+    private function rules(): array
+    {
+        return [
+            'ID_TA_ANGGARAN' => [
+                'required',
+                'integer',
+                Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
+            ],
+            'ID_UNIT' => [
+                'required',
+                'integer',
+                Rule::exists('mst_unit', 'ID_UNIT'),
+            ],
+            'ID_TAN' => [
+                'required',
+                'integer',
+                Rule::exists('ref_tan', 'ID_TAN'),
+            ],
+            'ID_MASTER_COA' => [
+                'required',
+                'integer',
+                Rule::exists('mst_coa', 'ID_MASTER_COA')->where(function ($query) {
+                    $query->where('IS_DELETE', 0);
+                }),
+            ],
+            'ID_KEGIATAN' => [
+                'required',
+                'integer',
+                Rule::exists('mst_kegiatan', 'ID_KEGIATAN')->where(function ($query) {
+                    $query->where('IS_DELETE', 0);
+                }),
+            ],
+            'NOMINAL' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+            'INDIKATOR' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+            'SASARAN' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+            'WAKTU_AWAL' => [
+                'required',
+                'date',
+            ],
+            'WAKTU_AKHIR' => [
+                'required',
+                'date',
+                'after_or_equal:WAKTU_AWAL',
+            ],
+            'KELUARAN_PROGKER' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+            'PROGRAM_KERJA' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'NIP_PENANGGUNG_JAWAB' => [
+                'required',
+                'string',
+                'max:20',
+            ],
+        ];
+    }
+
+    /**
+     * Messages validasi
+     */
+    private function messages(): array
+    {
+        return [
+            'ID_TA_ANGGARAN.required' => 'Tahun anggaran wajib diisi.',
+            'ID_TA_ANGGARAN.exists' => 'Tahun anggaran tidak valid.',
+            'ID_UNIT.required' => 'Unit wajib diisi.',
+            'ID_UNIT.exists' => 'Unit tidak valid.',
+            'ID_TAN.required' => 'TAN wajib diisi.',
+            'ID_TAN.exists' => 'TAN tidak valid.',
+            'ID_MASTER_COA.required' => 'COA wajib diisi.',
+            'ID_MASTER_COA.exists' => 'COA tidak valid.',
+            'ID_KEGIATAN.required' => 'Kegiatan wajib diisi.',
+            'ID_KEGIATAN.exists' => 'Kegiatan tidak valid.',
+            'NOMINAL.required' => 'Nominal wajib diisi.',
+            'NOMINAL.numeric' => 'Nominal harus berupa angka.',
+            'NOMINAL.min' => 'Nominal tidak boleh kurang dari 0.',
+            'INDIKATOR.required' => 'Indikator wajib diisi.',
+            'INDIKATOR.max' => 'Indikator maksimal 100 karakter.',
+            'SASARAN.required' => 'Sasaran wajib diisi.',
+            'SASARAN.max' => 'Sasaran maksimal 100 karakter.',
+            'WAKTU_AWAL.required' => 'Waktu awal wajib diisi.',
+            'WAKTU_AWAL.date' => 'Waktu awal harus berupa tanggal yang valid.',
+            'WAKTU_AKHIR.required' => 'Waktu akhir wajib diisi.',
+            'WAKTU_AKHIR.date' => 'Waktu akhir harus berupa tanggal yang valid.',
+            'WAKTU_AKHIR.after_or_equal' => 'Waktu akhir tidak boleh lebih awal dari waktu awal.',
+            'KELUARAN_PROGKER.required' => 'Keluaran program kerja wajib diisi.',
+            'KELUARAN_PROGKER.max' => 'Keluaran program kerja maksimal 100 karakter.',
+            'PROGRAM_KERJA.required' => 'Program kerja wajib diisi.',
+            'PROGRAM_KERJA.max' => 'Program kerja maksimal 255 karakter.',
+            'NIP_PENANGGUNG_JAWAB.required' => 'NIP penanggung jawab wajib diisi.',
+            'NIP_PENANGGUNG_JAWAB.max' => 'NIP penanggung jawab maksimal 20 karakter.',
+        ];
+    }
+
+    /**
      * Helper cek apakah program kerja sudah dipakai
      */
     private function isProgramKerjaUsed(MstProgramKerja $programKerja): bool
     {
-        $hasDetail = method_exists($programKerja, 'detailProgramKerja')
-            && $programKerja->detailProgramKerja()->exists();
+        $hasDetail = $programKerja->detailProgramKerja()->exists();
 
-        $hasTrPm = method_exists($programKerja, 'trPm')
-            && $programKerja->trPm()->exists();
+        $hasTrPm = $programKerja->trPm()->exists();
 
         $hasFpd = DB::table('fpd_anggaran')
             ->where('ID_PROGRAM_KERJA', $programKerja->ID_PROGRAM_KERJA)
