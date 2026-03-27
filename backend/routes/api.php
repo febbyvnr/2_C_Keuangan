@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
-
 use App\Http\Controllers\RefTahunAnggaranController;
 use App\Http\Controllers\RefTanController;
 use App\Http\Controllers\RefJenisTarifController;
@@ -95,6 +94,7 @@ Route::prefix('rkt')->group(function () {
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update']);
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy']);
 });
+
 Route::prefix('dtl-fpd')->group(function () {
     Route::get('/', [DtlFpdController::class, 'index']);        
     Route::get('/search', [DtlFpdController::class, 'search']); 
