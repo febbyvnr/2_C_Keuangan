@@ -4,81 +4,178 @@ namespace App\Http\Controllers;
 
 use App\Models\RefPenerimaan;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class RefPenerimaanController extends Controller
 {
-    public function index()
+
+    public function index(): JsonResponse
     {
-        return response()->json(RefPenerimaan::all());
+        try {
+            $data = RefPenerimaan::all();
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data referensi penerimaan tidak ditemukan'
+                    : 'Data referensi penerimaan berhasil diambil',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan',
+                'error' => $e->getMessage()
+            ],500);
+        }
     }
 
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        $data = RefPenerimaan::find($id);
-        if(!$data){
-            return response()->json(['message'=>'Data tidak ditemukan'],404);
+        try {
+            $data = RefPenerimaan::find($id);
+            if(!$data){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data referensi penerimaan tidak ditemukan'
+                ],404);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Data referensi penerimaan berhasil diambil',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Terjadi kesalahan',
+                'error'=>$e->getMessage()
+            ],500);
         }
-        return response()->json($data);
     }
 
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
-        $query = RefPenerimaan::query();
-        if ($request->DESKRIPSI_REF_PENERIMAAN) {
-            $query->where('DESKRIPSI_REF_PENERIMAAN','like','%'.$request->DESKRIPSI_REF_PENERIMAAN.'%');
+        try {
+
+            $query = RefPenerimaan::query();
+            if ($request->filled('REF_ID_REF_PENERIMAAN')) {
+                $query->where('REF_ID_REF_PENERIMAAN', $request->REF_ID_REF_PENERIMAAN);
+            }
+            if ($request->filled('DESKRIPSI_REF_PENERIMAAN')) {
+                $query->where(
+                    'DESKRIPSI_REF_PENERIMAAN',
+                    'like',
+                    '%' . $request->DESKRIPSI_REF_PENERIMAAN . '%'
+                );
+            }
+            $data = $query->get();
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data tidak ditemukan'
+                    : 'Data berhasil ditemukan',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat search',
+                'error' => $e->getMessage()
+            ],500);
         }
-        if ($request->REF_ID_REF_PENERIMAAN !== null) {
-            $query->where('REF_ID_REF_PENERIMAAN',$request->REF_ID_REF_PENERIMAAN);
-        }
-        return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
-            'DESKRIPSI_REF_PENERIMAAN' => 'required|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
-        ],[
-            'REF_ID_REF_PENERIMAAN.exists' => 'Referensi induk tidak valid.',
-            'DESKRIPSI_REF_PENERIMAAN.unique' => 'Deskripsi penerimaan sudah ada.',
-        ]);
-        $lastId = RefPenerimaan::max('ID_REF_PENERIMAAN');
-        $newId = $lastId ? $lastId + 1 : 1;
-        $data = RefPenerimaan::create([
-            'ID_REF_PENERIMAAN' => $newId,
-            'REF_ID_REF_PENERIMAAN' => $request->REF_ID_REF_PENERIMAAN,
-            'DESKRIPSI_REF_PENERIMAAN' => $request->DESKRIPSI_REF_PENERIMAAN
-        ]);
-        return response()->json($data,201);
+        try {
+            $validated = $request->validate([
+                'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
+                'DESKRIPSI_REF_PENERIMAAN' => 'required|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+            ],[
+                'REF_ID_REF_PENERIMAAN.exists' => 'Referensi induk tidak valid',
+                'DESKRIPSI_REF_PENERIMAAN.unique' => 'Deskripsi penerimaan sudah ada'
+            ]);
+            $lastId = RefPenerimaan::max('ID_REF_PENERIMAAN');
+            $newId = $lastId ? $lastId + 1 : 1;
+            $validated['ID_REF_PENERIMAAN'] = $newId;
+            $data = RefPenerimaan::create($validated);
+            return response()->json([
+                'success'=>true,
+                'message'=>'Data referensi penerimaan berhasil ditambahkan',
+                'data'=>$data
+            ],201);
+        } catch (ValidationException $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Validasi gagal',
+                'errors'=>$e->errors()
+            ],422);
+        } catch (\Throwable $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Terjadi kesalahan',
+                'error'=>$e->getMessage()
+            ],500);
+        }
     }
 
-    public function update(Request $request,$id)
+    public function update(Request $request,$id): JsonResponse
     {
-        $data = RefPenerimaan::find($id);
-        if(!$data){
-            return response()->json(['message'=>'Data tidak ditemukan'],404);
+        try {
+            $data = RefPenerimaan::find($id);
+            if(!$data){
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'Data referensi penerimaan tidak ditemukan'
+                ],404);
+            }
+            $validated = $request->validate([
+                'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
+                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+            ]);
+            $data->update($validated);
+            return response()->json([
+                'success'=>true,
+                'message'=>'Data referensi penerimaan berhasil diupdate',
+                'data'=>$data
+            ]);
+        } catch (ValidationException $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Validasi gagal',
+                'errors'=>$e->errors()
+            ],422);
+        } catch (\Throwable $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Terjadi kesalahan',
+                'error'=>$e->getMessage()
+            ],500);
         }
-        // if($data->transaksi()->exists()){
-        //     return response()->json(['message'=>'Referensi penerimaan tidak bisa diubah karena sudah dipakai di transaksi'],400);
-        // }
-        $data->update([
-            'REF_ID_REF_PENERIMAAN' => $request->REF_ID_REF_PENERIMAAN,
-            'DESKRIPSI_REF_PENERIMAAN' => $request->DESKRIPSI_REF_PENERIMAAN
-        ]);
-        return response()->json($data);
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        $data = RefPenerimaan::find($id);
-        if(!$data){
-            return response()->json(['message'=>'Data tidak ditemukan'],404);
+        try {
+            $data = RefPenerimaan::find($id);
+            if(!$data){
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'Data referensi penerimaan tidak ditemukan'
+                ],404);
+            }
+            $data->delete();
+            return response()->json([
+                'success'=>true,
+                'message'=>'Data referensi penerimaan berhasil dihapus'
+            ]);
+        } catch (\Throwable $e){
+            return response()->json([
+                'success'=>false,
+                'message'=>'Terjadi kesalahan saat menghapus data',
+                'error'=>$e->getMessage()
+            ],500);
         }
-        //tgg transaksi
-        // if($data->transaksi()->exists()){
-        //     return response()->json(['message'=>'Referensi penerimaan tidak bisa dihapus karena sudah dipakai di transaksi'],400);
-        // }
-        $data->delete();
-        return response()->json(['message'=>'Data berhasil dihapus']);
     }
 }

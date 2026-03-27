@@ -42,7 +42,7 @@ Route::prefix('tahun-anggaran')->group(function () {
     Route::delete('/delete/{id}', [RefTahunAnggaranController::class, 'destroy']);
 });
 
-Route::prefix('penerimaan')->group(function () {
+Route::prefix('ref-penerimaan')->group(function () {
     Route::get('/', [RefPenerimaanController::class, 'index']);
     Route::get('/search', [RefPenerimaanController::class, 'search']);
     Route::get('/{id}', [RefPenerimaanController::class, 'show']);
