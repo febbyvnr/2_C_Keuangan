@@ -6,7 +6,8 @@ use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\RefTahunAnggaranController;
 use App\Http\Controllers\RefPenerimaanController;
-
+use App\Http\Controllers\TrCicilanController;
+use App\Http\Controllers\TrPembayaranController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -48,4 +49,22 @@ Route::prefix('penerimaan')->group(function () {
     Route::post('/store', [RefPenerimaanController::class, 'store']);
     Route::put('/update/{id}', [RefPenerimaanController::class, 'update']);
     Route::delete('/delete/{id}', [RefPenerimaanController::class, 'destroy']);
+});
+
+Route::prefix('tr-cicilan')->group(function () {
+    Route::get('/', [TrCicilanController::class, 'index']);
+    Route::get('/search', [TrCicilanController::class, 'search']);
+    Route::get('/{id}', [TrCicilanController::class, 'show']);
+    Route::post('/store', [TrCicilanController::class, 'store']);
+    Route::put('/update/{id}', [TrCicilanController::class, 'update']);
+    Route::delete('/delete/{id}', [TrCicilanController::class, 'destroy']);
+});
+
+Route::prefix('tr-pembayaran')->group(function () {
+    Route::get('/', [TrPembayaranController::class, 'index']);
+    Route::get('/search', [TrPembayaranController::class, 'search']);
+    Route::get('/{id}', [TrPembayaranController::class, 'show']);
+    Route::post('/store', [TrPembayaranController::class, 'store']);
+    Route::put('/update/{id}', [TrPembayaranController::class, 'update']);
+    Route::delete('/delete/{id}', [TrPembayaranController::class, 'destroy']);
 });

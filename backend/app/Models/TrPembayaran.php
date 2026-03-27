@@ -12,6 +12,8 @@ class TrPembayaran extends Model
     protected $table = 'tr_pembayaran';
     protected $primaryKey = 'ID_PEMBAYARAN';
     public $timestamps = false;
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'ID_PEMBAYARAN',
@@ -26,13 +28,8 @@ class TrPembayaran extends Model
         'NIP_VALIDATOR_PEMBAYARAN',
     ];
 
-    public function siswaTetap()
+    public function cicilan()
     {
-        return $this->belongsTo(SiswaTetap::class, 'ID_SISWA_TETAP', 'id'); 
-    }
-
-    public function jenisPembayaran()
-    {
-        return $this->belongsTo(JenisPembayaran::class, 'ID_JENIS_PEMBAYARAN', 'id');
+        return $this->hasMany(TrCicilan::class, 'ID_PEMBAYARAN', 'ID_PEMBAYARAN');
     }
 }
