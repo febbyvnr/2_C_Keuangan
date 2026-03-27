@@ -94,22 +94,34 @@ class RefSumberDanaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer',
+                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
+            ], [
+                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
+                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
+                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
             ]);
 
-            $data = RefSumberDana::create($validated);
+            $lastId = RefSumberDana::max('ID_REF_DANA');
+            $newId = $lastId ? $lastId + 1 : 1;
+
+            $data = RefSumberDana::create([
+                'ID_REF_DANA' => $newId,
+                'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA']
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Ref sumber dana berhasil ditambahkan',
                 'data' => $data,
             ], 201);
+
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -134,7 +146,12 @@ class RefSumberDanaController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer',
+                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
+            ],
+            [
+                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
+                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
+                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
             ]);
 
             $data->update($validated);

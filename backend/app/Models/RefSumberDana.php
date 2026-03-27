@@ -8,7 +8,8 @@ class RefSumberDana extends Model
 {
     protected $table = 'ref_sumber_dana';
     protected $primaryKey = 'ID_REF_DANA';
-    public $incrementing = true;
+
+    public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
 
