@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RefSumberDana;
+use App\Models\DtlFpd;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class RefSumberDanaController extends Controller
+class DtlFpdController extends Controller
 {
     public function index(): JsonResponse
     {
         try {
-            $data = RefSumberDana::all();
+            $data = DtlFpd::all();
 
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
-                    ? 'Data ref sumber dana tidak ditemukan'
-                    : 'Data ref sumber dana berhasil diambil',
+                    ? 'Data detail FPD tidak ditemukan'
+                    : 'Data detail FPD berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -35,12 +35,12 @@ class RefSumberDanaController extends Controller
         try {
             $keyword = trim((string) $request->query('keyword', ''));
 
-            $query = RefSumberDana::query();
+            $query = DtlFpd::query();
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
-                    $q->where('ID_REF_DANA', 'like', "%{$keyword}%")
-                      ->orWhere('REF_ID_REF_DANA', 'like', "%{$keyword}%");
+                    $q->where('SATUAN', 'like', "%{$keyword}%")
+                      ->orWhere('LINK_BUKTI_NOTA_FPD', 'like', "%{$keyword}%");
                 });
             }
 
@@ -66,7 +66,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = DtlFpd::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -78,7 +78,7 @@ class RefSumberDanaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ref sumber dana berhasil diambil',
+                'message' => 'Detail FPD berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -94,34 +94,29 @@ class RefSumberDanaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
-            ], [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'QTY' => 'required|integer|min:1',
+                'HARGA_SATUAN' => 'required|numeric|min:0',
+                'VOLUME' => 'required|integer|min:1',
+                'SATUAN' => 'required|string|max:10',
+                'TOTAL' => 'required|numeric|min:0',
+                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
             ]);
 
-            $lastId = RefSumberDana::max('ID_REF_DANA');
-            $newId = $lastId ? $lastId + 1 : 1;
-
-            $data = RefSumberDana::create([
-                'ID_REF_DANA' => $newId,
-                'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA']
-            ]);
+            $data = DtlFpd::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ref sumber dana berhasil ditambahkan',
+                'message' => 'Detail FPD berhasil ditambahkan',
                 'data' => $data,
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -135,7 +130,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = DtlFpd::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -146,12 +141,14 @@ class RefSumberDanaController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
-            ],
-            [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'ID_FPD' => 'required|integer|exists:fpd_anggaran,ID_FPD',
+                'ID_DT_PROGKER' => 'required|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'QTY' => 'required|integer|min:1',
+                'HARGA_SATUAN' => 'required|numeric|min:0',
+                'VOLUME' => 'required|integer|min:1',
+                'SATUAN' => 'required|string|max:10',
+                'TOTAL' => 'required|numeric|min:0',
+                'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
             ]);
 
             $data->update($validated);
@@ -180,7 +177,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = DtlFpd::find($id);
 
             if (!$data) {
                 return response()->json([

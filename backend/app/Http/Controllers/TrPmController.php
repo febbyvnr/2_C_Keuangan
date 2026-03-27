@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RefSumberDana;
+use App\Models\TrPm;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class RefSumberDanaController extends Controller
+class TrPmController extends Controller
 {
     public function index(): JsonResponse
     {
         try {
-            $data = RefSumberDana::all();
+            $data = TrPm::all();
 
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
-                    ? 'Data ref sumber dana tidak ditemukan'
-                    : 'Data ref sumber dana berhasil diambil',
+                    ? 'Data TR PM tidak ditemukan'
+                    : 'Data TR PM berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -35,12 +35,12 @@ class RefSumberDanaController extends Controller
         try {
             $keyword = trim((string) $request->query('keyword', ''));
 
-            $query = RefSumberDana::query();
+            $query = TrPm::query();
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
-                    $q->where('ID_REF_DANA', 'like', "%{$keyword}%")
-                      ->orWhere('REF_ID_REF_DANA', 'like', "%{$keyword}%");
+                    $q->where('DESKRIPSI_TR_PM', 'like', "%{$keyword}%")
+                      ->orWhere('TGL_PM', 'like', "%{$keyword}%");
                 });
             }
 
@@ -66,7 +66,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = TrPm::with(['programKerja', 'refPm'])->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -78,7 +78,7 @@ class RefSumberDanaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ref sumber dana berhasil diambil',
+                'message' => 'TR PM berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -94,34 +94,25 @@ class RefSumberDanaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
-            ], [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'ID_PROGRAM_KERJA' => 'required|integer|exists:dtl_program_kerja,ID_PROGRAM_KERJA',
+                'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
+                'TGL_PM' => 'required|date',
+                'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
             ]);
 
-            $lastId = RefSumberDana::max('ID_REF_DANA');
-            $newId = $lastId ? $lastId + 1 : 1;
-
-            $data = RefSumberDana::create([
-                'ID_REF_DANA' => $newId,
-                'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA']
-            ]);
+            $data = TrPm::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ref sumber dana berhasil ditambahkan',
+                'message' => 'TR PM berhasil ditambahkan',
                 'data' => $data,
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -135,7 +126,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = TrPm::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -146,12 +137,10 @@ class RefSumberDanaController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
-            ],
-            [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'ID_PROGRAM_KERJA' => 'required|integer|exists:dtl_program_kerja,ID_PROGRAM_KERJA',
+                'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
+                'TGL_PM' => 'required|date',
+                'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
             ]);
 
             $data->update($validated);
@@ -180,7 +169,7 @@ class RefSumberDanaController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefSumberDana::find($id);
+            $data = TrPm::find($id);
 
             if (!$data) {
                 return response()->json([
