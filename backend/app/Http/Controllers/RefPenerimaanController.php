@@ -21,7 +21,6 @@ class RefPenerimaanController extends Controller
         return response()->json($data);
     }
 
-    //searc by desc dan id ref, klo id dari show(id)atas
     public function search(Request $request)
     {
         $query = RefPenerimaan::query();

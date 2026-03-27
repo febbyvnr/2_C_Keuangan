@@ -11,10 +11,10 @@ class TrPembayaranController extends Controller
     public function index()
     {
         //tunggu User.php
-        // if(auth()->user()->ROLE == 'siswa'){
+        // if(auth()->user()->ROLE == 'siswa'){ //tampil punya siswa tsb
         //     $pembayaran = TrPembayaran::where('ID_SISWA', auth()->user()->id_siswa)->get();
         // } else {
-            $pembayaran = TrPembayaran::all();
+            $pembayaran = TrPembayaran::all(); //bendahara
         // }
         return response()->json($pembayaran);
     }
