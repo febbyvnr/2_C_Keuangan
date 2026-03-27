@@ -52,15 +52,6 @@ Route::prefix('tan')->group(function () {
     Route::delete('/delete/{id}', [RefTanController::class, 'destroy']);
 });
 
-Route::prefix('sumber-dana')->group(function () {
-    Route::get('/', [RefSumberDanaController::class, 'index']);
-    Route::get('/search', [RefSumberDanaController::class, 'search']);
-    Route::get('/{id}', [RefSumberDanaController::class, 'show']);
-    Route::post('/store', [RefSumberDanaController::class, 'store']);
-    Route::put('/update/{id}', [RefSumberDanaController::class, 'update']);
-    Route::delete('/delete/{id}', [RefSumberDanaController::class, 'destroy']);
-});
-
 Route::prefix('penerimaan')->group(function () {
     Route::get('/', [RefPenerimaanController::class, 'index']);
     Route::get('/search', [RefPenerimaanController::class, 'search']);
