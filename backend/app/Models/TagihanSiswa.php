@@ -11,6 +11,8 @@ class TagihanSiswa extends Model
     protected $table = 'tagihan_siswa';
     protected $primaryKey = 'ID_TAGIHAN_SISWA';
     public $timestamps = false;
+    protected $keyType = 'int';
+    public $incrementing = false;
 
     protected $fillable = [
         'ID_SISWA_TETAP',
