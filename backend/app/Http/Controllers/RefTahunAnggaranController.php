@@ -102,19 +102,22 @@ class RefTahunAnggaranController extends Controller
      */
     public function destroy($id)
     {
-        $data = RefTahunAnggaran::findOrFail($id);
+    $data = RefTahunAnggaran::findOrFail($id);
 
-        if ($data->programKerja()->exists()) {
-            return response()->json([
-                'message' => 'Tidak bisa dihapus, sudah dipakai program kerja'
-            ], 400);
-        }
-
-        $data->delete();
-
+    if (
+        $data->programKerja()->exists() ||
+        $data->tarif()->exists()
+    ) {
         return response()->json([
-            'message' => 'Data berhasil dihapus'
-        ]);
+            'message' => 'Tidak bisa dihapus, sudah dipakai data lain'
+        ], 400);
+    }
+
+    $data->delete();
+
+    return response()->json([
+        'message' => 'Data berhasil dihapus'
+    ]);
     }
 
     /**

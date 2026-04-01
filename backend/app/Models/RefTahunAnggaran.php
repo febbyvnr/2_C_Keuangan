@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\RefTarif;
 
 class RefTahunAnggaran extends Model
 {
@@ -36,6 +37,15 @@ class RefTahunAnggaran extends Model
     {
         return $this->hasMany(
             MstProgramKerja::class,
+            'ID_TA_ANGGARAN',
+            'ID_TA_ANGGARAN'
+        );
+    }
+
+    public function tarif(): HasMany
+    {
+        return $this->hasMany(
+            RefTarif::class,
             'ID_TA_ANGGARAN',
             'ID_TA_ANGGARAN'
         );
