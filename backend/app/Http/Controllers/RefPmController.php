@@ -177,6 +177,20 @@ class RefPmController extends Controller
                 ], 404);
             }
 
+            $usageCount = $data->trPm()->count();
+            
+            if ($usageCount > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak dapat dihapus karena sudah dipakai dalam RKT/evaluasi',
+                    'data' => [
+                        'id' => $data->ID_REF_PM,
+                        'nama' => $data->NAMA_PM,
+                        'usage_count' => $usageCount,
+                    ],
+                ], 422);
+            }
+
             $data->delete();
 
             return response()->json([
