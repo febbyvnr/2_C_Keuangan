@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RefTarif extends Model
 {
-    protected $table = 'REF_TARIF';
+    protected $table = 'ref_tarif';
 
     // Tidak ada primary key di tabel → pakai composite key (manual)
     protected $primaryKey = null;
