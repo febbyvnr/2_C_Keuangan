@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RbacController;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
@@ -22,6 +23,28 @@ use Termwind\Components\Raw;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::prefix('rbac')
+    ->middleware(['jabatan:Admin Sistem'])
+    ->group(function () {
+        // daftar master role/jabatan
+        Route::get('/jabatan', [RbacController::class, 'listJabatan']);
+
+        // daftar master menu/permission
+        Route::get('/menu', [RbacController::class, 'listMenu']);
+
+        // lihat mapping jabatan -> menu
+        Route::get('/jabatan-menu', [RbacController::class, 'listJabatanMenu']);
+
+        // tambah 1 hak akses menu ke jabatan
+        Route::post('/jabatan-menu', [RbacController::class, 'assignMenuToJabatan']);
+
+        // cabut 1 hak akses menu dari jabatan
+        Route::delete('/jabatan-menu/{idHakAkses}', [RbacController::class, 'revokeMenuFromJabatan']);
+
+        // sinkronisasi full menu untuk 1 jabatan
+        Route::post('/jabatan-menu/sync', [RbacController::class, 'syncJabatanMenu']);
+    });
 
 Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
