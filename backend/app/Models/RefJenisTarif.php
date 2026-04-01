@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefJenisTarif extends Model
 {
-    protected $table = 'REF_JENIS_TARIF';
+    protected $table = 'ref_jenis_tarif';
 
     protected $primaryKey = 'ID_JENIS_TARIF';
 
