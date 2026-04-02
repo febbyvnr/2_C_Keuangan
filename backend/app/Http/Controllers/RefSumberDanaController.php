@@ -94,9 +94,9 @@ class RefSumberDanaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
+                'REF_ID_REF_DANA' => 'nullable|integer|exists:ref_sumber_dana,ID_REF_DANA',
             ], [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
+                // 'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
                 'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
                 'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
             ]);
@@ -146,10 +146,10 @@ class RefSumberDanaController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
+                'REF_ID_REF_DANA' => 'nullable|integer|exists:ref_sumber_dana,ID_REF_DANA',
             ],
             [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
+                // 'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
                 'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
                 'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
             ]);
@@ -181,7 +181,6 @@ class RefSumberDanaController extends Controller
         try {
             $id = (int) $id;
             $data = RefSumberDana::find($id);
-
             if (!$data) {
                 return response()->json([
                     'success' => false,
@@ -189,9 +188,13 @@ class RefSumberDanaController extends Controller
                     'data' => null,
                 ], 404);
             }
-
+            if ($data->dtlProgramKerja()->exists() || $data->trPenerimaan()->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak bisa dihapus karena masih digunakan',
+                ], 400);
+            }
             $data->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil dihapus',
