@@ -58,6 +58,14 @@ class TagihanSiswaController extends Controller
             $query->where('STATUS_TAGIHAN_SISWA', $request->STATUS_TAGIHAN_SISWA);
         }
 
+        if ($request->filled('KELAS')) {
+            $kelas = trim($request->KELAS);
+
+            $query->whereHas('siswa', function ($q) use ($kelas) {
+                $q->where('KELAS_SISWA', 'like', '%' . $kelas . '%');
+            });
+        }
+
         if ($request->filled('search')) {
             $search = trim($request->search);
 
