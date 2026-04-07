@@ -400,4 +400,119 @@ class TagihanSiswaController extends Controller
 
         return $result;
     }
+
+    
+
+    public function export(Request $request)
+    {
+        $query = TagihanSiswa::with([
+            'siswa',
+            'jenisPembayaran',
+            'pembayaran',
+        ]);
+
+        if ($request->filled('ID_SISWA_TETAP')) {
+            $query->where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP);
+        }
+
+        if ($request->filled('ID_JENIS_PEMBAYARAN')) {
+            $query->where('ID_JENIS_PEMBAYARAN', $request->ID_JENIS_PEMBAYARAN);
+        }
+
+        if ($request->filled('BULAN_TAGIHAN_SISWA')) {
+            $query->where('BULAN_TAGIHAN_SISWA', $request->BULAN_TAGIHAN_SISWA);
+        }
+
+        if ($request->filled('TAHUN_TAGIHAN_SISWA')) {
+            $query->where('TAHUN_TAGIHAN_SISWA', $request->TAHUN_TAGIHAN_SISWA);
+        }
+
+        if ($request->filled('STATUS_TAGIHAN_SISWA')) {
+            $query->where('STATUS_TAGIHAN_SISWA', $request->STATUS_TAGIHAN_SISWA);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+
+            $query->whereHas('siswa', function ($q) use ($search) {
+                $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
+                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+            });
+        }
+
+        $data = $query
+            ->orderByDesc('TAHUN_TAGIHAN_SISWA')
+            ->orderByDesc('ID_TAGIHAN_SISWA')
+            ->get()
+            ->map(function ($tagihan) {
+                return $this->formatTagihan($tagihan, true);
+            })
+            ->values();
+
+        if ($request->filled('tunggakan')) {
+            $tunggakan = strtolower((string) $request->tunggakan);
+
+            if ($tunggakan === 'ada') {
+                $data = $data->filter(fn ($item) => $item['SISA_TAGIHAN'] > 0)->values();
+            }
+
+            if ($tunggakan === 'tidak') {
+                $data = $data->filter(fn ($item) => $item['SISA_TAGIHAN'] <= 0)->values();
+            }
+        }
+
+        $filename = 'tagihan_siswa_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM UTF-8 agar Excel membaca karakter dengan benar
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID_TAGIHAN_SISWA',
+                'ID_SISWA_TETAP',
+                'NAMA_SISWA_TETAP',
+                'NISN_SISWA',
+                'ID_JENIS_PEMBAYARAN',
+                'JENIS_PEMBAYARAN',
+                'BULAN_TAGIHAN_SISWA',
+                'TAHUN_TAGIHAN_SISWA',
+                'JUMLAH_TAGIHAN_SISWA',
+                'TOTAL_PEMBAYARAN',
+                'SISA_TAGIHAN',
+                'STATUS_TAGIHAN_SISWA',
+                'ADA_TUNGGAKAN',
+                'DUEDATE_TAGIHAN_SISWA',
+                'JUMLAH_TRANSAKSI_PEMBAYARAN',
+            ]);
+
+            foreach ($data as $item) {
+                fputcsv($handle, [
+                    $item['ID_TAGIHAN_SISWA'],
+                    $item['ID_SISWA_TETAP'],
+                    $item['SISWA']['NAMA_SISWA_TETAP'] ?? null,
+                    $item['SISWA']['NISN_SISWA'] ?? null,
+                    $item['ID_JENIS_PEMBAYARAN'],
+                    $item['JENIS_PEMBAYARAN']['DESKRIPSI_JENIS_PEMBAYARAN'] ?? null,
+                    $item['BULAN_TAGIHAN_SISWA'],
+                    $item['TAHUN_TAGIHAN_SISWA'],
+                    $item['JUMLAH_TAGIHAN_SISWA'],
+                    $item['TOTAL_PEMBAYARAN'],
+                    $item['SISA_TAGIHAN'],
+                    $item['STATUS_TAGIHAN_SISWA'],
+                    $item['ADA_TUNGGAKAN'] ? 'Ya' : 'Tidak',
+                    $item['DUEDATE_TAGIHAN_SISWA'],
+                    $item['JUMLAH_TRANSAKSI_PEMBAYARAN'],
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
 }
