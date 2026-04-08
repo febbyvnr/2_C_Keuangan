@@ -17,6 +17,7 @@ use App\Http\Controllers\RefPmController;
 use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
+use App\Http\Controllers\EvaluasiRktController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -157,4 +158,19 @@ Route::prefix('tarif')->group(function () {
     Route::post('/store', [RefTarifController::class, 'store']);
     Route::put('/update', [RefTarifController::class, 'update']);
     Route::delete('/delete', [RefTarifController::class, 'destroy']);
+});
+
+Route::prefix('evaluasi-rkt/export')->group(function () {
+    Route::get('/excel', [EvaluasiRktController::class, 'exportExcel']);
+    Route::get('/csv', [EvaluasiRktController::class, 'exportCsv']);
+    Route::get('/pdf', [EvaluasiRktController::class, 'exportPdf']);
+});
+
+Route::prefix('evaluasi-rkt')->group(function () {
+    Route::get('/', [EvaluasiRktController::class, 'index']);
+    Route::get('/search', [EvaluasiRktController::class, 'search']);
+    Route::get('/{id}', [EvaluasiRktController::class, 'show']);
+    Route::post('/store', [EvaluasiRktController::class, 'store']);
+    Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
+    Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
 });
