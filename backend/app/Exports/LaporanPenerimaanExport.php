@@ -75,7 +75,7 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
         return $drawing;
     }
 
-   public function registerEvents(): array
+  public function registerEvents(): array
 {
     return [
         AfterSheet::class => function ($event) {
@@ -85,34 +85,39 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
             // =====================
             // TITLE
             // =====================
-            $sheet->setCellValue('A1', 'LAPORAN PENERIMAAN KAS (BKM)');
-            $sheet->setCellValue('A2', 'Periode: ' . ($this->start ?? '-') . ' s/d ' . ($this->end ?? '-'));
+            $sheet->setCellValue('A1', 'SMK BOPKRI 2 YOGYAKARTA');
+            $sheet->setCellValue('A2', 'LAPORAN PENERIMAAN KAS (BKM)');
+            $sheet->setCellValue('A3', 'Periode: ' . ($this->start ?? '-') . ' s/d ' . ($this->end ?? '-'));
 
             $sheet->mergeCells('A1:D1');
             $sheet->mergeCells('A2:D2');
+            $sheet->mergeCells('A3:D3');
 
-            // 🔥 STYLE TITLE
+            // STYLE TITLE
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A2')->getFont()->setSize(12);
+            $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(13);
+            $sheet->getStyle('A3')->getFont()->setSize(11);
 
-            $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal('center');
-
-            // =====================
-            // GESER TABLE
-            // =====================
-            $sheet->insertNewRowBefore(4, 2);
+            $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal('center');
 
             // =====================
-            // HEADER TABLE STYLE
+            // HEADER TABLE
             // =====================
-            $headerRange = 'A4:D4';
+            $headerRow = 5;
 
-            $sheet->getStyle($headerRange)->getFont()->setBold(true);
+            $sheet->setCellValue("A$headerRow", 'Tanggal');
+            $sheet->setCellValue("B$headerRow", 'Jenis Penerimaan');
+            $sheet->setCellValue("C$headerRow", 'Uraian');
+            $sheet->setCellValue("D$headerRow", 'Jumlah (Rp)');
 
-            $sheet->getStyle($headerRange)->getAlignment()->setHorizontal('center');
+            // STYLE HEADER
+            $sheet->getStyle("A$headerRow:D$headerRow")->getFont()->setBold(true);
 
-            // background abu soft
-            $sheet->getStyle($headerRange)->getFill()->setFillType('solid')
+            $sheet->getStyle("A$headerRow:D$headerRow")->getAlignment()
+                ->setHorizontal('center');
+
+            $sheet->getStyle("A$headerRow:D$headerRow")->getFill()
+                ->setFillType('solid')
                 ->getStartColor()->setARGB('FFEFEFEF');
 
             // =====================
@@ -123,38 +128,47 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
             }
 
             // =====================
-            // FORMAT ANGKA (RUPIAH)
+            // DATA RANGE
             // =====================
-            $lastRow = $this->rowCount + 5;
+            $startData = 6;
+            $endData = $this->rowCount + 5;
 
-            $sheet->getStyle('D5:D' . $lastRow)
+            // FORMAT ANGKA
+            $sheet->getStyle("D$startData:D$endData")
                 ->getNumberFormat()
                 ->setFormatCode('#,##0');
+
+            // ALIGNMENT
+            $sheet->getStyle("A$startData:A$endData")
+                ->getAlignment()->setHorizontal('center');
+
+            $sheet->getStyle("D$startData:D$endData")
+                ->getAlignment()->setHorizontal('right');
 
             // =====================
             // BORDER TABLE
             // =====================
-            $tableRange = 'A4:D' . $lastRow;
-
-            $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            $sheet->getStyle("A$headerRow:D$endData")
+                ->getBorders()->getAllBorders()
                 ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
             // =====================
             // TOTAL
             // =====================
-            $totalRow = $this->rowCount + 6;
+            $totalRow = $endData + 1;
 
-            $sheet->setCellValue('C' . $totalRow, 'TOTAL');
-            $sheet->setCellValue('D' . $totalRow, $this->total);
+            $sheet->setCellValue("C$totalRow", 'TOTAL');
+            $sheet->setCellValue("D$totalRow", $this->total);
 
-            $sheet->getStyle('C' . $totalRow . ':D' . $totalRow)
-                ->getFont()->setBold(true);
+            $sheet->getStyle("C$totalRow:D$totalRow")->getFont()->setBold(true);
 
             // =====================
-            // ALIGNMENT
+            // BORDER TOTAL
             // =====================
-            $sheet->getStyle('A5:A' . $lastRow)->getAlignment()->setHorizontal('center'); // tanggal
-            $sheet->getStyle('D5:D' . $lastRow)->getAlignment()->setHorizontal('right'); // jumlah
+            $sheet->getStyle("A$totalRow:D$totalRow")
+                ->getBorders()->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
         },
     ];
 }
