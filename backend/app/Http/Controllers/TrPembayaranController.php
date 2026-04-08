@@ -65,7 +65,7 @@ class TrPembayaranController extends Controller
                 'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
                 'TGL_BAYAR' => 'nullable|date',
                 'JUMLAH_BAYAR' => 'nullable|numeric',
-                'LINK_BUKTI_BAYAR' => 'nullable|string|max:255',
+                'LINK_BUKTI_BAYAR' => 'string|max:255',
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
             $lastId = TrPembayaran::max('ID_PEMBAYARAN');
@@ -155,7 +155,7 @@ class TrPembayaranController extends Controller
                 'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
                 'TGL_BAYAR' => 'nullable|date',
                 'JUMLAH_BAYAR' => 'nullable|numeric',
-                'LINK_BUKTI_BAYAR' => 'nullable|string|max:255',
+                'LINK_BUKTI_BAYAR' => 'string|max:255',
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
             $data->update($validated);
