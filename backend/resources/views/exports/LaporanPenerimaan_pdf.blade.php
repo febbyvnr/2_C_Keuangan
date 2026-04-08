@@ -137,7 +137,7 @@
 \Carbon\Carbon::setLocale('id');
 @endphp
 
-<p style="text-align:right;">
+<p style="text-align:right; margin-top: 40px;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 </p>
 
