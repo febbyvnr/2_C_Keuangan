@@ -53,7 +53,7 @@ class LaporanPenerimaanController extends Controller
 
             $total = $data->sum('jumlah');
 
-            $pdf = Pdf::loadView('laporan.penerimaan_pdf', compact('data', 'total', 'start', 'end'));
+             $pdf = Pdf::loadView('exports.penerimaan_pdf', compact('data', 'total', 'start', 'end'));
 
             return $pdf->download('laporan_bkm.pdf');
         }
