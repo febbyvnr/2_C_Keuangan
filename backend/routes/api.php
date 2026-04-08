@@ -44,7 +44,13 @@ Route::prefix('coa')->group(function () {
 Route::prefix('kegiatan')->group(function () {
     Route::get('/', [MstKegiatanController::class, 'index']);
     Route::get('/parents', [MstKegiatanController::class, 'parents']);
-    Route::get('/{id}', [MstKegiatanController::class, 'show']);
+
+    Route::get('/export', [MstKegiatanController::class, 'export']);
+    Route::get('/export/excel', [MstKegiatanController::class, 'exportExcel']);
+    Route::get('/export/csv', [MstKegiatanController::class, 'exportCsv']);
+    Route::get('/export/pdf', [MstKegiatanController::class, 'exportPdf']);
+
+    Route::get('/{id}', [MstKegiatanController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstKegiatanController::class, 'store']);
     Route::put('/update/{id}', [MstKegiatanController::class, 'update']);
     Route::delete('/delete/{id}', [MstKegiatanController::class, 'destroy']);
