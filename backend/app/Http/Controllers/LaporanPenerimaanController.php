@@ -33,29 +33,44 @@ class LaporanPenerimaanController extends Controller
             );
         }
 
+        // QUERY UTAMA (dipakai PDF & JSON)
+        $query = DB::table('TR_PENERIMAAN as p')
+            ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+            ->select(
+                'p.TANGGAL_TR_PENERIMAAN as tanggal',
+                'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
+                'p.DESKRIPSI_TR_PENERIMAAN as uraian',
+                'p.JUMLAH_TR_PENERIMAAN as jumlah'
+            )
+            ->whereNotNull('p.NIP_PENERIMA');
+
+        // FILTER PERIODE 
+        if ($start && $end) {
+            $query->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
+        }
+
+        // FILTER SUMBER DANA
+        if ($sumberDana) {
+            $query->where('p.ID_REF_DANA', $sumberDana);
+        }
+
+        $data = $query->get();
+        $total = $data->sum('jumlah');
+
         // PDF
         if ($type == 'pdf') {
 
-            $data = DB::table('TR_PENERIMAAN as p')
-                ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
-                ->select(
-                    'p.TANGGAL_TR_PENERIMAAN as tanggal',
-                    'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
-                    'p.DESKRIPSI_TR_PENERIMAAN as uraian',
-                    'p.JUMLAH_TR_PENERIMAAN as jumlah'
-                )
-                ->whereNotNull('p.NIP_PENERIMA')
-                ->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end])
-                ->when($sumberDana, function ($query) use ($sumberDana) {
-                    $query->where('p.ID_REF_DANA', $sumberDana);
-                })
-                ->get();
-
-            $total = $data->sum('jumlah');
-
-             $pdf = Pdf::loadView('exports.LaporanPenerimaan_pdf', compact('data', 'total', 'start', 'end'));
+            $pdf = Pdf::loadView(
+                'exports.LaporanPenerimaan_pdf',
+                compact('data', 'total', 'start', 'end')
+            );
 
             return $pdf->download('laporan_bkm.pdf');
         }
+
+        return response()->json([
+            'data' => $data,
+            'total' => $total
+        ]);
     }
 }
