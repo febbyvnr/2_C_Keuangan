@@ -70,39 +70,92 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
         $drawing->setDescription('Logo Sekolah');
         $drawing->setPath(public_path('logo.png')); // taruh di public/
         $drawing->setHeight(60);
-        $drawing->setCoordinates('A1');
+         $drawing->setCoordinates('E1');
 
         return $drawing;
     }
 
-    public function registerEvents(): array
-    {
-        return [
-            AfterSheet::class => function ($event) {
+   public function registerEvents(): array
+{
+    return [
+        AfterSheet::class => function ($event) {
 
-                $sheet = $event->sheet;
+            $sheet = $event->sheet;
 
-                // TITLE
-                $sheet->setCellValue('A1', 'LAPORAN PENERIMAAN KAS (BKM)');
-                $sheet->setCellValue('A2', 'Periode: ' . $this->start . ' s/d ' . $this->end);
+            // =====================
+            // TITLE
+            // =====================
+            $sheet->setCellValue('A1', 'LAPORAN PENERIMAAN KAS (BKM)');
+            $sheet->setCellValue('A2', 'Periode: ' . ($this->start ?? '-') . ' s/d ' . ($this->end ?? '-'));
 
-                $sheet->mergeCells('A1:D1');
-                $sheet->mergeCells('A2:D2');
+            $sheet->mergeCells('A1:D1');
+            $sheet->mergeCells('A2:D2');
 
-                $sheet->getStyle('A1:A2')->getFont()->setBold(true);
+            // 🔥 STYLE TITLE
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A2')->getFont()->setSize(12);
 
-                // Geser tabel
-                $sheet->insertNewRowBefore(4, 2);
+            $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal('center');
 
-                // TOTAL
-                $totalRow = $this->rowCount + 6;
+            // =====================
+            // GESER TABLE
+            // =====================
+            $sheet->insertNewRowBefore(4, 2);
 
-                $sheet->setCellValue('C' . $totalRow, 'TOTAL');
-                $sheet->setCellValue('D' . $totalRow, $this->total);
+            // =====================
+            // HEADER TABLE STYLE
+            // =====================
+            $headerRange = 'A4:D4';
 
-                $sheet->getStyle('C' . $totalRow . ':D' . $totalRow)
-                      ->getFont()->setBold(true);
-            },
-        ];
-    }
+            $sheet->getStyle($headerRange)->getFont()->setBold(true);
+
+            $sheet->getStyle($headerRange)->getAlignment()->setHorizontal('center');
+
+            // background abu soft
+            $sheet->getStyle($headerRange)->getFill()->setFillType('solid')
+                ->getStartColor()->setARGB('FFEFEFEF');
+
+            // =====================
+            // AUTO WIDTH
+            // =====================
+            foreach (range('A', 'D') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // =====================
+            // FORMAT ANGKA (RUPIAH)
+            // =====================
+            $lastRow = $this->rowCount + 5;
+
+            $sheet->getStyle('D5:D' . $lastRow)
+                ->getNumberFormat()
+                ->setFormatCode('#,##0');
+
+            // =====================
+            // BORDER TABLE
+            // =====================
+            $tableRange = 'A4:D' . $lastRow;
+
+            $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+            // =====================
+            // TOTAL
+            // =====================
+            $totalRow = $this->rowCount + 6;
+
+            $sheet->setCellValue('C' . $totalRow, 'TOTAL');
+            $sheet->setCellValue('D' . $totalRow, $this->total);
+
+            $sheet->getStyle('C' . $totalRow . ':D' . $totalRow)
+                ->getFont()->setBold(true);
+
+            // =====================
+            // ALIGNMENT
+            // =====================
+            $sheet->getStyle('A5:A' . $lastRow)->getAlignment()->setHorizontal('center'); // tanggal
+            $sheet->getStyle('D5:D' . $lastRow)->getAlignment()->setHorizontal('right'); // jumlah
+        },
+    ];
+}
 }
