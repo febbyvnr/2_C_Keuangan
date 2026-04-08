@@ -18,6 +18,7 @@ use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
+use App\Http\Controllers\TagihanSiswaController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -173,4 +174,20 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::post('/store', [EvaluasiRktController::class, 'store']);
     Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
+});
+
+Route::prefix('tagihan-siswa')->group(function () {
+    Route::get('/', [TagihanSiswaController::class, 'index']);
+    Route::get('/search', [TagihanSiswaController::class, 'search']);
+
+    Route::get('/export', [TagihanSiswaController::class, 'export']);
+    Route::get('/export/excel', [TagihanSiswaController::class, 'exportExcel']);
+    Route::get('/export/csv', [TagihanSiswaController::class, 'exportCsv']);
+    Route::get('/export/pdf', [TagihanSiswaController::class, 'exportPdf']);
+
+    Route::get('/{id}', [TagihanSiswaController::class, 'show']);
+
+    Route::post('/store', [TagihanSiswaController::class, 'store']);
+    Route::put('/update/{id}', [TagihanSiswaController::class, 'update']);
+    Route::delete('/delete/{id}', [TagihanSiswaController::class, 'destroy']);
 });
