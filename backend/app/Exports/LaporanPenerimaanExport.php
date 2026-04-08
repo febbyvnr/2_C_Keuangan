@@ -25,26 +25,32 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
 
     public function collection()
     {
-        $data = DB::table('TR_PENERIMAAN as p')
-            ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
-            ->select(
-                'p.TANGGAL_TR_PENERIMAAN as tanggal',
-                'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
-                'p.DESKRIPSI_TR_PENERIMAAN as uraian',
-                'p.JUMLAH_TR_PENERIMAAN as jumlah'
-            )
-            ->whereNotNull('p.NIP_PENERIMA') // VALIDASI
-            ->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$this->start, $this->end])
-            ->when($this->sumberDana, function ($query) {
-                $query->where('p.ID_REF_DANA', $this->sumberDana);
-            })
-            ->orderBy('p.TANGGAL_TR_PENERIMAAN', 'asc')
-            ->get();
+    $query = DB::table('tr_penerimaan as p') 
+        ->join('ref_penerimaan as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+        ->select(
+            'p.TANGGAL_TR_PENERIMAAN as tanggal',
+            'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
+            'p.DESKRIPSI_TR_PENERIMAAN as uraian',
+            'p.JUMLAH_TR_PENERIMAAN as jumlah'
+        )
+        ->whereNotNull('p.NIP_PENERIMA'); 
 
-        $this->total = $data->sum('jumlah');
-        $this->rowCount = $data->count();
+    if ($this->start && $this->end) {
+        $query->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$this->start, $this->end]);
+    }
 
-        return $data;
+    if ($this->sumberDana) {
+        $query->where('p.ID_REF_DANA', $this->sumberDana);
+    }
+
+    $data = $query
+        ->orderBy('p.TANGGAL_TR_PENERIMAAN', 'asc')
+        ->get();
+
+    $this->total = $data->sum('jumlah');
+    $this->rowCount = $data->count();
+
+    return $data;
     }
 
     public function headings(): array
