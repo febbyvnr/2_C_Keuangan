@@ -65,7 +65,7 @@ class LaporanPenerimaanController extends Controller
                 compact('data', 'total', 'start', 'end')
             );
 
-            return $pdf->download('laporan_bkm.pdf');
+            return $pdf->download('Laporan_Penerimaan.pdf');
         }
 
         return response()->json([
