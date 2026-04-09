@@ -155,7 +155,7 @@ class LaporanPenerimaanExport implements WithEvents
                 // =====================
                 // TOTAL
                 // =====================
-                $totalRow = $endData + 1;
+                $totalRow = $endData + 6;
 
                 $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
                 $sheet->setCellValue("E$totalRow", $this->total);
