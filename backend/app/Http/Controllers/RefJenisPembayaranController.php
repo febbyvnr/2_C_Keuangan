@@ -56,28 +56,28 @@ class RefJenisPembayaranController extends Controller
 
     // UPDATE
     public function update(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',ID_JENIS_PEMBAYARAN'
-        ]);
+    {
+        try {
+            $request->validate([
+                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',ID_JENIS_PEMBAYARAN'
+            ]);
 
-        $jenis = RefJenisPembayaran::findOrFail($id);
-        $jenis->deskripsi_jenis_pembayaran = $request->deskripsi_jenis_pembayaran;
-        $jenis->save();
+            $jenis = RefJenisPembayaran::findOrFail($id);
+            $jenis->deskripsi_jenis_pembayaran = $request->deskripsi_jenis_pembayaran;
+            $jenis->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data berhasil diupdate',
-            'data' => $jenis
-        ], 200);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Data tidak ditemukan atau gagal update: '.$e->getMessage()
-        ], 404);
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil diupdate',
+                'data' => $jenis
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan atau gagal update: '.$e->getMessage()
+            ], 404);
+        }
     }
-}
 
 
     // DELETE
