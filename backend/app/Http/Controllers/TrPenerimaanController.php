@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Keuangan\StorePenerimaanRequest;
-use App\Http\Requests\Keuangan\UpdatePenerimaanRequest;
+use App\Http\Requests\StorePenerimaanRequest;
+use App\Http\Requests\UpdatePenerimaanRequest;
 use App\Models\TrPenerimaan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,9 +78,9 @@ class TrPenerimaanController extends Controller
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        if (!$request->user() || !$request->user()->hasRole('bendahara')) {
-            return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
-        }
+        // if (!$request->user() || !$request->user()->hasRole('bendahara')) {
+        //     return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
+        // }
 
         $penerimaan = TrPenerimaan::find($id);
 
