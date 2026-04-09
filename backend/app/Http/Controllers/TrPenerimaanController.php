@@ -194,7 +194,6 @@ class TrPenerimaanController extends Controller
             $sheet->setCellValue($cell, $label);
         }
 
-        // Style header kolom yang diubah agar tidak error "Undefined Type"
         $headerStyle = [
             'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
