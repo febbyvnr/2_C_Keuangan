@@ -3,8 +3,6 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Events\AfterSheet;
@@ -13,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvents, WithDrawings
+class LaporanPenerimaanExport implements WithEvents, WithDrawings
 {
     protected $start, $end, $sumberDana;
     protected $total = 0;
@@ -56,199 +54,184 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
     return $data;
     }
 
-    public function headings(): array
-    {
-        return [
-            'Tanggal',
-            'Jenis Penerimaan',
-            'Uraian',
-            'Jumlah (Rp)'
-        ];
-    }
+   public function headings(): array
+{
+    return []; // FIX: hilangkan auto heading biar ga tabrakan
+}
 
-    public function drawings()
-    {
-        // Logo kiri
-        $drawingLeft = new Drawing();
-        $drawingLeft->setName('Logo Kiri');
-        $drawingLeft->setDescription('Logo Sekolah Kiri');
-        $drawingLeft->setPath(public_path('logo.png'));
-        $drawingLeft->setHeight(80);
-        $drawingLeft->setCoordinates('A1');
-        $drawingLeft->setOffsetX(5);
-        $drawingLeft->setOffsetY(5);
+public function drawings()
+{
+    // Logo kiri (diperkecil)
+    $drawingLeft = new Drawing();
+    $drawingLeft->setName('Logo Kiri');
+    $drawingLeft->setPath(public_path('logo.png'));
+    $drawingLeft->setHeight(70); // FIX: lebih kecil
+    $drawingLeft->setCoordinates('B2');
+    $drawingLeft->setOffsetX(25);
+    $drawingLeft->setOffsetY(5);
 
-        // Logo kanan
-        $drawingRight = new Drawing();
-        $drawingRight->setName('Logo Kanan');
-        $drawingRight->setDescription('Logo Sekolah Kanan');
-        $drawingRight->setPath(public_path('logo.png'));
-        $drawingRight->setHeight(80);
-        $drawingRight->setCoordinates('F1');
-        $drawingRight->setOffsetX(5);
-        $drawingRight->setOffsetY(5);
+    // Logo kanan
+    $drawingRight = new Drawing();
+    $drawingRight->setName('Logo Kanan');
+    $drawingRight->setPath(public_path('logo.png'));
+    $drawingRight->setHeight(70); // FIX
+    $drawingRight->setCoordinates('E2');
+    $drawingRight->setOffsetX(-25);
+    $drawingRight->setOffsetY(5);
 
-        return [$drawingLeft, $drawingRight];
-    }
+    return [$drawingLeft, $drawingRight];
+}
 
-   public function registerEvents(): array
-    {
-        return [
-            AfterSheet::class => function ($event) {
+public function registerEvents(): array
+{
+    return [
+        AfterSheet::class => function ($event) {
 
-                $sheet = $event->sheet;
+            $sheet = $event->sheet;
 
-                // =====================
-                // TITLE & HEADER SEKOLAH
-                // =====================
-                $sheet->setCellValue('A1', 'YAYASAN BOPKRI');
-                $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
-                $sheet->setCellValue('A3', 'LAPORAN PENERIMAAN KAS (BKM)');
-                $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
+            // HAPUS ROW DEFAULT
+            $sheet->getDelegate()->removeRow(1);
 
-                // Merge cells untuk title
-                $sheet->mergeCells('A1:F1');
-                $sheet->mergeCells('A2:F2');
-                $sheet->mergeCells('A3:F3');
-                $sheet->mergeCells('A4:F4');
+            // =====================
+            // TITLE (SPACING DIRAPIKAN)
+            // =====================
+            $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
+            $sheet->setCellValue('A3', 'LAPORAN PENERIMAAN (KM)');
+            $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
 
-                // Style Title
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(13);
-                $sheet->getStyle('A4')->getFont()->setSize(11)->setItalic(true);
+            $sheet->mergeCells('A2:E2');
+            $sheet->mergeCells('A3:E3');
+            $sheet->mergeCells('A4:E4');
 
-                $sheet->getStyle('A1:A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
+            $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
+            $sheet->getStyle('A4')->getFont()->setSize(11);
 
-                // Background abu-abu muda untuk header sekolah
-                $sheet->getStyle('A1:F4')->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FFF5F5F5');
+            $sheet->getStyle('A2:A4')->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // =====================
-                // HEADER TABLE
-                // =====================
-                $headerRow = 6; // geser karena ada baris title lebih banyak
+            // JARAK ANTAR JUDUL (FIX)
+            $sheet->getRowDimension(2)->setRowHeight(26);
+            $sheet->getRowDimension(3)->setRowHeight(24);
+            $sheet->getRowDimension(4)->setRowHeight(22);
 
-                // Set header values
-                $sheet->setCellValue("A$headerRow", 'NO');
-                $sheet->setCellValue("B$headerRow", 'TANGGAL');
-                $sheet->setCellValue("C$headerRow", 'JENIS PENERIMAAN');
-                $sheet->setCellValue("D$headerRow", 'URAIAN');
-                $sheet->setCellValue("E$headerRow", 'JUMLAH (Rp)');
-                $sheet->setCellValue("F$headerRow", 'KETERANGAN');
+            // =====================
+            // HEADER TABLE
+            // =====================
+            $headerRow = 6;
 
-                // Style Header Table
-                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->setBold(true)->setSize(11);
-                $sheet->getStyle("A$headerRow:F$headerRow")->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                    ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->setCellValue("A$headerRow", 'NO');
+            $sheet->setCellValue("B$headerRow", 'TANGGAL');
+            $sheet->setCellValue("C$headerRow", 'JENIS PENERIMAAN');
+            $sheet->setCellValue("D$headerRow", 'URAIAN');
+            $sheet->setCellValue("E$headerRow", 'JUMLAH');
 
-                // Warna header table (biru tua)
-                $sheet->getStyle("A$headerRow:F$headerRow")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FF2E75B6');
+            $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->setBold(true);
+            $sheet->getStyle("A$headerRow:E$headerRow")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
+            $sheet->getStyle("A$headerRow:E$headerRow")->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FF2E75B6');
 
-                // =====================
-                // AUTO WIDTH
-                // =====================
-                $sheet->getColumnDimension('A')->setWidth(5);
-                $sheet->getColumnDimension('B')->setWidth(15);
-                $sheet->getColumnDimension('C')->setWidth(25);
-                $sheet->getColumnDimension('D')->setWidth(35);
-                $sheet->getColumnDimension('E')->setWidth(20);
-                $sheet->getColumnDimension('F')->setWidth(20);
+            $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
 
-                // =====================
-                // DATA RANGE
-                // =====================
-                $startData = $headerRow + 1;
-                $endData = $headerRow + $this->rowCount;
+            // WIDTH
+            $sheet->getColumnDimension('A')->setWidth(5);
+            $sheet->getColumnDimension('B')->setWidth(15);
+            $sheet->getColumnDimension('C')->setWidth(30);
+            $sheet->getColumnDimension('D')->setWidth(32);
+            $sheet->getColumnDimension('E')->setWidth(20);
 
-                // Isi nomor urut dan data
-                if ($this->rowCount > 0) {
-                    $dataCollection = $this->collection();
-                    $row = $startData;
-                    $no = 1;
-                    foreach ($dataCollection as $item) {
-                        $sheet->setCellValue("A$row", $no);
-                        $sheet->setCellValue("B$row", $item->tanggal);
-                        $sheet->setCellValue("C$row", $item->jenis);
-                        $sheet->setCellValue("D$row", $item->uraian);
-                        $sheet->setCellValue("E$row", $item->jumlah);
-                        $sheet->setCellValue("F$row", '-'); // default keterangan kosong
-                        $row++;
-                        $no++;
-                    }
-                }
+            // =====================
+            // DATA
+            // =====================
+            $startData = $headerRow + 1;
+            $row = $startData;
+            $no = 1;
 
-                // Format angka Rupiah
-                $sheet->getStyle("E$startData:E$endData")
-                    ->getNumberFormat()
-                    ->setFormatCode('#,##0');
+            $dataCollection = $this->collection();
 
-                // Alignment data
-                $sheet->getStyle("A$startData:A$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("B$startData:B$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("E$startData:E$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $sheet->getStyle("F$startData:F$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            foreach ($dataCollection as $item) {
+                $sheet->setCellValue("A$row", $no);
+                $sheet->setCellValue("B$row", $item->tanggal);
+                $sheet->setCellValue("C$row", $item->jenis);
+                $sheet->setCellValue("D$row", $item->uraian);
+                $sheet->setCellValue("E$row", $item->jumlah);
+                $row++;
+                $no++;
+            }
 
-                // Border semua sel data
-                $sheet->getStyle("A$headerRow:F$endData")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
+            $endData = $row - 1;
 
-                // Warna baris header table
-                $sheet->getStyle("A$headerRow:F$headerRow")->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
+            // FORMAT RP
+            $sheet->getStyle("E$startData:E$endData")
+                ->getNumberFormat()
+                ->setFormatCode('"Rp" #,##0');
 
-                // =====================
-                // TOTAL
-                // =====================
-                $totalRow = $endData + 1;
+            // BORDER
+            $sheet->getStyle("A$headerRow:E$endData")
+                ->getBorders()->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
 
-                $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
-                $sheet->setCellValue("E$totalRow", $this->total);
-                $sheet->setCellValue("F$totalRow", '');
+            // =====================
+            // TOTAL
+            // =====================
+            $totalRow = $endData + 1;
 
-                $sheet->getStyle("D$totalRow:E$totalRow")->getFont()->setBold(true);
-                $sheet->getStyle("D$totalRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $sheet->getStyle("E$totalRow")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
+            $sheet->setCellValue("E$totalRow", $this->total);
 
-                // Background total (kuning muda)
-                $sheet->getStyle("D$totalRow:E$totalRow")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FFFFEB9C');
+            $sheet->getStyle("D$totalRow:E$totalRow")->getFont()->setBold(true);
 
-                // Border total
-                $sheet->getStyle("A$totalRow:F$totalRow")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle("E$totalRow")->getNumberFormat()
+                ->setFormatCode('"Rp" #,##0');
 
-                // =====================
-                // FOOTER (TTD)
-                // =====================
-                $footerRow = $totalRow + 2;
-                
-                $sheet->setCellValue("D$footerRow", 'Mengetahui,');
-                $sheet->setCellValue("F$footerRow", 'Yogyakarta, ' . date('d F Y'));
-                
-                $sheet->setCellValue("D" . ($footerRow+1), 'Kepala Sekolah');
-                $sheet->setCellValue("F" . ($footerRow+1), 'Bendahara');
-                
-                $sheet->setCellValue("D" . ($footerRow+3), '(_______________________)');
-                $sheet->setCellValue("F" . ($footerRow+3), '(_______________________)');
-                
-                $sheet->getStyle("D$footerRow:F" . ($footerRow+3))->getFont()->setSize(10);
-                $sheet->getStyle("D$footerRow:F" . ($footerRow+3))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("D$totalRow:E$totalRow")->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFFFE699');
 
-                // =====================
-                // FREEZE PANE 
-                // =====================
-                $sheet->freezePane("A" . ($headerRow + 1));
-            },
-        ];
-    }
+            // =====================
+            // FOOTER (FIX POSISI)
+            // =====================
+            $footerRow = $totalRow + 4; // FIX: lebih turun
+
+            // Bendahara (SEJAJAR KOLOM C)
+            $sheet->setCellValue("C$footerRow", 'Bendahara');
+
+            // Kepala Sekolah (kanan)
+            $sheet->setCellValue("E$footerRow", 'Kepala Sekolah');
+
+            // JARAK KE NAMA (FIX)
+            $sheet->setCellValue("C" . ($footerRow+3), 'Rina Putri, S.E.');
+            $sheet->setCellValue("C" . ($footerRow+4), 'NIP: 1987654321');
+
+            $sheet->setCellValue("E" . ($footerRow+3), 'Drs. Budi Santoso');
+            $sheet->setCellValue("E" . ($footerRow+4), 'NIP: 1976543210');
+
+            // ALIGN
+            $sheet->getStyle("C$footerRow:C" . ($footerRow+4))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $sheet->getStyle("E$footerRow:E" . ($footerRow+4))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $sheet->getStyle("C$footerRow")->getFont()->setBold(true);
+            $sheet->getStyle("E$footerRow")->getFont()->setBold(true);
+
+            // =====================
+            // TANGGAL (LEBIH TURUN)
+            // =====================
+            $sheet->setCellValue("E" . ($footerRow+7), 'Yogyakarta, ' . date('d F Y'));
+
+            $sheet->getStyle("E" . ($footerRow+7))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+            // =====================
+            // FREEZE
+            // =====================
+            $sheet->freezePane("A7");
+        },
+    ];
+}
 }
