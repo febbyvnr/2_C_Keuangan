@@ -155,7 +155,7 @@ class LaporanPenerimaanExport implements WithEvents
                 // =====================
                 // TOTAL
                 // =====================
-                $totalRow = $endData + 6;
+                $totalRow = $endData + 2;
 
                 $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
                 $sheet->setCellValue("E$totalRow", $this->total);
@@ -207,7 +207,7 @@ class LaporanPenerimaanExport implements WithEvents
                 $sheet->getStyle("D$footerRow")->getFont()->setBold(true);
 
                 // =====================
-                // TANGGAL (DITURUNKAN BANGET)
+                // TANGGAL 
                 // =====================
                 $sheet->setCellValue("E" . ($footerRow+11), 'Yogyakarta, ' . date('d F Y'));
 
