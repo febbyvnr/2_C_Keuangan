@@ -59,6 +59,10 @@ class RefJenisPembayaranController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $request->validate([
+                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',id_jenis_pembayaran'
+            ]);
+            
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->update([
                 'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
