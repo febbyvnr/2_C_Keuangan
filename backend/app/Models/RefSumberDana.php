@@ -12,8 +12,7 @@ class RefSumberDana extends Model
 
     protected $fillable = [
         'REF_ID_REF_DANA',
-        // CATATAN: Tabel ref_sumber_dana di SQL hanya memiliki ID_REF_DANA dan REF_ID_REF_DANA.
-        // Jika tim lain menambah kolom nama/deskripsi, tambahkan di sini.
+
     ];
 
     public function parent()
