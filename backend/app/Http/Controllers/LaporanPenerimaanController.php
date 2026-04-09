@@ -21,7 +21,7 @@ class LaporanPenerimaanController extends Controller
         if ($type == 'excel') {
             return Excel::download(
                 new LaporanPenerimaanExport($start, $end, $sumberDana),
-                'laporan_bkm.xlsx'
+                'Laporan_Penerimaan.xlsx'
             );
         }
 
@@ -29,7 +29,7 @@ class LaporanPenerimaanController extends Controller
         if ($type == 'csv') {
             return Excel::download(
                 new LaporanPenerimaanExport($start, $end, $sumberDana),
-                'laporan_bkm.csv'
+                'Laporan_Penerimaan.csv'
             );
         }
 
