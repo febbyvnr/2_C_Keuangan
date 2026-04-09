@@ -8,7 +8,7 @@ use Exception;
 
 class RefJenisPembayaranController extends Controller
 {
-    // READ
+    // READ ALL
     public function index()
     {
         try {
@@ -28,46 +28,43 @@ class RefJenisPembayaranController extends Controller
 
     // CREATE
     public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
-            'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
-        ]);
+    {
+        try {
+            $request->validate([
+                'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
+                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
+            ]);
 
-        $jenis = RefJenisPembayaran::create([
-            'ID_JENIS_PEMBAYARAN' => $request->ID_JENIS_PEMBAYARAN,
-            'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
-        ]);
+            $jenis = RefJenisPembayaran::create($request->only([
+                'ID_JENIS_PEMBAYARAN',
+                'deskripsi_jenis_pembayaran'
+            ]));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data berhasil ditambahkan',
-            'data' => $jenis
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil ditambahkan',
+                'data' => $jenis
+            ], 201);
 
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal menambahkan data: '.$e->getMessage()
-        ], 500);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan data: '.$e->getMessage()
+            ], 500);
+        }
     }
-}
-
-
 
     // UPDATE
     public function update(Request $request, $id)
     {
         try {
             $request->validate([
-                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',id_jenis_pembayaran'
+                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',ID_JENIS_PEMBAYARAN'
             ]);
 
             $jenis = RefJenisPembayaran::findOrFail($id);
-            $jenis->update([
-                'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
-            ]);
+            $jenis->update($request->only(['deskripsi_jenis_pembayaran']));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diupdate',
@@ -87,6 +84,7 @@ class RefJenisPembayaranController extends Controller
         try {
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->delete();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil dihapus'
@@ -98,12 +96,12 @@ class RefJenisPembayaranController extends Controller
             ], 404);
         }
     }
-    
-    //Search
+
+    // SEARCH
     public function search(Request $request)
     {
         try {
-            $keyword = $request->input('q'); // parameter pencarian, misalnya ?q=BCA
+            $keyword = $request->input('q');
 
             $data = RefJenisPembayaran::where('deskripsi_jenis_pembayaran', 'like', '%'.$keyword.'%')->get();
 
@@ -121,4 +119,3 @@ class RefJenisPembayaranController extends Controller
         }
     }
 }
-    
