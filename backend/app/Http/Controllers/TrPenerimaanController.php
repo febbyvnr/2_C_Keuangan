@@ -22,8 +22,6 @@ class TrPenerimaanController extends Controller
         DB::beginTransaction();
         try {
             $validData = $request->validated();
-            
-            // Workaround untuk tabel Non-Auto Increment
             $lastData = TrPenerimaan::orderBy('ID_TR_PENERIMAAN', 'desc')->first();
             $newId = $lastData ? $lastData->ID_TR_PENERIMAAN + 1 : 1;
 
@@ -91,7 +89,7 @@ class TrPenerimaanController extends Controller
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        // TODO: Uncomment RBAC jika modul sudah siap
+
         // if (!$request->user() || !$request->user()->hasRole('bendahara')) {
         //     return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         // }
@@ -124,7 +122,6 @@ class TrPenerimaanController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        // TODO: Uncomment RBAC jika modul sudah siap
         // if (!$request->user() || !$request->user()->hasAnyRole(['bendahara', 'kepala_sekolah'])) {
         //     return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         // }
@@ -169,7 +166,6 @@ class TrPenerimaanController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
-        // TODO: Uncomment RBAC jika modul sudah siap
         // if (!$request->user() || !$request->user()->hasAnyRole(['bendahara', 'kepala_sekolah'])) {
         //     return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         // }
@@ -185,7 +181,6 @@ class TrPenerimaanController extends Controller
 
     public function export(Request $request)
     {
-        // TODO: Uncomment RBAC jika modul sudah siap
         // if (!$request->user() || !$request->user()->hasAnyRole(['bendahara', 'kepala_sekolah'])) {
         //     return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         // }
