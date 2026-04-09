@@ -30,13 +30,13 @@ class RefJenisPembayaranController extends Controller
     public function store(Request $request)
 {
     try {
-        // Validasi input
         $request->validate([
-            'deskripsi_jenis_pembayaran' => 'required|string|min:3|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
+            'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
+            'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
         ]);
 
-        // Simpan data
         $jenis = RefJenisPembayaran::create([
+            'ID_JENIS_PEMBAYARAN' => $request->ID_JENIS_PEMBAYARAN,
             'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
         ]);
 
@@ -53,6 +53,7 @@ class RefJenisPembayaranController extends Controller
         ], 500);
     }
 }
+
 
 
     // UPDATE
