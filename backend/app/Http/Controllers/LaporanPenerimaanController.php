@@ -27,13 +27,41 @@ class LaporanPenerimaanController extends Controller
 
         // CSV
         if ($type == 'csv') {
-            return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana),
-                'Laporan_Penerimaan.csv'
-            );
+            $queryCsv = DB::table('TR_PENERIMAAN as p')
+                ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+                ->select(
+                        'p.TANGGAL_TR_PENERIMAAN as tanggal',
+                        'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
+                        'p.DESKRIPSI_TR_PENERIMAAN as uraian',
+                        'p.JUMLAH_TR_PENERIMAAN as jumlah'
+                        )
+                ->whereNotNull('p.NIP_PENERIMA');
+
+                // FILTER PERIODE
+                if ($start && $end) {
+                    $queryCsv->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
+                }
+
+                // FILTER SUMBER DANA
+                if ($sumberDana) {
+                    $queryCsv->where('p.ID_REF_DANA', $sumberDana);
         }
 
-        // QUERY UTAMA (dipakai PDF & JSON)
+                $dataCsv = $queryCsv->get();
+
+                $csv = "Tanggal,Jenis,Uraian,Jumlah\n";
+
+             foreach ($dataCsv as $row) {
+            $csv .= "{$row->tanggal},\"{$row->jenis}\",\"{$row->uraian}\",{$row->jumlah}\n";
+        }
+
+        //  RETURN CSV
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename=Laporan_Penerimaan.csv');
+        }
+
+        // QUERY UTAMA (PDF & JSON)
         $query = DB::table('TR_PENERIMAAN as p')
             ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
             ->select(
