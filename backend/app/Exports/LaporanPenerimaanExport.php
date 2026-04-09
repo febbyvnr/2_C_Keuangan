@@ -157,41 +157,41 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getStartColor()->setARGB('FFFFE699');
 
                // =====================
-// FOOTER (FIX CENTER)
-// =====================
-$footerRow = $totalRow + 6;
+              // FOOTER (FIX CENTER)
+              // =====================
+                $footerRow = $totalRow + 6;
 
-// 🔥 MERGE biar bener-bener tengah
-$sheet->mergeCells("B$footerRow:C$footerRow"); // Bendahara
-$sheet->mergeCells("D$footerRow:E$footerRow"); // Kepsek
 
-$sheet->mergeCells("B" . ($footerRow+5) . ":C" . ($footerRow+5));
-$sheet->mergeCells("B" . ($footerRow+6) . ":C" . ($footerRow+6));
+                $sheet->mergeCells("B$footerRow:C$footerRow"); // Bendahara
+                $sheet->mergeCells("D$footerRow:E$footerRow"); // Kepsek
 
-$sheet->mergeCells("D" . ($footerRow+5) . ":E" . ($footerRow+5));
-$sheet->mergeCells("D" . ($footerRow+6) . ":E" . ($footerRow+6));
+                $sheet->mergeCells("B" . ($footerRow+5) . ":C" . ($footerRow+5));
+                $sheet->mergeCells("B" . ($footerRow+6) . ":C" . ($footerRow+6));
 
-// JABATAN
-$sheet->setCellValue("B$footerRow", 'Bendahara');
-$sheet->setCellValue("D$footerRow", 'Kepala Sekolah');
+                $sheet->mergeCells("D" . ($footerRow+5) . ":E" . ($footerRow+5));
+                $sheet->mergeCells("D" . ($footerRow+6) . ":E" . ($footerRow+6));
 
-// NAMA
-$sheet->setCellValue("B" . ($footerRow+5), 'Rina Putri, S.E.');
-$sheet->setCellValue("B" . ($footerRow+6), 'NIP: 1987654321');
 
-$sheet->setCellValue("D" . ($footerRow+5), 'Drs. Budi Santoso');
-$sheet->setCellValue("D" . ($footerRow+6), 'NIP: 1976543210');
+                $sheet->setCellValue("B$footerRow", 'Bendahara');
+                $sheet->setCellValue("D$footerRow", 'Kepala Sekolah');
 
-// 🔥 CENTER SEMUA
-$sheet->getStyle("B$footerRow:B" . ($footerRow+6))
-    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-$sheet->getStyle("D$footerRow:D" . ($footerRow+6))
-    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->setCellValue("B" . ($footerRow+5), 'Rina Putri, S.E.');
+                $sheet->setCellValue("B" . ($footerRow+6), 'NIP: 1987654321');
 
-// BOLD JABATAN
-$sheet->getStyle("B$footerRow")->getFont()->setBold(true);
-$sheet->getStyle("D$footerRow")->getFont()->setBold(true);
+                $sheet->setCellValue("D" . ($footerRow+5), 'Drs. Budi Santoso');
+                $sheet->setCellValue("D" . ($footerRow+6), 'NIP: 1976543210');
+
+
+                $sheet->getStyle("B$footerRow:B" . ($footerRow+6))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->getStyle("D$footerRow:D" . ($footerRow+6))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+
+                $sheet->getStyle("B$footerRow")->getFont()->setBold(true);
+                $sheet->getStyle("D$footerRow")->getFont()->setBold(true);
 
                 // =====================
                 // TANGGAL (DITURUNKAN BANGET)
