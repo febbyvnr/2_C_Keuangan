@@ -17,6 +17,7 @@ use App\Http\Controllers\RefPmController;
 use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
+use App\Http\Controllers\RefJenisPembayaranController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -157,4 +158,13 @@ Route::prefix('tarif')->group(function () {
     Route::post('/store', [RefTarifController::class, 'store']);
     Route::put('/update', [RefTarifController::class, 'update']);
     Route::delete('/delete', [RefTarifController::class, 'destroy']);
+});
+
+Route::prefix('jenis-pembayaran')->group(function () {
+    Route::get('/', [RefJenisPembayaranController::class, 'index']);       // READ ALL
+    Route::get('/{id}', [RefJenisPembayaranController::class, 'show']);    // READ ONE
+    Route::post('/', [RefJenisPembayaranController::class, 'store']);      // CREATE
+    Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);  // UPDATE
+    Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']); // DELETE
+    Route::get('/search', [RefJenisPembayaranController::class, 'search']);   // SEARCH
 });
