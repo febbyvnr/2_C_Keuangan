@@ -10,7 +10,7 @@ class FpdAnggaran extends Model
 {
     protected $table = 'fpd_anggaran';
     protected $primaryKey = 'ID_FPD';
-    public $incrementing = true;
+    public $incrementing = false;
     protected $keyType = 'int';
     public $timestamps = false;
 
@@ -24,6 +24,18 @@ class FpdAnggaran extends Model
         'NOMINAL_FPD' => 'double',
         'NOMINAL_SISA' => 'double',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->ID_FPD) {
+                $maxId = static::max('ID_FPD') ?? 0;
+                $model->ID_FPD = $maxId + 1;
+            }
+        });
+    }
 
     public function detailFpd(): HasMany
     {
