@@ -62,7 +62,7 @@ class RefJenisPembayaranController extends Controller
             $request->validate([
                 'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',id_jenis_pembayaran'
             ]);
-            
+
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->update([
                 'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
@@ -97,6 +97,27 @@ class RefJenisPembayaranController extends Controller
             ], 404);
         }
     }
+    
+    //Search
+    public function search(Request $request)
+    {
+        try {
+            $keyword = $request->input('q'); // parameter pencarian, misalnya ?q=BCA
 
+            $data = RefJenisPembayaran::where('deskripsi_jenis_pembayaran', 'like', '%'.$keyword.'%')->get();
 
+            return response()->json([
+                'success' => true,
+                'message' => 'Hasil pencarian',
+                'data' => $data
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: '.$e->getMessage()
+            ], 500);
+        }
+    }
 }
+    
