@@ -68,113 +68,187 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
 
     public function drawings()
     {
-        $drawing = new Drawing();
-        $drawing->setName('Logo');
-        $drawing->setDescription('Logo Sekolah');
-        $drawing->setPath(public_path('logo.png')); 
-        $drawing->setHeight(60);
-        $drawing->setCoordinates('G1');\
-        $drawing->setOffsetX(10);
-        $drawing->setOffsetY(5);
+        // Logo kiri
+        $drawingLeft = new Drawing();
+        $drawingLeft->setName('Logo Kiri');
+        $drawingLeft->setDescription('Logo Sekolah Kiri');
+        $drawingLeft->setPath(public_path('logo.png'));
+        $drawingLeft->setHeight(80);
+        $drawingLeft->setCoordinates('A1');
+        $drawingLeft->setOffsetX(5);
+        $drawingLeft->setOffsetY(5);
 
-        return $drawing;
+        // Logo kanan
+        $drawingRight = new Drawing();
+        $drawingRight->setName('Logo Kanan');
+        $drawingRight->setDescription('Logo Sekolah Kanan');
+        $drawingRight->setPath(public_path('logo.png'));
+        $drawingRight->setHeight(80);
+        $drawingRight->setCoordinates('F1');
+        $drawingRight->setOffsetX(5);
+        $drawingRight->setOffsetY(5);
+
+        return [$drawingLeft, $drawingRight];
     }
 
-  public function registerEvents(): array
-{
-    return [
-        AfterSheet::class => function ($event) {
+   public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function ($event) {
 
-            $sheet = $event->sheet;
+                $sheet = $event->sheet;
 
-            // =====================
-            // TITLE
-            // =====================
-            $sheet->setCellValue('A1', 'SMK BOPKRI 2 YOGYAKARTA');
-            $sheet->setCellValue('A2', 'LAPORAN PENERIMAAN KAS (BKM)');
-            $sheet->setCellValue('A3', 'Periode: ' . ($this->start ?? '-') . ' s/d ' . ($this->end ?? '-'));
+                // =====================
+                // TITLE & HEADER SEKOLAH
+                // =====================
+                $sheet->setCellValue('A1', 'YAYASAN BOPKRI');
+                $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
+                $sheet->setCellValue('A3', 'LAPORAN PENERIMAAN KAS (BKM)');
+                $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
 
-            $sheet->mergeCells('A1:D1');
-            $sheet->mergeCells('A2:D2');
-            $sheet->mergeCells('A3:D3');
+                // Merge cells untuk title
+                $sheet->mergeCells('A1:F1');
+                $sheet->mergeCells('A2:F2');
+                $sheet->mergeCells('A3:F3');
+                $sheet->mergeCells('A4:F4');
 
-            // STYLE TITLE
-            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(13);
-            $sheet->getStyle('A3')->getFont()->setSize(11);
+                // Style Title
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(13);
+                $sheet->getStyle('A4')->getFont()->setSize(11)->setItalic(true);
 
-            $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('A1:A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            // =====================
-            // HEADER TABLE
-            // =====================
-            $headerRow = 5;
+                // Background abu-abu muda untuk header sekolah
+                $sheet->getStyle('A1:F4')->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFF5F5F5');
 
-            $sheet->setCellValue("A$headerRow", 'Tanggal');
-            $sheet->setCellValue("B$headerRow", 'Jenis Penerimaan');
-            $sheet->setCellValue("C$headerRow", 'Uraian');
-            $sheet->setCellValue("D$headerRow", 'Jumlah (Rp)');
+                // =====================
+                // HEADER TABLE
+                // =====================
+                $headerRow = 6; // geser karena ada baris title lebih banyak
 
-            // STYLE HEADER
-            $sheet->getStyle("A$headerRow:D$headerRow")->getFont()->setBold(true);
+                // Set header values
+                $sheet->setCellValue("A$headerRow", 'NO');
+                $sheet->setCellValue("B$headerRow", 'TANGGAL');
+                $sheet->setCellValue("C$headerRow", 'JENIS PENERIMAAN');
+                $sheet->setCellValue("D$headerRow", 'URAIAN');
+                $sheet->setCellValue("E$headerRow", 'JUMLAH (Rp)');
+                $sheet->setCellValue("F$headerRow", 'KETERANGAN');
 
-            $sheet->getStyle("A$headerRow:D$headerRow")->getAlignment()
-                ->setHorizontal('center');
+                // Style Header Table
+                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->setBold(true)->setSize(11);
+                $sheet->getStyle("A$headerRow:F$headerRow")->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
 
-            $sheet->getStyle("A$headerRow:D$headerRow")->getFill()
-                ->setFillType('solid')
-                ->getStartColor()->setARGB('FFEFEFEF');
+                // Warna header table (biru tua)
+                $sheet->getStyle("A$headerRow:F$headerRow")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FF2E75B6');
 
-            // =====================
-            // AUTO WIDTH
-            // =====================
-            foreach (range('A', 'D') as $col) {
-                $sheet->getColumnDimension($col)->setAutoSize(true);
-            }
+                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
 
-            // =====================
-            // DATA RANGE
-            // =====================
-            $startData = 6;
-            $endData = $this->rowCount + 5;
+                // =====================
+                // AUTO WIDTH
+                // =====================
+                $sheet->getColumnDimension('A')->setWidth(5);
+                $sheet->getColumnDimension('B')->setWidth(15);
+                $sheet->getColumnDimension('C')->setWidth(25);
+                $sheet->getColumnDimension('D')->setWidth(35);
+                $sheet->getColumnDimension('E')->setWidth(20);
+                $sheet->getColumnDimension('F')->setWidth(20);
 
-            // FORMAT ANGKA
-            $sheet->getStyle("D$startData:D$endData")
-                ->getNumberFormat()
-                ->setFormatCode('#,##0');
+                // =====================
+                // DATA RANGE
+                // =====================
+                $startData = $headerRow + 1;
+                $endData = $headerRow + $this->rowCount;
 
-            // ALIGNMENT
-            $sheet->getStyle("A$startData:A$endData")
-                ->getAlignment()->setHorizontal('center');
+                // Isi nomor urut dan data
+                if ($this->rowCount > 0) {
+                    $dataCollection = $this->collection();
+                    $row = $startData;
+                    $no = 1;
+                    foreach ($dataCollection as $item) {
+                        $sheet->setCellValue("A$row", $no);
+                        $sheet->setCellValue("B$row", $item->tanggal);
+                        $sheet->setCellValue("C$row", $item->jenis);
+                        $sheet->setCellValue("D$row", $item->uraian);
+                        $sheet->setCellValue("E$row", $item->jumlah);
+                        $sheet->setCellValue("F$row", '-'); // default keterangan kosong
+                        $row++;
+                        $no++;
+                    }
+                }
 
-            $sheet->getStyle("D$startData:D$endData")
-                ->getAlignment()->setHorizontal('right');
+                // Format angka Rupiah
+                $sheet->getStyle("E$startData:E$endData")
+                    ->getNumberFormat()
+                    ->setFormatCode('#,##0');
 
-            // =====================
-            // BORDER TABLE
-            // =====================
-            $sheet->getStyle("A$headerRow:D$endData")
-                ->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                // Alignment data
+                $sheet->getStyle("A$startData:A$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("B$startData:B$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("E$startData:E$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("F$startData:F$endData")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            // =====================
-            // TOTAL
-            // =====================
-            $totalRow = $endData + 1;
+                // Border semua sel data
+                $sheet->getStyle("A$headerRow:F$endData")
+                    ->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
 
-            $sheet->setCellValue("C$totalRow", 'TOTAL');
-            $sheet->setCellValue("D$totalRow", $this->total);
+                // Warna baris header table
+                $sheet->getStyle("A$headerRow:F$headerRow")->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
 
-            $sheet->getStyle("C$totalRow:D$totalRow")->getFont()->setBold(true);
+                // =====================
+                // TOTAL
+                // =====================
+                $totalRow = $endData + 1;
 
-            // =====================
-            // BORDER TOTAL
-            // =====================
-            $sheet->getStyle("A$totalRow:D$totalRow")
-                ->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
+                $sheet->setCellValue("E$totalRow", $this->total);
+                $sheet->setCellValue("F$totalRow", '');
 
-        },
-    ];
-}
+                $sheet->getStyle("D$totalRow:E$totalRow")->getFont()->setBold(true);
+                $sheet->getStyle("D$totalRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("E$totalRow")->getNumberFormat()->setFormatCode('#,##0');
+
+                // Background total (kuning muda)
+                $sheet->getStyle("D$totalRow:E$totalRow")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFFFEB9C');
+
+                // Border total
+                $sheet->getStyle("A$totalRow:F$totalRow")
+                    ->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
+
+                // =====================
+                // FOOTER (TTD)
+                // =====================
+                $footerRow = $totalRow + 2;
+                
+                $sheet->setCellValue("D$footerRow", 'Mengetahui,');
+                $sheet->setCellValue("F$footerRow", 'Yogyakarta, ' . date('d F Y'));
+                
+                $sheet->setCellValue("D" . ($footerRow+1), 'Kepala Sekolah');
+                $sheet->setCellValue("F" . ($footerRow+1), 'Bendahara');
+                
+                $sheet->setCellValue("D" . ($footerRow+3), '(_______________________)');
+                $sheet->setCellValue("F" . ($footerRow+3), '(_______________________)');
+                
+                $sheet->getStyle("D$footerRow:F" . ($footerRow+3))->getFont()->setSize(10);
+                $sheet->getStyle("D$footerRow:F" . ($footerRow+3))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // =====================
+                // FREEZE PANE 
+                // =====================
+                $sheet->freezePane("A" . ($headerRow + 1));
+            },
+        ];
+    }
 }
