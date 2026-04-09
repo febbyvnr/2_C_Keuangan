@@ -73,7 +73,9 @@ class LaporanPenerimaanExport implements FromCollection, WithHeadings, WithEvent
         $drawing->setDescription('Logo Sekolah');
         $drawing->setPath(public_path('logo.png')); 
         $drawing->setHeight(60);
-         $drawing->setCoordinates('E1');
+        $drawing->setCoordinates('G1');\
+        $drawing->setOffsetX(10);
+        $drawing->setOffsetY(5);
 
         return $drawing;
     }
