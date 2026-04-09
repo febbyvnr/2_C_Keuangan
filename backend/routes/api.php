@@ -18,7 +18,6 @@ use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
-use App\Http\Controllers\TagihanSiswaController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -28,13 +27,7 @@ Route::get('/user', function (Request $request) {
 Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
     Route::get('/parents', [MstCoaController::class, 'parents']);
-
-    Route::get('/export', [MstCoaController::class, 'export']);
-    Route::get('/export/excel', [MstCoaController::class, 'exportExcel']);
-    Route::get('/export/csv', [MstCoaController::class, 'exportCsv']);
-    Route::get('/export/pdf', [MstCoaController::class, 'exportPdf']);
-
-    Route::get('/{id}', [MstCoaController::class, 'show'])->whereNumber('id');
+    Route::get('/{id}', [MstCoaController::class, 'show']);
     Route::post('/store', [MstCoaController::class, 'store']);
     Route::put('/update/{id}', [MstCoaController::class, 'update']);
     Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
@@ -44,13 +37,7 @@ Route::prefix('coa')->group(function () {
 Route::prefix('kegiatan')->group(function () {
     Route::get('/', [MstKegiatanController::class, 'index']);
     Route::get('/parents', [MstKegiatanController::class, 'parents']);
-
-    Route::get('/export', [MstKegiatanController::class, 'export']);
-    Route::get('/export/excel', [MstKegiatanController::class, 'exportExcel']);
-    Route::get('/export/csv', [MstKegiatanController::class, 'exportCsv']);
-    Route::get('/export/pdf', [MstKegiatanController::class, 'exportPdf']);
-
-    Route::get('/{id}', [MstKegiatanController::class, 'show'])->whereNumber('id');
+    Route::get('/{id}', [MstKegiatanController::class, 'show']);
     Route::post('/store', [MstKegiatanController::class, 'store']);
     Route::put('/update/{id}', [MstKegiatanController::class, 'update']);
     Route::delete('/delete/{id}', [MstKegiatanController::class, 'destroy']);
@@ -103,10 +90,7 @@ Route::prefix('ref-tan')->group(function () {
 
 Route::prefix('rkt')->group(function () {
     Route::get('/', [MstProgramKerjaController::class, 'index']);
-
-    Route::get('/export/excel', [MstProgramKerjaController::class, 'exportExcel']);
-
-    Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
+    Route::get('/{id}', [MstProgramKerjaController::class, 'show']);
     Route::post('/store', [MstProgramKerjaController::class, 'store']);
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update']);
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy']);
@@ -190,20 +174,4 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::post('/store', [EvaluasiRktController::class, 'store']);
     Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
-});
-
-Route::prefix('tagihan-siswa')->group(function () {
-    Route::get('/', [TagihanSiswaController::class, 'index']);
-    Route::get('/search', [TagihanSiswaController::class, 'search']);
-
-    Route::get('/export', [TagihanSiswaController::class, 'export']);
-    Route::get('/export/excel', [TagihanSiswaController::class, 'exportExcel']);
-    Route::get('/export/csv', [TagihanSiswaController::class, 'exportCsv']);
-    Route::get('/export/pdf', [TagihanSiswaController::class, 'exportPdf']);
-
-    Route::get('/{id}', [TagihanSiswaController::class, 'show']);
-
-    Route::post('/store', [TagihanSiswaController::class, 'store']);
-    Route::put('/update/{id}', [TagihanSiswaController::class, 'update']);
-    Route::delete('/delete/{id}', [TagihanSiswaController::class, 'destroy']);
 });
