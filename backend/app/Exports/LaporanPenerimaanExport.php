@@ -129,6 +129,19 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $endData = $row - 1;
 
+                 // =====================
+                // AUTO WRAP
+                // =====================
+                $sheet->getStyle("C$startData:D$endData")
+                    ->getAlignment()->setWrapText(true);
+
+                // =====================
+                // AUTO HEIGHT
+                // =====================
+                for ($i = $startData; $i <= $endData; $i++) {
+                    $sheet->getRowDimension($i)->setRowHeight(-1);
+                }
+
                 // FORMAT RP
                 $sheet->getStyle("E$startData:E$endData")
                     ->getNumberFormat()
