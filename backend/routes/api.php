@@ -20,6 +20,7 @@ use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
+use App\Http\Controllers\TrPenerimaanController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -210,4 +211,13 @@ Route::prefix('tagihan-siswa')->group(function () {
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
+});
+
+Route::prefix('tr-penerimaan')->group(function () {
+    Route::get('/', [TrPenerimaanController::class, 'index']);
+    Route::get('/search', [TrPenerimaanController::class, 'search']);
+    Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
+    Route::post('/store', [TrPenerimaanController::class, 'store']);
+    Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
+    Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
 });
