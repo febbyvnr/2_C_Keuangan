@@ -65,19 +65,19 @@ public function drawings()
     $drawingLeft = new Drawing();
     $drawingLeft->setName('Logo Kiri');
     $drawingLeft->setPath(public_path('logo.png'));
-    $drawingLeft->setHeight(70); // FIX: lebih kecil
+    $drawingLeft->setHeight(85);
     $drawingLeft->setCoordinates('B2');
     $drawingLeft->setOffsetX(25);
-    $drawingLeft->setOffsetY(5);
+    $drawingLeft->setOffsetY(12);
 
     // Logo kanan
     $drawingRight = new Drawing();
     $drawingRight->setName('Logo Kanan');
     $drawingRight->setPath(public_path('logo.png'));
-    $drawingRight->setHeight(70); // FIX
+    $drawingRight->setHeight(85); 
     $drawingRight->setCoordinates('E2');
     $drawingRight->setOffsetX(-25);
-    $drawingRight->setOffsetY(5);
+    $drawingRight->setOffsetY(12);
 
     return [$drawingLeft, $drawingRight];
 }
