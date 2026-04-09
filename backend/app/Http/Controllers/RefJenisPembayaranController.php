@@ -59,7 +59,8 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,'.$id.',ID_JENIS_PEMBAYARAN'
+                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,
+                '.$id.',ID_JENIS_PEMBAYARAN'
             ]);
 
             $jenis = RefJenisPembayaran::findOrFail($id);
