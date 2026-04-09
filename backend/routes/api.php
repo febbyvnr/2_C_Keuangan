@@ -19,6 +19,7 @@ use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
+use App\Http\Controllers\LaporanPenerimaanController;
 use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
@@ -205,4 +206,8 @@ Route::prefix('tagihan-siswa')->group(function () {
     Route::post('/store', [TagihanSiswaController::class, 'store']);
     Route::put('/update/{id}', [TagihanSiswaController::class, 'update']);
     Route::delete('/delete/{id}', [TagihanSiswaController::class, 'destroy']);
+});
+
+Route::prefix('laporan')->group(function () {
+    Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
 });
