@@ -22,7 +22,7 @@ class DtlFpd extends Model
         'QTY' => 'integer',
         'HARGA_SATUAN' => 'double',
         'VOLUME' => 'integer',
-        'TOTAL_FPD' => 'double',
+        'TOTAL' => 'double',
     ];
 
     protected static function boot()
@@ -45,15 +45,5 @@ class DtlFpd extends Model
     public function detailProgram(): BelongsTo
     {
         return $this->belongsTo(DtlProgramKerja::class, 'ID_DT_PROGKER', 'ID_DT_PROGKER');
-    }
-
-    public function getTotalAttribute(): ?float
-    {
-        return $this->TOTAL_FPD;
-    }
-
-    public function setTotalAttribute($value): void
-    {
-        $this->attributes['TOTAL_FPD'] = $value;
     }
 }

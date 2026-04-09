@@ -14,7 +14,7 @@ class FpdAnggaranController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = FpdAnggaran::with(['programKerja', 'detailFpd'])->get();
+            $data = FpdAnggaran::all();
 
             return response()->json([
                 'success' => true,
@@ -37,15 +37,12 @@ class FpdAnggaranController extends Controller
         try {
             $keyword = trim((string) $request->query('keyword', ''));
 
-            $query = FpdAnggaran::with(['programKerja', 'detailFpd']);
+            $query = FpdAnggaran::query();
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('TGL_FPD', 'like', "%{$keyword}%")
-                      ->orWhere('NIP_VALIDATOR_FPD', 'like', "%{$keyword}%")
-                      ->orWhere('NOMINAL_ANGGARAN', 'like', "%{$keyword}%")
-                      ->orWhere('NOMINAL_FPD', 'like', "%{$keyword}%")
-                      ->orWhere('NOMINAL_SISA', 'like', "%{$keyword}%");
+                      ->orWhere('NIP_VALIDATOR_FPD', 'like', "%{$keyword}%");
                 });
             }
 
@@ -71,7 +68,7 @@ class FpdAnggaranController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = FpdAnggaran::with(['programKerja', 'detailFpd.detailProgram.programKerja'])->find($id);
+            $data = FpdAnggaran::with('detailFpd')->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -151,7 +148,7 @@ class FpdAnggaranController extends Controller
                 'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
             ]);
 
-            $totalDetail = (float) $data->detailFpd()->sum('TOTAL_FPD');
+            $totalDetail = (float) $data->detailFpd()->sum('TOTAL');
 
             if ($data->detailFpd()->exists() && (int) $validated['ID_PROGRAM_KERJA'] !== (int) $data->ID_PROGRAM_KERJA) {
                 throw ValidationException::withMessages([
@@ -273,7 +270,7 @@ class FpdAnggaranController extends Controller
 
                 $grandTotal = 0;
                 foreach ($fpd->detailFpd as $index => $detail) {
-                    $grandTotal += (float) $detail->TOTAL_FPD;
+                    $grandTotal += (float) $detail->TOTAL;
 
                     fputcsv($handle, [
                         $index + 1,
@@ -284,7 +281,7 @@ class FpdAnggaranController extends Controller
                         $detail->VOLUME,
                         $detail->SATUAN,
                         $detail->HARGA_SATUAN,
-                        $detail->TOTAL_FPD,
+                        $detail->TOTAL,
                         $detail->LINK_BUKTI_NOTA_FPD ?? '-',
                     ], ';');
                 }

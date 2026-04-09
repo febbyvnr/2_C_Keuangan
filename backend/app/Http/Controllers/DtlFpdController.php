@@ -7,7 +7,6 @@ use App\Models\DtlFpd;
 use App\Models\FpdAnggaran;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DtlFpdController extends Controller
@@ -15,7 +14,7 @@ class DtlFpdController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = DtlFpd::with(['fpd.programKerja', 'detailProgram.programKerja'])->get();
+            $data = DtlFpd::all();
 
             return response()->json([
                 'success' => true,
@@ -38,13 +37,12 @@ class DtlFpdController extends Controller
         try {
             $keyword = trim((string) $request->query('keyword', ''));
 
-            $query = DtlFpd::with(['fpd.programKerja', 'detailProgram.programKerja']);
+            $query = DtlFpd::query();
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('SATUAN', 'like', "%{$keyword}%")
-                      ->orWhere('LINK_BUKTI_NOTA_FPD', 'like', "%{$keyword}%")
-                      ->orWhere('TOTAL_FPD', 'like', "%{$keyword}%");
+                      ->orWhere('LINK_BUKTI_NOTA_FPD', 'like', "%{$keyword}%");
                 });
             }
 
@@ -70,7 +68,7 @@ class DtlFpdController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = DtlFpd::with(['fpd.programKerja', 'detailProgram.programKerja'])->find($id);
+            $data = DtlFpd::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -107,35 +105,31 @@ class DtlFpdController extends Controller
                 'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
             ]);
 
-            $data = DB::transaction(function () use ($validated) {
-                $fpd = FpdAnggaran::find($validated['ID_FPD']);
-                $detailProgram = DtlProgramKerja::find($validated['ID_DT_PROGKER']);
+            $fpd = FpdAnggaran::find($validated['ID_FPD']);
+            $detailProgram = DtlProgramKerja::find($validated['ID_DT_PROGKER']);
 
-                if (!$fpd || !$detailProgram) {
-                    throw ValidationException::withMessages([
-                        'ID_FPD' => ['Data FPD atau detail program kerja tidak ditemukan.'],
-                    ]);
-                }
+            if (!$fpd || !$detailProgram) {
+                throw ValidationException::withMessages([
+                    'ID_FPD' => ['Data FPD atau detail program kerja tidak ditemukan.'],
+                ]);
+            }
 
-                if ((int) $fpd->ID_PROGRAM_KERJA !== (int) $detailProgram->ID_PROGRAM_KERJA) {
-                    throw ValidationException::withMessages([
-                        'ID_DT_PROGKER' => ['Detail program kerja harus sesuai dengan program kerja pada FPD.'],
-                    ]);
-                }
+            if ((int) $fpd->ID_PROGRAM_KERJA !== (int) $detailProgram->ID_PROGRAM_KERJA) {
+                throw ValidationException::withMessages([
+                    'ID_DT_PROGKER' => ['Detail program kerja harus sesuai dengan program kerja pada FPD.'],
+                ]);
+            }
 
-                $validated['TOTAL_FPD'] = (float) $validated['QTY'] * (float) $validated['VOLUME'] * (float) $validated['HARGA_SATUAN'];
+            $validated['TOTAL'] = (float) $validated['QTY'] * (float) $validated['VOLUME'] * (float) $validated['HARGA_SATUAN'];
 
-                if (((float) $fpd->detailFpd()->sum('TOTAL_FPD') + $validated['TOTAL_FPD']) > (float) $fpd->NOMINAL_ANGGARAN) {
-                    throw ValidationException::withMessages([
-                        'TOTAL_FPD' => ['Total detail FPD melebihi nominal anggaran.'],
-                    ]);
-                }
+            if (((float) $fpd->detailFpd()->sum('TOTAL') + $validated['TOTAL']) > (float) $fpd->NOMINAL_ANGGARAN) {
+                throw ValidationException::withMessages([
+                    'TOTAL' => ['Total detail FPD melebihi nominal anggaran.'],
+                ]);
+            }
 
-                $data = DtlFpd::create($validated);
-                $this->syncFpd($validated['ID_FPD']);
-
-                return $data->load(['fpd.programKerja', 'detailProgram.programKerja']);
-            });
+            $data = DtlFpd::create($validated);
+            $this->syncFpd($validated['ID_FPD']);
 
             return response()->json([
                 'success' => true,
@@ -181,44 +175,40 @@ class DtlFpdController extends Controller
                 'LINK_BUKTI_NOTA_FPD' => 'nullable|string|max:255',
             ]);
 
-            $data = DB::transaction(function () use ($data, $validated) {
-                $oldFpdId = $data->ID_FPD;
-                $fpd = FpdAnggaran::find($validated['ID_FPD']);
-                $detailProgram = DtlProgramKerja::find($validated['ID_DT_PROGKER']);
+            $oldFpdId = $data->ID_FPD;
+            $fpd = FpdAnggaran::find($validated['ID_FPD']);
+            $detailProgram = DtlProgramKerja::find($validated['ID_DT_PROGKER']);
 
-                if (!$fpd || !$detailProgram) {
-                    throw ValidationException::withMessages([
-                        'ID_FPD' => ['Data FPD atau detail program kerja tidak ditemukan.'],
-                    ]);
-                }
+            if (!$fpd || !$detailProgram) {
+                throw ValidationException::withMessages([
+                    'ID_FPD' => ['Data FPD atau detail program kerja tidak ditemukan.'],
+                ]);
+            }
 
-                if ((int) $fpd->ID_PROGRAM_KERJA !== (int) $detailProgram->ID_PROGRAM_KERJA) {
-                    throw ValidationException::withMessages([
-                        'ID_DT_PROGKER' => ['Detail program kerja harus sesuai dengan program kerja pada FPD.'],
-                    ]);
-                }
+            if ((int) $fpd->ID_PROGRAM_KERJA !== (int) $detailProgram->ID_PROGRAM_KERJA) {
+                throw ValidationException::withMessages([
+                    'ID_DT_PROGKER' => ['Detail program kerja harus sesuai dengan program kerja pada FPD.'],
+                ]);
+            }
 
-                $validated['TOTAL_FPD'] = (float) $validated['QTY'] * (float) $validated['VOLUME'] * (float) $validated['HARGA_SATUAN'];
+            $validated['TOTAL'] = (float) $validated['QTY'] * (float) $validated['VOLUME'] * (float) $validated['HARGA_SATUAN'];
 
-                $totalLain = (float) DtlFpd::where('ID_FPD', $validated['ID_FPD'])
-                    ->where('ID_DT_FPD', '!=', $data->ID_DT_FPD)
-                    ->sum('TOTAL_FPD');
+            $totalLain = (float) DtlFpd::where('ID_FPD', $validated['ID_FPD'])
+                ->where('ID_DT_FPD', '!=', $data->ID_DT_FPD)
+                ->sum('TOTAL');
 
-                if (($totalLain + $validated['TOTAL_FPD']) > (float) $fpd->NOMINAL_ANGGARAN) {
-                    throw ValidationException::withMessages([
-                        'TOTAL_FPD' => ['Total detail FPD melebihi nominal anggaran.'],
-                    ]);
-                }
+            if (($totalLain + $validated['TOTAL']) > (float) $fpd->NOMINAL_ANGGARAN) {
+                throw ValidationException::withMessages([
+                    'TOTAL' => ['Total detail FPD melebihi nominal anggaran.'],
+                ]);
+            }
 
-                $data->update($validated);
-                $this->syncFpd($validated['ID_FPD']);
+            $data->update($validated);
+            $this->syncFpd($validated['ID_FPD']);
 
-                if ((int) $oldFpdId !== (int) $validated['ID_FPD']) {
-                    $this->syncFpd($oldFpdId);
-                }
-
-                return $data->load(['fpd.programKerja', 'detailProgram.programKerja']);
-            });
+            if ((int) $oldFpdId !== (int) $validated['ID_FPD']) {
+                $this->syncFpd($oldFpdId);
+            }
 
             return response()->json([
                 'success' => true,
@@ -256,10 +246,8 @@ class DtlFpdController extends Controller
 
             $fpdId = $data->ID_FPD;
 
-            DB::transaction(function () use ($data, $fpdId) {
-                $data->delete();
-                $this->syncFpd($fpdId);
-            });
+            $data->delete();
+            $this->syncFpd($fpdId);
 
             return response()->json([
                 'success' => true,
@@ -283,7 +271,7 @@ class DtlFpdController extends Controller
             return;
         }
 
-        $total = (float) $fpd->detailFpd()->sum('TOTAL_FPD');
+        $total = (float) $fpd->detailFpd()->sum('TOTAL');
 
         $fpd->update([
             'NOMINAL_FPD' => $total,
