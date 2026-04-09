@@ -162,7 +162,6 @@ Route::prefix('tarif')->group(function () {
 
 Route::prefix('jenis-pembayaran')->group(function () {
     Route::get('/', [RefJenisPembayaranController::class, 'index']);       // READ ALL
-    Route::get('/{id}', [RefJenisPembayaranController::class, 'show']);    // READ ONE
     Route::post('/', [RefJenisPembayaranController::class, 'store']);      // CREATE
     Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);  // UPDATE
     Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']); // DELETE
