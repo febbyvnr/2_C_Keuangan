@@ -8,22 +8,13 @@ class RefSumberDana extends Model
 {
     protected $table = 'ref_sumber_dana';
     protected $primaryKey = 'ID_REF_DANA';
-
-    public $incrementing = false;
-    protected $keyType = 'int';
     public $timestamps = false;
 
-    protected $guarded = [];
-
-    protected $casts = [
-        'ID_REF_DANA' => 'integer',
-        'REF_ID_REF_DANA' => 'integer',
+    protected $fillable = [
+        'REF_ID_REF_DANA',
+        // CATATAN: Tabel ref_sumber_dana di SQL hanya memiliki ID_REF_DANA dan REF_ID_REF_DANA.
+        // Jika tim lain menambah kolom nama/deskripsi, tambahkan di sini.
     ];
-
-    public function dtlProgramKerja()
-    {
-        return $this->hasMany(DtlProgramKerja::class, 'ID_REF_DANA', 'ID_REF_DANA');
-    }
 
     public function parent()
     {
@@ -35,7 +26,7 @@ class RefSumberDana extends Model
         return $this->hasMany(RefSumberDana::class, 'REF_ID_REF_DANA', 'ID_REF_DANA');
     }
 
-    public function trPenerimaan()
+    public function transaksiPenerimaan()
     {
         return $this->hasMany(TrPenerimaan::class, 'ID_REF_DANA', 'ID_REF_DANA');
     }

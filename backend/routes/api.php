@@ -20,6 +20,7 @@ use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
+use App\Http\Controllers\TrPenerimaanController;
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
 
@@ -212,7 +213,6 @@ Route::prefix('tagihan-siswa')->group(function () {
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
-
 });
 
 Route::prefix('rka')->group(function () {
@@ -222,4 +222,22 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
+});
+
+Route::prefix('tr-penerimaan')->group(function () {
+    Route::get('/', [TrPenerimaanController::class, 'index']);
+    Route::get('/search', [TrPenerimaanController::class, 'search']);
+    Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
+    Route::post('/store', [TrPenerimaanController::class, 'store']);
+    Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
+    Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
+});
+
+Route::prefix('tr-penerimaan')->group(function () {
+    Route::get('/', [TrPenerimaanController::class, 'index']);
+    Route::get('/search', [TrPenerimaanController::class, 'search']);
+    Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
+    Route::post('/store', [TrPenerimaanController::class, 'store']);
+    Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
+    Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
 });
