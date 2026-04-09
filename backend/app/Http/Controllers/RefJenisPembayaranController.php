@@ -28,23 +28,32 @@ class RefJenisPembayaranController extends Controller
 
     // CREATE
     public function store(Request $request)
-    {
-        try {
-            $jenis = RefJenisPembayaran::create([
-                'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
-            ]);
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil ditambahkan',
-                'data' => $jenis
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambahkan data: '.$e->getMessage()
-            ], 500);
-        }
+{
+    try {
+        // Validasi input
+        $request->validate([
+            'deskripsi_jenis_pembayaran' => 'required|string|min:3|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
+        ]);
+
+        // Simpan data
+        $jenis = RefJenisPembayaran::create([
+            'deskripsi_jenis_pembayaran' => $request->deskripsi_jenis_pembayaran
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $jenis
+        ], 201);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menambahkan data: '.$e->getMessage()
+        ], 500);
     }
+}
+
 
     // UPDATE
     public function update(Request $request, $id)
@@ -84,4 +93,6 @@ class RefJenisPembayaranController extends Controller
             ], 404);
         }
     }
+
+
 }
