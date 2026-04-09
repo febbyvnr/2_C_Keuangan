@@ -21,6 +21,7 @@ use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use Termwind\Components\Raw;
+use App\Http\Controllers\RkaController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -211,4 +212,14 @@ Route::prefix('tagihan-siswa')->group(function () {
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
+
+});
+
+Route::prefix('rka')->group(function () {
+    Route::get('/', [RkaController::class, 'index']);
+    Route::get('/search', [RkaController::class, 'search']);
+    Route::get('/{id}', [RkaController::class, 'show']);
+    Route::post('/store', [RkaController::class, 'store']);
+    Route::put('/update/{id}', [RkaController::class, 'update']);
+    Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
 });
