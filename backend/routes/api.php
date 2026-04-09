@@ -237,6 +237,7 @@ Route::prefix('tr-penerimaan')->group(function () {
     Route::get('/', [TrPenerimaanController::class, 'index']);
     Route::get('/search', [TrPenerimaanController::class, 'search']);
     Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
+    Route::get('/export', [TrPenerimaanController::class, 'export']);
     Route::post('/store', [TrPenerimaanController::class, 'store']);
     Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
     Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
