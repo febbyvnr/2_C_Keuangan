@@ -21,6 +21,7 @@ use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
+use App\Http\Controllers\TrPenerimaanController;
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
 
