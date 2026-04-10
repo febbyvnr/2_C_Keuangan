@@ -1,4 +1,4 @@
-import "../styles/Sidebar.css";
+import "../styles/bendahara/Sidebar.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
 import { NavLink } from "react-router-dom";
