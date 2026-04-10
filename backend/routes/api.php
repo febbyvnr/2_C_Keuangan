@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
@@ -23,6 +24,37 @@ use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Rute cek user yang lagi login (bawaan Laravel, biarin aja)
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+// ------------------------------------------
+    // MODUL PENERIMAAN
+    // ------------------------------------------
+    Route::prefix('tr-penerimaan')->group(function () {
+        
+        Route::get('/', [TrPenerimaanController::class, 'index']);
+        Route::get('/export', [TrPenerimaanController::class, 'export']);
+        Route::get('/{id}', [TrPenerimaanController::class, 'show']);
+        
+        // KITA KELUARKAN DARI MIDDLEWARE ROLE SEMENTARA
+        // Biar yang bertugas memblokir adalah fungsi authorize() di Form Request
+        Route::post('/store', [TrPenerimaanController::class, 'store']);
+        Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
+        Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
+
+    });
+
+    // Nanti kalau ada modul Pengeluaran, tinggal tambahin di sini:
+    // Route::prefix('tr-pengeluaran')->group(function () { ... });
+
+});
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -222,14 +254,4 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
-});
-
-Route::prefix('tr-penerimaan')->group(function () {
-    Route::get('/', [TrPenerimaanController::class, 'index']);
-    Route::get('/search', [TrPenerimaanController::class, 'search']);
-    Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
-    Route::get('/export', [TrPenerimaanController::class, 'export']);
-    Route::post('/store', [TrPenerimaanController::class, 'store']);
-    Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
-    Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
 });

@@ -9,8 +9,7 @@ class StorePenerimaanRequest extends FormRequest
     public function authorize(): bool
     {
         // TODO: Hanya Bendahara yang boleh menambah penerimaan (F82)
-        // return $this->user() && $this->user()->hasRole('bendahara');
-        return true;
+        return $this->user() && $this->user()->hasRole('Bendahara');
     }
 
     public function rules(): array
