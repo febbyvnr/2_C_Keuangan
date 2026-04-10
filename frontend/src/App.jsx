@@ -18,7 +18,7 @@ export default function App() {
         <BrowserRouter>
             <div style={{display:"flex"}}>
                 <Sidebar />
-                <div style={{flex:1}}>
+                <div className="content-wrapper">
                     <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/dashboard" element={<Dashboard />} />

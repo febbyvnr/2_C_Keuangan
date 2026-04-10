@@ -69,3 +69,9 @@ button:focus-visible {
         background-color: #f9f9f9;
     }
 }
+
+.content-wrapper {
+    flex: 1;
+    transition: all 0.4s ease;
+    min-height: 100vh;
+}
