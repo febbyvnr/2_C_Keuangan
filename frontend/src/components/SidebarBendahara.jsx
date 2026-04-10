@@ -4,7 +4,7 @@ import profile from "../assets/user-profile.jpg";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-export default function Sidebar() {
+export default function SidebarBendahara() {
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -79,52 +79,52 @@ export default function Sidebar() {
                         </div>
                         <ul className="nav flex-column sidebar-menu">
                             <li className="nav-item">
-                                <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/dashboard" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Dashboard
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/persetujuan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/persetujuan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Persetujuan & Verifikasi
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/dana" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/dana" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Pencairan Dana
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/rka" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/rka" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Page RKA
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/bku" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/bku" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Page BKU
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/bkm" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/bkm" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Page BKM
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/bkk" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/bkk" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Page BKK
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/tagihan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/tagihan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Tagihan Siswa
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/tarif" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/tarif" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Master Tarif
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/laporan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/bendahara/laporan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     Laporan Keuangan
                                 </NavLink>
                             </li>
