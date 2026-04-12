@@ -161,9 +161,11 @@ Route::prefix('tarif')->group(function () {
 });
 
 Route::prefix('jenis-pembayaran')->group(function () {
-    Route::get('/', [RefJenisPembayaranController::class, 'index']);       // READ ALL
-    Route::post('/', [RefJenisPembayaranController::class, 'store']);      // CREATE
-    Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);  // UPDATE
-    Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']); // DELETE
-    Route::get('/search', [RefJenisPembayaranController::class, 'search']);   // SEARCH
+    Route::get('/', [RefJenisPembayaranController::class, 'index']);
+    Route::post('/', [RefJenisPembayaranController::class, 'store']);
+    Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);
+    Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']);
+    Route::get('/search', [RefJenisPembayaranController::class, 'search']);
+    
+    Route::get('/export', [RefJenisPembayaranController::class, 'export']);
 });
