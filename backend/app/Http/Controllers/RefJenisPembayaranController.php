@@ -6,6 +6,10 @@ use App\Models\RefJenisPembayaran;
 use Illuminate\Http\Request;
 use Exception;
 
+use App\Exports\RefJenisPembayaranExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+
 class RefJenisPembayaranController extends Controller
 {
     // READ ALL
@@ -120,5 +124,13 @@ class RefJenisPembayaranController extends Controller
                 'message' => 'Terjadi kesalahan: '.$e->getMessage()
             ], 500);
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(
+            new RefJenisPembayaranExport(),
+            'ref_jenis_pembayaran.xlsx'
+        );
     }
 }
