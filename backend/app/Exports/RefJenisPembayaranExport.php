@@ -4,16 +4,14 @@ namespace App\Exports;
 
 use App\Models\RefJenisPembayaran;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\{
     FromCollection,
     WithHeadings,
     WithMapping,
     WithStyles,
-    WithColumnWidths,
-    WithEvents
+    WithEvents,
+    WithColumnWidths
 };
-
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
@@ -22,24 +20,20 @@ class RefJenisPembayaranExport implements
     WithHeadings,
     WithMapping,
     WithStyles,
-    WithColumnWidths,
     WithEvents,
-    WithCustomStartCell
+    WithColumnWidths
 {
-    protected Collection $data;
+    protected int $no = 0;
 
     public function collection(): Collection
     {
-        $this->data = RefJenisPembayaran::query()
-            ->orderBy('ID_JENIS_PEMBAYARAN', 'asc')
-            ->get();
-
-        return $this->data;
+        return RefJenisPembayaran::orderBy('ID_JENIS_PEMBAYARAN')->get();
     }
 
     public function map($item): array
     {
         return [
+            ++$this->no,
             $item->ID_JENIS_PEMBAYARAN,
             $item->deskripsi_jenis_pembayaran 
                 ?? $item->DESKRIPSI_JENIS_PEMBAYARAN 
@@ -47,55 +41,38 @@ class RefJenisPembayaranExport implements
         ];
     }
 
-    public function startCell(): string
-    {
-        return 'A5'; // data mulai dari baris 5
-    }
     public function headings(): array
     {
         return [
-            ['SMK BOPKRI 2 YOGYAKARTA'], // baris 1
-            ['Referensi Jenis Pembayaran'], // baris 2
-            [], // spasi
-            ['Kode', 'Keterangan'], // header tabel
+            ['No', 'ID', 'Deskripsi'],
         ];
     }
 
     public function columnWidths(): array
     {
         return [
-            'A' => 25,
-            'B' => 60,
+            'A' => 8,   // No (kecil)
+            'B' => 10,  // ID (compact)
+            'C' => 30,  // Deskripsi (cukup panjang)
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        // HEADER SESUAI DESIGN SYSTEM (brand-primary #265F9C)
-        $sheet->getStyle('A1:B1')->applyFromArray([
+        // HEADER
+        $sheet->getStyle('A1:C1')->applyFromArray([
             'font' => [
                 'bold' => true,
-                'size' => 11,
                 'color' => ['rgb' => 'FFFFFF'],
             ],
             'fill' => [
                 'fillType' => 'solid',
-                'startColor' => ['rgb' => '265F9C'], // dari design system kamu
+                'startColor' => ['rgb' => '2F5597'],
             ],
             'alignment' => [
                 'horizontal' => 'center',
-                'vertical' => 'center',
             ],
         ]);
-
-        // BORDER
-        $sheet->getStyle('A1:B' . $sheet->getHighestRow())
-            ->getBorders()
-            ->getAllBorders()
-            ->setBorderStyle('thin');
-
-        // WRAP TEXT DESKRIPSI
-        $sheet->getStyle('B')->getAlignment()->setWrapText(true);
 
         return [];
     }
@@ -106,71 +83,34 @@ class RefJenisPembayaranExport implements
             AfterSheet::class => function (AfterSheet $event) {
 
                 $sheet = $event->sheet;
-
-                // === MERGE TITLE ===
-                $sheet->mergeCells('A1:B1');
-                $sheet->mergeCells('A2:B2');
-
-                // === STYLE TITLE ===
-                $sheet->getStyle('A1')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
-                    'alignment' => [
-                        'horizontal' => 'center',
-                    ],
-                ]);
-
-                $sheet->getStyle('A2')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 12,
-                    ],
-                    'alignment' => [
-                        'horizontal' => 'center',
-                    ],
-                ]);
-
-                // === HEADER TABLE (BARIS 4) ===
-                $sheet->getStyle('A4:B4')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => 'FFFFFF'],
-                    ],
-                    'fill' => [
-                        'fillType' => 'solid',
-                        'startColor' => ['rgb' => '265F9C'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => 'center',
-                    ],
-                ]);
-
-                // === BORDER ===
                 $highestRow = $sheet->getHighestRow();
 
-                $sheet->getStyle("A4:B{$highestRow}")
+                // BORDER
+                $sheet->getStyle("A1:C{$highestRow}")
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle('thin');
 
-                // === ZEBRA ===
-                for ($i = 5; $i <= $highestRow; $i++) {
+                // ZEBRA
+                for ($i = 2; $i <= $highestRow; $i++) {
                     if ($i % 2 == 0) {
-                        $sheet->getStyle("A{$i}:B{$i}")
+                        $sheet->getStyle("A{$i}:C{$i}")
                             ->getFill()
                             ->setFillType('solid')
                             ->getStartColor()
-                            ->setRGB('F6F7F9');
+                            ->setRGB('E7E6E6');
                     }
                 }
 
-                // === FREEZE ===
-                $sheet->freezePane('A5');
+                // ALIGNMENT
+                $sheet->getStyle('A')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('B')->getAlignment()->setHorizontal('center');
 
-                // === WRAP TEXT ===
-                $sheet->getStyle('B')->getAlignment()->setWrapText(true);
+                // WRAP TEXT (biar deskripsi panjang gak keluar)
+                $sheet->getStyle('C')->getAlignment()->setWrapText(true);
+
+                // FREEZE HEADER
+                $sheet->freezePane('A2');
             },
         ];
     }
