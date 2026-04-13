@@ -16,49 +16,21 @@ class LaporanPenerimaanController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
+        $role = $request->role ?? null; 
+
+        //VALIDASI BENDAHARA
+          if ($type == 'excel' && $role && $role !== 'Bendahara') {
+        return response()->json([
+            'message' => 'Hanya Bendahara yang boleh generate laporan'
+        ], 403);
+    }
 
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana),
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role),
                 'Laporan_Penerimaan.xlsx'
             );
-        }
-
-        // CSV
-        if ($type == 'csv') {
-            $queryCsv = DB::table('TR_PENERIMAAN as p')
-                ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
-                ->select(
-                        'p.TANGGAL_TR_PENERIMAAN as tanggal',
-                        'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
-                        'p.DESKRIPSI_TR_PENERIMAAN as uraian',
-                        'p.JUMLAH_TR_PENERIMAAN as jumlah'
-                        )
-                ->whereNotNull('p.NIP_PENERIMA');
-
-                // FILTER PERIODE
-                if ($start && $end) {
-                    $queryCsv->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
-                }
-
-                // FILTER SUMBER DANA
-                if ($sumberDana) {
-                    $queryCsv->where('p.ID_REF_DANA', $sumberDana);
-        }
-
-                $dataCsv = $queryCsv->get();
-
-                $csv = "Tanggal,Jenis,Uraian,Jumlah\n";
-
-             foreach ($dataCsv as $row) {
-            $csv .= "{$row->tanggal},\"{$row->jenis}\",\"{$row->uraian}\",{$row->jumlah}\n";
-        }
-
-        //  RETURN CSV
-        return response($csv)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename=Laporan_Penerimaan.csv');
         }
 
         // QUERY UTAMA (PDF & JSON)
