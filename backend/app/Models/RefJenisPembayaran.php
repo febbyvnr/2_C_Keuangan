@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class RefJenisPembayaran extends Model
 {
     protected $table = 'ref_jenis_pembayaran';
+
     protected $primaryKey = 'ID_JENIS_PEMBAYARAN';
     public $timestamps = false;
 
     protected $fillable = [
-        'DESKRIPSI_JENIS_PEMBAYARAN',
+
+        'ID_JENIS_PEMBAYARAN',
+        'DESKRIPSI_JENIS_PEMBAYARAN'
     ];
 }

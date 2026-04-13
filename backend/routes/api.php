@@ -20,6 +20,8 @@ use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
+use App\Http\Controllers\RefJenisPembayaranController;
+
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
 
@@ -222,4 +224,14 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
+});
+
+Route::prefix('jenis-pembayaran')->group(function () {
+    Route::get('/', [RefJenisPembayaranController::class, 'index']);
+    Route::post('/', [RefJenisPembayaranController::class, 'store']);
+    Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);
+    Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']);
+    Route::get('/search', [RefJenisPembayaranController::class, 'search']);
+    
+    Route::get('/export', [RefJenisPembayaranController::class, 'export']);
 });
