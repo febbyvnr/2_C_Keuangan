@@ -110,27 +110,6 @@
 
 <br><br><br><br>
 
-<!-- TANDA TANGAN -->
-<table class="no-border">
-    <tr class="no-border">
-        
-        <td style="text-align: center; width: 50%;">
-            Bendahara<br><br><br><br>
-
-            <b>Rina Putri, S.E.</b><br>
-            NIP: 1987654321
-        </td>
-
-        <td style="text-align: center; width: 50%;">
-            Kepala Sekolah<br><br><br><br>
-
-            <b>Drs. Budi Santoso</b><br>
-            NIP: 1976543210
-        </td>
-
-    </tr>
-</table>
-
 <br><br>
 
 @php
