@@ -57,7 +57,7 @@ class RefTahunAnggaranController extends Controller
             'IS_CURRENT' => $request->IS_CURRENT,
         ]);
 
-        return response()->json($data, 201);
+        return response()->json($data->fresh(), 201);
     }
 
     /**
@@ -65,44 +65,42 @@ class RefTahunAnggaranController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $data = RefTahunAnggaran::findOrFail($id);
+    $data = RefTahunAnggaran::findOrFail($id);
 
-        $request->validate([
-            'DESKRIPSI_TAHUN_ANGGARAN' => 'required',
-            'IS_CURRENT' => 'required|boolean',
-        ]);
+    $request->validate([
+        'DESKRIPSI_TAHUN_ANGGARAN' => 'required',
+        'IS_CURRENT' => 'required|boolean',
+    ]);
 
-        if ($data->programKerja()->exists()) {
-
-            if ($request->IS_CURRENT != $data->IS_CURRENT) {
-                return response()->json([
-                    'message' => 'Tidak boleh mengubah status aktif karena sudah dipakai program kerja'
-                ], 400);
-            }
-
-            $data->update([
-                'DESKRIPSI_TAHUN_ANGGARAN' => $request->DESKRIPSI_TAHUN_ANGGARAN
-            ]);
-
-            return response()->json($data);
-        }
-
-        // hanya 1 aktif
-        if ($request->IS_CURRENT == 1) {
-            RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
-        }
-
-        $data->update($request->all());
-
-        return $data;
+    if (
+        $data->programKerja()->exists() ||
+        $data->tarif()->exists()
+    ) {
+        return response()->json([
+            'message' => 'Tidak boleh mengubah data karena sudah dipakai transaksi'
+        ], 400);
     }
 
+    if ($request->IS_CURRENT == 1) {
+        RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
+    }
+
+    $data->update($request->all());
+
+    return $data;
+}
     /**
      * Menghapus Tahun Anggaran
      */
     public function destroy($id)
-    {
+{
     $data = RefTahunAnggaran::findOrFail($id);
+
+    if ($data->IS_CURRENT == 1) {
+        return response()->json([
+            'message' => 'Tidak bisa menghapus tahun anggaran yang sedang aktif'
+        ], 400);
+    }
 
     if (
         $data->programKerja()->exists() ||
@@ -118,7 +116,7 @@ class RefTahunAnggaranController extends Controller
     return response()->json([
         'message' => 'Data berhasil dihapus'
     ]);
-    }
+}
 
     /**
      * Detail 1 data
