@@ -173,7 +173,7 @@ class LaporanPenerimaanExport implements WithEvents
                // =====================
               // FOOTER (FIX CENTER)
               // =====================
-                $footerRow = $totalRow + 6;
+                $footerRow = $totalRow + 4;
 
 
                 // =====================
