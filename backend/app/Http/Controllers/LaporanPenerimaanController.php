@@ -16,6 +16,7 @@ class LaporanPenerimaanController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
+        $role = $request->role ?? null; 
 
         // EXCEL
         if ($type == 'excel') {
