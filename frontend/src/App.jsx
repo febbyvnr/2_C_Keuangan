@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 
-function App() {
-  const [count, setCount] = useState(0)
+import SidebarBendahara from "./components/SidebarBendahara"
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+import Dashboard from "./pages/bendahara/Dashboard"
+import Persetujuan from "./pages/bendahara/Persetujuan"
+import Dana from "./pages/bendahara/Dana"
+import RKA from "./pages/bendahara/RKA"
+import BKU from "./pages/bendahara/BKU"
+import BKM from "./pages/bendahara/BKM"
+import BKK from "./pages/bendahara/BKK"
+import Tagihan from "./pages/bendahara/Tagihan"
+import Tarif from "./pages/bendahara/Tarif"
+import Laporan from "./pages/bendahara/Laporan"
+
+export default function App() {
+    return (
+        <BrowserRouter>
+            <div style={{display:"flex"}}>
+                <SidebarBendahara />
+                <div className="content-wrapper">
+                    <Routes>
+                        <Route path="/bendahara/" element={<Dashboard />} />
+                        <Route path="/bendahara/dashboard" element={<Dashboard />} />
+                        <Route path="/bendahara/persetujuan" element={<Persetujuan />} />
+                        <Route path="/bendahara/dana" element={<Dana />} />
+                        <Route path="/bendahara/rka" element={<RKA />} />
+                        <Route path="/bendahara/bku" element={<BKU />} />
+                        <Route path="/bendahara/bkm" element={<BKM />} />
+                        <Route path="/bendahara/bkk" element={<BKK />} />
+                        <Route path="/bendahara/tagihan" element={<Tagihan />} />
+                        <Route path="/bendahara/tarif" element={<Tarif />} />
+                        <Route path="/bendahara/laporan" element={<Laporan />} />
+                    </Routes>
+                </div>
+            </div>
+        </BrowserRouter>
+    )
 }
-
-export default App

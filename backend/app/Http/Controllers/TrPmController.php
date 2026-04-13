@@ -94,7 +94,7 @@ class TrPmController extends Controller
     {
         try {
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:dtl_program_kerja,ID_PROGRAM_KERJA',
+                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
                 'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
                 'TGL_PM' => 'required|date',
                 'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
@@ -137,7 +137,7 @@ class TrPmController extends Controller
             }
 
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:dtl_program_kerja,ID_PROGRAM_KERJA',
+                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
                 'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
                 'TGL_PM' => 'required|date',
                 'DESKRIPSI_TR_PM' => 'nullable|string|max:500',

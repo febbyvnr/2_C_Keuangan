@@ -11,8 +11,11 @@ class TagihanSiswa extends Model
     protected $table = 'tagihan_siswa';
     protected $primaryKey = 'ID_TAGIHAN_SISWA';
     public $timestamps = false;
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
+        'ID_TAGIHAN_SISWA',
         'ID_SISWA_TETAP',
         'ID_JENIS_PEMBAYARAN',
         'BULAN_TAGIHAN_SISWA',
@@ -30,25 +33,16 @@ class TagihanSiswa extends Model
         'DUEDATE_TAGIHAN_SISWA' => 'date',
     ];
 
-    /**
-     * Relasi ke mst_siswa
-     */
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(MstSiswa::class, 'ID_SISWA_TETAP', 'ID_SISWA_TETAP');
     }
 
-    /**
-     * Relasi ke ref_jenis_pembayaran
-     */
     public function jenisPembayaran(): BelongsTo
     {
         return $this->belongsTo(RefJenisPembayaran::class, 'ID_JENIS_PEMBAYARAN', 'ID_JENIS_PEMBAYARAN');
     }
 
-    /**
-     * Relasi ke tr_pembayaran
-     */
     public function pembayaran(): HasMany
     {
         return $this->hasMany(TrPembayaran::class, 'ID_TAGIHAN_SISWA', 'ID_TAGIHAN_SISWA');

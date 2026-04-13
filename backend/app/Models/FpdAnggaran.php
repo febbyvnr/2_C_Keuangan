@@ -32,6 +32,6 @@ class FpdAnggaran extends Model
 
     public function programKerja(): BelongsTo
     {
-        return $this->belongsTo(ProgramKerja::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
+        return $this->belongsTo(MstProgramKerja::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
 }
