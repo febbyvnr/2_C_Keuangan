@@ -14,6 +14,7 @@ class LaporanPenerimaanExport implements WithEvents
     protected $start, $end, $sumberDana;
     protected $total = 0;
     protected $rowCount = 0;
+    protected $role = null; 
 
     public function __construct($start, $end, $sumberDana)
     {
@@ -175,37 +176,6 @@ class LaporanPenerimaanExport implements WithEvents
                 $footerRow = $totalRow + 6;
 
 
-                $sheet->mergeCells("B$footerRow:C$footerRow"); // Bendahara
-                $sheet->mergeCells("D$footerRow:E$footerRow"); // Kepsek
-
-                $sheet->mergeCells("B" . ($footerRow+5) . ":C" . ($footerRow+5));
-                $sheet->mergeCells("B" . ($footerRow+6) . ":C" . ($footerRow+6));
-
-                $sheet->mergeCells("D" . ($footerRow+5) . ":E" . ($footerRow+5));
-                $sheet->mergeCells("D" . ($footerRow+6) . ":E" . ($footerRow+6));
-
-
-                $sheet->setCellValue("B$footerRow", 'Bendahara');
-                $sheet->setCellValue("D$footerRow", 'Kepala Sekolah');
-
-
-                $sheet->setCellValue("B" . ($footerRow+5), 'Rina Putri, S.E.');
-                $sheet->setCellValue("B" . ($footerRow+6), 'NIP: 1987654321');
-
-                $sheet->setCellValue("D" . ($footerRow+5), 'Drs. Budi Santoso');
-                $sheet->setCellValue("D" . ($footerRow+6), 'NIP: 1976543210');
-
-
-                $sheet->getStyle("B$footerRow:B" . ($footerRow+6))
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("D$footerRow:D" . ($footerRow+6))
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-
-                $sheet->getStyle("B$footerRow")->getFont()->setBold(true);
-                $sheet->getStyle("D$footerRow")->getFont()->setBold(true);
-
                 // =====================
                 // TANGGAL 
                 // =====================
@@ -213,6 +183,15 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $sheet->getStyle("E" . ($footerRow+11))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                
+                // =====================
+                // BY ROLE 
+                // =====================
+                $sheet->setCellValue("E" . ($footerRow+13), 'By: ' . ($this->role ?? ''));
+
+                $sheet->getStyle("E" . ($footerRow+13))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // FREEZE
                 $sheet->freezePane("A7");
