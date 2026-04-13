@@ -17,11 +17,12 @@ class LaporanPenerimaanExport implements WithEvents
     protected $rowCount = 0;
     protected $role = 'Bendahara'; 
 
-    public function __construct($start, $end, $sumberDana)
+    public function __construct($start, $end, $sumberDana, $role = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
+        $this->role = $role ?? 'Bendahara';
     }
 
     public function collection()
