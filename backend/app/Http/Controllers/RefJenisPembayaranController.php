@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RefJenisPembayaranController extends Controller
 {
-    // READ ALL
+    
     public function index()
     {
         try {
@@ -30,7 +30,7 @@ class RefJenisPembayaranController extends Controller
         }
     }
 
-    // CREATE
+    
     public function store(Request $request)
     {
         try {
@@ -58,7 +58,7 @@ class RefJenisPembayaranController extends Controller
         }
     }
 
-    // UPDATE
+    
     public function update(Request $request, $id)
     {
         try {
@@ -85,7 +85,7 @@ class RefJenisPembayaranController extends Controller
     }
 
 
-    // DELETE
+    
     public function destroy($id)
     {
         try {
@@ -104,7 +104,7 @@ class RefJenisPembayaranController extends Controller
         }
     }
 
-    // SEARCH
+    
     public function search(Request $request)
     {
         try {

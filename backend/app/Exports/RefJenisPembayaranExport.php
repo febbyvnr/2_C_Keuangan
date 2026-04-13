@@ -51,15 +51,15 @@ class RefJenisPembayaranExport implements
     public function columnWidths(): array
     {
         return [
-            'A' => 8,   // No (kecil)
-            'B' => 10,  // ID (compact)
-            'C' => 30,  // Deskripsi (cukup panjang)
+            'A' => 8,   
+            'B' => 10,  
+            'C' => 30,  
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        // HEADER
+        
         $sheet->getStyle('A1:C1')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -85,13 +85,13 @@ class RefJenisPembayaranExport implements
                 $sheet = $event->sheet;
                 $highestRow = $sheet->getHighestRow();
 
-                // BORDER
+                
                 $sheet->getStyle("A1:C{$highestRow}")
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle('thin');
 
-                // ZEBRA
+                
                 for ($i = 2; $i <= $highestRow; $i++) {
                     if ($i % 2 == 0) {
                         $sheet->getStyle("A{$i}:C{$i}")
@@ -102,14 +102,14 @@ class RefJenisPembayaranExport implements
                     }
                 }
 
-                // ALIGNMENT
+                
                 $sheet->getStyle('A')->getAlignment()->setHorizontal('center');
                 $sheet->getStyle('B')->getAlignment()->setHorizontal('center');
 
-                // WRAP TEXT (biar deskripsi panjang gak keluar)
+                
                 $sheet->getStyle('C')->getAlignment()->setWrapText(true);
 
-                // FREEZE HEADER
+                
                 $sheet->freezePane('A2');
             },
         ];
