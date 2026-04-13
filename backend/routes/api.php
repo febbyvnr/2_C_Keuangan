@@ -17,8 +17,13 @@ use App\Http\Controllers\RefPmController;
 use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
+use App\Http\Controllers\EvaluasiRktController;
+use App\Http\Controllers\TagihanSiswaController;
+use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
+
 use Termwind\Components\Raw;
+use App\Http\Controllers\RkaController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -27,7 +32,13 @@ Route::get('/user', function (Request $request) {
 Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
     Route::get('/parents', [MstCoaController::class, 'parents']);
-    Route::get('/{id}', [MstCoaController::class, 'show']);
+
+    Route::get('/export', [MstCoaController::class, 'export']);
+    Route::get('/export/excel', [MstCoaController::class, 'exportExcel']);
+    Route::get('/export/csv', [MstCoaController::class, 'exportCsv']);
+    Route::get('/export/pdf', [MstCoaController::class, 'exportPdf']);
+
+    Route::get('/{id}', [MstCoaController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstCoaController::class, 'store']);
     Route::put('/update/{id}', [MstCoaController::class, 'update']);
     Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
@@ -37,7 +48,13 @@ Route::prefix('coa')->group(function () {
 Route::prefix('kegiatan')->group(function () {
     Route::get('/', [MstKegiatanController::class, 'index']);
     Route::get('/parents', [MstKegiatanController::class, 'parents']);
-    Route::get('/{id}', [MstKegiatanController::class, 'show']);
+
+    Route::get('/export', [MstKegiatanController::class, 'export']);
+    Route::get('/export/excel', [MstKegiatanController::class, 'exportExcel']);
+    Route::get('/export/csv', [MstKegiatanController::class, 'exportCsv']);
+    Route::get('/export/pdf', [MstKegiatanController::class, 'exportPdf']);
+
+    Route::get('/{id}', [MstKegiatanController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstKegiatanController::class, 'store']);
     Route::put('/update/{id}', [MstKegiatanController::class, 'update']);
     Route::delete('/delete/{id}', [MstKegiatanController::class, 'destroy']);
@@ -90,7 +107,10 @@ Route::prefix('ref-tan')->group(function () {
 
 Route::prefix('rkt')->group(function () {
     Route::get('/', [MstProgramKerjaController::class, 'index']);
-    Route::get('/{id}', [MstProgramKerjaController::class, 'show']);
+
+    Route::get('/export/excel', [MstProgramKerjaController::class, 'exportExcel']);
+
+    Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstProgramKerjaController::class, 'store']);
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update']);
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy']);
@@ -108,6 +128,7 @@ Route::prefix('dtl-fpd')->group(function () {
 Route::prefix('fpd-anggaran')->group(function () {
     Route::get('/', [FpdAnggaranController::class, 'index']);
     Route::get('/search', [FpdAnggaranController::class, 'search']);
+    Route::get('/export/{id}', [FpdAnggaranController::class, 'export']);
     Route::get('/{id}', [FpdAnggaranController::class, 'show']);
     Route::post('/store', [FpdAnggaranController::class, 'store']);
     Route::put('/update/{id}', [FpdAnggaranController::class, 'update']);
@@ -160,7 +181,53 @@ Route::prefix('tarif')->group(function () {
     Route::delete('/delete', [RefTarifController::class, 'destroy']);
 });
 
-Route::prefix('jenis-pembayaran')->group(function () {
+Route::prefix('evaluasi-rkt/export')->group(function () {
+    Route::get('/excel', [EvaluasiRktController::class, 'exportExcel']);
+    Route::get('/csv', [EvaluasiRktController::class, 'exportCsv']);
+    Route::get('/pdf', [EvaluasiRktController::class, 'exportPdf']);
+});
+
+Route::prefix('evaluasi-rkt')->group(function () {
+    Route::get('/', [EvaluasiRktController::class, 'index']);
+    Route::get('/search', [EvaluasiRktController::class, 'search']);
+    Route::get('/{id}', [EvaluasiRktController::class, 'show']);
+    Route::post('/store', [EvaluasiRktController::class, 'store']);
+    Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
+    Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
+});
+
+Route::prefix('tagihan-siswa')->group(function () {
+    Route::get('/', [TagihanSiswaController::class, 'index']);
+    Route::get('/search', [TagihanSiswaController::class, 'search']);
+
+    Route::get('/export', [TagihanSiswaController::class, 'export']);
+    Route::get('/export/excel', [TagihanSiswaController::class, 'exportExcel']);
+    Route::get('/export/csv', [TagihanSiswaController::class, 'exportCsv']);
+    Route::get('/export/pdf', [TagihanSiswaController::class, 'exportPdf']);
+
+    Route::get('/{id}', [TagihanSiswaController::class, 'show']);
+
+    Route::post('/store', [TagihanSiswaController::class, 'store']);
+    Route::put('/update/{id}', [TagihanSiswaController::class, 'update']);
+    Route::delete('/delete/{id}', [TagihanSiswaController::class, 'destroy']);
+});
+
+Route::prefix('laporan')->group(function () {
+    Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
+
+});
+
+Route::prefix('rka')->group(function () {
+    Route::get('/', [RkaController::class, 'index']);
+    Route::get('/search', [RkaController::class, 'search']);
+    Route::get('/{id}', [RkaController::class, 'show']);
+    Route::post('/store', [RkaController::class, 'store']);
+    Route::put('/update/{id}', [RkaController::class, 'update']);
+    Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
+});
+
+  
+ Route::prefix('jenis-pembayaran')->group(function () {
     Route::get('/', [RefJenisPembayaranController::class, 'index']);
     Route::post('/', [RefJenisPembayaranController::class, 'store']);
     Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);
@@ -168,4 +235,4 @@ Route::prefix('jenis-pembayaran')->group(function () {
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
     
     Route::get('/export', [RefJenisPembayaranController::class, 'export']);
-});
+}); 

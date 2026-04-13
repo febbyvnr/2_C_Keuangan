@@ -10,6 +10,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 
+use App\Exports\MstCoaExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+
 class MstCoaController extends Controller
 {
     /**
@@ -365,6 +369,104 @@ class MstCoaController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function export(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstCoa::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('KODE_COA', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('KODE_COA', $search)
+                ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $filename = 'mst_coa_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID_MASTER_COA',
+                'MST_ID_MASTER_COA',
+                'KODE_COA',
+                'DESKRIPSI_COA',
+                'PARENT_KODE_COA',
+                'PARENT_DESKRIPSI_COA',
+                'IS_DELETE',
+            ]);
+
+            foreach ($data as $item) {
+                fputcsv($handle, [
+                    $item->ID_MASTER_COA,
+                    $item->MST_ID_MASTER_COA,
+                    $item->KODE_COA,
+                    $item->DESKRIPSI_COA,
+                    optional($item->parent)->KODE_COA,
+                    optional($item->parent)->DESKRIPSI_COA,
+                    $item->IS_DELETE,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstCoaExport($filters), 'mst_coa.xlsx');
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstCoaExport($filters), 'mst_coa.csv');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstCoa::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('KODE_COA', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('KODE_COA', $search)
+                ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $pdf = Pdf::loadView('exports.mst_coa_pdf', compact('data'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('mst_coa.pdf');
     }
 
     /**
