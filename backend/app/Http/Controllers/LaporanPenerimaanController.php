@@ -18,6 +18,13 @@ class LaporanPenerimaanController extends Controller
         $type = $request->type;
         $role = $request->role ?? null; 
 
+        //VALIDASI BENDAHARA
+          if ($type == 'excel' && $role && $role !== 'Bendahara') {
+        return response()->json([
+            'message' => 'Hanya Bendahara yang boleh generate laporan'
+        ], 403);
+    }
+
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
