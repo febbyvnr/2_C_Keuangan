@@ -16,9 +16,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MstCoaController extends Controller
 {
-    /**
-     * Menampilkan daftar COA root beserta child aktif
-     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -59,9 +56,6 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menampilkan detail COA
-     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -98,10 +92,6 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menambahkan COA baru
-     * KODE_COA digenerate otomatis berdasarkan parent
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -177,10 +167,6 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Mengubah COA
-     * Jika parent berubah, KODE_COA ikut dihitung ulang
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -226,12 +212,10 @@ class MstCoaController extends Controller
                 ]
             );
 
-            // Kalau field parent tidak dikirim, pertahankan parent lama
             $newParentId = array_key_exists('MST_ID_MASTER_COA', $validated)
                 ? $validated['MST_ID_MASTER_COA']
                 : $coa->MST_ID_MASTER_COA;
 
-            // Cegah parent = dirinya sendiri
             if (!is_null($newParentId) && (int) $newParentId === (int) $coa->ID_MASTER_COA) {
                 return response()->json([
                     'success' => false,
@@ -240,7 +224,6 @@ class MstCoaController extends Controller
                 ], 422);
             }
 
-            // Cegah circular reference
             if (
                 !is_null($newParentId) &&
                 $this->isDescendant((int) $newParentId, (int) $coa->ID_MASTER_COA)
@@ -254,7 +237,6 @@ class MstCoaController extends Controller
 
             $parentChanged = (int) ($coa->MST_ID_MASTER_COA ?? 0) !== (int) ($newParentId ?? 0);
 
-            // Kalau parent berubah dan node masih punya child aktif, tolak
             if ($parentChanged) {
                 $hasActiveChildren = $coa->children()
                     ->active()
@@ -274,7 +256,6 @@ class MstCoaController extends Controller
                 'DESKRIPSI_COA' => $validated['DESKRIPSI_COA'],
             ];
 
-            // Kalau parent berubah, generate ulang kode
             if ($parentChanged) {
                 $updateData['KODE_COA'] = $this->generateNextCoaCode($newParentId, $coa->ID_MASTER_COA);
             }
@@ -307,9 +288,6 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menghapus COA (soft delete)
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -363,36 +341,6 @@ class MstCoaController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Menampilkan semua COA aktif untuk dropdown parent
-     */
-    // public function parents(): JsonResponse
-    // {
-    //     try {
-    //         $data = MstCoa::query()
-    //             ->active()
-    //             ->orderBy('KODE_COA', 'asc')
-    //             ->get([
-    //                 'ID_MASTER_COA',
-    //                 'MST_ID_MASTER_COA',
-    //                 'KODE_COA',
-    //                 'DESKRIPSI_COA',
-    //             ]);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Data parent COA berhasil diambil',
-    //             'data' => $data,
-    //         ]);
-    //     } catch (\Throwable $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Terjadi kesalahan saat mengambil parent COA',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 
     public function parents(): JsonResponse
     {
@@ -490,12 +438,6 @@ class MstCoaController extends Controller
         return Excel::download(new MstCoaExport($filters), 'mst_coa.xlsx');
     }
 
-    public function exportCsv(Request $request)
-    {
-        $filters = $request->only(['search']);
-
-        return Excel::download(new MstCoaExport($filters), 'mst_coa.csv');
-    }
 
     public function exportPdf(Request $request)
     {
@@ -509,7 +451,7 @@ class MstCoaController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('KODE_COA', 'like', "%{$search}%")
-                  ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+                ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
             });
         }
 
@@ -521,12 +463,6 @@ class MstCoaController extends Controller
         return $pdf->download('mst_coa.pdf');
     }
 
-    /**
-     * Generate kode COA berikutnya berdasarkan parent
-     * Kalau parent null => root baru
-     * Kalau parent ada => child baru
-     * $excludeId dipakai saat update agar tidak bentrok dengan dirinya sendiri
-     */
     private function generateNextCoaCode(?int $parentId = null, ?int $excludeId = null): string
     {
         if (is_null($parentId)) {
@@ -573,9 +509,6 @@ class MstCoaController extends Controller
         return $parent->KODE_COA . '.' . $nextNumber;
     }
 
-    /**
-     * Cek apakah parentCandidate adalah turunan dari currentNodeId
-     */
     private function isDescendant(int $parentCandidateId, int $currentNodeId): bool
     {
         $current = MstCoa::query()->find($parentCandidateId);
@@ -595,9 +528,6 @@ class MstCoaController extends Controller
         return false;
     }
 
-    /**
-     * Helper untuk cek apakah COA sudah dipakai atau belum
-     */
     private function isCoaUsed(MstCoa $coa): bool
     {
         return $coa->programKerja()->exists();

@@ -31,9 +31,7 @@ Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
     Route::get('/parents', [MstCoaController::class, 'parents']);
 
-    Route::get('/export', [MstCoaController::class, 'export']);
     Route::get('/export/excel', [MstCoaController::class, 'exportExcel']);
-    Route::get('/export/csv', [MstCoaController::class, 'exportCsv']);
     Route::get('/export/pdf', [MstCoaController::class, 'exportPdf']);
 
     Route::get('/{id}', [MstCoaController::class, 'show'])->whereNumber('id');
