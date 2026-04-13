@@ -118,6 +118,8 @@
 
 <p style="text-align:right; margin-top: 40px;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+    <br><br>
+    <b>By: Bendahara</b>
 </p>
 
 </body>
