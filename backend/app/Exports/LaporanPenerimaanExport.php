@@ -173,27 +173,27 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getStartColor()->setARGB('FFFFE699');
 
                // =====================
-// FOOTER
-// =====================
-$footerRow = $totalRow + 4;
+              // FOOTER
+             // =====================
+            $footerRow = $totalRow + 4;
 
 
-// =====================
-// TANGGAL
-// =====================
-$sheet->setCellValue("E" . ($footerRow+2), 'Yogyakarta, ' . date('d F Y'));
+            // =====================
+            // TANGGAL
+            // =====================
+            $sheet->setCellValue("E" . ($footerRow+2), 'Yogyakarta, ' . date('d F Y'));
 
-$sheet->getStyle("E" . ($footerRow+2))
-    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle("E" . ($footerRow+2))
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
 
-// =====================
-// BY ROLE
-// =====================
-$sheet->setCellValue("E" . ($footerRow+3), 'By: ' . ($this->role = Auth::user()->role ?? 'Bendahara'));    
+            // =====================
+            // BY ROLE
+            // =====================
+            $sheet->setCellValue("E" . ($footerRow+3), 'By: ' . ($this->role = Auth::user()->role ?? 'Bendahara'));    
 
-$sheet->getStyle("E" . ($footerRow+3))
-    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle("E" . ($footerRow+3))
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // FREEZE
                 $sheet->freezePane("A7");
