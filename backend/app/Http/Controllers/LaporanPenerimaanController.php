@@ -21,7 +21,7 @@ class LaporanPenerimaanController extends Controller
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana),
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role),
                 'Laporan_Penerimaan.xlsx'
             );
         }
