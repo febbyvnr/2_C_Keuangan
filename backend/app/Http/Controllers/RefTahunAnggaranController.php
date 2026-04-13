@@ -57,7 +57,7 @@ class RefTahunAnggaranController extends Controller
             'IS_CURRENT' => $request->IS_CURRENT,
         ]);
 
-        return response()->json($data, 201);
+        return response()->json($data->fresh(), 201);
     }
 
     /**
