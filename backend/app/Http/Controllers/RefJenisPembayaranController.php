@@ -36,12 +36,12 @@ class RefJenisPembayaranController extends Controller
         try {
             $request->validate([
                 'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
-                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran'
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
             ]);
 
             $jenis = RefJenisPembayaran::create($request->only([
                 'ID_JENIS_PEMBAYARAN',
-                'deskripsi_jenis_pembayaran'
+                'DESKRIPSI_JENIS_PEMBAYARAN'
             ]));
 
             return response()->json([
@@ -63,12 +63,12 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'deskripsi_jenis_pembayaran' => 'required|string|unique:ref_jenis_pembayaran,deskripsi_jenis_pembayaran,
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,
                 '.$id.',ID_JENIS_PEMBAYARAN'
             ]);
 
             $jenis = RefJenisPembayaran::findOrFail($id);
-            $jenis->deskripsi_jenis_pembayaran = $request->deskripsi_jenis_pembayaran;
+            $jenis->DESKRIPSI_JENIS_PEMBAYARAN = $request->DESKRIPSI_JENIS_PEMBAYARAN;
             $jenis->save();
 
             return response()->json([
@@ -110,7 +110,7 @@ class RefJenisPembayaranController extends Controller
         try {
             $keyword = $request->input('q');
 
-            $data = RefJenisPembayaran::where('deskripsi_jenis_pembayaran', 'like', '%'.$keyword.'%')->get();
+            $data = RefJenisPembayaran::where('DESKRIPSI_JENIS_PEMBAYARAN', 'like', '%'.$keyword.'%')->get();
 
             return response()->json([
                 'success' => true,

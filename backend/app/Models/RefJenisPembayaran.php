@@ -14,6 +14,6 @@ class RefJenisPembayaran extends Model
 
     protected $fillable = [
         'ID_JENIS_PEMBAYARAN',
-        'deskripsi_jenis_pembayaran'
+        'DESKRIPSI_JENIS_PEMBAYARAN',
     ];
 }
