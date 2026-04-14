@@ -3,13 +3,19 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class SheetBKUP2Bank extends SheetBKU
+class SheetBKUP2Bank extends SheetBKU implements WithTitle
 {   
 
     public function __construct($data, $role)
     {
         parent::__construct($data, $role);
+    }
+
+    public function title(): string
+    {
+        return 'BKU (BANK)';
     }
     public function registerEvents(): array
     {
