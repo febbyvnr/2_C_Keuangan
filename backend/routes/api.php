@@ -219,7 +219,7 @@ Route::prefix('laporan')->group(function () {
 });
 
 Route::prefix('laporan')->group(function () {
-    Route::get('/penerimaan', [LaporanBukuKhasUmumController::class, 'penerimaan']);
+    Route::get('/bku', [LaporanBukuKhasUmumController::class, 'bku']);
 
 });
 
