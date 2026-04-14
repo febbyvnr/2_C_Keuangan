@@ -2,13 +2,14 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithEvents;\
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class SheetBKU implements WithEvents
+class SheetBKU implements WithEvents,withTitle
 {
     protected $data;
     protected $role;
@@ -17,6 +18,11 @@ class SheetBKU implements WithEvents
     {
         $this->data = $data;
         $this->role = $role;
+    }
+
+    public function title(): string
+    {
+        return 'BKU';
     }
 
     public function registerEvents(): array
