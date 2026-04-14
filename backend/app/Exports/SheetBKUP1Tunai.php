@@ -6,6 +6,12 @@ use Maatwebsite\Excel\Events\AfterSheet;
 
 class SheetBKUP1Tunai extends SheetBKU
 {
+
+    public function __construct($data, $role)
+    {
+        parent::__construct($data, $role);
+    }
+    
     public function registerEvents(): array
     {
         $events = parent::registerEvents();

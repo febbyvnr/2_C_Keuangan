@@ -15,7 +15,7 @@ class LaporanBukuKhasUmumController extends Controller
         $start = $request->start;
         $end = $request->end;
         $type = $request->type;
-        $role = $request->role ?? null;
+        $role = $request->role ?? 'Bendahara';
 
         // VALIDASI BENDAHARA
         if ($type == 'excel' && $role && $role !== 'Bendahara') {
@@ -108,7 +108,7 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanBukuKhasUmumExport($data, $p1, $p2),
+                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role),
                 'Laporan_BKU.xlsx'
             );
         }
@@ -124,7 +124,8 @@ class LaporanBukuKhasUmumController extends Controller
                     'p1' => $p1,
                     'p2' => $p2,
                     'start' => $start,
-                    'end' => $end
+                    'end' => $end,
+                    'role' => $role
                 ]
             );
 

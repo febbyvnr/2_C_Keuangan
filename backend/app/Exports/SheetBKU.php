@@ -11,10 +11,12 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class SheetBKU implements WithEvents
 {
     protected $data;
+    protected $role;
 
-    public function __construct($data)
+    public function __construct($data, $role = 'Bendahara')
     {
         $this->data = $data;
+        $this->role = $role;
     }
 
     public function registerEvents(): array
@@ -139,6 +141,15 @@ class SheetBKU implements WithEvents
                 $sheet->getStyle("E$totalRow:F$totalRow")->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FFFFE699');
+                
+                $footerRow = $totalRow + 2;
+
+                $sheet->setCellValue("F$footerRow", 'Yogyakarta, ' . date('d F Y'));
+                $sheet->setCellValue("F" . ($footerRow + 1), 'By: ' . $this->role);
+
+                // ALIGN RIGHT
+                $sheet->getStyle("F$footerRow:F" . ($footerRow + 1))
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // =====================
                 // FREEZE
