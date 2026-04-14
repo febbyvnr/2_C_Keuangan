@@ -2,23 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TrPm;
+use App\Models\RefVisiMisi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class TrPmController extends Controller
+class RefVisiMisiController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = TrPm::all();
+            $query = RefVisiMisi::query();
+
+            $tipe = $request->query('tipe');
+            if ($tipe !== null && $tipe !== '') {
+                $query->where('TIPE', $tipe);
+            }
+
+            $data = $query->get();
 
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
-                    ? 'Data TR PM tidak ditemukan'
-                    : 'Data TR PM berhasil diambil',
+                    ? 'Data ref visi misi tidak ditemukan'
+                    : 'Data ref visi misi berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -34,14 +41,16 @@ class TrPmController extends Controller
     {
         try {
             $keyword = trim((string) $request->query('keyword', ''));
+            $tipe = $request->query('tipe');
 
-            $query = TrPm::query();
+            $query = RefVisiMisi::query();
 
             if ($keyword !== '') {
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('DESKRIPSI_TR_PM', 'like', "%{$keyword}%")
-                      ->orWhere('TGL_PM', 'like', "%{$keyword}%");
-                });
+                $query->where('DESKRIPSI', 'like', "%{$keyword}%");
+            }
+
+            if ($tipe !== null && $tipe !== '') {
+                $query->where('TIPE', $tipe);
             }
 
             $data = $query->get();
@@ -66,7 +75,7 @@ class TrPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = TrPm::with(['programKerja', 'refPm', 'refVisiMisi'])->find($id);
+            $data = RefVisiMisi::with('trPm')->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -78,7 +87,7 @@ class TrPmController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'TR PM berhasil diambil',
+                'message' => 'Ref visi misi berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
@@ -94,19 +103,16 @@ class TrPmController extends Controller
     {
         try {
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
-                'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
-                'TGL_PM' => 'required|date',
-                'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
-                'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
-                'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
+                'TIPE' => 'required|in:Visi,Misi',
+                'DESKRIPSI' => 'required|string|max:255',
+                'IS_ACTIVE' => 'nullable|boolean',
             ]);
 
-            $data = TrPm::create($validated);
+            $data = RefVisiMisi::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'TR PM berhasil ditambahkan',
+                'message' => 'Ref visi misi berhasil ditambahkan',
                 'data' => $data,
             ], 201);
         } catch (ValidationException $e) {
@@ -128,7 +134,7 @@ class TrPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = TrPm::find($id);
+            $data = RefVisiMisi::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -139,12 +145,9 @@ class TrPmController extends Controller
             }
 
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
-                'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
-                'TGL_PM' => 'required|date',
-                'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
-                'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
-                'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
+                'TIPE' => 'required|in:Visi,Misi',
+                'DESKRIPSI' => 'required|string|max:255',
+                'IS_ACTIVE' => 'nullable|boolean',
             ]);
 
             $data->update($validated);
@@ -173,7 +176,7 @@ class TrPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = TrPm::find($id);
+            $data = RefVisiMisi::find($id);
 
             if (!$data) {
                 return response()->json([
@@ -181,6 +184,19 @@ class TrPmController extends Controller
                     'message' => 'Data tidak ditemukan',
                     'data' => null,
                 ], 404);
+            }
+
+            $usageCount = $data->trPm()->count();
+            if ($usageCount > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak dapat dihapus karena sudah dipakai dalam evaluasi PM',
+                    'data' => [
+                        'id' => $data->ID_VISI_MISI,
+                        'deskripsi' => $data->DESKRIPSI,
+                        'usage_count' => $usageCount,
+                    ],
+                ], 422);
             }
 
             $data->delete();
