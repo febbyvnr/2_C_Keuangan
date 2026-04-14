@@ -131,6 +131,8 @@ class SheetBKU implements WithEvents,withTitle
                     ->getBorders()->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
 
+                $sheet->setAutoFilter("A$headerRow:F$headerRow");
+
                 // =====================
                 // SALDO AKHIR
                 // =====================

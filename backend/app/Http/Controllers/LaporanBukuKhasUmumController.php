@@ -118,7 +118,7 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         if ($type == 'pdf') {
             $pdf = Pdf::loadView(
-                'exports.LaporanBKU_pdf',
+                'exports.LaporanBukuKhasUmum',
                 [
                     'bku' => $data,
                     'p1' => $p1,
