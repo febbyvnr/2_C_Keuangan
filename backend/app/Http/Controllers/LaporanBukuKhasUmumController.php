@@ -77,12 +77,16 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         // UNION SEMUA DATA
         // =========================
-        $data = $pembayaran
-            ->unionAll($penerimaan)
-            ->unionAll($pengeluaran)
+         $data = DB::query()
+            ->fromSub(
+                $pembayaran
+                    ->unionAll($penerimaan)
+                    ->unionAll($pengeluaran),
+                'trx'
+            )
             ->orderBy('tanggal', 'asc')
             ->get();
-
+            
         // =========================
         // HITUNG SALDO
         // =========================
