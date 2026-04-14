@@ -14,6 +14,7 @@ use App\Http\Controllers\FpdAnggaranController;
 use App\Http\Controllers\RefSumberDanaController;
 use App\Http\Controllers\TrPmController;
 use App\Http\Controllers\RefPmController;
+use App\Http\Controllers\RefVisiMisiController;
 use App\Http\Controllers\RefPenerimaanController;
 use App\Http\Controllers\TrCicilanController;
 use App\Http\Controllers\TrPembayaranController;
@@ -149,6 +150,15 @@ Route::prefix('tr-pm')->group(function () {
     Route::post('/store', [TrPmController::class, 'store']);
     Route::put('/update/{id}', [TrPmController::class, 'update']);
     Route::delete('/delete/{id}', [TrPmController::class, 'destroy']);
+});
+
+Route::prefix('ref-visi-misi')->group(function () {
+    Route::get('/', [RefVisiMisiController::class, 'index']);
+    Route::get('/search', [RefVisiMisiController::class, 'search']);
+    Route::get('/{id}', [RefVisiMisiController::class, 'show']);
+    Route::post('/store', [RefVisiMisiController::class, 'store']);
+    Route::put('/update/{id}', [RefVisiMisiController::class, 'update']);
+    Route::delete('/delete/{id}', [RefVisiMisiController::class, 'destroy']);
 });
 
 Route::prefix('ref-pm')->group(function () {
