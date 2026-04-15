@@ -133,6 +133,7 @@ Route::prefix('tr-pm')->group(function () {
 
 Route::prefix('ref-pm')->group(function () {
     Route::get('/', [RefPmController::class, 'index']);
+    Route::post('/', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
     Route::get('/{id}', [RefPmController::class, 'show']);
     Route::post('/store', [RefPmController::class, 'store']);
