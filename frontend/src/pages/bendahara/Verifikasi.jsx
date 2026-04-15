@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import "../../styles/bendahara/Persetujuan.css";
+import "../../styles/bendahara/Verifikasi.css";
 
-export default function Persetujuan() {
+export default function Verifikasi() {
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
