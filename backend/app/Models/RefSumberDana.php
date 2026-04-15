@@ -15,9 +15,16 @@ class RefSumberDana extends Model
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'ID_REF_DANA',
+        'REF_ID_REF_DANA',
+        'DESKRIPSI_SUMBER_DANA',
+    ];
+
     protected $casts = [
         'ID_REF_DANA' => 'integer',
         'REF_ID_REF_DANA' => 'integer',
+        'DESKRIPSI_SUMBER_DANA' => 'string'
     ];
 
     public function dtlProgramKerja()
