@@ -31,7 +31,10 @@
   border-bottom: 2px solid #2563eb;
 }
 
-/* FILTER */
+/* ========================= */
+/* 🔥 FILTER UPGRADE */
+/* ========================= */
+
 .laporan-filter {
   background: #ffffff;
   padding: 16px;
@@ -44,15 +47,33 @@
   margin-bottom: 20px;
 }
 
+/* 🔥 TAMBAHAN: BIKIN INPUT RAPI */
+.laporan-filter div {
+  display: flex;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 🔥 TAMBAHAN: LABEL */
+.laporan-filter label {
+  margin-bottom: 4px;
+}
+
+/* 🔥 UPGRADE INPUT */
 .laporan-filter input {
   border: 1px solid #ddd;
   padding: 8px;
   border-radius: 6px;
   background: white;
   color: black;
+  font-size: 12px; /* 🔥 kecilin biar clean */
+  min-width: 140px; /* 🔥 biar ga gepeng */
 }
 
+/* ========================= */
 /* BUTTON */
+/* ========================= */
+
 .btn {
   padding: 8px 16px;
   border-radius: 6px;
@@ -71,12 +92,12 @@
 }
 
 /* ========================= */
-/* 🔥 TABLE FIX TOTAL */
+/* 🔥 TABLE */
 /* ========================= */
 
 .laporan-table {
   background: white;
-  color: black; /* 🔥 fix dark mode */
+  color: black;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -85,7 +106,7 @@
 .laporan-table table {
   width: 100%;
   border-collapse: collapse;
-  background: white; /* 🔥 fix */
+  background: white;
 }
 
 .laporan-table th {
@@ -111,13 +132,21 @@
   background: #f9fafb;
 }
 
-/* 🔥 LAST DEFENSE (kalau masih di-override) */
+/* 🔥 OPTIONAL: BIKIN BARIS SELANG SELING (LEBIH ENAK DIBACA) */
+.laporan-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* 🔥 LAST DEFENSE */
 .laporan-table * {
   color: rgb(103, 100, 100) !important;
   background-color: transparent;
 }
 
+/* ========================= */
 /* TOTAL */
+/* ========================= */
+
 .laporan-total {
   margin-top: 16px;
   text-align: right;
@@ -125,9 +154,13 @@
   color: black;
 }
 
+/* ========================= */
+/* 🔥 EXPORT BUTTON */
+/* ========================= */
+
 .laporan-actions {
   display: flex;
-  justify-content: flex-end; /* 🔥 ke kanan */
+  justify-content: flex-end;
   gap: 10px;
   margin-top: 12px;
 }
@@ -151,4 +184,56 @@
 
 .btn-export:hover {
   opacity: 0.9;
+}
+
+/* 🔥 RANGE DATE STYLE */
+.filter-range {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.range-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.range-separator {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* 🔥 RANGE DATE STYLE */
+.filter-range {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.range-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-separator {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.range-input input {
+  min-width: 140px;
+  flex-shrink: 0; /* 🔥 biar ga nyempit lalu turun */
+}
+
+.range-input {
+  display: flex !important;
+  flex-direction: row !important; /* 🔥 INI KUNCINYA */
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
 }

@@ -7,23 +7,34 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
+  // 🔥 TAMBAHAN STATE FILTER
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [sumberDana, setSumberDana] = useState("");
+
+  // 🔥 PERBAIKAN LOAD DATA (SUDAH SUPPORT FILTER)
   const loadData = () => {
-    let url = "";
+    let baseUrl = "";
 
     if (active === "Penerimaan") {
-      url = "http://127.0.0.1:8000/api/laporan/penerimaan";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
-      url = "http://127.0.0.1:8000/api/laporan/bku";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     } else {
-      console.warn("Belum ada endpoint untuk:", active);
-      setData([]);
+      setData([]); // 🔥 FIX biar ga putih kosong
       return;
     }
 
-    fetch(url)
+    // 🔥 QUERY PARAM FILTER
+    const params = new URLSearchParams({
+      start,
+      end,
+      sumber_dana: sumberDana,
+    });
+
+    fetch(`${baseUrl}?${params.toString()}`)
       .then((res) => res.json())
       .then((res) => {
-        console.log("DATA:", res); // 🔥 DEBUG
         setData(res.data || []);
       })
       .catch((err) => {
@@ -32,30 +43,44 @@ export default function Laporan() {
       });
   };
 
-  // 🔥 TAMBAHAN EXPORT EXCEL
+  // 🔥 EXPORT EXCEL SUDAH IKUT FILTER
   const handleExportExcel = () => {
-    let url = "";
+    let baseUrl = "";
 
     if (active === "Penerimaan") {
-      url = "http://127.0.0.1:8000/api/laporan/penerimaan?type=excel";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
-      url = "http://127.0.0.1:8000/api/laporan/bku?type=excel";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     }
 
-    if (url) window.open(url, "_blank");
+    const params = new URLSearchParams({
+      start,
+      end,
+      sumber_dana: sumberDana,
+      type: "excel",
+    });
+
+    if (baseUrl) window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
-  // 🔥 TAMBAHAN EXPORT PDF
+  // 🔥 EXPORT PDF SUDAH IKUT FILTER
   const handleExportPDF = () => {
-    let url = "";
+    let baseUrl = "";
 
     if (active === "Penerimaan") {
-      url = "http://127.0.0.1:8000/api/laporan/penerimaan?type=pdf";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
-      url = "http://127.0.0.1:8000/api/laporan/bku?type=pdf";
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     }
 
-    if (url) window.open(url, "_blank");
+    const params = new URLSearchParams({
+      start,
+      end,
+      sumber_dana: sumberDana,
+      type: "pdf",
+    });
+
+    if (baseUrl) window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
   useEffect(() => {
@@ -77,6 +102,35 @@ export default function Laporan() {
             {tab}
           </div>
         ))}
+      </div>
+
+      <div className="laporan-filter">
+        {/* 🔥 UBAH JADI 1 GROUP */}
+        <div className="filter-range">
+          <label>Tanggal</label>
+
+          <div className="range-input">
+            <input
+              type="date"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+            />
+
+            {/* 🔥 TANDA STRIP */}
+            <span className="range-separator">—</span>
+
+            <input
+              type="date"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* 🔥 BUTTON FILTER */}
+        <button className="btn btn-primary" onClick={loadData}>
+          Filter
+        </button>
       </div>
 
       <div className="laporan-table">
@@ -117,7 +171,6 @@ export default function Laporan() {
         </table>
       </div>
 
-      {/* 🔥 BUTTON SUDAH TERHUBUNG */}
       <div className="laporan-actions">
         <button className="btn-export excel" onClick={handleExportExcel}>
           Excel
