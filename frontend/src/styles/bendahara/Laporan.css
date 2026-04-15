@@ -89,7 +89,7 @@
 }
 
 .laporan-table th {
-  background: #f3f4f6;
+  background: #ffffff;
   text-align: left;
   padding: 12px;
   font-size: 13px;
@@ -98,6 +98,7 @@
 
 .laporan-table td {
   padding: 12px;
+  font-size: 13px;
   border-top: 1px solid #eee;
   color: #111827; /* 🔥 fix text */
 }
@@ -112,7 +113,7 @@
 
 /* 🔥 LAST DEFENSE (kalau masih di-override) */
 .laporan-table * {
-  color: black !important;
+  color: rgb(103, 100, 100) !important;
   background-color: transparent;
 }
 
