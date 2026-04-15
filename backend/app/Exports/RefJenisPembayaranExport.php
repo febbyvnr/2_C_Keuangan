@@ -35,9 +35,7 @@ class RefJenisPembayaranExport implements
         return [
             ++$this->no,
             $item->ID_JENIS_PEMBAYARAN,
-            $item->DESKRIPSI_JENIS_PEMBAYARAN
-                ?? $item->DESKRIPSI_JENIS_PEMBAYARAN 
-                ?? '-',
+            $item->DESKRIPSI_JENIS_PEMBAYARAN ?? '-',
         ];
     }
 
