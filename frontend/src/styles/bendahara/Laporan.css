@@ -1,0 +1,125 @@
+.laporan-container {
+  padding: 24px;
+  background: #f6f7f9;
+  min-height: 100vh;
+}
+
+/* TITLE */
+.laporan-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* TAB */
+.laporan-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.laporan-tab {
+  padding-bottom: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.laporan-tab.active {
+  color: #2563eb;
+  border-bottom: 2px solid #2563eb;
+}
+
+/* FILTER */
+.laporan-filter {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.laporan-filter input {
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  background: white;
+  color: black;
+}
+
+/* BUTTON */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-success {
+  background: #22c55e;
+  color: white;
+}
+
+/* ========================= */
+/* 🔥 TABLE FIX TOTAL */
+/* ========================= */
+
+.laporan-table {
+  background: white;
+  color: black; /* 🔥 fix dark mode */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.laporan-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white; /* 🔥 fix */
+}
+
+.laporan-table th {
+  background: #f3f4f6;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #374151; /* 🔥 fix text */
+}
+
+.laporan-table td {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  color: #111827; /* 🔥 fix text */
+}
+
+.laporan-table tr {
+  background: white; /* 🔥 fix */
+}
+
+.laporan-table tr:hover {
+  background: #f9fafb;
+}
+
+/* 🔥 LAST DEFENSE (kalau masih di-override) */
+.laporan-table * {
+  color: black !important;
+  background-color: transparent;
+}
+
+/* TOTAL */
+.laporan-total {
+  margin-top: 16px;
+  text-align: right;
+  font-weight: 600;
+  color: black;
+}

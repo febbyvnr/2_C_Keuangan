@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/laporan.css";
+import "../../styles/bendahara/laporan.css";
 
 export default function Laporan() {
   const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU", "Yayasan"];
@@ -7,10 +7,7 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-
-  // LOAD DATA AWAL
+  // LOAD DATA
   useEffect(() => {
     loadData();
   }, [active]);
@@ -29,23 +26,7 @@ export default function Laporan() {
 
     fetch(url)
       .then((res) => res.json())
-      .then((res) => setData(res))
-      .catch((err) => console.error(err));
-  };
-
-  // FILTER
-  const handleFilter = () => {
-    let url = "";
-
-    if (active === "Penerimaan") {
-      url = `http://localhost:8000/api/laporan/penerimaan?from=${from}&to=${to}`;
-    } else {
-      return;
-    }
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((res) => setData(res))
+      .then((res) => setData(res.data || res))
       .catch((err) => console.error(err));
   };
 
@@ -66,34 +47,7 @@ export default function Laporan() {
         ))}
       </div>
 
-      {/* FILTER */}
-      <div className="laporan-filter">
-        <div>
-          <label>Dari</label>
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label>Sampai</label>
-          <input
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-        </div>
-
-        <button className="btn btn-primary" onClick={handleFilter}>
-          Filter
-        </button>
-
-        <button className="btn btn-success">Export Excel</button>
-      </div>
-
-      {/* TABLE */}
+      {/* TABLE ONLY */}
       <div className="laporan-table">
         <table>
           <thead>
@@ -111,10 +65,14 @@ export default function Laporan() {
               data.map((item, i) => (
                 <tr key={i}>
                   <td>{i + 1}</td>
-                  <td>{item.tanggal}</td>
+                  <td>
+                    {item.tanggal
+                      ? new Date(item.tanggal).toLocaleDateString("id-ID")
+                      : "-"}
+                  </td>
                   <td>{item.jenis || "-"}</td>
                   <td>{item.uraian || item.keterangan}</td>
-                  <td>Rp {Number(item.jumlah || 0).toLocaleString("id-ID")}</td>
+                  <td>Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}</td>
                 </tr>
               ))
             ) : (
@@ -126,14 +84,6 @@ export default function Laporan() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* TOTAL */}
-      <div className="laporan-total">
-        TOTAL: Rp{" "}
-        {data
-          .reduce((acc, item) => acc + Number(item.jumlah || 0), 0)
-          .toLocaleString("id-ID")}
       </div>
     </div>
   );
