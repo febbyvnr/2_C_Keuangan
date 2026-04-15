@@ -67,7 +67,7 @@ export default function Laporan() {
                   <td>{i + 1}</td>
                   <td>
                     {item.tanggal
-                      ? new Date(item.tanggal).toLocaleDateString("id-ID")
+                      ? new Date(item.tanggal).toLocaleString("sv-SE")
                       : "-"}
                   </td>
                   <td>{item.jenis || "-"}</td>
