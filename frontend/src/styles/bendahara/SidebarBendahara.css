@@ -10,10 +10,12 @@ body {
     flex-direction: column;
     width: 220px;
     transition: transform 0.4s ease;
-    height: 100vh;
-    height: 100dvh;
     overflow: hidden;
     padding: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
 }
 
 .sidebar-menu {
@@ -23,7 +25,7 @@ body {
     flex-direction: column;
     gap: 8px;
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     overflow-x: hidden;
     padding-right: 4px;
     list-style: none;

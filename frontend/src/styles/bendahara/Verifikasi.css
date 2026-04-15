@@ -209,29 +209,33 @@ tr:hover {
 }
 
 .pagination {
-    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 6px;
+    margin-top: 16px;
 }
 
 .pagination button {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: none;
-    background: #f1f5f9;
-    color: #1e293b;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: 0.2s;
-    justify-content: center;
-    display: flex;
-    align-items: center;
+    color: #1a1a1a;
+    transition: all 0.2s ease;
 }
 
 .pagination button:hover {
-    background: #e2e8f0;
+    background-color: #f6f7f9;
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.pagination button.active {
+    background-color: #265f9c;
+    color: #ffffff;
+    border-color: #265f9c;
 }
 
 .pagination button:disabled {
@@ -241,10 +245,11 @@ tr:hover {
 
 .page-info {
     font-size: 14px;
-    color: #475569;
-    background: #f8fafc;
+    color: #585858;
+    background: #f6f7f9;
     padding: 6px 14px;
     border-radius: 10px;
+    border: 1px solid #e0e0e0;
 }
 
 .empty-state {

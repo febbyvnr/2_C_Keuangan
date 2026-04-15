@@ -180,16 +180,24 @@ export default function Verifikasi() {
                     </div>
                     <div className="pagination">
                         <button
-                            onClick={() => setCurrentPage(prev => prev - 1)}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
                         >
                             <i className="bi bi-chevron-left"></i>
                         </button>
-                        <div className="page-info">
-                            Page {currentPage} of {totalPages}
-                        </div>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={currentPage === i + 1 ? "active" : ""}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
                         <button
-                            onClick={() => setCurrentPage(prev => prev + 1)}
+                            onClick={() =>
+                                setCurrentPage(prev => Math.min(prev + 1, totalPages))
+                            }
                             disabled={currentPage === totalPages}
                         >
                             <i className="bi bi-chevron-right"></i>

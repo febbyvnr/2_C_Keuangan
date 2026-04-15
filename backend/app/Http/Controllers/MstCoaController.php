@@ -28,7 +28,7 @@ class MstCoaController extends Controller
                     }
                 ])
                 ->active()
-                ->whereNull('MST_ID_MASTER_COA')
+                // ->whereNull('MST_ID_MASTER_COA')
                 ->orderBy('KODE_COA', 'asc');
 
             if ($search !== '') {
@@ -38,7 +38,15 @@ class MstCoaController extends Controller
                 });
             }
 
-            $data = $query->get();
+            $data = $query->get()->map(function ($item) {
+                return [
+                    'ID_MASTER_COA' => $item->ID_MASTER_COA,
+                    'MST_ID_MASTER_COA' => $item->MST_ID_MASTER_COA,
+                    'KODE_COA' => $item->KODE_COA,
+                    'DESKRIPSI_COA' => $item->DESKRIPSI_COA,
+                    'is_used' => $this->isCoaUsed($item),
+                ];
+            });
 
             return response()->json([
                 'success' => true,
