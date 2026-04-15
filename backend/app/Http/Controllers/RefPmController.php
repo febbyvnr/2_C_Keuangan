@@ -114,7 +114,7 @@ class RefPmController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
+                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ]);
@@ -156,7 +156,7 @@ class RefPmController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
+                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ]);
