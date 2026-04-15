@@ -40,6 +40,7 @@ class LaporanPenerimaanController extends Controller
             ->select(
                 'p.TANGGAL_TR_PENERIMAAN as tanggal',
                 'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
+                'rd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as jumlah'
             )
