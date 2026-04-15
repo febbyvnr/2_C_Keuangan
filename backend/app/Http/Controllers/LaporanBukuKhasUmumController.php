@@ -48,7 +48,7 @@ class LaporanBukuKhasUmumController extends Controller
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as debit',
                 DB::raw('0 as kredit'),
-                DB::raw("'Bank' as metode") // asumsi BANK
+                DB::raw("'Bank' as metode") 
             );
 
         // =========================
@@ -62,7 +62,7 @@ class LaporanBukuKhasUmumController extends Controller
                 DB::raw("CONCAT('Pengeluaran - ', pk.PROGRAM_KERJA) as uraian"),
                 DB::raw('0 as debit'),
                 'd.TOTAL as kredit',
-                DB::raw("'Transfer' as metode") // asumsi BANK
+                DB::raw("'Bank' as metode") 
             );
 
         // =========================
