@@ -85,6 +85,10 @@ export default function Laporan() {
           </tbody>
         </table>
       </div>
+      <div className="laporan-actions">
+        <button className="btn-export excel">Excel</button>
+        <button className="btn-export pdf">PDF</button>
+      </div>
     </div>
   );
 }
