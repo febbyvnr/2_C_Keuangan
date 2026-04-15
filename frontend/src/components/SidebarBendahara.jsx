@@ -1,10 +1,11 @@
-import "../styles/bendahara/Sidebar.css";
+import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function SidebarBendahara() {
+    const [openMaster, setOpenMaster] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -80,52 +81,55 @@ export default function SidebarBendahara() {
                         <ul className="nav flex-column sidebar-menu">
                             <li className="nav-item">
                                 <NavLink to="/bendahara/dashboard" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Dashboard
+                                    <i className="bi bi-columns-gap"></i>Dashboard
                                 </NavLink>
                             </li>
-                            <li className="nav-item">
-                                <NavLink to="/bendahara/persetujuan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Persetujuan & Verifikasi
-                                </NavLink>
+                            <li 
+                                className="nav-item"
+                                onMouseEnter={() => setOpenMaster(true)}
+                                onMouseLeave={() => setOpenMaster(false)}
+                            >
+                                <div className="nav-link text-dark master-menu">
+                                    <i className="bi bi-database"></i>Master Data
+                                </div>
+
+                                {openMaster && (
+                                    <ul className="submenu">
+                                        <li><NavLink to="/bendahara/master/coa" className="nav-link">Master COA</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/kegiatan" className="nav-link">Master Kegiatan</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tahun-anggaran" className="nav-link">Master Tahun Anggaran</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tahun-akademik" className="nav-link">Master Tahun Akademik</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/sumber-dana" className="nav-link">Master Sumber Dana</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/ref-penerimaan" className="nav-link">Master Ref Penerimaan</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tarif" className="nav-link">Master Tarif</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/jenis-tarif" className="nav-link">Master Jenis Tarif</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/jenis-pembayaran" className="nav-link">Master Jenis Pembayaran</NavLink></li>
+                                    </ul>
+                                )}
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/bendahara/dana" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Pencairan Dana
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/bendahara/rka" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Page RKA
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/bendahara/bku" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Page BKU
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/bendahara/bkm" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Page BKM
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/bendahara/bkk" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Page BKK
+                                <NavLink to="/bendahara/penerimaan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-wallet2"></i>Penerimaan
                                 </NavLink>
                             </li>
                             <li className="nav-item">
                                 <NavLink to="/bendahara/tagihan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Tagihan Siswa
+                                    <i className="bi bi-receipt"></i>Tagihan Siswa
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to="/bendahara/tarif" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Master Tarif
+                                <NavLink to="/bendahara/verifikasi" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-file-check"></i>Verifikasi Pembayaran
                                 </NavLink>
                             </li>
                             <li className="nav-item">
                                 <NavLink to="/bendahara/laporan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    Laporan Keuangan
+                                    <i className="bi bi-file-earmark"></i>Laporan Keuangan
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink to="/bendahara/log" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-clock-history"></i>Log Aktivitas
                                 </NavLink>
                             </li>
                         </ul>
