@@ -22,9 +22,35 @@ export default function Laporan() {
     fetch(url)
       .then((res) => res.json())
       .then((res) => {
-        setData(res.data); // ✅ FIX
+        setData(res.data);
       })
       .catch((err) => console.error(err));
+  };
+
+  // 🔥 TAMBAHAN EXPORT EXCEL
+  const handleExportExcel = () => {
+    let url = "";
+
+    if (active === "Penerimaan") {
+      url = "http://127.0.0.1:8000/api/laporan/penerimaan?type=excel";
+    } else if (active === "BKU") {
+      url = "http://127.0.0.1:8000/api/laporan/bku?type=excel";
+    }
+
+    if (url) window.open(url, "_blank");
+  };
+
+  // 🔥 TAMBAHAN EXPORT PDF
+  const handleExportPDF = () => {
+    let url = "";
+
+    if (active === "Penerimaan") {
+      url = "http://127.0.0.1:8000/api/laporan/penerimaan?type=pdf";
+    } else if (active === "BKU") {
+      url = "http://127.0.0.1:8000/api/laporan/bku?type=pdf";
+    }
+
+    if (url) window.open(url, "_blank");
   };
 
   useEffect(() => {
@@ -85,9 +111,16 @@ export default function Laporan() {
           </tbody>
         </table>
       </div>
+
+      {/* 🔥 BUTTON SUDAH TERHUBUNG */}
       <div className="laporan-actions">
-        <button className="btn-export excel">Excel</button>
-        <button className="btn-export pdf">PDF</button>
+        <button className="btn-export excel" onClick={handleExportExcel}>
+          Excel
+        </button>
+
+        <button className="btn-export pdf" onClick={handleExportPDF}>
+          PDF
+        </button>
       </div>
     </div>
   );
