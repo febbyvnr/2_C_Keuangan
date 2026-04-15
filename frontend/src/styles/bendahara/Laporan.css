@@ -124,3 +124,31 @@
   font-weight: 600;
   color: black;
 }
+
+.laporan-actions {
+  display: flex;
+  justify-content: flex-end; /* 🔥 ke kanan */
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-export {
+  padding: 8px 14px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-export.excel {
+  background: #22c55e;
+}
+
+.btn-export.pdf {
+  background: #ef4444;
+}
+
+.btn-export:hover {
+  opacity: 0.9;
+}
