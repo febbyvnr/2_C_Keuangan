@@ -35,14 +35,12 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
                 'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
             ]);
 
-            $jenis = RefJenisPembayaran::create($request->only([
-                'ID_JENIS_PEMBAYARAN',
-                'DESKRIPSI_JENIS_PEMBAYARAN'
-            ]));
+            $jenis = RefJenisPembayaran::create([
+                'DESKRIPSI_JENIS_PEMBAYARAN' => $request->DESKRIPSI_JENIS_PEMBAYARAN
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -63,8 +61,9 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,
-                '.$id.',ID_JENIS_PEMBAYARAN'
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 
+                    'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,' 
+                    . $id . ',ID_JENIS_PEMBAYARAN'
             ]);
 
             $jenis = RefJenisPembayaran::findOrFail($id);
