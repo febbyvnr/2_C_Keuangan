@@ -10,6 +10,10 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 
+use App\Exports\MstKegiatanExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+
 class MstKegiatanController extends Controller
 {
     /**
@@ -368,6 +372,98 @@ class MstKegiatanController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function export(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstKegiatan::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $filename = 'mst_kegiatan_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID_KEGIATAN',
+                'MST_ID_KEGIATAN',
+                'DESKRIPSI_KEGIATAN',
+                'PARENT_DESKRIPSI_KEGIATAN',
+                'IS_DELETE',
+            ]);
+
+            foreach ($data as $item) {
+                fputcsv($handle, [
+                    $item->ID_KEGIATAN,
+                    $item->MST_ID_KEGIATAN,
+                    $item->DESKRIPSI_KEGIATAN,
+                    optional($item->parent)->DESKRIPSI_KEGIATAN,
+                    $item->IS_DELETE,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstKegiatanExport($filters), 'mst_kegiatan.xlsx');
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstKegiatanExport($filters), 'mst_kegiatan.csv');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstKegiatan::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $pdf = Pdf::loadView('exports.mst_kegiatan_pdf', compact('data'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('mst_kegiatan.pdf');
     }
 
     /**
