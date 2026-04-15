@@ -21,6 +21,7 @@ use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
+use App\Http\Controllers\JenisTarifExportController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -242,4 +243,8 @@ Route::prefix('jenis-pembayaran')->group(function () {
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
     
     Route::get('/export', [RefJenisPembayaranController::class, 'export']);
+});
+
+Route::prefix('export')->group(function () {
+    Route::get('/jenis-tarif', [JenisTarifExportController::class, 'export']);
 });
