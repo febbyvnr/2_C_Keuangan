@@ -13,7 +13,7 @@ class RefTahunAnggaran extends Model
 
     protected $primaryKey = 'ID_TA_ANGGARAN';
 
-    public $incrementing = true; 
+    public $incrementing = false; 
 
     protected $keyType = 'int'; 
 

@@ -30,7 +30,7 @@ body {
     place-items: center;
     min-width: 320px;
     min-height: 100vh;
-    background-color: #F5F6F8 !important;
+    background-color: #F6F7F9 !important;
 }
 
 h1 {
@@ -68,4 +68,10 @@ button:focus-visible {
     button {
         background-color: #f9f9f9;
     }
+}
+
+.content-wrapper {
+    flex: 1;
+    transition: all 0.4s ease;
+    min-height: 100vh;
 }
