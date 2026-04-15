@@ -50,12 +50,14 @@ Route::prefix('jenis-tarif')->group(function () {
 });
 
 Route::prefix('tarif')->group(function () {
-    Route::get('/', [RefTarifController::class, 'index']);
-    Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
-    Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
-    Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
-    Route::post('/store', [RefTarifController::class, 'store']);
-    Route::put('/update', [RefTarifController::class, 'update']);
-    Route::delete('/delete', [RefTarifController::class, 'destroy']);
+       Route::get('/', [RefTarifController::class, 'index']);
+       Route::get('/search', [RefTarifController::class, 'search']);
+       Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
+       Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
+       Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
+       Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
+       Route::post('/store', [RefTarifController::class, 'store']);
+       Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+       Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
 });
 
