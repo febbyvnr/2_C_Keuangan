@@ -224,12 +224,10 @@ Route::prefix('rka')->group(function () {
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
 });
 
-Route::prefix('tr-penerimaan')->group(function () {
-    Route::get('/', [TrPenerimaanController::class, 'index']);
-    Route::get('/search', [TrPenerimaanController::class, 'search']);
-    Route::get('/{id}', [TrPenerimaanController::class, 'show'])->whereNumber('id');
-    Route::get('/export', [TrPenerimaanController::class, 'export']);
-    Route::post('/store', [TrPenerimaanController::class, 'store']);
-    Route::put('/update/{id}', [TrPenerimaanController::class, 'update']);
-    Route::delete('/delete/{id}', [TrPenerimaanController::class, 'destroy']);
+Route::prefix('keuangan')->group(function () {
+    Route::get('/penerimaan', [TrPenerimaanController::class, 'index']);      // F85 & F86
+    Route::post('/penerimaan', [TrPenerimaanController::class, 'store']);     // F82
+    Route::put('/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
+    Route::delete('/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
+    Route::get('/penerimaan/export', [TrPenerimaanController::class, 'export']); // F87
 });
