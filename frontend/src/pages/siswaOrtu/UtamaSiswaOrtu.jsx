@@ -1,38 +1,55 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const formatRupiah = (value) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
 
   const summaryCards = [
-    { title: "Total Tagihan", value: "Rp3.500.000" },
-    { title: "Sudah Dibayar", value: "Rp1.500.000" },
-    { title: "Sisa Tagihan", value: "Rp2.000.000" },
+    { title: "Total Tagihan", value: 3500000 },
+    { title: "Sudah Dibayar", value: 1500000 },
+    { title: "Sisa Tagihan", value: 2000000 },
   ];
 
   const activeBills = [
     {
       id: 1,
       tagihan: "SPP Februari 2026",
-      totalTagihan: "Rp500.000",
-      totalBayar: "Rp0",
-      sisa: "Rp500.000",
+      totalTagihan: 500000,
+      totalBayar: 0,
+      sisa: 500000,
       status: "Belum Bayar",
     },
     {
       id: 2,
       tagihan: "SPP Januari 2026",
-      totalTagihan: "Rp500.000",
-      totalBayar: "Rp500.000",
-      sisa: "Rp0",
+      totalTagihan: 500000,
+      totalBayar: 500000,
+      sisa: 0,
       status: "Lunas",
     },
     {
       id: 3,
       tagihan: "Uang Kegiatan",
-      totalTagihan: "Rp1.000.000",
-      totalBayar: "Rp500.000",
-      sisa: "Rp500.000",
+      totalTagihan: 1000000,
+      totalBayar: 500000,
+      sisa: 500000,
+      status: "Belum Lunas",
+    },
+    {
+      id: 4,
+      tagihan: "Uang Gedung",
+      totalTagihan: 2000000,
+      totalBayar: 1000000,
+      sisa: 1000000,
       status: "Menunggu Verifikasi",
     },
   ];
@@ -42,7 +59,7 @@ function UtamaSiswaOrtu() {
       id: 1,
       tanggal: "10 Feb 2026",
       tagihan: "SPP Januari 2026",
-      nominal: "Rp500.000",
+      nominal: 500000,
       metode: "Transfer Bank",
       status: "Terverifikasi",
     },
@@ -50,7 +67,15 @@ function UtamaSiswaOrtu() {
       id: 2,
       tanggal: "05 Feb 2026",
       tagihan: "Uang Kegiatan",
-      nominal: "Rp500.000",
+      nominal: 500000,
+      metode: "Transfer Bank",
+      status: "Terverifikasi",
+    },
+    {
+      id: 3,
+      tanggal: "12 Feb 2026",
+      tagihan: "Uang Gedung",
+      nominal: 1000000,
       metode: "Transfer Bank",
       status: "Menunggu Verifikasi",
     },
@@ -72,6 +97,8 @@ function UtamaSiswaOrtu() {
       className += " success";
     } else if (status === "Belum Bayar") {
       className += " danger";
+    } else if (status === "Belum Lunas") {
+      className += " info";
     } else if (status === "Menunggu Verifikasi") {
       className += " warning";
     }
@@ -79,7 +106,7 @@ function UtamaSiswaOrtu() {
     return <span className={className}>{status}</span>;
   };
 
-  const renderActionButton = (status) => {
+  const renderActionButton = (status, id) => {
     if (status === "Lunas") {
       return (
         <button className="action-btn action-btn-disabled" disabled>
@@ -96,7 +123,29 @@ function UtamaSiswaOrtu() {
       );
     }
 
-    return <button className="action-btn action-btn-pay">Bayar</button>;
+    if (status === "Belum Bayar" || status === "Belum Lunas") {
+      return (
+        <button
+          className="action-btn action-btn-pay"
+          onClick={() => navigate(`/siswa-ortu/pembayaran/${id}`)}
+        >
+          Bayar
+        </button>
+      );
+    }
+
+    return null;
+  };
+
+  const handlePayNow = () => {
+    const unpaidBill = activeBills.find(
+      (item) =>
+        item.status === "Belum Bayar" || item.status === "Belum Lunas"
+    );
+
+    if (unpaidBill) {
+      navigate(`/siswa-ortu/pembayaran/${unpaidBill.id}`);
+    }
   };
 
   return (
@@ -132,10 +181,25 @@ function UtamaSiswaOrtu() {
 
             {isProfileOpen && (
               <div className="profile-dropdown">
-                <button type="button" className="dropdown-item">
+                <button
+                  type="button"
+                  className="dropdown-item"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    navigate("/siswa-ortu/profile");
+                  }}
+                >
                   Lihat Profile
                 </button>
-                <button type="button" className="dropdown-item logout-item">
+
+                <button
+                  type="button"
+                  className="dropdown-item logout-item"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    navigate("/");
+                  }}
+                >
                   Logout
                 </button>
               </div>
@@ -146,17 +210,19 @@ function UtamaSiswaOrtu() {
         <section className="hero-card">
           <div>
             <p className="hero-label">Total Sisa Tagihan Bulan Ini</p>
-            <h2 className="hero-value">Rp 350.000</h2>
+            <h2 className="hero-value">{formatRupiah(350000)}</h2>
           </div>
 
-          <button className="hero-button">Bayar Sekarang</button>
+          <button className="hero-button" onClick={handlePayNow}>
+            Bayar Sekarang
+          </button>
         </section>
 
         <section className="summary-grid">
-          {summaryCards.map((card, index) => (
-            <div className="summary-card" key={index}>
+          {summaryCards.map((card) => (
+            <div className="summary-card" key={card.title}>
               <p className="summary-title">{card.title}</p>
-              <h3 className="summary-value">{card.value}</h3>
+              <h3 className="summary-value">{formatRupiah(card.value)}</h3>
             </div>
           ))}
         </section>
@@ -187,11 +253,11 @@ function UtamaSiswaOrtu() {
                       <tr key={item.id}>
                         <td>{index + 1}</td>
                         <td>{item.tagihan}</td>
-                        <td>{item.totalTagihan}</td>
-                        <td>{item.totalBayar}</td>
-                        <td>{item.sisa}</td>
+                        <td>{formatRupiah(item.totalTagihan)}</td>
+                        <td>{formatRupiah(item.totalBayar)}</td>
+                        <td>{formatRupiah(item.sisa)}</td>
                         <td>{renderStatusBadge(item.status)}</td>
-                        <td>{renderActionButton(item.status)}</td>
+                        <td>{renderActionButton(item.status, item.id)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -223,7 +289,7 @@ function UtamaSiswaOrtu() {
                         <td>{index + 1}</td>
                         <td>{item.tanggal}</td>
                         <td>{item.tagihan}</td>
-                        <td>{item.nominal}</td>
+                        <td>{formatRupiah(item.nominal)}</td>
                         <td>{item.metode}</td>
                         <td>{renderStatusBadge(item.status)}</td>
                       </tr>

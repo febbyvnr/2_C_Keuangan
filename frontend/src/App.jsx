@@ -54,6 +54,8 @@ import Tarif from "./pages/bendahara/Tarif";
 import Laporan from "./pages/bendahara/Laporan";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
+import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
+import ProfileSiswaOrtu from "./pages/siswaOrtu/ProfileSiswaOrtu";
 
 function BendaharaPage({ children }) {
   return (
@@ -160,6 +162,11 @@ export default function App() {
         />
 
         <Route path="/siswa-ortu/utama" element={<UtamaSiswaOrtu />} />
+        <Route
+          path="/siswa-ortu/pembayaran/:id"
+          element={<PembayaranTagihanSiswaOrtu />}
+        />
+        <Route path="/siswa-ortu/profile" element={<ProfileSiswaOrtu />} />
       </Routes>
     </BrowserRouter>
   );

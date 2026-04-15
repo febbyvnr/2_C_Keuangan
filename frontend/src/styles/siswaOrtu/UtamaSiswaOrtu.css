@@ -137,7 +137,7 @@
   color: #c62828;
 }
 
-/* Hero */
+
 .hero-card {
   background: #265f9c;
   color: #ffffff;
@@ -176,20 +176,24 @@
   white-space: nowrap;
 }
 
-/* Summary */
+
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 20px;
   margin-bottom: 24px;
 }
 
 .summary-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 24px;
+  padding: 18px 20px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .summary-title {
@@ -200,12 +204,13 @@
 
 .summary-value {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #265f9c;
+  line-height: 1.2;
 }
 
-/* Main Layout */
+
 .portal-main-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -220,7 +225,7 @@
   gap: 24px;
 }
 
-/* Cards */
+
 .content-card {
   background: #ffffff;
   border-radius: 16px;
@@ -247,7 +252,7 @@
   line-height: 1.5;
 }
 
-/* Table */
+
 .table-wrapper {
   overflow-x: auto;
 }
@@ -273,7 +278,7 @@
   font-weight: 700;
 }
 
-/* Status */
+
 .status-badge {
   display: inline-block;
   padding: 7px 12px;
@@ -298,7 +303,12 @@
   color: #9a6b00;
 }
 
-/* Buttons */
+.status-badge.info {
+  background: rgba(38, 95, 156, 0.12);
+  color: #265f9c;
+}
+
+
 .action-btn {
   border: none;
   border-radius: 10px;
@@ -326,7 +336,7 @@
   cursor: not-allowed;
 }
 
-/* Announcement */
+
 .announcement-card {
   min-height: 220px;
 }
@@ -358,16 +368,28 @@
   color: #7a5a00;
 }
 
-/* Responsive */
+
 @media (max-width: 992px) {
   .portal-header {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .portal-header-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .profile-menu {
+    flex-shrink: 0;
   }
 
   .profile-button {
-    width: 100%;
-    min-width: 100%;
+    min-width: 220px;
+    width: auto;
   }
 
   .hero-card {
@@ -380,7 +402,17 @@
   }
 
   .summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .summary-card {
+    padding: 16px 18px;
+    min-height: 96px;
+  }
+
+  .summary-value {
+    font-size: 18px;
   }
 
   .portal-main-grid {
@@ -419,38 +451,99 @@
 }
 
 @media (max-width: 576px) {
+  
   .portal-page {
     padding: 16px;
   }
 
+  .portal-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .portal-header-left {
+    flex: 1;
+    min-width: 0;
+  }
+
   .portal-title {
-    font-size: 28px;
+    font-size: 24px;
+    line-height: 1.2;
+    margin-right: 8px;
   }
 
   .portal-subtitle {
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .profile-menu {
+    position: relative;
+    flex-shrink: 0;
   }
 
   .profile-button {
-    width: 100%;
-    min-width: 100%;
-    padding: 12px 14px;
+    min-width: unset;
+    width: auto;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .profile-name {
+    font-size: 14px;
+  }
+
+  .profile-class {
+    font-size: 12px;
   }
 
   .profile-dropdown {
-    width: 100%;
+    width: 180px;
+    right: 0;
+    top: calc(100% + 8px);
   }
 
   .hero-card {
-    padding: 20px;
+    padding: 16px;
+    gap: 16px;
   }
 
   .hero-value {
-    font-size: 30px;
+    font-size: 24px;
   }
 
-  .summary-card,
-  .content-card {
-    padding: 16px;
+  .hero-button {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .summary-card {
+    padding: 14px 14px;
+    min-height: 84px;
+    border-radius: 12px;
+  }
+
+  .summary-title {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .summary-value {
+    font-size: 16px;
   }
 }
