@@ -15,7 +15,6 @@ export default function Laporan() {
     } else if (active === "BKU") {
       url = "http://127.0.0.1:8000/api/laporan/bku";
     } else {
-      // 🔥 JANGAN LANGSUNG KOSONGIN
       console.warn("Belum ada endpoint untuk:", active);
       setData([]);
       return;
