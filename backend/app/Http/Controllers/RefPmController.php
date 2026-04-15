@@ -12,7 +12,7 @@ class RefPmController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = RefPm::with(['parent', 'trPm.programKerja'])
+            $data = RefPm::with(['trPm.programKerja'])
                 ->orderBy('REF_ID_REF_PM', 'asc')
                 ->orderBy('NAMA_PM', 'asc')
                 ->get();
@@ -51,7 +51,7 @@ class RefPmController extends Controller
                 });
             }
 
-            $data = $query->with(['parent', 'trPm.programKerja'])
+            $data = $query->with(['trPm.programKerja'])
                 ->orderBy('REF_ID_REF_PM', 'asc')
                 ->orderBy('NAMA_PM', 'asc')
                 ->get();
@@ -76,7 +76,17 @@ class RefPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefPm::with(['parent', 'children', 'trPm.programKerja'])->find($id);
+            $data = RefPm::with([
+                'parent' => function ($query) {
+                    $query->select('ID_REF_PM', 'NAMA_PM', 'DESKRIPSI_PM');
+                },
+                'children' => function ($query) {
+                    $query->select('ID_REF_PM', 'REF_ID_REF_PM', 'NAMA_PM', 'DESKRIPSI_PM');
+                },
+                'trPm.programKerja' => function ($query) {
+                    $query->select('ID_PROGRAM_KERJA', 'PROGRAM_KERJA', 'INDIKATOR');
+                }
+            ])->find($id);
 
             if (!$data) {
                 return response()->json([
