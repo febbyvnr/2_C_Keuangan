@@ -7,18 +7,13 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
-  // LOAD DATA
-  useEffect(() => {
-    loadData();
-  }, [active]);
-
   const loadData = () => {
     let url = "";
 
     if (active === "Penerimaan") {
-      url = "http://localhost:8000/api/laporan/penerimaan";
+      url = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
-      url = "http://localhost:8000/api/laporan/bku";
+      url = "http://127.0.0.1:8000/api/laporan/bku";
     } else {
       setData([]);
       return;
@@ -26,15 +21,21 @@ export default function Laporan() {
 
     fetch(url)
       .then((res) => res.json())
-      .then((res) => setData(res.data || res))
+      .then((res) => {
+        setData(res.data); // ✅ FIX
+      })
       .catch((err) => console.error(err));
   };
 
-  return (
-    <div className="laporan-container">
-      <h2 className="laporan-title">Laporan</h2>
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line
+  }, [active]);
 
-      {/* TAB */}
+  return (
+    <div style={{ padding: "30px" }}>
+      <h2>Laporan</h2>
+
       <div className="laporan-tabs">
         {tabs.map((tab) => (
           <div
@@ -47,7 +48,6 @@ export default function Laporan() {
         ))}
       </div>
 
-      {/* TABLE ONLY */}
       <div className="laporan-table">
         <table>
           <thead>

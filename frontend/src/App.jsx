@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SidebarBendahara from "./components/SidebarBendahara";
 
 import Dashboard from "./pages/bendahara/Dashboard";
-import Persetujuan from "./pages/bendahara/Persetujuan";
+// import Persetujuan from "./pages/bendahara/Persetujuan";
 import Dana from "./pages/bendahara/Dana";
 import RKA from "./pages/bendahara/RKA";
 import BKU from "./pages/bendahara/BKU";
@@ -23,7 +23,7 @@ export default function App() {
           <Routes>
             <Route path="/bendahara/" element={<Dashboard />} />
             <Route path="/bendahara/dashboard" element={<Dashboard />} />
-            <Route path="/bendahara/persetujuan" element={<Persetujuan />} />
+            {/* <Route path="/bendahara/persetujuan" element={<Persetujuan />} /> */}
             <Route path="/bendahara/dana" element={<Dana />} />
             <Route path="/bendahara/rka" element={<RKA />} />
             <Route path="/bendahara/bku" element={<BKU />} />
