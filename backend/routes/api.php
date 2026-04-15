@@ -136,6 +136,7 @@ Route::prefix('ref-pm')->group(function () {
     Route::post('/', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
     Route::get('/{id}', [RefPmController::class, 'show']);
+    Route::put('/{id}', [RefPmController::class, 'update']);
     Route::post('/store', [RefPmController::class, 'store']);
     Route::put('/update/{id}', [RefPmController::class, 'update']);
     Route::delete('/delete/{id}', [RefPmController::class, 'destroy']);
