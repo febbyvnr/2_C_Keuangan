@@ -104,6 +104,9 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
 
+                // DROPDOWN FILTER
+                $sheet->setAutoFilter("A$headerRow:E$headerRow");
+
                 // WIDTH
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(15);
