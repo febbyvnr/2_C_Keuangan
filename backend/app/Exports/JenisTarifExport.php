@@ -31,7 +31,6 @@ class JenisTarifExport implements WithEvents
                 // =====================
                 $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
                 $sheet->setCellValue('A3', 'DATA JENIS TARIF');
-                $sheet->setCellValue('A4', 'Tanggal Export: ' . date('d-m-Y'));
 
                 $sheet->mergeCells('A2:B2');
                 $sheet->mergeCells('A3:B3');
