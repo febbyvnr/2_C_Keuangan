@@ -25,6 +25,7 @@ use App\Http\Controllers\RefJenisPembayaranController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
+use App\Http\Controllers\LaporanBukuKhasUmumController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -222,6 +223,11 @@ Route::prefix('tagihan-siswa')->group(function () {
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
+    
+});
+
+Route::prefix('laporan')->group(function () {
+    Route::get('/bku', [LaporanBukuKhasUmumController::class, 'bku']);
 
 });
 
