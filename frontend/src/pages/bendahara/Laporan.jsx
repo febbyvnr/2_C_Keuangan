@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/bendahara/laporan.css";
+import "../../styles/bendahara/LaporanPenerimaan.css";
 
 export default function Laporan() {
   const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU", "Yayasan"];
@@ -7,12 +7,10 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
-  // 🔥 TAMBAHAN STATE FILTER
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
 
-  // 🔥 PERBAIKAN LOAD DATA (SUDAH SUPPORT FILTER)
   const loadData = () => {
     let baseUrl = "";
 
@@ -21,11 +19,10 @@ export default function Laporan() {
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     } else {
-      setData([]); // 🔥 FIX biar ga putih kosong
+      setData([]);
       return;
     }
 
-    // 🔥 QUERY PARAM FILTER
     const params = new URLSearchParams({
       start,
       end,
@@ -43,7 +40,6 @@ export default function Laporan() {
       });
   };
 
-  // 🔥 EXPORT EXCEL SUDAH IKUT FILTER
   const handleExportExcel = () => {
     let baseUrl = "";
 
@@ -63,7 +59,6 @@ export default function Laporan() {
     if (baseUrl) window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
-  // 🔥 EXPORT PDF SUDAH IKUT FILTER
   const handleExportPDF = () => {
     let baseUrl = "";
 
@@ -104,73 +99,98 @@ export default function Laporan() {
         ))}
       </div>
 
-      <div className="laporan-filter">
-        {/* 🔥 UBAH JADI 1 GROUP */}
-        <div className="filter-range">
-          <label>Tanggal</label>
+      {/* 🔥 CONTENT */}
+      <div className="laporan-content">
+        {/* ========================= */}
+        {/* TABEL */}
+        {/* ========================= */}
+        <div style={{ flex: 1 }}>
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Jenis Penerimaan</th>
+                  <th>Uraian</th>
+                  <th>Jumlah</th>
+                </tr>
+              </thead>
 
-          <div className="range-input">
-            <input
-              type="date"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-            />
-
-            {/* 🔥 TANDA STRIP */}
-            <span className="range-separator">—</span>
-
-            <input
-              type="date"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-            />
+              <tbody>
+                {data.length > 0 ? (
+                  data.map((item, i) => (
+                    <tr key={i}>
+                      <td>{i + 1}</td>
+                      <td>
+                        {item.tanggal
+                          ? new Date(item.tanggal).toLocaleString("sv-SE")
+                          : "-"}
+                      </td>
+                      <td>{item.jenis || "-"}</td>
+                      <td>{item.uraian || item.keterangan}</td>
+                      <td>
+                        Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* 🔥 BUTTON FILTER */}
-        <button className="btn btn-primary" onClick={loadData}>
-          Filter
-        </button>
+        {/* ========================= */}
+        {/* FILTER */}
+        {/* ========================= */}
+        <div className="laporan-filter">
+          <div className="filter-range">
+            <label>Periode</label>
+
+            <div className="range-input">
+              <input
+                type="date"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+
+              <span className="range-separator">—</span>
+
+              <input
+                type="date"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="filter-sumber">
+            <label>Sumber Dana</label>
+
+            <select
+              value={sumberDana}
+              onChange={(e) => setSumberDana(e.target.value)}
+            >
+              <option value="">Semua Dana</option>
+              <option value="1">Dana Pemerintah</option>
+              <option value="2">Dana Komite Sekolah</option>
+              <option value="3">Dana Pemerintah Daerah</option>
+            </select>
+          </div>
+
+          <button className="btn btn-primary" onClick={loadData}>
+            Filter
+          </button>
+        </div>
       </div>
 
-      <div className="laporan-table">
-        <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Tanggal</th>
-              <th>Jenis Penerimaan</th>
-              <th>Uraian</th>
-              <th>Jumlah</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.length > 0 ? (
-              data.map((item, i) => (
-                <tr key={i}>
-                  <td>{i + 1}</td>
-                  <td>
-                    {item.tanggal
-                      ? new Date(item.tanggal).toLocaleString("sv-SE")
-                      : "-"}
-                  </td>
-                  <td>{item.jenis || "-"}</td>
-                  <td>{item.uraian || item.keterangan}</td>
-                  <td>Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  Tidak ada data
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
+      {/* 🔥 EXPORT PINDAH KE BAWAH */}
       <div className="laporan-actions">
         <button className="btn-export excel" onClick={handleExportExcel}>
           Excel

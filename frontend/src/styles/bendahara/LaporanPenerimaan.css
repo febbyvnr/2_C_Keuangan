@@ -32,42 +32,64 @@
 }
 
 /* ========================= */
-/* 🔥 FILTER UPGRADE */
+/* LAYOUT */
+/* ========================= */
+
+.laporan-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ========================= */
+/* 🔥 FILTER */
 /* ========================= */
 
 .laporan-filter {
+  width: 100%px;
   background: #ffffff;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 11px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
   display: flex;
-  gap: 16px;
+  flex-direction: row;
   align-items: flex-end;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  gap: 16px;
+
+  height: fit-content;
 }
 
-/* 🔥 TAMBAHAN: BIKIN INPUT RAPI */
-.laporan-filter div {
+.filter-range {
   display: flex;
-  font-size: 12px;
-  color: #6b7280;
+  flex-direction: column; /* 🔥 UBAH INI */
+  align-items: flex-start; /* 🔥 BIAR SEJAJAR */
+  gap: 10px;
+  font-size: 13px;
+  color: #62666e;
+  flex: 1;
 }
 
-/* 🔥 TAMBAHAN: LABEL */
 .laporan-filter label {
-  margin-bottom: 4px;
+  margin-bottom: 0; /* 🔥 HAPUS efek turun */
+  margin-right: 8px; /* 🔥 kasih jarak ke input */
+  font-weight: 600;
 }
 
-/* 🔥 UPGRADE INPUT */
+/* INPUT NORMAL */
 .laporan-filter input {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 8px 10px;
   border-radius: 6px;
   background: white;
   color: black;
-  font-size: 12px; /* 🔥 kecilin biar clean */
-  min-width: 140px; /* 🔥 biar ga gepeng */
+  font-size: 13px;
+}
+
+/* 🔥 BUTTON FIX */
+.laporan-filter button {
+  width: auto; /* 🔥 DIUBAH (dari 100%) */
 }
 
 /* ========================= */
@@ -79,20 +101,17 @@
   border-radius: 6px;
   cursor: pointer;
   border: none;
+  font-size: 13px;
 }
 
 .btn-primary {
   background: #2563eb;
   color: white;
-}
-
-.btn-success {
-  background: #22c55e;
-  color: white;
+  height: 38px;
 }
 
 /* ========================= */
-/* 🔥 TABLE */
+/* TABLE */
 /* ========================= */
 
 .laporan-table {
@@ -124,20 +143,15 @@
   color: #111827;
 }
 
-.laporan-table tr {
-  background: white;
-}
-
 .laporan-table tr:hover {
   background: #f9fafb;
 }
 
-/* 🔥 OPTIONAL: BIKIN BARIS SELANG SELING (LEBIH ENAK DIBACA) */
 .laporan-table tbody tr:nth-child(even) {
   background: #fafafa;
 }
 
-/* 🔥 LAST DEFENSE */
+/* OPTIONAL */
 .laporan-table * {
   color: rgb(103, 100, 100) !important;
   background-color: transparent;
@@ -155,14 +169,14 @@
 }
 
 /* ========================= */
-/* 🔥 EXPORT BUTTON */
+/* EXPORT */
 /* ========================= */
 
 .laporan-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 1px;
 }
 
 .btn-export {
@@ -186,54 +200,58 @@
   opacity: 0.9;
 }
 
-/* 🔥 RANGE DATE STYLE */
-.filter-range {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  color: #6b7280;
-}
+/* ========================= */
+/* 🔥 RANGE DATE */
+/* ========================= */
 
 .range-input {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
+  gap: 10px;
 }
 
-.range-separator {
-  font-size: 14px;
-  color: #9ca3af;
-}
-
-/* 🔥 RANGE DATE STYLE */
-.filter-range {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.range-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.range-separator {
-  font-size: 14px;
-  color: #9ca3af;
-}
-
+/* 🔥 FIX BIAR SEJAJAR */
 .range-input input {
-  min-width: 140px;
-  flex-shrink: 0; /* 🔥 biar ga nyempit lalu turun */
+  width: 120px;
+  flex-shrink: 0;
 }
 
+.range-separator {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* ========================= */
+/* 🔥 DROPDOWN SUMBER DANA */
+/* ========================= */
+
+.laporan-filter select {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  background: white;
+  color: black;
+  flex-shrink: 0;
+  width: 150px;
+}
+
+/* 🔥 FIX RANGE BIAR CENTER */
 .range-input {
-  display: flex !important;
-  flex-direction: row !important; /* 🔥 INI KUNCINYA */
   align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;
+}
+
+.filter-sumber {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #62666e;
+}
+
+.filter-sumber label {
+  margin-bottom: 8px;
+  font-weight: 600;
 }
