@@ -3,6 +3,8 @@
     background: #f1f5f9;
     min-height: 100vh;
     font-family: 'Segoe UI', sans-serif;
+    width: 100%;
+    max-width: 100%;
 }
 
 .container h2 {
@@ -13,8 +15,9 @@
 
 .grid {
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 1fr 350px;
     gap: 20px;
+    align-items: stretch;
 }
 
 .grid.single {
@@ -27,6 +30,28 @@
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+.table-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    min-height: 650px;
+}
+
+.table-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-section {
+    display: flex;
+    flex-direction: column;
 }
 
 table {
@@ -40,6 +65,8 @@ th {
     color: #64748b;
     padding: 12px;
     border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    user-select: none;
 }
 
 td {
@@ -47,6 +74,46 @@ td {
     font-size: 14px;
     color: #1e293b;
     border-bottom: 1px solid #f1f5f9;
+}
+
+td i {
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+th i {
+    font-size: 12px;
+    margin-left: 6px;
+    color: #94a3b8;
+}
+
+th:last-child,
+td:last-child {
+    text-align: center;
+    width: 80px;
+}
+
+.icon-success {
+    color: #2E7D32;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-danger {
+    color: #C62828;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-success:hover,
+.icon-danger:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
 }
 
 tr:hover {
@@ -65,6 +132,7 @@ tr:hover {
     color: white;
     font-size: 12px;
     margin-bottom: 15px;
+    width: fit-content;
 }
 
 .status-pill.success {
@@ -76,12 +144,38 @@ tr:hover {
 }
 
 .detail-section h3 {
+    font-size: 20px;
+    font-weight: 600;
     margin-bottom: 10px;
 }
 
-.detail-item {
-    margin-bottom: 10px;
-    font-size: 14px;
+.detail-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:hover {
+    background: #f8fafc;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.detail-item b {
+    color: #1e293b;
 }
 
 .bukti img,
@@ -115,26 +209,62 @@ tr:hover {
 }
 
 .pagination {
-    margin-top: 15px;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
 .pagination button {
-    padding: 6px 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     border: none;
-    border-radius: 8px;
-    background: #e2e8f0;
+    background: #f1f5f9;
+    color: #1e293b;
     cursor: pointer;
+    transition: 0.2s;
+    justify-content: center;
+    display: flex;
+    align-items: center;
 }
 
 .pagination button:hover {
-    background: #cbd5f5;
+    background: #e2e8f0;
 }
 
 .pagination button:disabled {
-    background: #e5e7eb;
+    opacity: 0.4;
     cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #475569;
+    background: #f8fafc;
+    padding: 6px 14px;
+    border-radius: 10px;
+}
+
+.empty-state {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #94a3b8;
+    text-align: center;
+    padding: 20px;
+    flex: 1;
+}
+
+.empty-state i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #cbd5f5;
+}
+
+.empty-state p {
+    font-size: 14px;
 }
