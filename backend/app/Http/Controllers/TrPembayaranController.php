@@ -12,17 +12,17 @@ class TrPembayaranController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = TrPembayaran::all();
+            $data = TrPembayaran::with([
+                'tahunAnggaran',
+                'jenisPembayaran',
+                'siswa',
+                'tagihan'
+            ])->get();
             return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data pembayaran tidak ditemukan'
-                    : 'Data pembayaran berhasil diambil',
                 'data' => $data
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage()
             ],500);
@@ -35,18 +35,14 @@ class TrPembayaranController extends Controller
             $data = TrPembayaran::find($id);
             if(!$data){
                 return response()->json([
-                    'success' => false,
                     'message' => 'Data pembayaran tidak ditemukan'
                 ],404);
             }
             return response()->json([
-                'success' => true,
-                'message' => 'Data pembayaran berhasil diambil',
                 'data' => $data
             ]);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -65,7 +61,7 @@ class TrPembayaranController extends Controller
                 'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
                 'TGL_BAYAR' => 'nullable|date',
                 'JUMLAH_BAYAR' => 'nullable|numeric',
-                'LINK_BUKTI_BAYAR' => 'string|max:255',
+                'LINK_BUKTI_BAYAR' => 'required|string|max:255',
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
             $lastId = TrPembayaran::max('ID_PEMBAYARAN');
@@ -73,19 +69,14 @@ class TrPembayaranController extends Controller
             $validated['ID_PEMBAYARAN'] = $newId;
             $data = TrPembayaran::create($validated);
             return response()->json([
-                'success'=>true,
-                'message'=>'Data pembayaran berhasil ditambahkan',
                 'data'=>$data
             ],201);
         } catch (ValidationException $e){
             return response()->json([
-                'success'=>false,
-                'message'=>'Validasi gagal',
                 'errors'=>$e->errors()
             ],422);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -121,16 +112,16 @@ class TrPembayaranController extends Controller
                 $query->where('NIP_VALIDATOR_PEMBAYARAN', 'like', '%' . $request->NIP_VALIDATOR_PEMBAYARAN . '%');
             }
             $data = $query->get();
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
             return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data tidak ditemukan'
-                    : 'Data berhasil ditemukan',
                 'data' => $data
-            ]);
+            ], 200);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan saat search',
                 'error' => $e->getMessage()
             ],500);
@@ -143,7 +134,6 @@ class TrPembayaranController extends Controller
             $data = TrPembayaran::find($id);
             if(!$data){
                 return response()->json([
-                    'success'=>false,
                     'message'=>'Data pembayaran tidak ditemukan'
                 ],404);
             }
@@ -155,24 +145,19 @@ class TrPembayaranController extends Controller
                 'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
                 'TGL_BAYAR' => 'nullable|date',
                 'JUMLAH_BAYAR' => 'nullable|numeric',
-                'LINK_BUKTI_BAYAR' => 'string|max:255',
+                'LINK_BUKTI_BAYAR' => 'required|string|max:255',
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
             $data->update($validated);
             return response()->json([
-                'success'=>true,
-                'message'=>'Data pembayaran berhasil diupdate',
                 'data'=>$data
             ]);
         } catch (ValidationException $e){
             return response()->json([
-                'success'=>false,
-                'message'=>'Validasi gagal',
                 'errors'=>$e->errors()
             ],422);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -185,18 +170,15 @@ class TrPembayaranController extends Controller
             $data = TrPembayaran::find($id);
             if(!$data){
                 return response()->json([
-                    'success'=>false,
                     'message'=>'Data pembayaran tidak ditemukan'
                 ],404);
             }
             $data->delete();
             return response()->json([
-                'success'=>true,
                 'message'=>'Data pembayaran berhasil dihapus'
             ]);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan saat menghapus data',
                 'error'=>$e->getMessage()
             ],500);

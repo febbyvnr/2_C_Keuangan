@@ -15,15 +15,10 @@ class RefPenerimaanController extends Controller
         try {
             $data = RefPenerimaan::all();
             return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data referensi penerimaan tidak ditemukan'
-                    : 'Data referensi penerimaan berhasil diambil',
                 'data' => $data
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage()
             ],500);
@@ -36,18 +31,14 @@ class RefPenerimaanController extends Controller
             $data = RefPenerimaan::find($id);
             if(!$data){
                 return response()->json([
-                    'success' => false,
                     'message' => 'Data referensi penerimaan tidak ditemukan'
                 ],404);
             }
             return response()->json([
-                'success' => true,
-                'message' => 'Data referensi penerimaan berhasil diambil',
                 'data' => $data
             ]);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -70,16 +61,14 @@ class RefPenerimaanController extends Controller
                 );
             }
             $data = $query->get();
-            return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data tidak ditemukan'
-                    : 'Data berhasil ditemukan',
-                'data' => $data
-            ]);
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+            return response()->json($data, 200);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan saat search',
                 'error' => $e->getMessage()
             ],500);
@@ -91,29 +80,22 @@ class RefPenerimaanController extends Controller
         try {
             $validated = $request->validate([
                 'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
-                'DESKRIPSI_REF_PENERIMAAN' => 'required|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
             ],[
                 'REF_ID_REF_PENERIMAAN.exists' => 'Referensi induk tidak valid',
                 'DESKRIPSI_REF_PENERIMAAN.unique' => 'Deskripsi penerimaan sudah ada'
             ]);
-            $lastId = RefPenerimaan::max('ID_REF_PENERIMAAN');
-            $newId = $lastId ? $lastId + 1 : 1;
-            $validated['ID_REF_PENERIMAAN'] = $newId;
             $data = RefPenerimaan::create($validated);
             return response()->json([
-                'success'=>true,
-                'message'=>'Data referensi penerimaan berhasil ditambahkan',
-                'data'=>$data
-            ],201);
+                'success' => true,
+                'data' => $data
+            ]);
         } catch (ValidationException $e){
             return response()->json([
-                'success'=>false,
-                'message'=>'Validasi gagal',
                 'errors'=>$e->errors()
             ],422);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -126,29 +108,25 @@ class RefPenerimaanController extends Controller
             $data = RefPenerimaan::find($id);
             if(!$data){
                 return response()->json([
-                    'success'=>false,
                     'message'=>'Data referensi penerimaan tidak ditemukan'
                 ],404);
             }
             $validated = $request->validate([
                 'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
-                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN,' . $id . ',ID_REF_PENERIMAAN'
             ]);
             $data->update($validated);
             return response()->json([
-                'success'=>true,
-                'message'=>'Data referensi penerimaan berhasil diupdate',
-                'data'=>$data
+                'success' => true,
+                'data' => $data
             ]);
         } catch (ValidationException $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Validasi gagal',
                 'errors'=>$e->errors()
             ],422);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan',
                 'error'=>$e->getMessage()
             ],500);
@@ -161,18 +139,16 @@ class RefPenerimaanController extends Controller
             $data = RefPenerimaan::find($id);
             if(!$data){
                 return response()->json([
-                    'success'=>false,
                     'message'=>'Data referensi penerimaan tidak ditemukan'
                 ],404);
             }
             $data->delete();
             return response()->json([
-                'success'=>true,
+                'success' => true,
                 'message'=>'Data referensi penerimaan berhasil dihapus'
             ]);
         } catch (\Throwable $e){
             return response()->json([
-                'success'=>false,
                 'message'=>'Terjadi kesalahan saat menghapus data',
                 'error'=>$e->getMessage()
             ],500);

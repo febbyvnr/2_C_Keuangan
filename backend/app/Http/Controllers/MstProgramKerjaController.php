@@ -10,9 +10,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 
-use App\Exports\MstProgramKerjaExport;
-use Maatwebsite\Excel\Facades\Excel;
-
 class MstProgramKerjaController extends Controller
 {
     /**
@@ -455,20 +452,6 @@ class MstProgramKerjaController extends Controller
             'NIP_PENANGGUNG_JAWAB.required' => 'NIP penanggung jawab wajib diisi.',
             'NIP_PENANGGUNG_JAWAB.max' => 'NIP penanggung jawab maksimal 20 karakter.',
         ];
-    }
-
-    public function exportExcel(Request $request)
-    {
-        $filters = $request->only([
-            'search',
-            'ID_TAN',
-            'ID_TA_ANGGARAN',
-        ]);
-
-        return Excel::download(
-            new MstProgramKerjaExport($filters),
-            'rkt.xlsx'
-        );
     }
 
     /**
