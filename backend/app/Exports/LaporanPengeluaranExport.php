@@ -124,7 +124,6 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->setCellValue("F" . $footerRow, 'Yogyakarta, ' . date('d F Y'));
                 $sheet->setCellValue("F" . ($footerRow + 1), 'Mengetahui,');
                 $sheet->setCellValue("F" . ($footerRow + 2), $this->role);
-                $sheet->setCellValue("F" . ($footerRow + 5), Auth::user()->name ?? '.......................');
                 $sheet->getStyle("F$footerRow:F" . ($footerRow + 5))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 $sheet->freezePane("A7");
