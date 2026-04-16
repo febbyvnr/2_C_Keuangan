@@ -19,6 +19,7 @@ class TrPm extends Model
         'ID_PM' => 'integer',
         'ID_PROGRAM_KERJA' => 'integer',
         'ID_REF_PM' => 'integer',
+        'ID_VISI_MISI' => 'integer',
         'TGL_PM' => 'date',
     ];
 
@@ -42,5 +43,10 @@ class TrPm extends Model
     public function refPm(): BelongsTo
     {
         return $this->belongsTo(RefPm::class, 'ID_REF_PM', 'ID_REF_PM');
+    }
+
+    public function refVisiMisi(): BelongsTo
+    {
+        return $this->belongsTo(RefVisiMisi::class, 'ID_VISI_MISI', 'ID_VISI_MISI');
     }
 }

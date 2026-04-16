@@ -14,11 +14,9 @@ class RefTarifController extends Controller
             ->get();
     }
 
-    public function show($id)
-    {
-        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])->findOrFail($id);
-    }
-
+    /**
+     * Mencari data
+     */
     public function search(Request $request)
     {
         $keyword = $request->query('keyword');
@@ -48,7 +46,10 @@ class RefTarifController extends Controller
         return response()->json($data, 201);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Mengubah Tarif
+     */
+    public function update(Request $request, $idJenisTarif, $idTaAnggaran)
     {
         $data = RefTarif::findOrFail($id);
 
@@ -63,7 +64,10 @@ class RefTarifController extends Controller
         return response()->json($data);
     }
 
-    public function destroy($id)
+    /**
+     * Menghapus Tarif
+     */
+    public function destroy($idJenisTarif, $idTaAnggaran)
     {
         $data = RefTarif::findOrFail($id);
         $data->delete();
@@ -71,30 +75,43 @@ class RefTarifController extends Controller
         return response()->json(['message' => 'Data berhasil dihapus dengan aman']);
     }
 
-    public function export()
+    /**
+     * Detail 1 data
+     */
+    public function show($idJenisTarif, $idTaAnggaran)
     {
-        $data = RefTarif::with(['jenisTarif', 'tahunAnggaran'])->get();
-        
-        $filename = "data_tarif_" . date('Ymd') . ".csv";
-        $handle = fopen('php://output', 'w');
-        
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_JENIS_TARIF', $idJenisTarif)
+            ->where('ID_TA_ANGGARAN', $idTaAnggaran)
+            ->firstOrFail();
+    }
 
-        fputcsv($handle, ['ID Tarif', 'Jenis Tarif', 'Tahun Anggaran', 'Deskripsi Tarif', 'Nominal', 'Tanggal Penetapan']);
+    public function showById($id)
+    {
+        $data = RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_JENIS_TARIF', $id)
+            ->first();
 
-        foreach ($data as $row) {
-            fputcsv($handle, [
-                $row->ID_REF_TARIF,
-                $row->jenisTarif?->DESKRIPSI_JENIS_TARIF ?? '-', 
-                $row->tahunAnggaran?->DESKRIPSI_TAHUN_ANGGARAN ?? '-',
-                $row->DESKRIPSI_TARIF ?? '-',
-                $row->NOMINAL,
-                $row->TGL_PENETAPAN,
-            ]);
+        if (!$data) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan'
+            ], 404);
         }
 
-        fclose($handle);
-        exit;
+        return response()->json($data);
+    }
+
+    public function byJenis($idJenis)
+    {
+        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_JENIS_TARIF', $idJenis)
+            ->get();
+    }
+
+    public function byTahun($idTahun)
+    {
+        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_TA_ANGGARAN', $idTahun)
+            ->get();
     }
 }

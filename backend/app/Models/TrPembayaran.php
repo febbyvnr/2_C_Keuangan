@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RefJenisPembayaran;
+use App\Models\RefTahunAnggaran;
+use App\Models\MstSiswa;
+use App\Models\TagihanSiswa;
 
 class TrPembayaran extends Model
 {
@@ -31,5 +35,41 @@ class TrPembayaran extends Model
     public function cicilan()
     {
         return $this->hasMany(TrCicilan::class, 'ID_PEMBAYARAN', 'ID_PEMBAYARAN');
+    }
+
+    public function tahunAnggaran()
+    {
+        return $this->belongsTo(
+            RefTahunAnggaran::class,
+            'KODE_TA',
+            'ID_TA_ANGGARAN'
+        );
+    }
+
+    public function jenisPembayaran()
+    {
+        return $this->belongsTo(
+            RefJenisPembayaran::class,
+            'ID_JENIS_PEMBAYARAN',
+            'ID_JENIS_PEMBAYARAN'
+        );
+    }
+
+    public function siswa()
+    {
+        return $this->belongsTo(
+            MstSiswa::class,
+            'ID_SISWA_TETAP',
+            'ID_SISWA_TETAP'
+        );
+    }
+
+    public function tagihan()
+    {
+        return $this->belongsTo(
+            TagihanSiswa::class,
+            'ID_TAGIHAN_SISWA',
+            'ID_TAGIHAN_SISWA'
+        );
     }
 }
