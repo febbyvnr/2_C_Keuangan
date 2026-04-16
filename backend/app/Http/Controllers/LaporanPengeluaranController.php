@@ -33,7 +33,7 @@ class LaporanPengeluaranController extends Controller
 
         $query = DB::table('tr_pm as tp')
             ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
-            ->join('dtl_fpd as df', 'fa.ID_DT_PROGKER', '=', 'df.ID_DT_PROGKER')
+            ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
             ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
             ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
             ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
