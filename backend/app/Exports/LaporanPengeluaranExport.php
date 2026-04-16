@@ -27,9 +27,8 @@ class LaporanPengeluaranExport implements WithEvents
 
     public function collection()
     {
-
         $query = DB::table('tr_pm as tp')
-            ->join('ref_pm as rp', 'tp.ID_PM', '=', 'rp.ID_PM')
+            ->join('ref_pm as rp', 'tp.ID_PM', '=', 'rp.ID_TR_PM')
             ->join('fpd_anggaran as fa', 'rp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
             ->join('dtl_fpd as df', 'fa.ID_DT_PROGKER', '=', 'df.ID_DT_PROGKER')
             ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
