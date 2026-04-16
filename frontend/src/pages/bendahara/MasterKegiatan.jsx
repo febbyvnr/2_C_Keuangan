@@ -113,15 +113,15 @@ export default function MasterKegiatan() {
     };
 
     return (
-        <div className="coa-container">
-            <div className="coa-header">
+        <div className="kegiatan-container">
+            <div className="kegiatan-header">
                 <h2>Master Kegiatan</h2>
                 <button className="btn-primary" onClick={() => setShowModal(true)}>
                     Tambah Kegiatan
                 </button>
             </div>
-            <div className="coa-table-wrapper">
-                <table className="coa-table">
+            <div className="kegiatan-table-wrapper">
+                <table className="kegiatan-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -158,8 +158,8 @@ export default function MasterKegiatan() {
                                             disabled={item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "COA sudah digunakan Program Kerja"
-                                                    : "Hapus COA"
+                                                    ? "Kegiatan sudah digunakan Program Kerja"
+                                                    : "Hapus Kegiatan"
                                             }
                                             onClick={() =>
                                                 handleDelete(item.ID_KEGIATAN)
