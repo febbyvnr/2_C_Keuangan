@@ -16,11 +16,19 @@ class Exp
      *
      * @param mixed $number Should be numeric, or can be an array of numbers
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string Rounded number
+     *         If an array of numbers is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function evaluate(mixed $number): array|string|float
+=======
      * @return array|float|string Rounded number
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function evaluate($number)
+>>>>>>> main
     {
         if (is_array($number)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $number);

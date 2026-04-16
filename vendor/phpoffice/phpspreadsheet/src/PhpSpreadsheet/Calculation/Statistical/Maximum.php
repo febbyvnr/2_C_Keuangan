@@ -17,17 +17,26 @@ class Maximum extends MaxMinBase
      *        MAX(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function max(mixed ...$args): float|int|string
+=======
      *
      * @return float
      */
     public static function max(...$args)
+>>>>>>> main
     {
         $returnValue = null;
 
         // Loop through arguments
         $aArgs = Functions::flattenArray($args);
         foreach ($aArgs as $arg) {
+<<<<<<< HEAD
+            if (ErrorValue::isError($arg, true)) {
+=======
             if (ErrorValue::isError($arg)) {
+>>>>>>> main
                 $returnValue = $arg;
 
                 break;
@@ -43,6 +52,10 @@ class Maximum extends MaxMinBase
         if ($returnValue === null) {
             return 0;
         }
+<<<<<<< HEAD
+        /** @var float|int|string $returnValue */
+=======
+>>>>>>> main
 
         return $returnValue;
     }
@@ -56,17 +69,26 @@ class Maximum extends MaxMinBase
      *        MAXA(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function maxA(mixed ...$args): float|int|string
+=======
      *
      * @return float
      */
     public static function maxA(...$args)
+>>>>>>> main
     {
         $returnValue = null;
 
         // Loop through arguments
         $aArgs = Functions::flattenArray($args);
         foreach ($aArgs as $arg) {
+<<<<<<< HEAD
+            if (ErrorValue::isError($arg, true)) {
+=======
             if (ErrorValue::isError($arg)) {
+>>>>>>> main
                 $returnValue = $arg;
 
                 break;
@@ -83,6 +105,10 @@ class Maximum extends MaxMinBase
         if ($returnValue === null) {
             return 0;
         }
+<<<<<<< HEAD
+        /** @var float|int|string $returnValue */
+=======
+>>>>>>> main
 
         return $returnValue;
     }

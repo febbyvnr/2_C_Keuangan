@@ -24,6 +24,19 @@ class Payments
      * @return float|string Result, or a string containing an error
      */
     public static function annuity(
+<<<<<<< HEAD
+        mixed $interestRate,
+        mixed $numberOfPeriods,
+        mixed $presentValue,
+        mixed $futureValue = 0.0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+    ): string|float {
+        $interestRate = Functions::flattenSingleValue($interestRate);
+        $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
+        $presentValue = Functions::flattenSingleValue($presentValue);
+        $futureValue = Functions::flattenSingleValue($futureValue) ?? 0.0;
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
         $interestRate,
         $numberOfPeriods,
         $presentValue,
@@ -35,6 +48,7 @@ class Payments
         $presentValue = Functions::flattenSingleValue($presentValue);
         $futureValue = ($futureValue === null) ? 0.0 : Functions::flattenSingleValue($futureValue);
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $interestRate = CashFlowValidations::validateRate($interestRate);
@@ -48,8 +62,13 @@ class Payments
 
         // Calculate
         if ($interestRate != 0.0) {
+<<<<<<< HEAD
+            return (-$futureValue - $presentValue * (1 + $interestRate) ** $numberOfPeriods)
+                / (1 + $interestRate * $type) / (((1 + $interestRate) ** $numberOfPeriods - 1) / $interestRate);
+=======
             return (-$futureValue - $presentValue * (1 + $interestRate) ** $numberOfPeriods) /
                 (1 + $interestRate * $type) / (((1 + $interestRate) ** $numberOfPeriods - 1) / $interestRate);
+>>>>>>> main
         }
 
         return (-$presentValue - $futureValue) / $numberOfPeriods;
@@ -71,6 +90,15 @@ class Payments
      * @return float|string Result, or a string containing an error
      */
     public static function interestPayment(
+<<<<<<< HEAD
+        mixed $interestRate,
+        mixed $period,
+        mixed $numberOfPeriods,
+        mixed $presentValue,
+        mixed $futureValue = 0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+    ): string|float {
+=======
         $interestRate,
         $period,
         $numberOfPeriods,
@@ -78,12 +106,17 @@ class Payments
         $futureValue = 0,
         $type = FinancialConstants::PAYMENT_END_OF_PERIOD
     ) {
+>>>>>>> main
         $interestRate = Functions::flattenSingleValue($interestRate);
         $period = Functions::flattenSingleValue($period);
         $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
         $presentValue = Functions::flattenSingleValue($presentValue);
         $futureValue = ($futureValue === null) ? 0.0 : Functions::flattenSingleValue($futureValue);
+<<<<<<< HEAD
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $interestRate = CashFlowValidations::validateRate($interestRate);

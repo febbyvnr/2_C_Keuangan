@@ -90,7 +90,6 @@ class RefSumberDanaController extends Controller
             $lastId = RefSumberDana::max('ID_REF_DANA');
             $newId = $lastId ? $lastId + 1 : 1;
             $data = RefSumberDana::create([
-                'ID_REF_DANA' => $newId,
                 'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA'],
                 'DESKRIPSI_SUMBER_DANA' => $validated['DESKRIPSI_SUMBER_DANA'],
             ]);

@@ -2,13 +2,48 @@
 
 namespace PhpOffice\PhpSpreadsheet\Writer;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+=======
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class Csv extends BaseWriter
 {
     /**
      * PhpSpreadsheet object.
+<<<<<<< HEAD
+     */
+    private Spreadsheet $spreadsheet;
+
+    /**
+     * Delimiter.
+     */
+    private string $delimiter = ',';
+
+    /**
+     * Enclosure.
+     */
+    private string $enclosure = '"';
+
+    /**
+     * Line ending.
+     */
+    private string $lineEnding = PHP_EOL;
+
+    /**
+     * Sheet index to write.
+     */
+    private int $sheetIndex = 0;
+
+    /**
+     * Whether to write a UTF8 BOM.
+     */
+    private bool $useBOM = false;
+=======
      *
      * @var Spreadsheet
      */
@@ -48,10 +83,34 @@ class Csv extends BaseWriter
      * @var bool
      */
     private $useBOM = false;
+>>>>>>> main
 
     /**
      * Whether to write a Separator line as the first line of the file
      *     sep=x.
+<<<<<<< HEAD
+     */
+    private bool $includeSeparatorLine = false;
+
+    /**
+     * Whether to write a fully Excel compatible CSV file.
+     */
+    private bool $excelCompatibility = false;
+
+    /**
+     * Output encoding.
+     */
+    private string $outputEncoding = '';
+
+    /**
+     * Whether number of columns should be allowed to vary
+     * between rows, or use a fixed range based on the max
+     * column overall.
+     */
+    private bool $variableColumns = false;
+
+    private bool $preferHyperlinkToLabel = false;
+=======
      *
      * @var bool
      */
@@ -70,6 +129,7 @@ class Csv extends BaseWriter
      * @var string
      */
     private $outputEncoding = '';
+>>>>>>> main
 
     /**
      * Create a new CSV.
@@ -93,8 +153,12 @@ class Csv extends BaseWriter
 
         $saveDebugLog = Calculation::getInstance($this->spreadsheet)->getDebugLog()->getWriteDebugLog();
         Calculation::getInstance($this->spreadsheet)->getDebugLog()->setWriteDebugLog(false);
+<<<<<<< HEAD
+        $sheet->calculateArrays($this->preCalculateFormulas);
+=======
         $saveArrayReturnType = Calculation::getArrayReturnType();
         Calculation::setArrayReturnType(Calculation::RETURN_ARRAY_AS_VALUE);
+>>>>>>> main
 
         // Open file
         $this->openFileHandle($filename);
@@ -103,7 +167,11 @@ class Csv extends BaseWriter
             $this->setUseBOM(true); //  Enforce UTF-8 BOM Header
             $this->setIncludeSeparatorLine(true); //  Set separator line
             $this->setEnclosure('"'); //  Set enclosure to "
+<<<<<<< HEAD
+            $this->setDelimiter(';'); //  Set delimiter to a semicolon
+=======
             $this->setDelimiter(';'); //  Set delimiter to a semi-colon
+>>>>>>> main
             $this->setLineEnding("\r\n");
         }
 
@@ -122,6 +190,32 @@ class Csv extends BaseWriter
         $maxRow = $sheet->getHighestDataRow();
 
         // Write rows to file
+<<<<<<< HEAD
+        $row = 0;
+        foreach ($sheet->rangeToArrayYieldRows("A1:$maxCol$maxRow", '', $this->preCalculateFormulas) as $cellsArray) {
+            ++$row;
+            if ($this->variableColumns) {
+                $column = $sheet->getHighestDataColumn($row);
+                if ($column === 'A' && !$sheet->cellExists("A$row")) {
+                    $cellsArray = [];
+                } else {
+                    array_splice($cellsArray, Coordinate::columnIndexFromString($column));
+                }
+            }
+            if ($this->preferHyperlinkToLabel) {
+                foreach ($cellsArray as $key => $value) {
+                    $url = $sheet->getCell([$key + 1, $row])->getHyperlink()->getUrl();
+                    if ($url !== '') {
+                        $cellsArray[$key] = $url;
+                    }
+                }
+            }
+            /** @var string[] $cellsArray */
+            $this->writeLine($this->fileHandle, $cellsArray);
+        }
+
+        $this->maybeCloseFileHandle();
+=======
         for ($row = 1; $row <= $maxRow; ++$row) {
             // Convert the row to an array...
             $cellsArray = $sheet->rangeToArray('A' . $row . ':' . $maxCol . $row, '', $this->preCalculateFormulas);
@@ -131,6 +225,7 @@ class Csv extends BaseWriter
 
         $this->maybeCloseFileHandle();
         Calculation::setArrayReturnType($saveArrayReturnType);
+>>>>>>> main
         Calculation::getInstance($this->spreadsheet)->getDebugLog()->setWriteDebugLog($saveDebugLog);
     }
 
@@ -244,15 +339,25 @@ class Csv extends BaseWriter
         return $this->outputEncoding;
     }
 
+<<<<<<< HEAD
+    public function setOutputEncoding(string $outputEncoding): self
+    {
+        $this->outputEncoding = $outputEncoding;
+=======
     public function setOutputEncoding(string $outputEnconding): self
     {
         $this->outputEncoding = $outputEnconding;
+>>>>>>> main
 
         return $this;
     }
 
+<<<<<<< HEAD
+    private bool $enclosureRequired = true;
+=======
     /** @var bool */
     private $enclosureRequired = true;
+>>>>>>> main
 
     public function setEnclosureRequired(bool $value): self
     {
@@ -267,6 +372,12 @@ class Csv extends BaseWriter
     }
 
     /**
+<<<<<<< HEAD
+     * Write line to CSV file.
+     *
+     * @param resource $fileHandle PHP filehandle
+     * @param string[] $values Array containing values in a row
+=======
      * Convert boolean to TRUE/FALSE; otherwise return element cast to string.
      *
      * @param mixed $element
@@ -285,6 +396,7 @@ class Csv extends BaseWriter
      *
      * @param resource $fileHandle PHP filehandle
      * @param array $values Array containing values in a row
+>>>>>>> main
      */
     private function writeLine($fileHandle, array $values): void
     {
@@ -295,7 +407,26 @@ class Csv extends BaseWriter
         $line = '';
 
         foreach ($values as $element) {
+<<<<<<< HEAD
+            if (Preg::isMatch('/^([+-])?(\d+)[.](\d+)/', $element, $matches)) {
+                // Excel will "convert" file with pop-up
+                // if there are more than 15 digits precision.
+                $whole = $matches[2];
+                if ($whole !== '0') {
+                    $wholeLen = strlen($whole);
+                    $frac = $matches[3];
+                    $maxFracLen = 15 - $wholeLen;
+                    if ($maxFracLen >= 0 && strlen($frac) > $maxFracLen) {
+                        $result = sprintf("%.{$maxFracLen}F", $element);
+                        if (str_contains($result, '.')) {
+                            $element = Preg::replace('/[.]?0+$/', '', $result); // strip trailing zeros
+                        }
+                    }
+                }
+            }
+=======
             $element = self::elementToString($element);
+>>>>>>> main
             // Add delimiter
             $line .= $delimiter;
             $delimiter = $this->delimiter;
@@ -319,8 +450,54 @@ class Csv extends BaseWriter
 
         // Write to file
         if ($this->outputEncoding != '') {
+<<<<<<< HEAD
+            $line = (string) mb_convert_encoding($line, $this->outputEncoding);
+        }
+        fwrite($fileHandle, $line);
+    }
+
+    /**
+     * Get whether number of columns should be allowed to vary
+     * between rows, or use a fixed range based on the max
+     * column overall.
+     */
+    public function getVariableColumns(): bool
+    {
+        return $this->variableColumns;
+    }
+
+    /**
+     * Set whether number of columns should be allowed to vary
+     * between rows, or use a fixed range based on the max
+     * column overall.
+     */
+    public function setVariableColumns(bool $pValue): self
+    {
+        $this->variableColumns = $pValue;
+
+        return $this;
+    }
+
+    /**
+     * Get whether hyperlink or label should be output.
+     */
+    public function getPreferHyperlinkToLabel(): bool
+    {
+        return $this->preferHyperlinkToLabel;
+    }
+
+    /**
+     * Set whether hyperlink or label should be output.
+     */
+    public function setPreferHyperlinkToLabel(bool $preferHyperlinkToLabel): self
+    {
+        $this->preferHyperlinkToLabel = $preferHyperlinkToLabel;
+
+        return $this;
+=======
             $line = mb_convert_encoding($line, $this->outputEncoding);
         }
         fwrite($fileHandle, /** @scrutinizer ignore-type */ $line);
+>>>>>>> main
     }
 }

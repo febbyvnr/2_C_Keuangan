@@ -8,8 +8,13 @@ class CodePage
 {
     public const DEFAULT_CODE_PAGE = 'CP1252';
 
+<<<<<<< HEAD
+    /** @var array<int, array<int, string>|string> */
+    private static array $pageArray = [
+=======
     /** @var array */
     private static $pageArray = [
+>>>>>>> main
         0 => 'CP1252', //    CodePage is not always correctly set when the xls file was saved by Apple's Numbers program
         367 => 'ASCII', //    ASCII
         437 => 'CP437', //    OEM US
@@ -78,7 +83,11 @@ class CodePage
      * Convert Microsoft Code Page Identifier to Code Page Name which iconv
      * and mbstring understands.
      *
+<<<<<<< HEAD
+     * @param int $codePage Microsoft Code Page Identifier
+=======
      * @param int $codePage Microsoft Code Page Indentifier
+>>>>>>> main
      *
      * @return string Code Page Name
      */
@@ -107,6 +116,10 @@ class CodePage
         throw new PhpSpreadsheetException('Unknown codepage: ' . $codePage);
     }
 
+<<<<<<< HEAD
+    /** @return array<int, array<int, string>|string> */
+=======
+>>>>>>> main
     public static function getEncodings(): array
     {
         return self::$pageArray;

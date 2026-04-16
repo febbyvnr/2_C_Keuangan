@@ -2,10 +2,20 @@
 
 namespace PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+
+class FunctionPrefix
+{
+    const XLFNREGEXP = '/(?:_xlfn\.)?((?:_xlws\.)?\b('
+        // functions added with Excel 2010
+=======
 class FunctionPrefix
 {
     const XLFNREGEXP = '/(?:_xlfn\.)?((?:_xlws\.)?\b('
             // functions added with Excel 2010
+>>>>>>> main
         . 'beta[.]dist'
         . '|beta[.]inv'
         . '|binom[.]dist'
@@ -63,6 +73,11 @@ class FunctionPrefix
         . '|var[.]s'
         . '|weibull[.]dist'
         . '|z[.]test'
+<<<<<<< HEAD
+        // probably added with Excel 2010 but not properly documented
+        . '|base'
+=======
+>>>>>>> main
         // functions added with Excel 2013
         . '|acot'
         . '|acoth'
@@ -125,6 +140,52 @@ class FunctionPrefix
         . '|switch'
         // functions added with Excel 2019
         . '|concat'
+<<<<<<< HEAD
+        . '|ifs'
+        . '|maxifs'
+        . '|minifs'
+        . '|textjoin'
+        // functions added with Excel 365
+        . '|anchorarray'
+        . '|arraytotext'
+        . '|bycol'
+        . '|byrow'
+        . '|call'
+        . '|choosecols'
+        . '|chooserows'
+        . '|drop'
+        . '|expand'
+        . '|filter'
+        . '|groupby'
+        . '|hstack'
+        . '|isomitted'
+        . '|lambda'
+        . '|let'
+        . '|makearray'
+        . '|map'
+        . '|randarray'
+        . '|reduce'
+        . '|register[.]id'
+        . '|scan'
+        . '|sequence'
+        . '|single'
+        . '|sort'
+        . '|sortby'
+        . '|take'
+        . '|textafter'
+        . '|textbefore'
+        . '|textjoin'
+        . '|textsplit'
+        . '|tocol'
+        . '|torow'
+        . '|unique'
+        . '|valuetotext'
+        . '|vstack'
+        . '|wrapcols'
+        . '|wraprows'
+        . '|xlookup'
+        . '|xmatch'
+=======
         . '|countifs'
         . '|ifs'
         . '|maxifs'
@@ -151,6 +212,7 @@ class FunctionPrefix
         . '|textbefore'
         . '|textsplit'
         . '|valuetotext'
+>>>>>>> main
         . '))\s*\(/Umui';
 
     const XLWSREGEXP = '/(?<!_xlws\.)('
@@ -164,7 +226,11 @@ class FunctionPrefix
      */
     protected static function addXlfnPrefix(string $functionString): string
     {
+<<<<<<< HEAD
+        return Preg::replace(self::XLFNREGEXP, '_xlfn.$1(', $functionString);
+=======
         return (string) preg_replace(self::XLFNREGEXP, '_xlfn.$1(', $functionString);
+>>>>>>> main
     }
 
     /**
@@ -172,7 +238,11 @@ class FunctionPrefix
      */
     protected static function addXlwsPrefix(string $functionString): string
     {
+<<<<<<< HEAD
+        return Preg::replace(self::XLWSREGEXP, '_xlws.$1(', $functionString);
+=======
         return (string) preg_replace(self::XLWSREGEXP, '_xlws.$1(', $functionString);
+>>>>>>> main
     }
 
     /**
@@ -180,6 +250,15 @@ class FunctionPrefix
      */
     public static function addFunctionPrefix(string $functionString): string
     {
+<<<<<<< HEAD
+        $functionString = Preg::replaceCallback(
+            Calculation::CALCULATION_REGEXP_CELLREF_SPILL,
+            fn (array $matches) => 'ANCHORARRAY(' . substr((string) $matches[0], 0, -1) . ')',
+            $functionString
+        );
+
+=======
+>>>>>>> main
         return self::addXlwsPrefix(self::addXlfnPrefix($functionString));
     }
 
@@ -189,6 +268,21 @@ class FunctionPrefix
      */
     public static function addFunctionPrefixStripEquals(string $functionString): string
     {
+<<<<<<< HEAD
+        $functionString = Preg::replace(
+            [
+                '/\b(CEILING|FLOOR)[.]ODS\s*[(]/',
+                '/\b(CEILING|FLOOR)[.]XCL\s*[(]/',
+            ],
+            [
+                '$1.MATH(',
+                '$1(',
+            ],
+            $functionString
+        );
+
+=======
+>>>>>>> main
         return self::addFunctionPrefix(substr($functionString, 1));
     }
 }

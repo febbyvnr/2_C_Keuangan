@@ -20,6 +20,17 @@ class ComplexOperations
      * Excel Function:
      *        IMDIV(complexDividend,complexDivisor)
      *
+<<<<<<< HEAD
+     * @param array<mixed>|string $complexDividend the complex numerator or dividend
+     *                      Or can be an array of values
+     * @param array<mixed>|string $complexDivisor the complex denominator or divisor
+     *                      Or can be an array of values
+     *
+     * @return array<mixed>|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function IMDIV(array|string $complexDividend, array|string $complexDivisor): array|string
+=======
      * @param array|string $complexDividend the complex numerator or dividend
      *                      Or can be an array of values
      * @param array|string $complexDivisor the complex denominator or divisor
@@ -30,6 +41,7 @@ class ComplexOperations
      *            with the same dimensions
      */
     public static function IMDIV($complexDividend, $complexDivisor)
+>>>>>>> main
     {
         if (is_array($complexDividend) || is_array($complexDivisor)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $complexDividend, $complexDivisor);
@@ -37,7 +49,11 @@ class ComplexOperations
 
         try {
             return (string) (new ComplexObject($complexDividend))->divideby(new ComplexObject($complexDivisor));
+<<<<<<< HEAD
+        } catch (ComplexException) {
+=======
         } catch (ComplexException $e) {
+>>>>>>> main
             return ExcelError::NAN();
         }
     }
@@ -50,6 +66,17 @@ class ComplexOperations
      * Excel Function:
      *        IMSUB(complexNumber1,complexNumber2)
      *
+<<<<<<< HEAD
+     * @param array<mixed>|string $complexNumber1 the complex number from which to subtract complexNumber2
+     *                      Or can be an array of values
+     * @param array<mixed>|string $complexNumber2 the complex number to subtract from complexNumber1
+     *                      Or can be an array of values
+     *
+     * @return array<mixed>|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function IMSUB(array|string $complexNumber1, array|string $complexNumber2): array|string
+=======
      * @param array|string $complexNumber1 the complex number from which to subtract complexNumber2
      *                      Or can be an array of values
      * @param array|string $complexNumber2 the complex number to subtract from complexNumber1
@@ -60,6 +87,7 @@ class ComplexOperations
      *            with the same dimensions
      */
     public static function IMSUB($complexNumber1, $complexNumber2)
+>>>>>>> main
     {
         if (is_array($complexNumber1) || is_array($complexNumber2)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $complexNumber1, $complexNumber2);
@@ -67,7 +95,11 @@ class ComplexOperations
 
         try {
             return (string) (new ComplexObject($complexNumber1))->subtract(new ComplexObject($complexNumber2));
+<<<<<<< HEAD
+        } catch (ComplexException) {
+=======
         } catch (ComplexException $e) {
+>>>>>>> main
             return ExcelError::NAN();
         }
     }
@@ -81,10 +113,15 @@ class ComplexOperations
      *        IMSUM(complexNumber[,complexNumber[,...]])
      *
      * @param string ...$complexNumbers Series of complex numbers to add
+<<<<<<< HEAD
+     */
+    public static function IMSUM(...$complexNumbers): string
+=======
      *
      * @return string
      */
     public static function IMSUM(...$complexNumbers)
+>>>>>>> main
     {
         // Return value
         $returnValue = new ComplexObject(0.0);
@@ -95,7 +132,11 @@ class ComplexOperations
             foreach ($aArgs as $complex) {
                 $returnValue = $returnValue->add(new ComplexObject($complex));
             }
+<<<<<<< HEAD
+        } catch (ComplexException) {
+=======
         } catch (ComplexException $e) {
+>>>>>>> main
             return ExcelError::NAN();
         }
 
@@ -111,10 +152,15 @@ class ComplexOperations
      *        IMPRODUCT(complexNumber[,complexNumber[,...]])
      *
      * @param string ...$complexNumbers Series of complex numbers to multiply
+<<<<<<< HEAD
+     */
+    public static function IMPRODUCT(...$complexNumbers): string
+=======
      *
      * @return string
      */
     public static function IMPRODUCT(...$complexNumbers)
+>>>>>>> main
     {
         // Return value
         $returnValue = new ComplexObject(1.0);
@@ -125,7 +171,11 @@ class ComplexOperations
             foreach ($aArgs as $complex) {
                 $returnValue = $returnValue->multiply(new ComplexObject($complex));
             }
+<<<<<<< HEAD
+        } catch (ComplexException) {
+=======
         } catch (ComplexException $e) {
+>>>>>>> main
             return ExcelError::NAN();
         }
 

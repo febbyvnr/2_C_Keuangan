@@ -12,6 +12,12 @@
         "spreadsheet"
     ],
     "config": {
+<<<<<<< HEAD
+        "platform": {
+            "php" : "8.1.99"
+        },
+=======
+>>>>>>> main
         "process-timeout": 600,
         "sort-packages": true,
         "allow-plugins": {
@@ -46,6 +52,33 @@
     ],
     "scripts": {
         "check": [
+<<<<<<< HEAD
+            "php bin/check-phpdoc-types.php",
+            "phpcs samples/ src/ tests/ --report=checkstyle",
+            "phpcs samples/ src/ tests/ --standard=PHPCompatibility --runtime-set testVersion 8.0- --exclude=PHPCompatibility.Variables.ForbiddenThisUseContexts -n",
+            "php-cs-fixer fix --ansi --dry-run --diff",
+            "phpstan analyse --ansi --memory-limit=2048M",
+            "phpunit --color=always"
+        ],
+        "style": [
+            "phpcs samples/ src/ tests/ --report=checkstyle",
+            "php-cs-fixer fix --ansi --dry-run --diff"
+        ],
+        "fix": [
+            "phpcbf samples/ src/ tests/ --report=checkstyle",
+            "php-cs-fixer fix"
+        ],
+        "versions": [
+            "phpcs samples/ src/ tests/ --standard=PHPCompatibility --runtime-set testVersion 8.0- --exclude=PHPCompatibility.Variables.ForbiddenThisUseContexts -n"
+        ]
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-ctype": "*",
+        "ext-dom": "*",
+        "ext-fileinfo": "*",
+        "ext-filter": "*",
+=======
             "phpcs src/ tests/ --report=checkstyle",
             "phpcs --report-width=200 samples/ src/ tests/ --ignore=samples/Header.php --standard=PHPCompatibility --runtime-set testVersion 7.4- -n",
             "php-cs-fixer fix --ansi --dry-run --diff",
@@ -69,6 +102,7 @@
         "ext-ctype": "*",
         "ext-dom": "*",
         "ext-fileinfo": "*",
+>>>>>>> main
         "ext-gd": "*",
         "ext-iconv": "*",
         "ext-libxml": "*",
@@ -80,13 +114,29 @@
         "ext-zip": "*",
         "ext-zlib": "*",
         "composer/pcre": "^1||^2||^3",
+<<<<<<< HEAD
+=======
         "ezyang/htmlpurifier": "^4.15",
+>>>>>>> main
         "maennchen/zipstream-php": "^2.1 || ^3.0",
         "markbaker/complex": "^3.0",
         "markbaker/matrix": "^3.0",
         "psr/simple-cache": "^1.0 || ^2.0 || ^3.0"
     },
     "require-dev": {
+<<<<<<< HEAD
+        "ext-intl": "*",
+        "dealerdirect/phpcodesniffer-composer-installer": "dev-main",
+        "dompdf/dompdf": "^2.0 || ^3.0",
+        "friendsofphp/php-cs-fixer": "^3.2",
+        "mitoteam/jpgraph": "^10.5",
+        "mpdf/mpdf": "^8.1.1",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpstan/phpstan": "^1.1 || ^2.0",
+        "phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
+        "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
+        "phpunit/phpunit": "^10.5",
+=======
         "dealerdirect/phpcodesniffer-composer-installer": "dev-main",
         "doctrine/instantiator": "^1.5",
         "dompdf/dompdf": "^1.0 || ^2.0 || ^3.0",
@@ -97,11 +147,16 @@
         "phpstan/phpstan": "^1.1",
         "phpstan/phpstan-phpunit": "^1.0",
         "phpunit/phpunit": "^8.5 || ^9.0",
+>>>>>>> main
         "squizlabs/php_codesniffer": "^3.7",
         "tecnickcom/tcpdf": "^6.5"
     },
     "suggest": {
+<<<<<<< HEAD
+        "ext-intl": "PHP Internationalization Functions, required for NumberFormat Wizard and StringHelper::setLocale()",
+=======
         "ext-intl": "PHP Internationalization Functions",
+>>>>>>> main
         "mpdf/mpdf": "Option for rendering PDF with PDF Writer",
         "dompdf/dompdf": "Option for rendering PDF with PDF Writer",
         "tecnickcom/tcpdf": "Option for rendering PDF with PDF Writer",

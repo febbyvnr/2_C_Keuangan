@@ -24,7 +24,11 @@ class Selection
      *
      * @return mixed The selected value
      */
+<<<<<<< HEAD
+    public static function choose(mixed $chosenEntry, mixed ...$chooseArgs): mixed
+=======
     public static function choose($chosenEntry, ...$chooseArgs)
+>>>>>>> main
     {
         if (is_array($chosenEntry)) {
             return self::evaluateArrayArgumentsSubset([self::class, __FUNCTION__], 1, $chosenEntry, ...$chooseArgs);
@@ -37,7 +41,11 @@ class Selection
         } else {
             return ExcelError::VALUE();
         }
+<<<<<<< HEAD
+        $chosenEntry = (int) floor($chosenEntry);
+=======
         $chosenEntry = floor($chosenEntry);
+>>>>>>> main
         if (($chosenEntry < 0) || ($chosenEntry > $entryCount)) {
             return ExcelError::VALUE();
         }

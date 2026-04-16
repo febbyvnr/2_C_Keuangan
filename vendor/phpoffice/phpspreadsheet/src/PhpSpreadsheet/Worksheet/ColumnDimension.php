@@ -7,17 +7,35 @@ use PhpOffice\PhpSpreadsheet\Helper\Dimension as CssDimension;
 
 class ColumnDimension extends Dimension
 {
+<<<<<<< HEAD
+    public const EXCEL_MAX_WIDTH = 255.0;
+
+    /**
+     * Column index.
+     */
+    private ?string $columnIndex;
+=======
     /**
      * Column index.
      *
      * @var ?string
      */
     private $columnIndex;
+>>>>>>> main
 
     /**
      * Column width.
      *
      * When this is set to a negative value, the column width should be ignored by IWriter
+<<<<<<< HEAD
+     */
+    private float $width = -1;
+
+    /**
+     * Auto size?
+     */
+    private bool $autoSize = false;
+=======
      *
      * @var float
      */
@@ -29,13 +47,18 @@ class ColumnDimension extends Dimension
      * @var bool
      */
     private $autoSize = false;
+>>>>>>> main
 
     /**
      * Create a new ColumnDimension.
      *
      * @param ?string $index Character column index
      */
+<<<<<<< HEAD
+    public function __construct(?string $index = 'A')
+=======
     public function __construct($index = 'A')
+>>>>>>> main
     {
         // Initialise values
         $this->columnIndex = $index;
@@ -95,6 +118,14 @@ class ColumnDimension extends Dimension
             : (new CssDimension((string) $this->width))->toUnit($unitOfMeasure);
     }
 
+<<<<<<< HEAD
+    public function getWidthForOutput(bool $restrictMax): float
+    {
+        return ($restrictMax && $this->width > self::EXCEL_MAX_WIDTH) ? self::EXCEL_MAX_WIDTH : $this->width;
+    }
+
+=======
+>>>>>>> main
     /**
      * Set Width.
      *
@@ -106,7 +137,11 @@ class ColumnDimension extends Dimension
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setWidth(float $width, ?string $unitOfMeasure = null): static
+=======
     public function setWidth(float $width, ?string $unitOfMeasure = null)
+>>>>>>> main
     {
         $this->width = ($unitOfMeasure === null || $width < 0)
             ? $width
@@ -128,7 +163,11 @@ class ColumnDimension extends Dimension
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setAutoSize(bool $autosizeEnabled): static
+=======
     public function setAutoSize(bool $autosizeEnabled)
+>>>>>>> main
     {
         $this->autoSize = $autosizeEnabled;
 

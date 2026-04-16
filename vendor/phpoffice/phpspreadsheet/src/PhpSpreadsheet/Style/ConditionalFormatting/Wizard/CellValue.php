@@ -36,16 +36,27 @@ class CellValue extends WizardAbstract implements WizardInterface
 
     protected const RANGE_OPERATORS = CellMatcher::COMPARISON_RANGE_OPERATORS;
 
+<<<<<<< HEAD
+    protected string $operator = Conditional::OPERATOR_EQUAL;
+
+    /** @var array<int|string> */
+    protected array $operand = [0];
+=======
     /** @var string */
     protected $operator = Conditional::OPERATOR_EQUAL;
 
     /** @var array */
     protected $operand = [0];
+>>>>>>> main
 
     /**
      * @var string[]
      */
+<<<<<<< HEAD
+    protected array $operandValueType = [];
+=======
     protected $operandValueType = [];
+>>>>>>> main
 
     public function __construct(string $cellRange)
     {
@@ -61,15 +72,27 @@ class CellValue extends WizardAbstract implements WizardInterface
         $this->operator = $operator;
     }
 
+<<<<<<< HEAD
+    protected function operand(int $index, mixed $operand, string $operandValueType = Wizard::VALUE_TYPE_LITERAL): void
+=======
     /**
      * @param mixed $operand
      */
     protected function operand(int $index, $operand, string $operandValueType = Wizard::VALUE_TYPE_LITERAL): void
+>>>>>>> main
     {
         if (is_string($operand)) {
             $operand = $this->validateOperand($operand, $operandValueType);
         }
 
+<<<<<<< HEAD
+        $this->operand[$index] = $operand; //* @phpstan-ignore-line
+        $this->operandValueType[$index] = $operandValueType;
+    }
+
+    /** @param null|bool|float|int|string $value value to be wrapped */
+    protected function wrapValue(mixed $value, string $operandValueType): float|int|string
+=======
         $this->operand[$index] = $operand;
         $this->operandValueType[$index] = $operandValueType;
     }
@@ -80,6 +103,7 @@ class CellValue extends WizardAbstract implements WizardInterface
      * @return float|int|string
      */
     protected function wrapValue($value, string $operandValueType)
+>>>>>>> main
     {
         if (!is_numeric($value) && !is_bool($value) && null !== $value) {
             if ($operandValueType === Wizard::VALUE_TYPE_LITERAL) {
@@ -117,7 +141,11 @@ class CellValue extends WizardAbstract implements WizardInterface
 
     protected static function unwrapString(string $condition): string
     {
+<<<<<<< HEAD
+        if ((str_starts_with($condition, '"')) && (str_starts_with(strrev($condition), '"'))) {
+=======
         if ((strpos($condition, '"') === 0) && (strpos(strrev($condition), '"') === 0)) {
+>>>>>>> main
             $condition = substr($condition, 1, -1);
         }
 
@@ -146,8 +174,13 @@ class CellValue extends WizardAbstract implements WizardInterface
                     $operandValueType = Wizard::VALUE_TYPE_CELL;
                     $condition = self::reverseAdjustCellRef($condition, $cellRange);
                 } elseif (
+<<<<<<< HEAD
+                    preg_match('/\(\)/', $condition)
+                    || preg_match('/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/i', $condition)
+=======
                     preg_match('/\(\)/', $condition) ||
                     preg_match('/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/i', $condition)
+>>>>>>> main
                 ) {
                     $operandValueType = Wizard::VALUE_TYPE_FORMULA;
                     $condition = self::reverseAdjustCellRef($condition, $cellRange);
@@ -162,10 +195,16 @@ class CellValue extends WizardAbstract implements WizardInterface
     }
 
     /**
+<<<<<<< HEAD
+     * @param mixed[] $arguments
+     */
+    public function __call(string $methodName, array $arguments): self
+=======
      * @param string $methodName
      * @param mixed[] $arguments
      */
     public function __call($methodName, $arguments): self
+>>>>>>> main
     {
         if (!isset(self::MAGIC_OPERATIONS[$methodName]) && $methodName !== 'and') {
             throw new Exception('Invalid Operator for Cell Value CF Rule Wizard');
@@ -176,6 +215,9 @@ class CellValue extends WizardAbstract implements WizardInterface
                 throw new Exception('AND Value is only appropriate for range operators');
             }
 
+<<<<<<< HEAD
+            $this->operand(1, ...$arguments);
+=======
             // Scrutinizer ignores its own suggested workaround.
             //$this->operand(1, /** @scrutinizer ignore-type */ ...$arguments);
             if (count($arguments) < 2) {
@@ -183,6 +225,7 @@ class CellValue extends WizardAbstract implements WizardInterface
             } else {
                 $this->operand(1, $arguments[0], $arguments[1]);
             }
+>>>>>>> main
 
             return $this;
         }
@@ -192,7 +235,13 @@ class CellValue extends WizardAbstract implements WizardInterface
         if (count($arguments) < 2) {
             $this->operand(0, $arguments[0]);
         } else {
+<<<<<<< HEAD
+            /** @var string */
+            $arg1 = $arguments[1];
+            $this->operand(0, $arguments[0], $arg1);
+=======
             $this->operand(0, $arguments[0], $arguments[1]);
+>>>>>>> main
         }
 
         return $this;

@@ -2,8 +2,11 @@
 
 namespace PhpOffice\PhpSpreadsheet\Shared;
 
+<<<<<<< HEAD
+=======
 use GdImage;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
+>>>>>>> main
 use SimpleXMLElement;
 
 class Drawing
@@ -13,9 +16,15 @@ class Drawing
      *
      * @param int $pixelValue Value in pixels
      *
+<<<<<<< HEAD
+     * @return float|int Value in EMU
+     */
+    public static function pixelsToEMU(int $pixelValue): int|float
+=======
      * @return int Value in EMU
      */
     public static function pixelsToEMU($pixelValue)
+>>>>>>> main
     {
         return $pixelValue * 9525;
     }
@@ -27,7 +36,11 @@ class Drawing
      *
      * @return int Value in pixels
      */
+<<<<<<< HEAD
+    public static function EMUToPixels($emuValue): int
+=======
     public static function EMUToPixels($emuValue)
+>>>>>>> main
     {
         $emuValue = (int) $emuValue;
         if ($emuValue != 0) {
@@ -46,22 +59,40 @@ class Drawing
      *
      * @return float|int Value in cell dimension
      */
+<<<<<<< HEAD
+    public static function pixelsToCellDimension(int $pixelValue, \PhpOffice\PhpSpreadsheet\Style\Font $defaultFont): int|float
+=======
     public static function pixelsToCellDimension($pixelValue, \PhpOffice\PhpSpreadsheet\Style\Font $defaultFont)
+>>>>>>> main
     {
         // Font name and size
         $name = $defaultFont->getName();
         $size = $defaultFont->getSize();
+<<<<<<< HEAD
+        $sizex = ($size !== null && $size == (int) $size) ? ((int) $size) : "$size";
+
+        if (isset(Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex])) {
+            // Exact width can be determined
+            return $pixelValue * Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex]['width']
+                / Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex]['px'];
+=======
 
         if (isset(Font::$defaultColumnWidths[$name][$size])) {
             // Exact width can be determined
             return $pixelValue * Font::$defaultColumnWidths[$name][$size]['width']
                 / Font::$defaultColumnWidths[$name][$size]['px'];
+>>>>>>> main
         }
 
         // We don't have data for this particular font and size, use approximation by
         // extrapolating from Calibri 11
+<<<<<<< HEAD
+        return $pixelValue * 11 * Font::DEFAULT_COLUMN_WIDTHS['Calibri'][11]['width']
+            / Font::DEFAULT_COLUMN_WIDTHS['Calibri'][11]['px'] / $size;
+=======
         return $pixelValue * 11 * Font::$defaultColumnWidths['Calibri'][11]['width']
             / Font::$defaultColumnWidths['Calibri'][11]['px'] / $size;
+>>>>>>> main
     }
 
     /**
@@ -72,11 +103,28 @@ class Drawing
      *
      * @return int Value in pixels
      */
+<<<<<<< HEAD
+    public static function cellDimensionToPixels(float $cellWidth, \PhpOffice\PhpSpreadsheet\Style\Font $defaultFont): int
+=======
     public static function cellDimensionToPixels($cellWidth, \PhpOffice\PhpSpreadsheet\Style\Font $defaultFont)
+>>>>>>> main
     {
         // Font name and size
         $name = $defaultFont->getName();
         $size = $defaultFont->getSize();
+<<<<<<< HEAD
+        $sizex = ($size !== null && $size == (int) $size) ? ((int) $size) : "$size";
+
+        if (isset(Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex])) {
+            // Exact width can be determined
+            $colWidth = $cellWidth * Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex]['px']
+                / Font::DEFAULT_COLUMN_WIDTHS[$name][$sizex]['width'];
+        } else {
+            // We don't have data for this particular font and size, use approximation by
+            // extrapolating from Calibri 11
+            $colWidth = $cellWidth * $size * Font::DEFAULT_COLUMN_WIDTHS['Calibri'][11]['px']
+                / Font::DEFAULT_COLUMN_WIDTHS['Calibri'][11]['width'] / 11;
+=======
 
         if (isset(Font::$defaultColumnWidths[$name][$size])) {
             // Exact width can be determined
@@ -87,6 +135,7 @@ class Drawing
             // extrapolating from Calibri 11
             $colWidth = $cellWidth * $size * Font::$defaultColumnWidths['Calibri'][11]['px']
                 / Font::$defaultColumnWidths['Calibri'][11]['width'] / 11;
+>>>>>>> main
         }
 
         // Round pixels to closest integer
@@ -102,7 +151,11 @@ class Drawing
      *
      * @return float Value in points
      */
+<<<<<<< HEAD
+    public static function pixelsToPoints(int $pixelValue): float
+=======
     public static function pixelsToPoints($pixelValue)
+>>>>>>> main
     {
         return $pixelValue * 0.75;
     }
@@ -110,6 +163,15 @@ class Drawing
     /**
      * Convert points to pixels.
      *
+<<<<<<< HEAD
+     * @param float|int $pointValue Value in points
+     *
+     * @return int Value in pixels
+     */
+    public static function pointsToPixels($pointValue): int
+    {
+        return (int) ceil($pointValue / 0.75);
+=======
      * @param int $pointValue Value in points
      *
      * @return int Value in pixels
@@ -121,6 +183,7 @@ class Drawing
         }
 
         return 0;
+>>>>>>> main
     }
 
     /**
@@ -130,7 +193,11 @@ class Drawing
      *
      * @return int Angle
      */
+<<<<<<< HEAD
+    public static function degreesToAngle(int $degrees): int
+=======
     public static function degreesToAngle($degrees)
+>>>>>>> main
     {
         return (int) round($degrees * 60000);
     }
@@ -142,7 +209,11 @@ class Drawing
      *
      * @return int Degrees
      */
+<<<<<<< HEAD
+    public static function angleToDegrees($angle): int
+=======
     public static function angleToDegrees($angle)
+>>>>>>> main
     {
         $angle = (int) $angle;
         if ($angle != 0) {
@@ -151,6 +222,8 @@ class Drawing
 
         return 0;
     }
+<<<<<<< HEAD
+=======
 
     /**
      * Create a new image from file. By alexander at alexauto dot nl.
@@ -174,4 +247,5 @@ class Drawing
 
         return $retVal;
     }
+>>>>>>> main
 }

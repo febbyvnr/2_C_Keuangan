@@ -24,7 +24,7 @@ abstract class GammaBase
             return self::incompleteGamma($a, $value / $b) / self::gammaValue($a);
         }
 
-        return (1 / ($b ** $a * self::gammaValue($a))) * $value ** ($a - 1) * exp(0 - ($value / $b));
+        return (1 / ($b ** $a * self::gammaValue($a))) * $value ** ($a - 1) * exp(-($value / $b));
     }
 
     /** @return float|string */

@@ -13,7 +13,11 @@ class RelsRibbon extends WriterPart
      *
      * @return string XML Output
      */
+<<<<<<< HEAD
+    public function writeRibbonRelationships(Spreadsheet $spreadsheet): string
+=======
     public function writeRibbonRelationships(Spreadsheet $spreadsheet)
+>>>>>>> main
     {
         // Create XML writer
         $objWriter = null;
@@ -35,6 +39,10 @@ class RelsRibbon extends WriterPart
                 $objWriter->startElement('Relationship');
                 $objWriter->writeAttribute('Id', $aId);
                 $objWriter->writeAttribute('Type', Namespaces::IMAGE);
+<<<<<<< HEAD
+                /** @var string $aTarget */
+=======
+>>>>>>> main
                 $objWriter->writeAttribute('Target', $aTarget);
                 $objWriter->endElement();
             }

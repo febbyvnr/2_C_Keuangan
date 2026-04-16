@@ -6,8 +6,12 @@ use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 
 class OLERead
 {
+<<<<<<< HEAD
+    private string $data = '';
+=======
     /** @var string */
     private $data = '';
+>>>>>>> main
 
     // Size of a sector = 512 bytes
     const BIG_BLOCK_SIZE = 0x200;
@@ -22,12 +26,21 @@ class OLERead
     const SMALL_BLOCK_THRESHOLD = 0x1000;
 
     // header offsets
+<<<<<<< HEAD
+    const NUM_BIG_BLOCK_DEPOT_BLOCKS_POS = 0x2C;
+    const ROOT_START_BLOCK_POS = 0x30;
+    const SMALL_BLOCK_DEPOT_BLOCK_POS = 0x3C;
+    const EXTENSION_BLOCK_POS = 0x44;
+    const NUM_EXTENSION_BLOCK_POS = 0x48;
+    const BIG_BLOCK_DEPOT_BLOCKS_POS = 0x4C;
+=======
     const NUM_BIG_BLOCK_DEPOT_BLOCKS_POS = 0x2c;
     const ROOT_START_BLOCK_POS = 0x30;
     const SMALL_BLOCK_DEPOT_BLOCK_POS = 0x3c;
     const EXTENSION_BLOCK_POS = 0x44;
     const NUM_EXTENSION_BLOCK_POS = 0x48;
     const BIG_BLOCK_DEPOT_BLOCKS_POS = 0x4c;
+>>>>>>> main
 
     // property storage offsets (directory offsets)
     const SIZE_OF_NAME_POS = 0x40;
@@ -35,6 +48,34 @@ class OLERead
     const START_BLOCK_POS = 0x74;
     const SIZE_POS = 0x78;
 
+<<<<<<< HEAD
+    public ?int $wrkbook = null;
+
+    public ?int $summaryInformation = null;
+
+    public ?int $documentSummaryInformation = null;
+
+    private int $numBigBlockDepotBlocks;
+
+    private int $rootStartBlock;
+
+    private int $sbdStartBlock;
+
+    private int $extensionBlock;
+
+    private int $numExtensionBlocks;
+
+    private string $bigBlockChain;
+
+    private string $smallBlockChain;
+
+    private string $entry;
+
+    private int $rootentry;
+
+    /** @var mixed[][] */
+    private array $props = [];
+=======
     /** @var int */
     public $wrkbook;
 
@@ -93,6 +134,7 @@ class OLERead
      * @var array
      */
     private $props = [];
+>>>>>>> main
 
     /**
      * Read the file.
@@ -106,7 +148,11 @@ class OLERead
         $this->data = (string) file_get_contents($filename, false, null, 0, 8);
 
         // Check OLE identifier
+<<<<<<< HEAD
+        $identifierOle = pack('CCCCCCCC', 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1);
+=======
         $identifierOle = pack('CCCCCCCC', 0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1);
+>>>>>>> main
         if ($this->data != $identifierOle) {
             throw new ReaderException('The filename ' . $filename . ' is not recognised as an OLE file');
         }
@@ -188,12 +234,17 @@ class OLERead
 
     /**
      * Extract binary stream data.
+<<<<<<< HEAD
+     */
+    public function getStream(?int $stream): ?string
+=======
      *
      * @param ?int $stream
      *
      * @return null|string
      */
     public function getStream($stream)
+>>>>>>> main
     {
         if ($stream === null) {
             return null;
@@ -202,8 +253,16 @@ class OLERead
         $streamData = '';
 
         if ($this->props[$stream]['size'] < self::SMALL_BLOCK_THRESHOLD) {
+<<<<<<< HEAD
+            /** @var int */
+            $temp = $this->props[$this->rootentry]['startBlock'];
+            $rootdata = $this->readData($temp);
+
+            /** @var int */
+=======
             $rootdata = $this->readData($this->props[$this->rootentry]['startBlock']);
 
+>>>>>>> main
             $block = $this->props[$stream]['startBlock'];
 
             while ($block != -2) {
@@ -215,8 +274,15 @@ class OLERead
 
             return $streamData;
         }
+<<<<<<< HEAD
+        /** @var int */
+        $temp = $this->props[$stream]['size'];
+        $numBlocks = $temp / self::BIG_BLOCK_SIZE;
+        if ($temp % self::BIG_BLOCK_SIZE != 0) {
+=======
         $numBlocks = $this->props[$stream]['size'] / self::BIG_BLOCK_SIZE;
         if ($this->props[$stream]['size'] % self::BIG_BLOCK_SIZE != 0) {
+>>>>>>> main
             ++$numBlocks;
         }
 
@@ -224,6 +290,10 @@ class OLERead
             return '';
         }
 
+<<<<<<< HEAD
+        /** @var int */
+=======
+>>>>>>> main
         $block = $this->props[$stream]['startBlock'];
 
         while ($block != -2) {
@@ -242,7 +312,11 @@ class OLERead
      *
      * @return string Data for standard stream
      */
+<<<<<<< HEAD
+    private function readData(int $block): string
+=======
     private function readData($block)
+>>>>>>> main
     {
         $data = '';
 
@@ -262,7 +336,11 @@ class OLERead
     {
         $offset = 0;
 
+<<<<<<< HEAD
+        // loop through entries, each entry is 128 bytes
+=======
         // loop through entires, each entry is 128 bytes
+>>>>>>> main
         $entryLen = strlen($this->entry);
         while ($offset < $entryLen) {
             // entry data (128 bytes)
@@ -316,6 +394,10 @@ class OLERead
 
     /**
      * Read 4 bytes of data at specified position.
+<<<<<<< HEAD
+     */
+    private static function getInt4d(string $data, int $pos): int
+=======
      *
      * @param string $data
      * @param int $pos
@@ -323,6 +405,7 @@ class OLERead
      * @return int
      */
     private static function getInt4d($data, $pos)
+>>>>>>> main
     {
         if ($pos < 0) {
             // Invalid position

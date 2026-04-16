@@ -4,11 +4,27 @@ namespace PhpOffice\PhpSpreadsheet\Reader\Csv;
 
 class Delimiter
 {
+<<<<<<< HEAD
+    protected const POTENTIAL_DELIMITERS = [',', ';', "\t", '|', ':', ' ', '~'];
+=======
     protected const POTENTIAL_DELIMETERS = [',', ';', "\t", '|', ':', ' ', '~'];
+>>>>>>> main
 
     /** @var resource */
     protected $fileHandle;
 
+<<<<<<< HEAD
+    protected string $escapeCharacter;
+
+    protected string $enclosure;
+
+    /** @var array<string, int[]> */
+    protected array $counts = [];
+
+    protected int $numberLines = 0;
+
+    protected ?string $delimiter = null;
+=======
     /** @var string */
     protected $escapeCharacter;
 
@@ -23,6 +39,7 @@ class Delimiter
 
     /** @var ?string */
     protected $delimiter;
+>>>>>>> main
 
     /**
      * @param resource $fileHandle
@@ -38,7 +55,11 @@ class Delimiter
 
     public function getDefaultDelimiter(): string
     {
+<<<<<<< HEAD
+        return self::POTENTIAL_DELIMITERS[0];
+=======
         return self::POTENTIAL_DELIMETERS[0];
+>>>>>>> main
     }
 
     public function linesCounted(): int
@@ -48,8 +69,13 @@ class Delimiter
 
     protected function countPotentialDelimiters(): void
     {
+<<<<<<< HEAD
+        $this->counts = array_fill_keys(self::POTENTIAL_DELIMITERS, []);
+        $delimiterKeys = array_flip(self::POTENTIAL_DELIMITERS);
+=======
         $this->counts = array_fill_keys(self::POTENTIAL_DELIMETERS, []);
         $delimiterKeys = array_flip(self::POTENTIAL_DELIMETERS);
+>>>>>>> main
 
         // Count how many times each of the potential delimiters appears in each line
         $this->numberLines = 0;
@@ -58,6 +84,17 @@ class Delimiter
         }
     }
 
+<<<<<<< HEAD
+    /** @param array<string, int> $delimiterKeys */
+    protected function countDelimiterValues(string $line, array $delimiterKeys): void
+    {
+        $splitString = mb_str_split($line, 1, 'UTF-8');
+        $distribution = array_count_values($splitString);
+        $countLine = array_intersect_key($distribution, $delimiterKeys);
+
+        foreach (self::POTENTIAL_DELIMITERS as $delimiter) {
+            $this->counts[$delimiter][] = $countLine[$delimiter] ?? 0;
+=======
     protected function countDelimiterValues(string $line, array $delimiterKeys): void
     {
         $splitString = str_split($line, 1);
@@ -68,6 +105,7 @@ class Delimiter
             foreach (self::POTENTIAL_DELIMETERS as $delimiter) {
                 $this->counts[$delimiter][] = $countLine[$delimiter] ?? 0;
             }
+>>>>>>> main
         }
     }
 
@@ -76,9 +114,15 @@ class Delimiter
         // Calculate the mean square deviations for each delimiter
         //     (ignoring delimiters that haven't been found consistently)
         $meanSquareDeviations = [];
+<<<<<<< HEAD
+        $middleIdx = (int) floor(($this->numberLines - 1) / 2);
+
+        foreach (self::POTENTIAL_DELIMITERS as $delimiter) {
+=======
         $middleIdx = floor(($this->numberLines - 1) / 2);
 
         foreach (self::POTENTIAL_DELIMETERS as $delimiter) {
+>>>>>>> main
             $series = $this->counts[$delimiter];
             sort($series);
 
@@ -92,16 +136,24 @@ class Delimiter
 
             $meanSquareDeviations[$delimiter] = array_reduce(
                 $series,
+<<<<<<< HEAD
+                fn ($sum, $value): int|float => $sum + ($value - $median) ** 2
+=======
                 function ($sum, $value) use ($median) {
                     return $sum + ($value - $median) ** 2;
                 }
+>>>>>>> main
             ) / count($series);
         }
 
         // ... and pick the delimiter with the smallest mean square deviation
         //         (in case of ties, the order in potentialDelimiters is respected)
         $min = INF;
+<<<<<<< HEAD
+        foreach (self::POTENTIAL_DELIMITERS as $delimiter) {
+=======
         foreach (self::POTENTIAL_DELIMETERS as $delimiter) {
+>>>>>>> main
             if (!isset($meanSquareDeviations[$delimiter])) {
                 continue;
             }

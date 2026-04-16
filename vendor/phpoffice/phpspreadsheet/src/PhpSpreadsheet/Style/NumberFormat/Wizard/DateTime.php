@@ -5,7 +5,11 @@ namespace PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard;
 class DateTime extends DateTimeWizard
 {
     /**
+<<<<<<< HEAD
+     * @var array<?string>
+=======
      * @var string[]
+>>>>>>> main
      */
     protected array $separators;
 
@@ -28,6 +32,13 @@ class DateTime extends DateTimeWizard
         $this->formatBlocks = array_map([$this, 'mapFormatBlocks'], $formatBlocks);
     }
 
+<<<<<<< HEAD
+    private function mapFormatBlocks(DateTimeWizard|string $value): string
+    {
+        // Any date masking codes are returned as lower case values
+        if ($value instanceof DateTimeWizard) {
+            return $value->__toString();
+=======
     /**
      * @param DateTimeWizard|string $value
      */
@@ -37,6 +48,7 @@ class DateTime extends DateTimeWizard
         if (is_object($value)) {
             // We can't explicitly test for Stringable until PHP >= 8.0
             return $value;
+>>>>>>> main
         }
 
         // Wrap any string literals in quotes, so that they're clearly defined as string literals

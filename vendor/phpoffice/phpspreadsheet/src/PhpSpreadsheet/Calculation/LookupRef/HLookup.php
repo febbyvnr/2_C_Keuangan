@@ -18,14 +18,23 @@ class HLookup extends LookupBase
      *     in the same column based on the index_number.
      *
      * @param mixed $lookupValue The value that you want to match in lookup_array
+<<<<<<< HEAD
+     * @param mixed[][] $lookupArray The range of cells being searched
+     * @param array<mixed>|float|int|string $indexNumber The row number in table_array from which the matching value must be returned.
+=======
      * @param mixed $lookupArray The range of cells being searched
      * @param mixed $indexNumber The row number in table_array from which the matching value must be returned.
+>>>>>>> main
      *                                The first row is 1.
      * @param mixed $notExactMatch determines if you are looking for an exact match based on lookup_value
      *
      * @return mixed The value of the found cell
      */
+<<<<<<< HEAD
+    public static function lookup(mixed $lookupValue, $lookupArray, $indexNumber, mixed $notExactMatch = true): mixed
+=======
     public static function lookup($lookupValue, $lookupArray, $indexNumber, $notExactMatch = true)
+>>>>>>> main
     {
         if (is_array($lookupValue) || is_array($indexNumber)) {
             return self::evaluateArrayArgumentsIgnore([self::class, __FUNCTION__], 1, $lookupValue, $lookupArray, $indexNumber, $notExactMatch);
@@ -49,6 +58,10 @@ class HLookup extends LookupBase
 
         $firstkey = $f[0] - 1;
         $returnColumn = $firstkey + $indexNumber;
+<<<<<<< HEAD
+        /** @var mixed[][] $lookupArray */
+=======
+>>>>>>> main
         $firstColumn = array_shift($f) ?? 1;
         $rowNumber = self::hLookupSearch($lookupValue, $lookupArray, $firstColumn, $notExactMatch);
 
@@ -62,15 +75,35 @@ class HLookup extends LookupBase
 
     /**
      * @param mixed $lookupValue The value that you want to match in lookup_array
+<<<<<<< HEAD
+     * @param mixed[][] $lookupArray
+     * @param  int|string $column
+     */
+    private static function hLookupSearch(mixed $lookupValue, array $lookupArray, $column, bool $notExactMatch): ?int
+    {
+        $lookupLower = StringHelper::strToLower(StringHelper::convertToString($lookupValue));
+=======
      * @param  int|string $column
      */
     private static function hLookupSearch($lookupValue, array $lookupArray, $column, bool $notExactMatch): ?int
     {
         $lookupLower = StringHelper::strToLower((string) $lookupValue);
+>>>>>>> main
 
         $rowNumber = null;
         foreach ($lookupArray[$column] as $rowKey => $rowData) {
             // break if we have passed possible keys
+<<<<<<< HEAD
+            /** @var string $rowKey */
+            $bothNumeric = is_numeric($lookupValue) && is_numeric($rowData);
+            $bothNotNumeric = !is_numeric($lookupValue) && !is_numeric($rowData);
+            /** @var scalar $rowData */
+            $cellDataLower = StringHelper::strToLower((string) $rowData);
+
+            if (
+                $notExactMatch
+                && (($bothNumeric && $rowData > $lookupValue) || ($bothNotNumeric && $cellDataLower > $lookupLower))
+=======
             $bothNumeric = is_numeric($lookupValue) && is_numeric($rowData);
             $bothNotNumeric = !is_numeric($lookupValue) && !is_numeric($rowData);
             $cellDataLower = StringHelper::strToLower((string) $rowData);
@@ -78,6 +111,7 @@ class HLookup extends LookupBase
             if (
                 $notExactMatch &&
                 (($bothNumeric && $rowData > $lookupValue) || ($bothNotNumeric && $cellDataLower > $lookupLower))
+>>>>>>> main
             ) {
                 break;
             }
@@ -96,6 +130,14 @@ class HLookup extends LookupBase
         return $rowNumber;
     }
 
+<<<<<<< HEAD
+    /**
+     * @param mixed[] $lookupArray
+     *
+     * @return mixed[]
+     */
+=======
+>>>>>>> main
     private static function convertLiteralArray(array $lookupArray): array
     {
         if (array_key_exists(0, $lookupArray)) {

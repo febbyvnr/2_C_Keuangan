@@ -9,6 +9,10 @@ use PhpOffice\PhpSpreadsheet\Calculation\Financial\Coupons;
 use PhpOffice\PhpSpreadsheet\Calculation\Financial\Helpers;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+=======
+>>>>>>> main
 
 class Price
 {
@@ -28,7 +32,10 @@ class Price
      *                              For annual payments, frequency = 1;
      *                              for semiannual, frequency = 2;
      *                              for quarterly, frequency = 4.
+<<<<<<< HEAD
+=======
      * @param mixed $frequency
+>>>>>>> main
      * @param mixed $basis The type of day count to use.
      *                         0 or omitted    US (NASD) 30/360
      *                         1               Actual/actual
@@ -39,6 +46,16 @@ class Price
      * @return float|string Result, or a string containing an error
      */
     public static function price(
+<<<<<<< HEAD
+        mixed $settlement,
+        mixed $maturity,
+        mixed $rate,
+        mixed $yield,
+        mixed $redemption,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+=======
         $settlement,
         $maturity,
         $rate,
@@ -47,15 +64,20 @@ class Price
         $frequency,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
     ) {
+>>>>>>> main
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $rate = Functions::flattenSingleValue($rate);
         $yield = Functions::flattenSingleValue($yield);
         $redemption = Functions::flattenSingleValue($redemption);
         $frequency = Functions::flattenSingleValue($frequency);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -110,19 +132,31 @@ class Price
      * @return float|string Result, or a string containing an error
      */
     public static function priceDiscounted(
+<<<<<<< HEAD
+        mixed $settlement,
+        mixed $maturity,
+        mixed $discount,
+        mixed $redemption,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+=======
         $settlement,
         $maturity,
         $discount,
         $redemption,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+>>>>>>> main
     ) {
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $discount = Functions::flattenSingleValue($discount);
         $redemption = Functions::flattenSingleValue($redemption);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -138,7 +172,11 @@ class Price
         $daysBetweenSettlementAndMaturity = Functions::scalar(DateTimeExcel\YearFrac::fraction($settlement, $maturity, $basis));
         if (!is_numeric($daysBetweenSettlementAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenSettlementAndMaturity);
+=======
             return $daysBetweenSettlementAndMaturity;
+>>>>>>> main
         }
 
         return $redemption * (1 - $discount * $daysBetweenSettlementAndMaturity);
@@ -167,21 +205,34 @@ class Price
      * @return float|string Result, or a string containing an error
      */
     public static function priceAtMaturity(
+<<<<<<< HEAD
+        mixed $settlement,
+        mixed $maturity,
+        mixed $issue,
+        mixed $rate,
+        mixed $yield,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+=======
         $settlement,
         $maturity,
         $issue,
         $rate,
         $yield,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+>>>>>>> main
     ) {
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $issue = Functions::flattenSingleValue($issue);
         $rate = Functions::flattenSingleValue($rate);
         $yield = Functions::flattenSingleValue($yield);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -202,18 +253,35 @@ class Price
         $daysBetweenIssueAndSettlement = Functions::scalar(DateTimeExcel\YearFrac::fraction($issue, $settlement, $basis));
         if (!is_numeric($daysBetweenIssueAndSettlement)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenIssueAndSettlement);
+=======
             return $daysBetweenIssueAndSettlement;
+>>>>>>> main
         }
         $daysBetweenIssueAndSettlement *= $daysPerYear;
         $daysBetweenIssueAndMaturity = Functions::scalar(DateTimeExcel\YearFrac::fraction($issue, $maturity, $basis));
         if (!is_numeric($daysBetweenIssueAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenIssueAndMaturity);
+=======
             return $daysBetweenIssueAndMaturity;
+>>>>>>> main
         }
         $daysBetweenIssueAndMaturity *= $daysPerYear;
         $daysBetweenSettlementAndMaturity = Functions::scalar(DateTimeExcel\YearFrac::fraction($settlement, $maturity, $basis));
         if (!is_numeric($daysBetweenSettlementAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenSettlementAndMaturity);
+        }
+        $daysBetweenSettlementAndMaturity *= $daysPerYear;
+
+        return (100 + (($daysBetweenIssueAndMaturity / $daysPerYear) * $rate * 100))
+            / (1 + (($daysBetweenSettlementAndMaturity / $daysPerYear) * $yield))
+            - (($daysBetweenIssueAndSettlement / $daysPerYear) * $rate * 100);
+=======
             return $daysBetweenSettlementAndMaturity;
         }
         $daysBetweenSettlementAndMaturity *= $daysPerYear;
@@ -221,6 +289,7 @@ class Price
         return (100 + (($daysBetweenIssueAndMaturity / $daysPerYear) * $rate * 100)) /
             (1 + (($daysBetweenSettlementAndMaturity / $daysPerYear) * $yield)) -
             (($daysBetweenIssueAndSettlement / $daysPerYear) * $rate * 100);
+>>>>>>> main
     }
 
     /**
@@ -245,19 +314,31 @@ class Price
      * @return float|string Result, or a string containing an error
      */
     public static function received(
+<<<<<<< HEAD
+        mixed $settlement,
+        mixed $maturity,
+        mixed $investment,
+        mixed $discount,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+=======
         $settlement,
         $maturity,
         $investment,
         $discount,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+>>>>>>> main
     ) {
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $investment = Functions::flattenSingleValue($investment);
         $discount = Functions::flattenSingleValue($discount);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -276,7 +357,11 @@ class Price
         $daysBetweenSettlementAndMaturity = DateTimeExcel\YearFrac::fraction($settlement, $maturity, $basis);
         if (!is_numeric($daysBetweenSettlementAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString(Functions::scalar($daysBetweenSettlementAndMaturity));
+=======
             return Functions::scalar($daysBetweenSettlementAndMaturity);
+>>>>>>> main
         }
 
         return $investment / (1 - ($discount * $daysBetweenSettlementAndMaturity));

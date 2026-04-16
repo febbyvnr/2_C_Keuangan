@@ -5,7 +5,10 @@ namespace PhpOffice\PhpSpreadsheet\Calculation\MathTrig;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ErrorValue;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
+<<<<<<< HEAD
+=======
 use PhpOffice\PhpSpreadsheet\Calculation\Information\Value;
+>>>>>>> main
 
 class Sum
 {
@@ -18,10 +21,15 @@ class Sum
      *        SUM(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function sumIgnoringStrings(mixed ...$args): float|int|string
+=======
      *
      * @return float|string
      */
     public static function sumIgnoringStrings(...$args)
+>>>>>>> main
     {
         $returnValue = 0;
 
@@ -31,6 +39,10 @@ class Sum
             if (is_numeric($arg)) {
                 $returnValue += $arg;
             } elseif (ErrorValue::isError($arg)) {
+<<<<<<< HEAD
+                /** @var string $arg */
+=======
+>>>>>>> main
                 return $arg;
             }
         }
@@ -48,15 +60,29 @@ class Sum
      *
      * @param mixed ...$args Data values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|int|string
+     */
+    public static function sumErroringStrings(mixed ...$args): float|int|string|array
+=======
      * @return float|string
      */
     public static function sumErroringStrings(...$args)
+>>>>>>> main
     {
         $returnValue = 0;
         // Loop through the arguments
         $aArgs = Functions::flattenArrayIndexed($args);
         foreach ($aArgs as $k => $arg) {
             // Is it a numeric value?
+<<<<<<< HEAD
+            if (is_numeric($arg)) {
+                $returnValue += $arg;
+            } elseif (is_bool($arg)) {
+                $returnValue += (int) $arg;
+            } elseif (ErrorValue::isError($arg, true)) {
+                /** @var string $arg */
+=======
             if (is_numeric($arg) || empty($arg)) {
                 if (is_string($arg)) {
                     $arg = (int) $arg;
@@ -65,6 +91,7 @@ class Sum
             } elseif (is_bool($arg)) {
                 $returnValue += (int) $arg;
             } elseif (ErrorValue::isError($arg)) {
+>>>>>>> main
                 return $arg;
             } elseif ($arg !== null && !Functions::isCellValue($k)) {
                 // ignore non-numerics from cell, but fail as literals (except null)
@@ -83,9 +110,15 @@ class Sum
      *
      * @param mixed ...$args Data values
      *
+<<<<<<< HEAD
+     * @return float|int|string The result, or a string containing an error
+     */
+    public static function product(mixed ...$args): string|int|float
+=======
      * @return float|string The result, or a string containing an error
      */
     public static function product(...$args)
+>>>>>>> main
     {
         $arrayList = $args;
 
@@ -109,10 +142,18 @@ class Sum
                 if ((!is_numeric($val)) || (is_string($val))) {
                     $val = 0;
                 }
+<<<<<<< HEAD
+                /** @var array<float|int> $wrkArray */
+=======
+>>>>>>> main
                 $wrkArray[$i] *= $val;
             }
         }
 
+<<<<<<< HEAD
+        /** @var array<float|int> $wrkArray */
+=======
+>>>>>>> main
         return array_sum($wrkArray);
     }
 }

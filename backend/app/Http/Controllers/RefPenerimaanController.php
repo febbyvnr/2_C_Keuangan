@@ -80,18 +80,16 @@ class RefPenerimaanController extends Controller
         try {
             $validated = $request->validate([
                 'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
-                'DESKRIPSI_REF_PENERIMAAN' => 'required|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
             ],[
                 'REF_ID_REF_PENERIMAAN.exists' => 'Referensi induk tidak valid',
                 'DESKRIPSI_REF_PENERIMAAN.unique' => 'Deskripsi penerimaan sudah ada'
             ]);
-            $lastId = RefPenerimaan::max('ID_REF_PENERIMAAN');
-            $newId = $lastId ? $lastId + 1 : 1;
-            $validated['ID_REF_PENERIMAAN'] = $newId;
             $data = RefPenerimaan::create($validated);
             return response()->json([
-                'data'=>$data
-            ],201);
+                'success' => true,
+                'data' => $data
+            ]);
         } catch (ValidationException $e){
             return response()->json([
                 'errors'=>$e->errors()
@@ -115,11 +113,12 @@ class RefPenerimaanController extends Controller
             }
             $validated = $request->validate([
                 'REF_ID_REF_PENERIMAAN' => 'nullable|exists:ref_penerimaan,ID_REF_PENERIMAAN',
-                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN'
+                'DESKRIPSI_REF_PENERIMAAN' => 'nullable|unique:ref_penerimaan,DESKRIPSI_REF_PENERIMAAN,' . $id . ',ID_REF_PENERIMAAN'
             ]);
             $data->update($validated);
             return response()->json([
-                'data'=>$data
+                'success' => true,
+                'data' => $data
             ]);
         } catch (ValidationException $e){
             return response()->json([
@@ -145,6 +144,7 @@ class RefPenerimaanController extends Controller
             }
             $data->delete();
             return response()->json([
+                'success' => true,
                 'message'=>'Data referensi penerimaan berhasil dihapus'
             ]);
         } catch (\Throwable $e){
