@@ -9,12 +9,11 @@ class Rka extends Model
 {
     protected $table = 'mst_program_kerja';
     protected $primaryKey = 'ID_PROGRAM_KERJA';
-    public $incrementing = false;
+    public $incrementing = true; // Diubah ke true karena DB sudah Auto Increment
     protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
-        'ID_PROGRAM_KERJA',
         'ID_TA_ANGGARAN',
         'ID_UNIT',
         'ID_TAN',
@@ -39,8 +38,8 @@ class Rka extends Model
         'ID_MASTER_COA' => 'integer',
         'ID_KEGIATAN' => 'integer',
         'NOMINAL' => 'double',
-        'WAKTU_AWAL' => 'date',
-        'WAKTU_AKHIR' => 'date',
+        'WAKTU_AWAL' => 'datetime',
+        'WAKTU_AKHIR' => 'datetime',
         'IS_DELETE' => 'boolean',
     ];
 
