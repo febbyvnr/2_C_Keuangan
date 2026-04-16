@@ -1,11 +1,13 @@
 import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function SidebarBendahara() {
+    const location = useLocation();
     const [openMaster, setOpenMaster] = useState(false);
+    const isMasterActive = location.pathname.startsWith("/bendahara/master");
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -20,6 +22,12 @@ export default function SidebarBendahara() {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    useEffect(() => {
+        if (isMasterActive) {
+            setOpenMaster(true);
+        }
+    }, [isMasterActive]);
 
     return (
         <>
@@ -87,12 +95,14 @@ export default function SidebarBendahara() {
                             <li 
                                 className="nav-item"
                                 onMouseEnter={() => setOpenMaster(true)}
-                                onMouseLeave={() => setOpenMaster(false)}
+                                onMouseLeave={() => !isMasterActive && setOpenMaster(false)} // Jangan tutup kalau lagi aktif
                             >
-                                <div className="nav-link text-dark master-menu">
-                                    <i className="bi bi-database"></i>Master Data
+                                <div className={`nav-link text-dark master-menu ${isMasterActive ? "sidebar-active" : ""}`}>
+                                    <i className="bi bi-database"></i>
+                                    Master Data
+                                    {/* Opsional: Tambah ikon panah biar cakep */}
+                                    <i className={`bi bi-chevron-right ms-auto transition-transform ${openMaster ? 'rotate-90' : ''}`} style={{ fontSize: '10px' }}></i>
                                 </div>
-
                                 {openMaster && (
                                     <ul className="submenu">
                                         <li><NavLink to="/bendahara/master/coa" className="nav-link">Master COA</NavLink></li>

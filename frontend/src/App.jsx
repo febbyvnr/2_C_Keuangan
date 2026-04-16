@@ -26,6 +26,9 @@ import MasterRefPenerimaan from "./pages/bendahara/MasterRefPenerimaan";
 import MasterTarif from "./pages/bendahara/MasterTarif";
 import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
+import PicGuruFPD from "./pages/pic/guru/FPD";
+import WakaRKT from "./pages/waka/RKT";
+import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
@@ -80,6 +83,16 @@ export default function App() {
                 <Route path="/siswa-ortu/utama" element={<UtamaSiswaOrtu />} />
                 <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
                 <Route path="/siswa-ortu/profile" element={<ProfileSiswaOrtu />} />
+
+                {/* PIC GURU */}
+                <Route path="/pic/guru" element={<PicGuruFPD />} />
+                <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
+
+                {/* WAKA */}
+                <Route path="/waka" element={<WakaRKT />} />
+                <Route path="/waka/rkt" element={<WakaRKT />} />
+                <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
+                <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
 
             </Routes>
         </BrowserRouter>

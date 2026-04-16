@@ -25,6 +25,7 @@ use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
+use App\Http\Controllers\MstUnitController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -72,6 +73,10 @@ Route::prefix('coa')->group(function () {
     Route::post('/store', [MstCoaController::class, 'store']);
     Route::put('/update/{id}', [MstCoaController::class, 'update']);
     Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
+});
+
+Route::prefix('unit')->group(function () {
+    Route::get('/', [MstUnitController::class, 'index']);
 });
 
 
@@ -272,8 +277,16 @@ Route::prefix('laporan')->group(function () {
 Route::prefix('rka')->group(function () {
     Route::get('/', [RkaController::class, 'index']);
     Route::get('/search', [RkaController::class, 'search']);
-    Route::get('/{id}', [RkaController::class, 'show']);
+    
+    // ROUTE EXPORT HARUS DI ATAS {id}
+    Route::get('/export', [RkaController::class, 'export']); 
+    Route::get('/export/pdf', [RkaController::class, 'exportPdf']); // <-- RUTE PDF DITAMBAHKAN
+    
+    Route::get('/{id}', [RkaController::class, 'show'])->whereNumber('id');
+    
     Route::post('/store', [RkaController::class, 'store']);
+    Route::put('/update/{id}', [RkaController::class, 'update'])->whereNumber('id');
+    Route::delete('/delete/{id}', [RkaController::class, 'destroy'])->whereNumber('id');
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
 });
