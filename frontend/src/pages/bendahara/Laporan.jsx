@@ -31,11 +31,11 @@ export default function Laporan() {
       return;
     }
 
-    const params = new URLSearchParams({
-      start,
-      end,
-      sumber_dana: sumberDana,
-    });
+    const params = new URLSearchParams();
+
+    if (start) params.append("start", start);
+    if (end) params.append("end", end);
+    if (sumberDana) params.append("sumber_dana", sumberDana);
 
     fetch(`${baseUrl}?${params.toString()}`)
       .then((res) => res.json())
