@@ -335,93 +335,72 @@
 }
 
 /* ========================================= */
-/* BKU STYLE (KHUSUS BUKU KAS UMUM) */
+/* FIX BKU SWITCH (NAVIGASI) */
 /* ========================================= */
 
-/* WRAPPER SWITCH */
 .bku-switch {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 
-  width: fit-content;
-  margin: 0 auto 16px auto;
+  width: 100%;
+  margin: 10px 0 16px 0;
 }
 
+/* BUTTON PANAH */
 .bku-switch button {
+  background: #e5e7eb !important; /* abu soft */
+  color: var(--text-main) !important;
   border: none;
-  background: #e5e7eb;
-  color: var(--text-main);
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  transition: 0.2s;
 }
 
+/* HOVER */
 .bku-switch button:hover {
-  background: var(--primary);
-  color: white;
+  background: var(--primary) !important;
+  color: white !important;
 }
 
-/* TEXT BKU */
 .bku-switch span {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary) !important;
+  letter-spacing: 0.3px;
+}
+
+/* ========================================= */
+/* 🔥 FIX CARD TOTAL (PENERIMAAN & BKU) */
+/* ========================================= */
+
+.laporan-total-card {
+  background: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px; /* 🔥 biar ga nempel */
+}
+
+/* 🔥 LABEL (Saldo Akhir / Total Penerimaan) */
+.laporan-total-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* 🔥 VALUE ANGKA */
+.laporan-total-value {
+  font-size: 16px;
   font-weight: 600;
   color: var(--primary);
-}
 
-/* ========================================= */
-/* TABEL KHUSUS BKU (SCOPED) */
-/* ========================================= */
-
-.bku-table th {
-  background: var(--primary);
-  color: white;
-  font-weight: 600;
-}
-
-/* hover */
-.bku-table tr:hover {
-  background: #f1f5f9;
-}
-
-/* ========================================= */
-/* KOLOM KHUSUS BKU */
-/* ========================================= */
-
-/* Debit */
-.bku-table td:nth-child(4) {
-  color: var(--success);
-  font-weight: 500;
-}
-
-/* Kredit */
-.bku-table td:nth-child(5) {
-  color: var(--error);
-  font-weight: 500;
-}
-
-/* Saldo */
-.bku-table td:nth-child(6) {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-/* ========================================= */
-/* SCROLL HALUS */
-/* ========================================= */
-
-.bku-table {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-
-.bku-table::-webkit-scrollbar {
-  width: 6px;
-}
-
-.bku-table::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+  white-space: nowrap; /* 🔥 biar ga turun */
 }
