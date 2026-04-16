@@ -7,7 +7,11 @@ class ErrorCode
     /**
      * @var array<string, int>
      */
+<<<<<<< HEAD
+    protected static array $errorCodeMap = [
+=======
     protected static $errorCodeMap = [
+>>>>>>> main
         '#NULL!' => 0x00,
         '#DIV/0!' => 0x07,
         '#VALUE!' => 0x0F,
@@ -19,10 +23,14 @@ class ErrorCode
 
     public static function error(string $errorCode): int
     {
+<<<<<<< HEAD
+        return self::$errorCodeMap[$errorCode] ?? 0;
+=======
         if (array_key_exists($errorCode, self::$errorCodeMap)) {
             return self::$errorCodeMap[$errorCode];
         }
 
         return 0;
+>>>>>>> main
     }
 }

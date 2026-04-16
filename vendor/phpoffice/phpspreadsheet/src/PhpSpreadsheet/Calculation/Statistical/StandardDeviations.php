@@ -17,7 +17,11 @@ class StandardDeviations
      *
      * @return float|string The result, or a string containing an error
      */
+<<<<<<< HEAD
+    public static function STDEV(mixed ...$args)
+=======
     public static function STDEV(...$args)
+>>>>>>> main
     {
         $result = Variances::VAR(...$args);
         if (!is_numeric($result)) {
@@ -36,10 +40,15 @@ class StandardDeviations
      *        STDEVA(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function STDEVA(mixed ...$args): float|string
+=======
      *
      * @return float|string
      */
     public static function STDEVA(...$args)
+>>>>>>> main
     {
         $result = Variances::VARA(...$args);
         if (!is_numeric($result)) {
@@ -58,10 +67,15 @@ class StandardDeviations
      *        STDEVP(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function STDEVP(mixed ...$args): float|string
+=======
      *
      * @return float|string
      */
     public static function STDEVP(...$args)
+>>>>>>> main
     {
         $result = Variances::VARP(...$args);
         if (!is_numeric($result)) {
@@ -80,10 +94,15 @@ class StandardDeviations
      *        STDEVPA(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function STDEVPA(mixed ...$args): float|string
+=======
      *
      * @return float|string
      */
     public static function STDEVPA(...$args)
+>>>>>>> main
     {
         $result = Variances::VARPA(...$args);
         if (!is_numeric($result)) {

@@ -14,6 +14,14 @@ use SimpleXMLElement;
 
 class Styles
 {
+<<<<<<< HEAD
+    private Spreadsheet $spreadsheet;
+
+    protected bool $readDataOnly;
+
+    /** @var array<string, string[]> */
+    public static array $mappings = [
+=======
     /**
      * @var Spreadsheet
      */
@@ -26,6 +34,7 @@ class Styles
 
     /** @var array */
     public static $mappings = [
+>>>>>>> main
         'borderStyle' => [
             '0' => Border::BORDER_NONE,
             '1' => Border::BORDER_THIN,
@@ -53,7 +62,11 @@ class Styles
             '8' => Fill::FILL_PATTERN_DARKVERTICAL, // vertical stripe
             '9' => Fill::FILL_PATTERN_DARKDOWN, // diagonal stripe
             '10' => Fill::FILL_PATTERN_DARKUP, // reverse diagonal stripe
+<<<<<<< HEAD
+            '11' => Fill::FILL_PATTERN_DARKGRID, // diagonal crosshatch
+=======
             '11' => Fill::FILL_PATTERN_DARKGRID, // diagoanl crosshatch
+>>>>>>> main
             '12' => Fill::FILL_PATTERN_DARKTRELLIS, // thick diagonal crosshatch
             '13' => Fill::FILL_PATTERN_LIGHTHORIZONTAL,
             '14' => Fill::FILL_PATTERN_LIGHTVERTICAL,
@@ -101,13 +114,20 @@ class Styles
     private function readStyles(SimpleXMLElement $styleRegion, int $maxRow, int $maxCol): void
     {
         foreach ($styleRegion as $style) {
+<<<<<<< HEAD
+=======
             /** @scrutinizer ignore-call */
+>>>>>>> main
             $styleAttributes = $style->attributes();
             if ($styleAttributes !== null && ($styleAttributes['startRow'] <= $maxRow) && ($styleAttributes['startCol'] <= $maxCol)) {
                 $cellRange = $this->readStyleRange($styleAttributes, $maxCol, $maxRow);
 
                 $styleAttributes = $style->Style->attributes();
 
+<<<<<<< HEAD
+                /** @var mixed[][] */
+=======
+>>>>>>> main
                 $styleArray = [];
                 // We still set the number format mask for date/time values, even if readDataOnly is true
                 //    so that we can identify whether a float is a float or a date value
@@ -118,13 +138,27 @@ class Styles
                 if ($this->readDataOnly === false && $styleAttributes !== null) {
                     //    If readDataOnly is false, we set all formatting information
                     $styleArray['numberFormat']['formatCode'] = $formatCode;
+<<<<<<< HEAD
+                    $styleArray = $this->readStyle($styleArray, $styleAttributes, $style);
+                }
+                /** @var mixed[][] $styleArray */
+                $this->spreadsheet
+                    ->getActiveSheet()
+                    ->getStyle($cellRange)
+                    ->applyFromArray($styleArray);
+=======
                     $styleArray = $this->readStyle($styleArray, $styleAttributes, /** @scrutinizer ignore-type */ $style);
                 }
                 $this->spreadsheet->getActiveSheet()->getStyle($cellRange)->applyFromArray($styleArray);
+>>>>>>> main
             }
         }
     }
 
+<<<<<<< HEAD
+    /** @param mixed[][] $styleArray */
+=======
+>>>>>>> main
     private function addBorderDiagonal(SimpleXMLElement $srssb, array &$styleArray): void
     {
         if (isset($srssb->Diagonal, $srssb->{'Rev-Diagonal'})) {
@@ -139,11 +173,21 @@ class Styles
         }
     }
 
+<<<<<<< HEAD
+    /** @param mixed[][] $styleArray */
+=======
+>>>>>>> main
     private function addBorderStyle(SimpleXMLElement $srssb, array &$styleArray, string $direction): void
     {
         $ucDirection = ucfirst($direction);
         if (isset($srssb->$ucDirection)) {
+<<<<<<< HEAD
+            /** @var SimpleXMLElement */
+            $temp = $srssb->$ucDirection;
+            $styleArray['borders'][$direction] = self::parseBorderAttributes($temp->attributes());
+=======
             $styleArray['borders'][$direction] = self::parseBorderAttributes($srssb->$ucDirection->attributes());
+>>>>>>> main
         }
     }
 
@@ -158,6 +202,17 @@ class Styles
         return $rotation;
     }
 
+<<<<<<< HEAD
+    /** @param mixed[][] $styleArray */
+    private static function addStyle(array &$styleArray, string $key, string $value): void
+    {
+        if (array_key_exists($value, self::$mappings[$key])) {
+            $styleArray[$key] = self::$mappings[$key][$value]; //* @phpstan-ignore-line
+        }
+    }
+
+    /** @param mixed[][] $styleArray */
+=======
     private static function addStyle(array &$styleArray, string $key, string $value): void
     {
         if (array_key_exists($value, self::$mappings[$key])) {
@@ -165,6 +220,7 @@ class Styles
         }
     }
 
+>>>>>>> main
     private static function addStyle2(array &$styleArray, string $key1, string $key, string $value): void
     {
         if (array_key_exists($value, self::$mappings[$key])) {
@@ -172,8 +228,15 @@ class Styles
         }
     }
 
+<<<<<<< HEAD
+    /** @return mixed[][] */
     private static function parseBorderAttributes(?SimpleXMLElement $borderAttributes): array
     {
+        /** @var mixed[][] */
+=======
+    private static function parseBorderAttributes(?SimpleXMLElement $borderAttributes): array
+    {
+>>>>>>> main
         $styleArray = [];
         if ($borderAttributes !== null) {
             if (isset($borderAttributes['Color'])) {
@@ -182,6 +245,10 @@ class Styles
 
             self::addStyle($styleArray, 'borderStyle', (string) $borderAttributes['Style']);
         }
+<<<<<<< HEAD
+        /** @var mixed[][] $styleArray */
+=======
+>>>>>>> main
 
         return $styleArray;
     }
@@ -196,9 +263,17 @@ class Styles
         return $gnmR . $gnmG . $gnmB;
     }
 
+<<<<<<< HEAD
+    /** @param mixed[][] $styleArray */
     private function addColors(array &$styleArray, SimpleXMLElement $styleAttributes): void
     {
         $RGB = self::parseGnumericColour((string) $styleAttributes['Fore']);
+        /** @var mixed[][][] $styleArray */
+=======
+    private function addColors(array &$styleArray, SimpleXMLElement $styleAttributes): void
+    {
+        $RGB = self::parseGnumericColour((string) $styleAttributes['Fore']);
+>>>>>>> main
         $styleArray['font']['color']['rgb'] = $RGB;
         $RGB = self::parseGnumericColour((string) $styleAttributes['Back']);
         $shade = (string) $styleAttributes['Shade'];
@@ -229,6 +304,14 @@ class Styles
         return $cellRange;
     }
 
+<<<<<<< HEAD
+    /**
+     * @param mixed[][] $styleArray
+     *
+     * @return mixed[]
+     */
+=======
+>>>>>>> main
     private function readStyle(array $styleArray, SimpleXMLElement $styleAttributes, SimpleXMLElement $style): array
     {
         self::addStyle2($styleArray, 'alignment', 'horizontal', (string) $styleAttributes['HAlign']);

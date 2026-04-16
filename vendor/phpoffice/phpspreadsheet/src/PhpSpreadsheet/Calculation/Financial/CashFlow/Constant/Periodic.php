@@ -28,6 +28,21 @@ class Periodic
      * @param mixed $type A number 0 or 1 and indicates when payments are due:
      *                      0 or omitted    At the end of the period.
      *                      1               At the beginning of the period.
+<<<<<<< HEAD
+     */
+    public static function futureValue(
+        mixed $rate,
+        mixed $numberOfPeriods,
+        mixed $payment = 0.0,
+        mixed $presentValue = 0.0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+    ): string|float {
+        $rate = Functions::flattenSingleValue($rate);
+        $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
+        $payment = Functions::flattenSingleValue($payment) ?? 0.0;
+        $presentValue = Functions::flattenSingleValue($presentValue) ?? 0.0;
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
      *
      * @return float|string
      */
@@ -43,6 +58,7 @@ class Periodic
         $payment = ($payment === null) ? 0.0 : Functions::flattenSingleValue($payment);
         $presentValue = ($presentValue === null) ? 0.0 : Functions::flattenSingleValue($presentValue);
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $rate = CashFlowValidations::validateRate($rate);
@@ -71,6 +87,19 @@ class Periodic
      * @return float|string Result, or a string containing an error
      */
     public static function presentValue(
+<<<<<<< HEAD
+        mixed $rate,
+        mixed $numberOfPeriods,
+        mixed $payment = 0.0,
+        mixed $futureValue = 0.0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+    ): string|float {
+        $rate = Functions::flattenSingleValue($rate);
+        $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
+        $payment = Functions::flattenSingleValue($payment) ?? 0.0;
+        $futureValue = Functions::flattenSingleValue($futureValue) ?? 0.0;
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
         $rate,
         $numberOfPeriods,
         $payment = 0.0,
@@ -82,6 +111,7 @@ class Periodic
         $payment = ($payment === null) ? 0.0 : Functions::flattenSingleValue($payment);
         $futureValue = ($futureValue === null) ? 0.0 : Functions::flattenSingleValue($futureValue);
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $rate = CashFlowValidations::validateRate($rate);
@@ -115,17 +145,30 @@ class Periodic
      * @return float|string Result, or a string containing an error
      */
     public static function periods(
+<<<<<<< HEAD
+        mixed $rate,
+        mixed $payment,
+        mixed $presentValue,
+        mixed $futureValue = 0.0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+=======
         $rate,
         $payment,
         $presentValue,
         $futureValue = 0.0,
         $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+>>>>>>> main
     ) {
         $rate = Functions::flattenSingleValue($rate);
         $payment = Functions::flattenSingleValue($payment);
         $presentValue = Functions::flattenSingleValue($presentValue);
+<<<<<<< HEAD
+        $futureValue = Functions::flattenSingleValue($futureValue) ?? 0.0;
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
         $futureValue = ($futureValue === null) ? 0.0 : Functions::flattenSingleValue($futureValue);
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $rate = CashFlowValidations::validateRate($rate);
@@ -152,9 +195,15 @@ class Periodic
         float $presentValue,
         int $type
     ): float {
+<<<<<<< HEAD
+        if ($rate != 0) {
+            return -$presentValue
+                * (1 + $rate) ** $numberOfPeriods - $payment * (1 + $rate * $type) * ((1 + $rate) ** $numberOfPeriods - 1)
+=======
         if ($rate !== null && $rate != 0) {
             return -$presentValue *
                 (1 + $rate) ** $numberOfPeriods - $payment * (1 + $rate * $type) * ((1 + $rate) ** $numberOfPeriods - 1)
+>>>>>>> main
                     / $rate;
         }
 
@@ -176,23 +225,35 @@ class Periodic
         return -$futureValue - $payment * $numberOfPeriods;
     }
 
+<<<<<<< HEAD
+=======
     /**
      * @return float|string
      */
+>>>>>>> main
     private static function calculatePeriods(
         float $rate,
         float $payment,
         float $presentValue,
         float $futureValue,
         int $type
+<<<<<<< HEAD
+    ): string|float {
+=======
     ) {
+>>>>>>> main
         if ($rate != 0.0) {
             if ($presentValue == 0.0) {
                 return ExcelError::NAN();
             }
 
+<<<<<<< HEAD
+            return log(($payment * (1 + $rate * $type) / $rate - $futureValue)
+                    / ($presentValue + $payment * (1 + $rate * $type) / $rate)) / log(1 + $rate);
+=======
             return log(($payment * (1 + $rate * $type) / $rate - $futureValue) /
                     ($presentValue + $payment * (1 + $rate * $type) / $rate)) / log(1 + $rate);
+>>>>>>> main
         }
 
         return (-$presentValue - $futureValue) / $payment;

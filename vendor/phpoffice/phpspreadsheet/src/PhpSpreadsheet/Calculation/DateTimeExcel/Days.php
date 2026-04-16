@@ -20,6 +20,20 @@ class Days
      * Excel Function:
      *        DAYS(endDate, startDate)
      *
+<<<<<<< HEAD
+     * @param array<mixed>|DateTimeInterface|float|int|string $endDate Excel date serial value (float),
+     *           PHP date timestamp (integer), PHP DateTime object, or a standard date string
+     *                         Or can be an array of date values
+     * @param array<mixed>|DateTimeInterface|float|int|string $startDate Excel date serial value (float),
+     *           PHP date timestamp (integer), PHP DateTime object, or a standard date string
+     *                         Or can be an array of date values
+     *
+     * @return array<mixed>|int|string Number of days between start date and end date or an error
+     *         If an array of values is passed for the $startDate or $endDays,arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function between(array|DateTimeInterface|float|int|string $endDate, array|DateTimeInterface|float|int|string $startDate): array|int|string
+=======
      * @param array|DateTimeInterface|float|int|string $endDate Excel date serial value (float),
      *           PHP date timestamp (integer), PHP DateTime object, or a standard date string
      *                         Or can be an array of date values
@@ -32,6 +46,7 @@ class Days
      *            will also be an array with matching dimensions
      */
     public static function between($endDate, $startDate)
+>>>>>>> main
     {
         if (is_array($endDate) || is_array($startDate)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $endDate, $startDate);
@@ -50,7 +65,11 @@ class Days
 
         $days = ExcelError::VALUE();
         $diff = $PHPStartDateObject->diff($PHPEndDateObject);
+<<<<<<< HEAD
+        if (!is_bool($diff->days)) {
+=======
         if ($diff !== false && !is_bool($diff->days)) {
+>>>>>>> main
             $days = $diff->days;
             if ($diff->invert) {
                 $days = -$days;

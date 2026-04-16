@@ -50,9 +50,12 @@ class PasswordHasher
      * Daniel Rentz of OpenOffice and the PEAR package
      * Spreadsheet_Excel_Writer by Xavier Noguer <xnoguer@rezebra.com>.
      *
+<<<<<<< HEAD
+=======
      * Scrutinizer will squawk at the use of bitwise operations here,
      * but it should ultimately pass.
      *
+>>>>>>> main
      * @param string $password Password to hash
      */
     private static function defaultHashPassword(string $password): string
@@ -63,7 +66,11 @@ class PasswordHasher
         for ($i = $pwlen; $i >= 0; --$i) {
             $intermediate1 = (($verifier & 0x4000) === 0) ? 0 : 1;
             $intermediate2 = 2 * $verifier;
+<<<<<<< HEAD
+            $intermediate2 = $intermediate2 & 0x7FFF;
+=======
             $intermediate2 = $intermediate2 & 0x7fff;
+>>>>>>> main
             $intermediate3 = $intermediate1 | $intermediate2;
             $verifier = $intermediate3 ^ ord($passwordArray[$i]);
         }
@@ -81,7 +88,11 @@ class PasswordHasher
      *
      * @param string $password Password to hash
      * @param string $algorithm Hash algorithm used to compute the password hash value
+<<<<<<< HEAD
+     * @param string $salt Pseudorandom base64-encoded string
+=======
      * @param string $salt Pseudorandom string
+>>>>>>> main
      * @param int $spinCount Number of times to iterate on a hash of a password
      *
      * @return string Hashed password
@@ -99,7 +110,11 @@ class PasswordHasher
         $saltValue = base64_decode($salt);
         $encodedPassword = mb_convert_encoding($password, 'UCS-2LE', 'UTF-8');
 
+<<<<<<< HEAD
+        $hashValue = hash($phpAlgorithm, $saltValue . $encodedPassword, true);
+=======
         $hashValue = hash($phpAlgorithm, $saltValue . /** @scrutinizer ignore-type */ $encodedPassword, true);
+>>>>>>> main
         for ($i = 0; $i < $spinCount; ++$i) {
             $hashValue = hash($phpAlgorithm, $hashValue . pack('L', $i), true);
         }

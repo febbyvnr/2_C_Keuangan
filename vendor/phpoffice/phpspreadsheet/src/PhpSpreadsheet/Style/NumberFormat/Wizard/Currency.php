@@ -2,6 +2,13 @@
 
 namespace PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard;
 
+<<<<<<< HEAD
+class Currency extends CurrencyBase
+{
+    protected ?bool $overrideSpacing = false;
+
+    protected ?CurrencyNegative $overrideNegative = null;
+=======
 use NumberFormatter;
 use PhpOffice\PhpSpreadsheet\Exception;
 
@@ -109,4 +116,5 @@ class Currency extends Number
             $this->currencySymbolPosition === self::TRAILING_SYMBOL ? $this->formatCurrencyCode() : null
         );
     }
+>>>>>>> main
 }

@@ -18,6 +18,24 @@ class Ods extends BaseWriter
 {
     /**
      * Private PhpSpreadsheet.
+<<<<<<< HEAD
+     */
+    private Spreadsheet $spreadSheet;
+
+    private Content $writerPartContent;
+
+    private Meta $writerPartMeta;
+
+    private MetaInf $writerPartMetaInf;
+
+    private Mimetype $writerPartMimetype;
+
+    private Settings $writerPartSettings;
+
+    private Styles $writerPartStyles;
+
+    private Thumbnails $writerPartThumbnails;
+=======
      *
      * @var Spreadsheet
      */
@@ -57,6 +75,7 @@ class Ods extends BaseWriter
      * @var Thumbnails
      */
     private $writerPartThumbnails;
+>>>>>>> main
 
     /**
      * Create a new Ods.
@@ -109,6 +128,15 @@ class Ods extends BaseWriter
         return $this->writerPartThumbnails;
     }
 
+<<<<<<< HEAD
+    /** @param array<string, callable> $additionalNumberFormats */
+    public function useAdditionalNumberFormats(array $additionalNumberFormats): void
+    {
+        $this->writerPartContent->additionalNumberFormats = $additionalNumberFormats;
+    }
+
+=======
+>>>>>>> main
     /**
      * Save PhpSpreadsheet to file.
      *
@@ -137,7 +165,11 @@ class Ods extends BaseWriter
         // Close file
         try {
             $zip->finish();
+<<<<<<< HEAD
+        } catch (OverflowException) {
+=======
         } catch (OverflowException $e) {
+>>>>>>> main
             throw new WriterException('Could not close resource.');
         }
 
@@ -146,10 +178,15 @@ class Ods extends BaseWriter
 
     /**
      * Create zip object.
+<<<<<<< HEAD
+     */
+    private function createZip(): ZipStream
+=======
      *
      * @return ZipStream
      */
     private function createZip()
+>>>>>>> main
     {
         // Try opening the ZIP file
         if (!is_resource($this->fileHandle)) {
@@ -162,10 +199,15 @@ class Ods extends BaseWriter
 
     /**
      * Get Spreadsheet object.
+<<<<<<< HEAD
+     */
+    public function getSpreadsheet(): Spreadsheet
+=======
      *
      * @return Spreadsheet
      */
     public function getSpreadsheet()
+>>>>>>> main
     {
         return $this->spreadSheet;
     }
@@ -177,7 +219,11 @@ class Ods extends BaseWriter
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setSpreadsheet(Spreadsheet $spreadsheet): static
+=======
     public function setSpreadsheet(Spreadsheet $spreadsheet)
+>>>>>>> main
     {
         $this->spreadSheet = $spreadsheet;
 
