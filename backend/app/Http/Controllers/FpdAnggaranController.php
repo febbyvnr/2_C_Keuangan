@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FpdAnggaran;
+use App\Models\MstProgramKerja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,10 @@ class FpdAnggaranController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = FpdAnggaran::all();
+            $data = FpdAnggaran::with([
+                'programKerja',
+                'detailFpd.detailProgram',
+            ])->get();
 
             return response()->json([
                 'success' => true,
@@ -37,12 +41,18 @@ class FpdAnggaranController extends Controller
         try {
             $keyword = trim((string) $request->query('keyword', ''));
 
-            $query = FpdAnggaran::query();
+            $query = FpdAnggaran::with([
+                'programKerja',
+                'detailFpd.detailProgram',
+            ]);
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('TGL_FPD', 'like', "%{$keyword}%")
-                      ->orWhere('NIP_VALIDATOR_FPD', 'like', "%{$keyword}%");
+                      ->orWhere('NIP_VALIDATOR_FPD', 'like', "%{$keyword}%")
+                      ->orWhereHas('programKerja', function ($sub) use ($keyword) {
+                          $sub->where('PROGRAM_KERJA', 'like', "%{$keyword}%");
+                      });
                 });
             }
 
@@ -68,7 +78,10 @@ class FpdAnggaranController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = FpdAnggaran::with('detailFpd')->find($id);
+            $data = FpdAnggaran::with([
+                'programKerja',
+                'detailFpd.detailProgram',
+            ])->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -102,10 +115,18 @@ class FpdAnggaranController extends Controller
                 'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
             ]);
 
+            $this->validateProgramKerjaBudget(
+                (int) $validated['ID_PROGRAM_KERJA'],
+                (float) $validated['NOMINAL_ANGGARAN']
+            );
+
             $validated['NOMINAL_FPD'] = 0;
             $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'];
 
-            $data = FpdAnggaran::create($validated);
+            $data = FpdAnggaran::create($validated)->load([
+                'programKerja',
+                'detailFpd.detailProgram',
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -162,6 +183,12 @@ class FpdAnggaranController extends Controller
                 ]);
             }
 
+            $this->validateProgramKerjaBudget(
+                (int) $validated['ID_PROGRAM_KERJA'],
+                (float) $validated['NOMINAL_ANGGARAN'],
+                $data->ID_FPD
+            );
+
             $validated['NOMINAL_FPD'] = $totalDetail;
             $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'] - $totalDetail;
 
@@ -170,7 +197,10 @@ class FpdAnggaranController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diupdate',
-                'data' => $data,
+                'data' => $data->load([
+                    'programKerja',
+                    'detailFpd.detailProgram',
+                ]),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -244,7 +274,7 @@ class FpdAnggaranController extends Controller
                 // Header informasi FPD
                 fputcsv($handle, ['DATA FPD'], ';');
                 fputcsv($handle, ['ID FPD', $fpd->ID_FPD], ';');
-                fputcsv($handle, ['Tanggal FPD', optional($fpd->TGL_FPD)->format('Y-m-d') ?? $fpd->TGL_FPD], ';');
+                fputcsv($handle, ['Tanggal FPD', $fpd->TGL_FPD?->format('Y-m-d H:i:s') ?? $fpd->TGL_FPD], ';');
                 fputcsv($handle, ['ID Program Kerja', $fpd->ID_PROGRAM_KERJA], ';');
                 fputcsv($handle, ['Program Kerja', optional($fpd->programKerja)->PROGRAM_KERJA ?? '-'], ';');
                 fputcsv($handle, ['Nominal Anggaran', $fpd->NOMINAL_ANGGARAN], ';');
@@ -299,6 +329,37 @@ class FpdAnggaranController extends Controller
                 'message' => 'Terjadi kesalahan saat export data',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    private function validateProgramKerjaBudget(int $idProgramKerja, float $nominalAnggaranBaru, ?int $excludeFpdId = null): void
+    {
+        $programKerja = MstProgramKerja::query()
+            ->active()
+            ->find($idProgramKerja);
+
+        if (!$programKerja) {
+            throw ValidationException::withMessages([
+                'ID_PROGRAM_KERJA' => ['Program kerja tidak ditemukan atau sudah tidak aktif.'],
+            ]);
+        }
+
+        $allocatedQuery = FpdAnggaran::query()
+            ->where('ID_PROGRAM_KERJA', $idProgramKerja);
+
+        if (!is_null($excludeFpdId)) {
+            $allocatedQuery->where('ID_FPD', '!=', $excludeFpdId);
+        }
+
+        $allocatedNominal = (float) $allocatedQuery->sum('NOMINAL_ANGGARAN');
+        $programBudget = (float) $programKerja->NOMINAL;
+
+        if (($allocatedNominal + $nominalAnggaranBaru) > $programBudget) {
+            throw ValidationException::withMessages([
+                'NOMINAL_ANGGARAN' => [
+                    'Total anggaran FPD untuk program kerja ini melebihi anggaran RKA/program kerja.',
+                ],
+            ]);
         }
     }
 }

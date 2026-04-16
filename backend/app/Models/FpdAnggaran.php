@@ -10,32 +10,27 @@ class FpdAnggaran extends Model
 {
     protected $table = 'fpd_anggaran';
     protected $primaryKey = 'ID_FPD';
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
 
-    protected $guarded =[];
+    protected $fillable = [
+        'ID_PROGRAM_KERJA',
+        'TGL_FPD',
+        'NOMINAL_ANGGARAN',
+        'NOMINAL_FPD',
+        'NOMINAL_SISA',
+        'NIP_VALIDATOR_FPD',
+    ];
 
     protected $casts = [
         'ID_FPD' => 'integer',
         'ID_PROGRAM_KERJA' => 'integer',
-        'TGL_FPD' => 'date',
+        'TGL_FPD' => 'datetime',
         'NOMINAL_ANGGARAN' => 'double',
         'NOMINAL_FPD' => 'double',
         'NOMINAL_SISA' => 'double',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (!$model->ID_FPD) {
-                $maxId = static::max('ID_FPD') ?? 0;
-                $model->ID_FPD = $maxId + 1;
-            }
-        });
-    }
 
     public function detailFpd(): HasMany
     {
