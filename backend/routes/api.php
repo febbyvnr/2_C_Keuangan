@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
@@ -32,6 +33,33 @@ use App\Http\Controllers\LaporanPengeluaranController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::post('/login', [AuthController::class, 'login']);
+
+
+// 2. F82, F83, F84 (Create, Update, Delete) - HANYA BENDAHARA
+Route::middleware(['role:Bendahara'])->group(function () {
+    Route::post('/keuangan/penerimaan', [TrPenerimaanController::class, 'store']); // F82
+    Route::put('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
+    Route::delete('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
+});
+
+
+// 3. F85, F86, F87 (Read, Search, Export) & Route /me - BENDAHARA ATAU KEPALA SEKOLAH
+Route::middleware(['role:Bendahara,Kepala Sekolah'])->group(function () {
+    
+    // Rute Testing Token
+    Route::get('/me', function (Request $request) {
+        return response()->json([
+            'message' => 'Token berhasil ditembus!',
+            'user' => $request->user(),
+            'roles' => $request->user()->jabatans->pluck('DESKRIPSI_JABATAN')
+        ]);
+    });
+
+    Route::get('/keuangan/penerimaan', [TrPenerimaanController::class, 'index']); // F85 & F86
+    Route::get('/keuangan/penerimaan/export', [TrPenerimaanController::class, 'export']); // F87
+});
 
 Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
