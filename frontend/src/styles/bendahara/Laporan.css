@@ -29,7 +29,7 @@
 /* TAB */
 .laporan-tabs {
   display: flex;
-  gap: 24px;
+  gap: 70px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 20px;
 }
