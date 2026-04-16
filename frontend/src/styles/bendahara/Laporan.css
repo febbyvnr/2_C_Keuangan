@@ -288,7 +288,7 @@
 }
 
 .laporan-table {
-  max-height: calc(110vh - 220px);
+  max-height: calc(106vh - 220px);
   overflow-y: auto;
 }
 
@@ -347,14 +347,16 @@
 .bku-switch {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  margin-bottom: 10px;
+
+  width: fit-content;
+  margin: 0 auto 16px auto;
 }
 
-/* 🔥 BUTTON PANAH (BIAR GA KOTAK HITAM JELEK) */
 .bku-switch button {
   border: none;
-  background: #e5e7eb; /* abu soft */
+  background: #e5e7eb;
   color: var(--text-main);
   padding: 6px 10px;
   border-radius: 6px;
