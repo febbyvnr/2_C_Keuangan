@@ -23,6 +23,7 @@ use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
+use App\Http\Controllers\MstUnitController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -43,6 +44,10 @@ Route::prefix('coa')->group(function () {
     Route::post('/store', [MstCoaController::class, 'store']);
     Route::put('/update/{id}', [MstCoaController::class, 'update']);
     Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
+});
+
+Route::prefix('unit')->group(function () {
+    Route::get('/', [MstUnitController::class, 'index']);
 });
 
 

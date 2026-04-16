@@ -14,11 +14,17 @@ class DtlFpdController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = DtlFpd::with([
+            $query = DtlFpd::with([
                 'fpd.programKerja',
                 'detailProgram.programKerja',
                 'detailProgram.sumberDana',
-            ])->get();
+            ]);
+
+            if (request()->filled('id_fpd')) {
+                $query->where('ID_FPD', (int) request()->query('id_fpd'));
+            }
+
+            $data = $query->orderByDesc('ID_DT_FPD')->get();
 
             return response()->json([
                 'success' => true,
@@ -47,6 +53,10 @@ class DtlFpdController extends Controller
                 'detailProgram.sumberDana',
             ]);
 
+            if ($request->filled('id_fpd')) {
+                $query->where('ID_FPD', (int) $request->query('id_fpd'));
+            }
+
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('SATUAN', 'like', "%{$keyword}%")
@@ -57,7 +67,7 @@ class DtlFpdController extends Controller
                 });
             }
 
-            $data = $query->get();
+            $data = $query->orderByDesc('ID_DT_FPD')->get();
 
             return response()->json([
                 'success' => true,

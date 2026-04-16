@@ -17,8 +17,10 @@ class FpdAnggaranController extends Controller
         try {
             $data = FpdAnggaran::with([
                 'programKerja',
+                'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
-            ])->get();
+                'detailFpd.detailProgram.sumberDana',
+            ])->orderByDesc('ID_FPD')->get();
 
             return response()->json([
                 'success' => true,
@@ -43,7 +45,9 @@ class FpdAnggaranController extends Controller
 
             $query = FpdAnggaran::with([
                 'programKerja',
+                'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
+                'detailFpd.detailProgram.sumberDana',
             ]);
 
             if ($keyword !== '') {
@@ -56,7 +60,7 @@ class FpdAnggaranController extends Controller
                 });
             }
 
-            $data = $query->get();
+            $data = $query->orderByDesc('ID_FPD')->get();
 
             return response()->json([
                 'success' => true,
@@ -80,7 +84,9 @@ class FpdAnggaranController extends Controller
             $id = (int) $id;
             $data = FpdAnggaran::with([
                 'programKerja',
+                'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
+                'detailFpd.detailProgram.sumberDana',
             ])->find($id);
 
             if (!$data) {
@@ -125,7 +131,9 @@ class FpdAnggaranController extends Controller
 
             $data = FpdAnggaran::create($validated)->load([
                 'programKerja',
+                'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
+                'detailFpd.detailProgram.sumberDana',
             ]);
 
             return response()->json([
@@ -199,7 +207,9 @@ class FpdAnggaranController extends Controller
                 'message' => 'Data berhasil diupdate',
                 'data' => $data->load([
                     'programKerja',
+                    'programKerja.detailProgramKerja.sumberDana',
                     'detailFpd.detailProgram',
+                    'detailFpd.detailProgram.sumberDana',
                 ]),
             ]);
         } catch (ValidationException $e) {
