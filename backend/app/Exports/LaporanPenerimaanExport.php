@@ -8,18 +8,21 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanPenerimaanExport implements WithEvents
 {
     protected $start, $end, $sumberDana;
     protected $total = 0;
     protected $rowCount = 0;
+    protected $role = 'Bendahara'; 
 
-    public function __construct($start, $end, $sumberDana)
+    public function __construct($start, $end, $sumberDana, $role = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
+        $this->role = $role ?? 'Bendahara';
     }
 
     public function collection()
@@ -101,6 +104,9 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
 
+                // DROPDOWN FILTER
+                $sheet->setAutoFilter("A$headerRow:E$headerRow");
+
                 // WIDTH
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(15);
@@ -170,49 +176,27 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getStartColor()->setARGB('FFFFE699');
 
                // =====================
-              // FOOTER (FIX CENTER)
-              // =====================
-                $footerRow = $totalRow + 6;
+              // FOOTER
+             // =====================
+            $footerRow = $totalRow + 4;
 
 
-                $sheet->mergeCells("B$footerRow:C$footerRow"); // Bendahara
-                $sheet->mergeCells("D$footerRow:E$footerRow"); // Kepsek
+            // =====================
+            // TANGGAL
+            // =====================
+            $sheet->setCellValue("E" . ($footerRow+2), 'Yogyakarta, ' . date('d F Y'));
 
-                $sheet->mergeCells("B" . ($footerRow+5) . ":C" . ($footerRow+5));
-                $sheet->mergeCells("B" . ($footerRow+6) . ":C" . ($footerRow+6));
-
-                $sheet->mergeCells("D" . ($footerRow+5) . ":E" . ($footerRow+5));
-                $sheet->mergeCells("D" . ($footerRow+6) . ":E" . ($footerRow+6));
-
-
-                $sheet->setCellValue("B$footerRow", 'Bendahara');
-                $sheet->setCellValue("D$footerRow", 'Kepala Sekolah');
+            $sheet->getStyle("E" . ($footerRow+2))
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
 
-                $sheet->setCellValue("B" . ($footerRow+5), 'Rina Putri, S.E.');
-                $sheet->setCellValue("B" . ($footerRow+6), 'NIP: 1987654321');
+            // =====================
+            // BY ROLE
+            // =====================
+            $sheet->setCellValue("E" . ($footerRow+3), 'By: ' . ($this->role = Auth::user()->role ?? 'Bendahara'));    
 
-                $sheet->setCellValue("D" . ($footerRow+5), 'Drs. Budi Santoso');
-                $sheet->setCellValue("D" . ($footerRow+6), 'NIP: 1976543210');
-
-
-                $sheet->getStyle("B$footerRow:B" . ($footerRow+6))
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("D$footerRow:D" . ($footerRow+6))
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-
-                $sheet->getStyle("B$footerRow")->getFont()->setBold(true);
-                $sheet->getStyle("D$footerRow")->getFont()->setBold(true);
-
-                // =====================
-                // TANGGAL 
-                // =====================
-                $sheet->setCellValue("E" . ($footerRow+11), 'Yogyakarta, ' . date('d F Y'));
-
-                $sheet->getStyle("E" . ($footerRow+11))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle("E" . ($footerRow+3))
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // FREEZE
                 $sheet->freezePane("A7");
