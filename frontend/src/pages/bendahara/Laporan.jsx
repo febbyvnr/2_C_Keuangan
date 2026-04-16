@@ -107,6 +107,9 @@ export default function Laporan() {
     setBkuType((prev) => (prev === 0 ? bkuList.length - 1 : prev - 1));
   };
 
+  // 🔥 TAMBAHAN: HITUNG SALDO AKHIR BKU (AUTO UPDATE)
+  const saldoAkhir = data.length > 0 ? data[data.length - 1].saldo || 0 : 0;
+
   return (
     <div style={{ padding: "30px" }}>
       <h2>Laporan</h2>
@@ -128,14 +131,11 @@ export default function Laporan() {
         {/* TABEL */}
         {/* ========================= */}
         <div style={{ flex: 1 }}>
-          {/* SWITCH BKU (FIXED) */}
+          {/* SWITCH BKU */}
           {active === "BKU" && (
             <div className="bku-switch">
               <button onClick={prevBku}>&lt;</button>
-
-              {/* LABEL TENGAH */}
               <span>{bkuList[bkuType]}</span>
-
               <button onClick={nextBku}>&gt;</button>
             </div>
           )}
@@ -274,6 +274,18 @@ export default function Laporan() {
             </>
           )}
 
+          {/* 🔥 TAMBAHAN KHUSUS BKU */}
+          {active === "BKU" && (
+            <div className="laporan-total-card">
+              <div className="laporan-total-title">Saldo Akhir</div>
+
+              <div className="laporan-total-value">
+                Rp {Number(saldoAkhir).toLocaleString("id-ID")}
+              </div>
+            </div>
+          )}
+
+          {/* EXPORT */}
           <div className="laporan-actions">
             <button className="btn-export excel" onClick={handleExportExcel}>
               Excel
