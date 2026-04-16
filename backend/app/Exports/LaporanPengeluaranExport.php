@@ -14,14 +14,15 @@ class LaporanPengeluaranExport implements WithEvents
 {
     protected $start, $end, $sumberDana;
     protected $total = 0;
-    protected $role;
+    protected $rowCount = 0;
+    protected $role = 'Bendahara'; 
 
-    public function __construct($start, $end, $sumberDana)
+    public function __construct($start, $end, $sumberDana, $role = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
-        $this->role = Auth::user()->role ?? 'Bendahara';
+        $this->role = $role ?? 'Bendahara';
     }
 
     public function collection()
@@ -49,7 +50,9 @@ class LaporanPengeluaranExport implements WithEvents
         }
 
         $data = $query->orderBy('tp.TANGGAL_TR_PM', 'asc')->get();
+
         $this->total = $data->sum('nominal');
+        $this->rowCount = $data->count();
 
         return $data;
     }
@@ -94,9 +97,7 @@ class LaporanPengeluaranExport implements WithEvents
 
                 $row = $headerRow + 1;
                 $no = 1;
-                $dataCollection = $this->collection();
-
-                foreach ($dataCollection as $item) {
+                foreach ($this->collection() as $item) {
                     $sheet->setCellValue("A$row", $no);
                     $sheet->setCellValue("B$row", $item->tanggal);
                     $sheet->setCellValue("C$row", $item->program);
