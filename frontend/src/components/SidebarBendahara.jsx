@@ -1,11 +1,14 @@
 import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
-import { NavLink, useLocation } from "react-router-dom";
+// TAMBAHAN: Import useNavigate
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function SidebarBendahara() {
     const location = useLocation();
+    const navigate = useNavigate(); // TAMBAHAN: Inisialisasi fungsi navigasi
+
     const [openMaster, setOpenMaster] = useState(false);
     const isMasterActive = location.pathname.startsWith("/bendahara/master");
     const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +31,12 @@ export default function SidebarBendahara() {
             setOpenMaster(true);
         }
     }, [isMasterActive]);
+
+    // TAMBAHAN: Fungsi untuk handle aksi logout
+    const handleLogout = () => {
+        localStorage.clear(); // 1. Hapus token dan data user dari memori browser
+        navigate("/login");   // 2. Lempar kembali ke halaman login
+    };
 
     return (
         <>
@@ -95,12 +104,11 @@ export default function SidebarBendahara() {
                             <li 
                                 className="nav-item"
                                 onMouseEnter={() => setOpenMaster(true)}
-                                onMouseLeave={() => !isMasterActive && setOpenMaster(false)} // Jangan tutup kalau lagi aktif
+                                onMouseLeave={() => !isMasterActive && setOpenMaster(false)}
                             >
                                 <div className={`nav-link text-dark master-menu ${isMasterActive ? "sidebar-active" : ""}`}>
                                     <i className="bi bi-database"></i>
                                     Master Data
-                                    {/* Opsional: Tambah ikon panah biar cakep */}
                                     <i className={`bi bi-chevron-right ms-auto transition-transform ${openMaster ? 'rotate-90' : ''}`} style={{ fontSize: '10px' }}></i>
                                 </div>
                                 {openMaster && (
@@ -145,7 +153,8 @@ export default function SidebarBendahara() {
                         </ul>
                         <div className="logout">
                             <div className="logout-button">
-                                <button className="btn-logout">
+                                {/* TAMBAHAN: Pasang onClick ke tombol ini */}
+                                <button className="btn-logout" onClick={handleLogout}>
                                     <i className="bi bi-box-arrow-right"></i>
                                     <span>Logout</span>
                                 </button>
