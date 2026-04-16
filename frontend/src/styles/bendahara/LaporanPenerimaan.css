@@ -1,6 +1,20 @@
+:root {
+  --primary: #265f9c;
+  --secondary: #eda60f;
+  --accent: #edd15b;
+  --bg: #f6f7f9;
+
+  --text-main: #1a1a1a;
+  --text-secondary: #585858;
+  --text-disabled: #7d7d7e;
+
+  --success: #2e7d32;
+  --error: #c62828;
+}
+
 .laporan-container {
   padding: 24px;
-  background: #f6f7f9;
+  background: var(--bg);
   min-height: 100vh;
 }
 
@@ -9,6 +23,7 @@
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 20px;
+  color: var(--text-main);
 }
 
 /* TAB */
@@ -22,13 +37,13 @@
 .laporan-tab {
   padding-bottom: 8px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .laporan-tab.active {
-  color: #2563eb;
-  border-bottom: 2px solid #2563eb;
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
 }
 
 /* ========================= */
@@ -46,7 +61,7 @@
 /* ========================= */
 
 .laporan-filter {
-  width: 100%px;
+  width: 100%;
   background: #ffffff;
   padding: 16px;
   border-radius: 11px;
@@ -55,7 +70,6 @@
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  justify-content: space-between;
   gap: 16px;
 
   height: fit-content;
@@ -63,18 +77,19 @@
 
 .filter-range {
   display: flex;
-  flex-direction: column; /* 🔥 UBAH INI */
-  align-items: flex-start; /* 🔥 BIAR SEJAJAR */
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
   font-size: 13px;
-  color: #62666e;
+  color: var(--text-secondary);
   flex: 1;
 }
 
 .laporan-filter label {
-  margin-bottom: 0; /* 🔥 HAPUS efek turun */
-  margin-right: 8px; /* 🔥 kasih jarak ke input */
+  margin-bottom: 0;
+  margin-right: 8px;
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
 /* INPUT NORMAL */
@@ -83,13 +98,19 @@
   padding: 8px 10px;
   border-radius: 6px;
   background: white;
-  color: black;
+  color: var(--text-main);
   font-size: 13px;
+}
+
+.laporan-filter input:focus,
+.laporan-filter select:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 /* 🔥 BUTTON FIX */
 .laporan-filter button {
-  width: auto; /* 🔥 DIUBAH (dari 100%) */
+  width: auto;
 }
 
 /* ========================= */
@@ -105,9 +126,13 @@
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: var(--primary);
   color: white;
   height: 38px;
+}
+
+.btn-primary:hover {
+  background: #1e4f82;
 }
 
 /* ========================= */
@@ -133,29 +158,29 @@
   text-align: left;
   padding: 12px;
   font-size: 13px;
-  color: #374151;
+  color: var(--text-main);
 }
 
 .laporan-table td {
   padding: 12px;
   font-size: 13px;
   border-top: 1px solid #eee;
-  color: #111827;
+  color: var(--text-secondary);
 }
 
 .laporan-table tr:hover {
-  background: #f9fafb;
+  background: #f1f5f9;
 }
 
 .laporan-table tbody tr:nth-child(even) {
   background: #fafafa;
 }
 
-/* OPTIONAL */
-.laporan-table * {
+/* ⚠️ DIHAPUS BIAR WARNA NORMAL */
+/* .laporan-table * {
   color: rgb(103, 100, 100) !important;
   background-color: transparent;
-}
+} */
 
 /* ========================= */
 /* TOTAL */
@@ -165,7 +190,7 @@
   margin-top: 16px;
   text-align: right;
   font-weight: 600;
-  color: black;
+  color: var(--text-main);
 }
 
 /* ========================= */
@@ -174,7 +199,7 @@
 
 .laporan-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 10px;
   margin-top: 1px;
 }
@@ -189,11 +214,11 @@
 }
 
 .btn-export.excel {
-  background: #22c55e;
+  background: var(--success);
 }
 
 .btn-export.pdf {
-  background: #ef4444;
+  background: var(--error);
 }
 
 .btn-export:hover {
@@ -211,7 +236,6 @@
   gap: 10px;
 }
 
-/* 🔥 FIX BIAR SEJAJAR */
 .range-input input {
   width: 120px;
   flex-shrink: 0;
@@ -233,12 +257,12 @@
   border: 1px solid #ddd;
   font-size: 13px;
   background: white;
-  color: black;
+  color: var(--text-main);
   flex-shrink: 0;
   width: 150px;
 }
 
-/* 🔥 FIX RANGE BIAR CENTER */
+/* FIX RANGE */
 .range-input {
   align-items: center;
   gap: 8px;
@@ -248,10 +272,17 @@
   display: flex;
   flex-direction: column;
   font-size: 13px;
-  color: #62666e;
+  color: var(--text-secondary);
 }
 
 .filter-sumber label {
   margin-bottom: 8px;
   font-weight: 600;
+}
+
+/* SIDE */
+.laporan-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }

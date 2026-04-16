@@ -99,7 +99,7 @@ export default function Laporan() {
         ))}
       </div>
 
-      {/* 🔥 CONTENT */}
+      {/* CONTENT */}
       <div className="laporan-content">
         {/* ========================= */}
         {/* TABEL */}
@@ -146,59 +146,60 @@ export default function Laporan() {
           </div>
         </div>
 
-        {/* ========================= */}
-        {/* FILTER */}
-        {/* ========================= */}
-        <div className="laporan-filter">
-          <div className="filter-range">
-            <label>Periode</label>
+        {/* WRAPPER KANAN */}
+        <div className="laporan-side">
+          {/* FILTER */}
+          <div className="laporan-filter">
+            <div className="filter-range">
+              <label>Periode</label>
 
-            <div className="range-input">
-              <input
-                type="date"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-              />
+              <div className="range-input">
+                <input
+                  type="date"
+                  value={start}
+                  onChange={(e) => setStart(e.target.value)}
+                />
 
-              <span className="range-separator">—</span>
+                <span className="range-separator">—</span>
 
-              <input
-                type="date"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-              />
+                <input
+                  type="date"
+                  value={end}
+                  onChange={(e) => setEnd(e.target.value)}
+                />
+              </div>
             </div>
+
+            <div className="filter-sumber">
+              <label>Sumber Dana</label>
+
+              <select
+                value={sumberDana}
+                onChange={(e) => setSumberDana(e.target.value)}
+              >
+                <option value="">Semua Dana</option>
+                <option value="1">Dana Pemerintah</option>
+                <option value="2">Dana Komite Sekolah</option>
+                <option value="3">Dana Pemerintah Daerah</option>
+              </select>
+            </div>
+
+            <button className="btn btn-primary" onClick={loadData}>
+              Filter
+            </button>
           </div>
 
-          <div className="filter-sumber">
-            <label>Sumber Dana</label>
+          {/* EXPORT (FIX DI BAWAH FILTER) */}
+          <div className="laporan-actions">
+            <button className="btn-export excel" onClick={handleExportExcel}>
+              Excel
+            </button>
 
-            <select
-              value={sumberDana}
-              onChange={(e) => setSumberDana(e.target.value)}
-            >
-              <option value="">Semua Dana</option>
-              <option value="1">Dana Pemerintah</option>
-              <option value="2">Dana Komite Sekolah</option>
-              <option value="3">Dana Pemerintah Daerah</option>
-            </select>
+            <button className="btn-export pdf" onClick={handleExportPDF}>
+              PDF
+            </button>
           </div>
-
-          <button className="btn btn-primary" onClick={loadData}>
-            Filter
-          </button>
         </div>
-      </div>
-
-      {/* 🔥 EXPORT PINDAH KE BAWAH */}
-      <div className="laporan-actions">
-        <button className="btn-export excel" onClick={handleExportExcel}>
-          Excel
-        </button>
-
-        <button className="btn-export pdf" onClick={handleExportPDF}>
-          PDF
-        </button>
       </div>
     </div>
   );
