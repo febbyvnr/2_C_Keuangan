@@ -32,8 +32,7 @@ class LaporanPengeluaranController extends Controller
         }
 
         $query = DB::table('tr_pm as tp')
-            ->join('ref_pm as rp', 'tp.ID_PM', '=', 'rp.ID_TR_PM')
-            ->join('fpd_anggaran as fa', 'rp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
+            ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
             ->join('dtl_fpd as df', 'fa.ID_DT_PROGKER', '=', 'df.ID_DT_PROGKER')
             ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
             ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
@@ -43,7 +42,6 @@ class LaporanPengeluaranController extends Controller
                 'mpk.PROGRAM_KERJA as program',
                 'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'tp.DESKRIPSI_TR_PM as uraian',
-                // Perhitungan nominal tetap dijaga
                 DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal')
             );
 
@@ -55,7 +53,6 @@ class LaporanPengeluaranController extends Controller
             $query->where('dpk.ID_REF_DANA', $sumberDana);
         }
 
-        // Urutkan berdasarkan tanggal
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         
         $total = $data->sum('nominal');
