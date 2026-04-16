@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../styles/waka/RKT.css";
+import SidebarWaka from "../../components/SidebarWaka";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
-const WAKA_MENU = ["Dashboard", "RKT", "Realisasi RKT", "Bridging RKT", "Evaluasi RKT"];
 
 const createEmptyForm = () => ({
     ID_TA_ANGGARAN: "",
@@ -284,27 +284,7 @@ export default function WakaRKT() {
 
     return (
         <div className="waka-rkt-shell">
-            <aside className="waka-rkt-sidebar">
-                <div className="waka-rkt-brand">
-                    <div className="waka-rkt-badge">WK</div>
-                    <div>
-                        <strong>Portal Waka</strong>
-                        <span>Rencana Kerja Tahunan</span>
-                    </div>
-                </div>
-
-                <nav className="waka-rkt-nav" aria-label="Navigasi waka">
-                    {WAKA_MENU.map((item) => (
-                        <button
-                            key={item}
-                            type="button"
-                            className={`waka-rkt-nav-item ${item === "RKT" ? "active" : ""}`}
-                        >
-                            {item}
-                        </button>
-                    ))}
-                </nav>
-            </aside>
+            <SidebarWaka />
 
             <main className="waka-rkt-main">
                 <header className="waka-rkt-header">

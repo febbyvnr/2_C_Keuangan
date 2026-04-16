@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../../styles/pic/guru/FPD.css";
+import SidebarPic from "../../../components/SidebarPic";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
-const SIDEBAR_ITEMS = ["Dashboard", "Page RKT", "Page Realisasi RKT", "Page Bridging RKT", "Page Pengajuan Dana", "Page LPJ", "Page Evaluasi RKT"];
 const currencyFormatter = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 const dateFormatter = new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 const createEmptyForm = (idFpd = "", idDetail = "", satuan = "") => ({ idFpd, idDetail, qty: "1", volume: "1", satuan, hargaSatuan: "0" });
@@ -223,12 +223,7 @@ export default function PicGuruFPD() {
 
     return (
         <div className="pic-fpd-shell">
-            <aside className="pic-fpd-sidebar">
-                <div className="pic-fpd-brand"><div className="pic-fpd-brand-badge">SMK</div><div><strong>Portal Guru</strong><span>SMK BOPKRI 2</span></div></div>
-                <nav className="pic-fpd-nav" aria-label="Navigasi portal guru">
-                    {SIDEBAR_ITEMS.map((item) => <button key={item} type="button" className={`pic-fpd-nav-item ${item === "Page Pengajuan Dana" ? "active" : ""}`}>{item}</button>)}
-                </nav>
-            </aside>
+            <SidebarPic />
             <main className="pic-fpd-main">
                 <header className="pic-fpd-page-heading">
                     <h1>Form Pengajuan Dana</h1>

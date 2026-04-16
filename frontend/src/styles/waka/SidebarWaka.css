@@ -1,0 +1,70 @@
+.waka-sidebar {
+    padding: 24px 14px;
+    background: #ffffff;
+    border-right: 1px solid #e5edf5;
+}
+
+.waka-sidebar-brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 6px 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #e8edf4;
+}
+
+.waka-sidebar-badge {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #1d4ed8;
+    color: #fff;
+    font-weight: 700;
+}
+
+.waka-sidebar-brand strong,
+.waka-sidebar-brand span {
+    display: block;
+}
+
+.waka-sidebar-brand span {
+    color: #6b7280;
+    font-size: 0.88rem;
+}
+
+.waka-sidebar-nav {
+    display: grid;
+    gap: 8px;
+}
+
+.waka-sidebar-item {
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #334155;
+    text-align: left;
+    text-decoration: none;
+}
+
+.waka-sidebar-item.active {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 700;
+    box-shadow: inset -4px 0 0 #1d4ed8;
+}
+
+.waka-sidebar-item.muted {
+    cursor: default;
+    color: #94a3b8;
+}
+
+@media (max-width: 1080px) {
+    .waka-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid #e5edf5;
+    }
+}
