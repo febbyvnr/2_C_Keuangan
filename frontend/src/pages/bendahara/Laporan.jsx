@@ -96,7 +96,7 @@ export default function Laporan() {
 
   useEffect(() => {
     loadData();
-  }, [active, bkuType]); // 🔥 TAMBAHAN
+  }, [active, bkuType]);
 
   // 🔥 NAVIGASI BKU
   const nextBku = () => {
@@ -128,12 +128,15 @@ export default function Laporan() {
         {/* TABEL */}
         {/* ========================= */}
         <div style={{ flex: 1 }}>
-          {/* 🔥 SWITCH BKU */}
+          {/* 🔥 SWITCH BKU (FIXED) */}
           {active === "BKU" && (
             <div className="bku-switch">
-              <button onClick={prevBku}>⬅</button>
+              <button onClick={prevBku}>&lt;</button>
+
+              {/* 🔥 LABEL TENGAH */}
               <span>{bkuList[bkuType]}</span>
-              <button onClick={nextBku}>➡</button>
+
+              <button onClick={nextBku}>&gt;</button>
             </div>
           )}
 
