@@ -32,17 +32,17 @@ class LaporanPengeluaranController extends Controller
         }
 
         $query = DB::table('tr_pm as tp')
-            ->join('dtl_fpd as df', 'tp.ID_TR_PM', '=', 'df.ID_TR_PM')
-            ->join('fpd_anggaran as fa', 'df.ID_FPD_ANGGARAN', '=', 'fa.ID_FPD_ANGGARAN')
-            ->join('dtl_program_kerja as dpk', 'fa.ID_ID_DT_PROGKER', '=', 'dpk.ID_ID_DT_PROGKER')
-            ->join('mst_program_kerja as mpk', 'dpk.ID_MST_PROGRAM_KERJA', '=', 'mpk.ID_MST_PROGRAM_KERJA')
-            ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_SUMBER_DANA', '=', 'rsd.ID_REF_SUMBER_DANA')
+            ->join('dtl_fpd as df', 'tp.ID_PM', '=', 'df.ID_PM')
+            ->join('fpd_anggaran as fa', 'df.ID_FPD', '=', 'fa.ID_FPD')
+            ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
+            ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
+            ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
             ->select(
-                'tp.TANGGAL_TR_PM as tanggal',
-                'mpk.NAMA_MST_PROGRAM_KERJA as program',
-                'rsd.NAMA_REF_SUMBER_DANA as sumber_dana',
+                'tp.TGL_PM as tanggal',
+                'mpk.PROGRAM_KERJA as program',
+                'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'tp.DESKRIPSI_TR_PM as uraian',
-                'df.JUMLAH_DTL_FPD as nominal'
+                'df.TOTAL as nominal'
             );
 
         if ($start && $end) {
@@ -50,10 +50,10 @@ class LaporanPengeluaranController extends Controller
         }
 
         if ($sumberDana) {
-            $query->where('dpk.ID_REF_SUMBER_DANA', $sumberDana);
+            $query->where('dpk.ID_REF_DANA', $sumberDana);
         }
 
-        $data = $query->get();
+        $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         $total = $data->sum('nominal');
 
         if ($type == 'pdf') {
