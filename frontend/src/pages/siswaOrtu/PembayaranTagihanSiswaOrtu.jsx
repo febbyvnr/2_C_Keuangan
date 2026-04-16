@@ -65,7 +65,7 @@ function PembayaranTagihanSiswaOrtu() {
           <button
             type="button"
             className="back-button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/siswa-ortu/utama")}
           >
             <span className="back-icon">←</span>
             <span>Kembali</span>

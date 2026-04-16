@@ -42,7 +42,10 @@ function ProfileSiswaOrtu() {
     <div className="profile-page">
       <div className="profile-container">
         <div className="profile-topbar">
-          <button className="back-btn" onClick={() => navigate("/siswa-ortu")}>
+          <button
+            className="back-btn"
+            onClick={() => navigate("/siswa-ortu/utama")}
+          >
             ← Kembali
           </button>
 
