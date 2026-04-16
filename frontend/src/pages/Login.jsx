@@ -27,7 +27,7 @@ export default function Login() {
             localStorage.setItem('user', JSON.stringify(response.data.user));
 
             // Lempar ke dashboard
-            navigate('/dashboard');
+            navigate('/bendahara/dashboard');
         } catch (error) {
             setErrorMsg(error.status === 401 ? 'NIP atau Password salah!' : error.message);
         } finally {
