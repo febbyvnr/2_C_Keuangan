@@ -286,3 +286,32 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.laporan-table {
+  max-height: calc(110vh - 220px);
+  overflow-y: auto;
+}
+
+.laporan-table thead th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+.laporan-table::-webkit-scrollbar {
+  width: 6px;
+}
+
+.laporan-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.laporan-table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.laporan-table::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
