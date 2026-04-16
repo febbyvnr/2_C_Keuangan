@@ -13,7 +13,7 @@ class RefTahunAnggaran extends Model
 
     protected $primaryKey = 'ID_TA_ANGGARAN';
 
-    public $incrementing = true; 
+    public $incrementing = false; 
 
     protected $keyType = 'int'; 
 
@@ -86,5 +86,14 @@ class RefTahunAnggaran extends Model
     public function getLabelAttribute(): string
     {
         return $this->DESKRIPSI_TAHUN_ANGGARAN;
+    }
+
+    public function tahunAnggaran()
+    {
+        return $this->belongsTo(
+            RefTahunAnggaran::class,
+            'KODE_TA',
+            'ID_TA_ANGGARAN'
+        );
     }
 }

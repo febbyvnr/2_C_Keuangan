@@ -9,14 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RefTarif extends Model
 {
     protected $table = 'ref_tarif';
-
-    // Tidak ada primary key di tabel → pakai composite key (manual)
-    protected $primaryKey = null;
-
-    public $incrementing = false;
-
+    protected $primaryKey = 'ID_REF_TARIF';
+    public $incrementing = true;
     protected $keyType = 'int';
-
     public $timestamps = false;
 
     protected $fillable = [

@@ -66,7 +66,7 @@ class TrPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = TrPm::with(['programKerja', 'refPm'])->find($id);
+            $data = TrPm::with(['programKerja', 'refPm', 'refVisiMisi'])->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -98,6 +98,8 @@ class TrPmController extends Controller
                 'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
                 'TGL_PM' => 'required|date',
                 'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
+                'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
+                'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
             ]);
 
             $data = TrPm::create($validated);
@@ -141,6 +143,8 @@ class TrPmController extends Controller
                 'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
                 'TGL_PM' => 'required|date',
                 'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
+                'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
+                'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
             ]);
 
             $data->update($validated);
