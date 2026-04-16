@@ -254,9 +254,9 @@ export default function Laporan() {
                     onChange={(e) => setSumberDana(e.target.value)}
                   >
                     <option value="">Semua Dana</option>
-                    <option value="1">Dana Pemerintah</option>
-                    <option value="2">Dana Komite Sekolah</option>
-                    <option value="3">Dana Pemerintah Daerah</option>
+                    <option value="1">Pemerintah</option>
+                    <option value="2">Komite Sekolah</option>
+                    <option value="3">Pemerintah Daerah</option>
                   </select>
                 </div>
 
