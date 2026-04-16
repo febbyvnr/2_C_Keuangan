@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-        body { 
+                body { 
             font-family: sans-serif; 
             position: relative;
         }
@@ -15,13 +15,11 @@
         th, td { 
             border: 1px solid black; 
             padding: 6px; 
-            font-size: 11px;
         }
 
-
+        HEADER TABLE LEBIH SOFT
         th { 
-            background: #f5f5f5; 
-            text-align: center;
+            background: #f5f5f5;  
         }
 
         .no-border td {
@@ -43,7 +41,7 @@
             font-weight: bold;
         }
 
-        /* WATERMARK */
+        /* WATERMARK (LEBIH HALUS & TENGAH) */
         .watermark {
             position: absolute;
             top: 50%;
@@ -53,19 +51,11 @@
             z-index: -1;
         }
 
-        /* GARIS DOBEL KHAS KOP SURAT */
+        /* GARIS DOBEL */
         .double-line {
             border-top: 3px solid black;
             border-bottom: 1px solid black;
             margin: 8px 0 12px 0;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
         }
 
     </style>
