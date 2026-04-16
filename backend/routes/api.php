@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
+use App\Http\Controllers\MstUnitController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -32,6 +34,33 @@ use App\Http\Controllers\LaporanPengeluaranController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::post('/login', [AuthController::class, 'login']);
+
+
+// 2. F82, F83, F84 (Create, Update, Delete) - HANYA BENDAHARA
+Route::middleware(['role:Bendahara'])->group(function () {
+    Route::post('/keuangan/penerimaan', [TrPenerimaanController::class, 'store']); // F82
+    Route::put('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
+    Route::delete('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
+});
+
+
+// 3. F85, F86, F87 (Read, Search, Export) & Route /me - BENDAHARA ATAU KEPALA SEKOLAH
+Route::middleware(['role:Bendahara,Kepala Sekolah'])->group(function () {
+    
+    // Rute Testing Token
+    Route::get('/me', function (Request $request) {
+        return response()->json([
+            'message' => 'Token berhasil ditembus!',
+            'user' => $request->user(),
+            'roles' => $request->user()->jabatans->pluck('DESKRIPSI_JABATAN')
+        ]);
+    });
+
+    Route::get('/keuangan/penerimaan', [TrPenerimaanController::class, 'index']); // F85 & F86
+    Route::get('/keuangan/penerimaan/export', [TrPenerimaanController::class, 'export']); // F87
+});
 
 Route::prefix('coa')->group(function () {
     Route::get('/', [MstCoaController::class, 'index']);
@@ -44,6 +73,10 @@ Route::prefix('coa')->group(function () {
     Route::post('/store', [MstCoaController::class, 'store']);
     Route::put('/update/{id}', [MstCoaController::class, 'update']);
     Route::delete('/delete/{id}', [MstCoaController::class, 'destroy']);
+});
+
+Route::prefix('unit')->group(function () {
+    Route::get('/', [MstUnitController::class, 'index']);
 });
 
 
@@ -244,8 +277,16 @@ Route::prefix('laporan')->group(function () {
 Route::prefix('rka')->group(function () {
     Route::get('/', [RkaController::class, 'index']);
     Route::get('/search', [RkaController::class, 'search']);
-    Route::get('/{id}', [RkaController::class, 'show']);
+    
+    // ROUTE EXPORT HARUS DI ATAS {id}
+    Route::get('/export', [RkaController::class, 'export']); 
+    Route::get('/export/pdf', [RkaController::class, 'exportPdf']); // <-- RUTE PDF DITAMBAHKAN
+    
+    Route::get('/{id}', [RkaController::class, 'show'])->whereNumber('id');
+    
     Route::post('/store', [RkaController::class, 'store']);
+    Route::put('/update/{id}', [RkaController::class, 'update'])->whereNumber('id');
+    Route::delete('/delete/{id}', [RkaController::class, 'destroy'])->whereNumber('id');
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
 });
