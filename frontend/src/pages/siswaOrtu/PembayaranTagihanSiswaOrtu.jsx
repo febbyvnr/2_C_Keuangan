@@ -192,43 +192,45 @@ function PembayaranTagihanSiswaOrtu() {
                 </div>
               </div>
 
-              {metode === "bank" && (
-                <>
-                  <div className="payment-info">
-                    <p className="payment-info-title">Informasi Rekening</p>
-                    <p>Bank BRI - 1234567890</p>
-                    <p>a.n. SMK BOPKRI 2 Yogyakarta</p>
+              <div className="payment-method-content">
+                {metode === "bank" && (
+                  <>
+                    <div className="payment-info">
+                      <p className="payment-info-title">Informasi Rekening</p>
+                      <p>Bank BRI - 1234567890</p>
+                      <p>a.n. SMK BOPKRI 2 Yogyakarta</p>
+                      <p className="payment-info-note">
+                        Silakan transfer sesuai nominal pembayaran lalu unggah
+                        bukti pembayaran untuk diverifikasi bendahara.
+                      </p>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="buktiTransfer">Upload Bukti Pembayaran</label>
+                      <input
+                        type="file"
+                        id="buktiTransfer"
+                        name="buktiTransfer"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {metode === "tunai" && (
+                  <div className="payment-info payment-info-tunai">
+                    <p className="payment-info-title">Instruksi Pembayaran Tunai</p>
+                    <p>
+                      Silakan melakukan pembayaran langsung ke bendahara sekolah
+                      pada jam layanan yang tersedia.
+                    </p>
                     <p className="payment-info-note">
-                      Silakan transfer sesuai nominal pembayaran lalu unggah
-                      bukti pembayaran untuk diverifikasi bendahara.
+                      Setelah pembayaran diterima, bendahara akan memverifikasi dan
+                      memperbarui status tagihan Anda.
                     </p>
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="buktiTransfer">Upload Bukti Pembayaran</label>
-                    <input
-                      type="file"
-                      id="buktiTransfer"
-                      name="buktiTransfer"
-                      accept=".jpg,.jpeg,.png,.pdf"
-                    />
-                  </div>
-                </>
-              )}
-
-              {metode === "tunai" && (
-                <div className="payment-info payment-info-tunai">
-                  <p className="payment-info-title">Instruksi Pembayaran Tunai</p>
-                  <p>
-                    Silakan melakukan pembayaran langsung ke bendahara sekolah
-                    pada jam layanan yang tersedia.
-                  </p>
-                  <p className="payment-info-note">
-                    Setelah pembayaran diterima, bendahara akan memverifikasi dan
-                    memperbarui status tagihan Anda.
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="form-group">
                 <label htmlFor="catatan">Catatan</label>
