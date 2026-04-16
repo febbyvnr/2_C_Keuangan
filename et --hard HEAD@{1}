@@ -1,0 +1,107 @@
+[33m2f9785a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mGian_FELaporanPengeluaran[m[33m, [m[1;31morigin/Gian_FELaporanPengeluaran[m[33m)[m HEAD@{0}: commit (merge): Merge remote-tracking branch 'origin/main' into Gian_FELaporanPengeluaran
+[33m47c51e4[m HEAD@{1}: commit: atur card agar sejajar dengan tabel
+[33m29a29f8[m[33m ([m[1;31morigin/Gian_FELaporanBKU[m[33m, [m[1;32mGian_FELaporanBKU[m[33m)[m HEAD@{2}: checkout: moving from Gian_FELaporanBKU to Gian_FELaporanPengeluaran
+[33m29a29f8[m[33m ([m[1;31morigin/Gian_FELaporanBKU[m[33m, [m[1;32mGian_FELaporanBKU[m[33m)[m HEAD@{3}: commit: penghapusan aturan tailwind
+[33m7c4b604[m HEAD@{4}: merge origin/main: Fast-forward
+[33mb39b07b[m HEAD@{5}: commit: tambahan card + atur layout biar rapi
+[33mcf2a9fb[m HEAD@{6}: commit: revisi alur masuk data
+[33mdf218f5[m HEAD@{7}: commit: ubah nama sumber dana
+[33m079c47f[m HEAD@{8}: commit: hapus komen dan kode yang tidak perlu
+[33mcb818e7[m HEAD@{9}: commit: perbaiki jarak judul
+[33m65adab8[m HEAD@{10}: commit: delete komen
+[33md90929a[m HEAD@{11}: commit: pembersihan komen di css
+[33m47a3088[m HEAD@{12}: commit: kunci agar di tengah
+[33m23c538a[m HEAD@{13}: commit: add nama filter
+[33me07d2f2[m HEAD@{14}: commit: atur desain filter
+[33m5172fa3[m[33m ([m[1;31morigin/Gian_FELaporan[m[33m, [m[1;32mGian_FELaporan[m[33m)[m HEAD@{15}: checkout: moving from Gian_FELaporan to Gian_FELaporanBKU
+[33m5172fa3[m[33m ([m[1;31morigin/Gian_FELaporan[m[33m, [m[1;32mGian_FELaporan[m[33m)[m HEAD@{16}: commit: ubah nama dan sesuakan untuk import
+[33m8d6261f[m HEAD@{17}: commit: hapus komen
+[33m02ca4f6[m HEAD@{18}: commit: add card total penerimaan & ui
+[33m2f982cf[m HEAD@{19}: commit: perbaiki aturan scrool tabel
+[33m037f547[m HEAD@{20}: commit: penyesuaian layout dan collor palete
+[33m59d3505[m HEAD@{21}: commit: revisi ui
+[33m173ab2b[m HEAD@{22}: commit: atur layout filter
+[33m3a35d04[m HEAD@{23}: commit: hapus komen
+[33mc1fa13f[m HEAD@{24}: commit: revisi biar tidak menjadi latar belakang putih saat pindah
+[33m357d21a[m HEAD@{25}: commit: revisi link endpoint
+[33md486ce2[m HEAD@{26}: commit: ubah format tanggal
+[33madc44d5[m HEAD@{27}: commit: add desain button
+[33m1829b87[m HEAD@{28}: commit: add buttoon
+[33m119c9c3[m HEAD@{29}: commit: add ukuran font
+[33mdf7b262[m HEAD@{30}: commit: perbaikan semula untuk localhost
+[33m4884c6d[m HEAD@{31}: commit (merge): resolve merge conflict
+[33m50ae419[m HEAD@{32}: commit: update
+[33mb562f4d[m HEAD@{33}: commit: add file css
+[33m4c0a572[m HEAD@{34}: commit: add fungsi tailwind
+[33meec9204[m HEAD@{35}: commit: ubah package
+[33m51c4de5[m[33m ([m[1;31morigin/Gian_RevLaporanPenerimaan(KM)[m[33m, [m[1;32mGian_RevLaporanPenerimaan(KM)[m[33m)[m HEAD@{36}: checkout: moving from Gian_RevLaporanPenerimaan(KM) to Gian_FELaporan
+[33m51c4de5[m[33m ([m[1;31morigin/Gian_RevLaporanPenerimaan(KM)[m[33m, [m[1;32mGian_RevLaporanPenerimaan(KM)[m[33m)[m HEAD@{37}: commit: add filter excel
+[33m9129559[m HEAD@{38}: commit: add field sumber dana
+[33me1f82bf[m HEAD@{39}: commit: add join sumber dana
+[33m31c15d0[m[33m ([m[1;31morigin/Gian_GenerateLaporanBukuKhasUmum-(BKU)[m[33m, [m[1;32mGian_GenerateLaporanBukuKhasUmum-(BKU)[m[33m)[m HEAD@{40}: checkout: moving from Gian_GenerateLaporanBukuKhasUmum-(BKU) to Gian_RevLaporanPenerimaan(KM)
+[33m31c15d0[m[33m ([m[1;31morigin/Gian_GenerateLaporanBukuKhasUmum-(BKU)[m[33m, [m[1;32mGian_GenerateLaporanBukuKhasUmum-(BKU)[m[33m)[m HEAD@{41}: commit: add komen
+[33m592aff6[m HEAD@{42}: commit: ubah metode
+[33m2b0214f[m HEAD@{43}: commit: ubah nama
+[33mb1c4dd1[m HEAD@{44}: commit: union data pakai fromSub
+[33m57551fa[m HEAD@{45}: commit: sesuaikan nama file untuk exp, hapus code, add auto filter
+[33mc817f6e[m HEAD@{46}: commit: hapus / dan add fungsi ubah nama sheet
+[33ma84625d[m HEAD@{47}: commit: add fungsi penamaan sheet
+[33m1f51bae[m HEAD@{48}: commit: add function judul sheet 'BKU'
+[33m707a977[m HEAD@{49}: commit: add function destriction, tanggal generate,, by role
+[33mc34e17b[m HEAD@{50}: commit: perbaiki route, ubah nama
+[33m2ab6c8f[m HEAD@{51}: commit: add route
+[33mb0db733[m HEAD@{52}: commit: add file bkup2
+[33md26046f[m HEAD@{53}: commit: add file sheetbkutunai
+[33mbbd49c5[m HEAD@{54}: commit: add code laporankhasumum & SheetBKU
+[33md86fac1[m HEAD@{55}: commit: add file bku bank
+[33m80fd348[m HEAD@{56}: commit: add file BKU tunai
+[33m4984466[m HEAD@{57}: commit: add file BKU
+[33ma53669a[m HEAD@{58}: commit: add file blade
+[33mb8f186f[m HEAD@{59}: commit: add file controllers
+[33m0012a66[m HEAD@{60}: commit: add file export
+[33mc5406a6[m HEAD@{61}: checkout: moving from main to Gian_GenerateLaporanBukuKhasUmum-(BKU)
+[33mc5406a6[m HEAD@{62}: checkout: moving from Gian_RevisiLaporanPenerimaan-(KM) to main
+[33mc89bc83[m[33m ([m[1;31morigin/Gian_RevisiLaporanPenerimaan-(KM)[m[33m)[m HEAD@{63}: commit: rapihin kode
+[33m7c0c5e0[m HEAD@{64}: commit: add function di export
+[33mf23ff99[m HEAD@{65}: commit: delete fungsi csv
+[33mbb5c7a9[m HEAD@{66}: commit: tambahin by role
+[33m9a1f3e1[m HEAD@{67}: commit: hapus tanda tangan
+[33mdec7e24[m HEAD@{68}: commit: ambil role dan validasi input
+[33m5396556[m HEAD@{69}: commit: revisi role & add auth
+[33m6e4ce80[m HEAD@{70}: commit: atur footer
+[33m2a3fdc7[m HEAD@{71}: commit: add role bagian excel
+[33m2fa5cb3[m HEAD@{72}: commit: add fungsi role
+[33m6b751f9[m HEAD@{73}: commit: generate berdasarkan role
+[33m8ce17fe[m HEAD@{74}: checkout: moving from main to Gian_RevisiLaporanPenerimaan-(KM)
+[33m8ce17fe[m HEAD@{75}: checkout: moving from Gian_RevisiTahunAnggaran to main
+[33m1447742[m[33m ([m[1;31morigin/Gian_RevisiTahunAnggaran[m[33m)[m HEAD@{76}: commit: perbaiki fungsi update agar data sebelumnya tidak bisa dihapus
+[33me726159[m HEAD@{77}: commit: update ID_TA-ANGGARAN auto increment
+[33m1f8404f[m HEAD@{78}: checkout: moving from main to Gian_RevisiTahunAnggaran
+[33m1f8404f[m HEAD@{79}: checkout: moving from Gian_GenerateLaporanPenerimaan-(KM) to main
+[33m7df925e[m[33m ([m[1;31morigin/Gian_GenerateLaporanPenerimaan-(KM)[m[33m)[m HEAD@{80}: merge origin/main: Fast-forward
+[33me9fe342[m HEAD@{81}: commit: update isi csv (clean)
+[33me0d772f[m HEAD@{82}: commit: atur jarak tabel dan total
+[33m69405d4[m HEAD@{83}: commit: footer dinamis
+[33maea16e8[m HEAD@{84}: commit: add auto wrap dan auto height
+[33mc0bb098[m HEAD@{85}: commit: ubah nama excel, csv
+[33mc907956[m HEAD@{86}: commit: perbaiki kerapian code
+[33md1a0bdd[m HEAD@{87}: commit: penghapusan logo, atur format nama dan npm ke tengah, dan tanggal diturunin sendikit
+[33mfebe2af[m HEAD@{88}: commit: perbaiki ukuran logo & turunin agar lebih center
+[33m5dcb963[m HEAD@{89}: commit: update struktur laporan (excel)
+[33mf783e97[m HEAD@{90}: commit: perbaiki posisi dan ukuran logo
+[33md5faf67[m HEAD@{91}: commit: atur posisi tempat logo, geseran horizontal, geseran vertikal
+[33m4d9367d[m HEAD@{92}: commit: mengatur perataan teks, garis tepi sel, dan mengatur latar belakang
+[33m46100a1[m HEAD@{93}: commit: revisi desain / struktur laporan (excel)
+[33ma704749[m HEAD@{94}: commit: hapus komen
+[33m2616d8c[m HEAD@{95}: commit: ubah koordinat
+[33mc633660[m HEAD@{96}: commit: revisi penamaan file pdf
+[33m1e2542a[m HEAD@{97}: commit: atur jarak tanggal
+[33mc81d14c[m HEAD@{98}: commit: penyesuaian database pada controllers & generate struktur laporan (Pdf)
+[33mb28e205[m HEAD@{99}: commit: Fix filter laporan penerimaan agar tidak kosong saat parameter kosong
+[33mfdd4d47[m HEAD@{100}: commit: hapus logo dan penambahan logo baru
+[33mcae26a0[m HEAD@{101}: commit: revisi penamaan
+[33m59bf0d1[m HEAD@{102}: commit: revisi penempatan file penerimaan_pdf
+[33m79b66c2[m HEAD@{103}: commit: add route LaporanPenerimaanController
+[33m9ce0c08[m HEAD@{104}: commit: add logo SMK
+[33m08b2e9b[m HEAD@{105}: commit: install Barryvdh\DomPDF\Facade\Pdf untuk format PDF & tambahan file LaporanPenerimaan_Pdf.blade.php
+[33mef34a29[m HEAD@{106}: commi
