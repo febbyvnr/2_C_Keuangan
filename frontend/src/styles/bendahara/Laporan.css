@@ -334,7 +334,7 @@
 }
 
 .laporan-total-value {
-  font-size: 16px; /* 🔥 DIPERKECIL */
+  font-size: 16px;
   font-weight: 600;
   color: var(--primary);
 }

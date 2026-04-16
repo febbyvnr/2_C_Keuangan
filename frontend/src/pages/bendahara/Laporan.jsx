@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/bendahara/LaporanPenerimaan.css";
+import "../../styles/bendahara/Laporan.css";
 
 export default function Laporan() {
   const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU", "Yayasan"];
