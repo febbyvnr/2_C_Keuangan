@@ -36,9 +36,11 @@ class LaporanPenerimaanController extends Controller
         // QUERY UTAMA (PDF & JSON)
         $query = DB::table('TR_PENERIMAAN as p')
             ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+            ->join('REF_SUMBER_DANA as rd', 'p.ID_REF_DANA', '=', 'rd.ID_REF_DANA')
             ->select(
                 'p.TANGGAL_TR_PENERIMAAN as tanggal',
                 'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
+                'rd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as jumlah'
             )

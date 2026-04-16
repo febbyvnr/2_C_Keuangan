@@ -82,7 +82,9 @@ class RefTahunAnggaranController extends Controller
     }
 
     if ($request->IS_CURRENT == 1) {
-        RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
+        RefTahunAnggaran::where('IS_CURRENT', 1)
+            ->where('ID_TA_ANGGARAN', '!=', $id)
+            ->update(['IS_CURRENT' => 0]);
     }
 
     $data->update($request->all());

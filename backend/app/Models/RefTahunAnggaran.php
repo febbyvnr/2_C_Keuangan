@@ -87,4 +87,13 @@ class RefTahunAnggaran extends Model
     {
         return $this->DESKRIPSI_TAHUN_ANGGARAN;
     }
+
+    public function tahunAnggaran()
+    {
+        return $this->belongsTo(
+            RefTahunAnggaran::class,
+            'KODE_TA',
+            'ID_TA_ANGGARAN'
+        );
+    }
 }
