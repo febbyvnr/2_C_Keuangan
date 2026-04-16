@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 
 class RefTarifController extends Controller
 {
-    /**
-     * Menampilkan semua data
-     */
     public function index()
     {
         return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
@@ -17,9 +14,6 @@ class RefTarifController extends Controller
             ->get();
     }
 
-    /**
-     * Mencari data
-     */
     public function search(Request $request)
     {
         $query = RefTarif::with(['jenisTarif', 'tahunAnggaran']);
@@ -35,9 +29,6 @@ class RefTarifController extends Controller
         return $query->get();
     }
 
-    /**
-     * Menambah Tarif
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -57,9 +48,6 @@ class RefTarifController extends Controller
         return response()->json($data, 201);
     }
 
-    /**
-     * Mengubah Tarif
-     */
     public function update(Request $request, $idJenisTarif, $idTaAnggaran)
     {
         $data = RefTarif::where('ID_JENIS_TARIF', $idJenisTarif)
@@ -79,9 +67,6 @@ class RefTarifController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Menghapus Tarif
-     */
     public function destroy($idJenisTarif, $idTaAnggaran)
     {
         $data = RefTarif::where('ID_JENIS_TARIF', $idJenisTarif)
@@ -95,14 +80,40 @@ class RefTarifController extends Controller
         ]);
     }
 
-    /**
-     * Detail 1 data
-     */
     public function show($idJenisTarif, $idTaAnggaran)
     {
         return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
             ->where('ID_JENIS_TARIF', $idJenisTarif)
             ->where('ID_TA_ANGGARAN', $idTaAnggaran)
             ->firstOrFail();
+    }
+
+    public function showById($id)
+    {
+        $data = RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_JENIS_TARIF', $id)
+            ->first();
+
+        if (!$data) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json($data);
+    }
+
+    public function byJenis($idJenis)
+    {
+        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_JENIS_TARIF', $idJenis)
+            ->get();
+    }
+
+    public function byTahun($idTahun)
+    {
+        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->where('ID_TA_ANGGARAN', $idTahun)
+            ->get();
     }
 }

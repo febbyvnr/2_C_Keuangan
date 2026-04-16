@@ -25,8 +25,8 @@ class MstKegiatanController extends Controller
             $query = MstKegiatan::query()
                 ->with(['children'])
                 ->where('IS_DELETE', 0)
-                ->whereNull('MST_ID_KEGIATAN')
-                ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+                // ->whereNull('MST_ID_KEGIATAN')
+                ->orderBy('ID_KEGIATAN', 'asc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {

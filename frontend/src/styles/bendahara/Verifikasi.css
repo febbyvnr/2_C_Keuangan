@@ -1,0 +1,275 @@
+.container {
+    padding: 25px;
+    background: #f1f5f9;
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    width: 100%;
+    max-width: 100%;
+}
+
+.container h2 {
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.grid.single {
+    grid-template-columns: 1fr;
+}
+
+.table-section,
+.detail-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+.table-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    min-height: 650px;
+}
+
+.table-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-section {
+    display: flex;
+    flex-direction: column;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    font-size: 13px;
+    color: #64748b;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    user-select: none;
+}
+
+td {
+    padding: 12px;
+    font-size: 14px;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+td i {
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+th i {
+    font-size: 12px;
+    margin-left: 6px;
+    color: #94a3b8;
+}
+
+th:last-child,
+td:last-child {
+    text-align: center;
+    width: 80px;
+}
+
+.icon-success {
+    color: #2E7D32;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-danger {
+    color: #C62828;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-success:hover,
+.icon-danger:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+tr:hover {
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.active-row {
+    background: #e0f2fe;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: white;
+    font-size: 12px;
+    margin-bottom: 15px;
+    width: fit-content;
+}
+
+.status-pill.success {
+    background: #2E7D32;
+}
+
+.status-pill.danger {
+    background: #C62828;
+}
+
+.detail-section h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:hover {
+    background: #f8fafc;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.detail-item b {
+    color: #1e293b;
+}
+
+.bukti img,
+.bukti iframe {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.btn-approve {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: #2E7D32;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-approve:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.btn-approve:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.pagination button {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #1a1a1a;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+    background-color: #f6f7f9;
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.pagination button.active {
+    background-color: #265f9c;
+    color: #ffffff;
+    border-color: #265f9c;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #585858;
+    background: #f6f7f9;
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+.empty-state {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #94a3b8;
+    text-align: center;
+    padding: 20px;
+    flex: 1;
+}
+
+.empty-state i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #cbd5f5;
+}
+
+.empty-state p {
+    font-size: 14px;
+}
