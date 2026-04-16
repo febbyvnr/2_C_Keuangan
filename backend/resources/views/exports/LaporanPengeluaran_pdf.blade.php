@@ -121,9 +121,9 @@
                 <br><br>
                 <b>Mengetahui,</b>
                 <br>
-                <b>By: Bendahara</b>
+                <b>Bendahara</b>
                 <br><br><br><br><br>
-                <b>{{ Auth::user()->name ?? '........................' }}</b>
+                <b>{{ Auth::user()->name ?? '' }}</b>
             </td>
         </tr>
     </table>
