@@ -27,7 +27,7 @@ use App\Http\Controllers\JenisTarifExportController;
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
 use App\Http\Controllers\LaporanBukuKhasUmumController;
-
+use App\Http\Controllers\LaporanPengeluaranController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -255,4 +255,8 @@ Route::prefix('jenis-pembayaran')->group(function () {
 
 Route::prefix('export')->group(function () {
     Route::get('/jenis-tarif', [JenisTarifExportController::class, 'export']);
+});
+
+Route::prefix('laporan')->group(function () {
+    Route::get('/pengeluaran', [LaporanPengeluaranController::class, 'pengeluaran']);
 });
