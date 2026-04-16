@@ -41,7 +41,6 @@
             font-weight: bold;
         }
 
-        /* WATERMARK (LEBIH HALUS & TENGAH) */
         .watermark {
             position: absolute;
             top: 50%;
@@ -123,7 +122,7 @@
                 <br>
                 <b>By: Bendahara</b>
                 <br><br><br><br><br>
-                <b>{{ Auth::user()->name ?? '.......................' }}</b>
+                <b>{{ Auth::user()->name ?? }}</b>
             </td>
         </tr>
     </table>
