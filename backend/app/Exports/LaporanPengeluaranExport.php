@@ -42,14 +42,14 @@ class LaporanPengeluaranExport implements WithEvents
             );
 
         if ($this->start && $this->end) {
-            $query->whereBetween('tp.TANGGAL_TR_PM', [$this->start, $this->end]);
+            $query->whereBetween('tp.TGL_PM', [$this->start, $this->end]);
         }
 
         if ($this->sumberDana) {
             $query->where('dpk.ID_REF_SUMBER_DANA', $this->sumberDana);
         }
 
-        $data = $query->orderBy('tp.TANGGAL_TR_PM', 'asc')->get();
+        $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
 
         $this->total = $data->sum('nominal');
         $this->rowCount = $data->count();

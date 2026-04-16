@@ -46,7 +46,7 @@ class LaporanPengeluaranController extends Controller
             );
 
         if ($start && $end) {
-            $query->whereBetween('tp.TANGGAL_TR_PM', [$start, $end]);
+            $query->whereBetween('tp.TGL_PM', [$start, $end]);
         }
 
         if ($sumberDana) {
