@@ -7,6 +7,7 @@ function PembayaranTagihanSiswaOrtu() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [metode, setMetode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const tagihanDummy = {
     id,
@@ -134,19 +135,61 @@ function PembayaranTagihanSiswaOrtu() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="metodePembayaran">Metode Pembayaran</label>
-                <select
-                  id="metodePembayaran"
-                  name="metodePembayaran"
-                  value={metode}
-                  onChange={(e) => setMetode(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Pilih metode pembayaran
-                  </option>
-                  <option value="bank">Transfer Bank</option>
-                  <option value="tunai">Tunai</option>
-                </select>
+                <label>Metode Pembayaran</label>
+
+                <div className="custom-select">
+                  <button
+                    type="button"
+                    className={`custom-select-trigger ${!metode ? "is-placeholder" : ""}`}
+                    onClick={() => setIsOpen(!isOpen)}
+                  >
+                    <span>
+                      {!metode
+                        ? "Pilih metode pembayaran"
+                        : metode === "bank"
+                        ? "Transfer Bank"
+                        : "Tunai"}
+                    </span>
+                    <span className="custom-select-arrow">▾</span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="custom-select-menu">
+                      <button
+                        type="button"
+                        className="custom-select-option placeholder-option"
+                        onClick={() => {
+                          setMetode("");
+                          setIsOpen(false);
+                        }}
+                      >
+                        Pilih metode pembayaran
+                      </button>
+
+                      <button
+                        type="button"
+                        className="custom-select-option"
+                        onClick={() => {
+                          setMetode("bank");
+                          setIsOpen(false);
+                        }}
+                      >
+                        Transfer Bank
+                      </button>
+
+                      <button
+                        type="button"
+                        className="custom-select-option"
+                        onClick={() => {
+                          setMetode("tunai");
+                          setIsOpen(false);
+                        }}
+                      >
+                        Tunai
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {metode === "bank" && (
