@@ -57,7 +57,7 @@
 }
 
 /* ========================= */
-/* 🔥 FILTER */
+/* FILTER */
 /* ========================= */
 
 .laporan-filter {
@@ -108,7 +108,7 @@
   outline: none;
 }
 
-/* 🔥 BUTTON FIX */
+/* BUTTON FIX */
 .laporan-filter button {
   width: auto;
 }
@@ -176,12 +176,6 @@
   background: #fafafa;
 }
 
-/* ⚠️ DIHAPUS BIAR WARNA NORMAL */
-/* .laporan-table * {
-  color: rgb(103, 100, 100) !important;
-  background-color: transparent;
-} */
-
 /* ========================= */
 /* TOTAL */
 /* ========================= */
@@ -226,7 +220,7 @@
 }
 
 /* ========================= */
-/* 🔥 RANGE DATE */
+/*  RANGE DATE */
 /* ========================= */
 
 .range-input {
@@ -247,7 +241,7 @@
 }
 
 /* ========================= */
-/* 🔥 DROPDOWN SUMBER DANA */
+/* DROPDOWN SUMBER DANA */
 /* ========================= */
 
 .laporan-filter select {
