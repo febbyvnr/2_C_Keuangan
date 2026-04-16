@@ -16,7 +16,11 @@ class MatrixFunctions
      *
      * @param mixed $matrixValues A matrix of values
      */
+<<<<<<< HEAD
+    private static function getMatrix(mixed $matrixValues): Matrix
+=======
     private static function getMatrix($matrixValues): Matrix
+>>>>>>> main
     {
         $matrixData = [];
         if (!is_array($matrixValues)) {
@@ -55,9 +59,15 @@ class MatrixFunctions
      * @param mixed $start the first number in the sequence, defaults to 1
      * @param mixed $step the amount to increment each subsequent value in the array, defaults to 1
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The resulting array, or a string containing an error
+     */
+    public static function sequence(mixed $rows = 1, mixed $columns = 1, mixed $start = 1, mixed $step = 1): string|array
+=======
      * @return array|string The resulting array, or a string containing an error
      */
     public static function sequence($rows = 1, $columns = 1, $start = 1, $step = 1)
+>>>>>>> main
     {
         try {
             $rows = (int) Helpers::validateNumericNullSubstitution($rows, 1);
@@ -95,13 +105,21 @@ class MatrixFunctions
      *
      * @return float|string The result, or a string containing an error
      */
+<<<<<<< HEAD
+    public static function determinant(mixed $matrixValues)
+=======
     public static function determinant($matrixValues)
+>>>>>>> main
     {
         try {
             $matrix = self::getMatrix($matrixValues);
 
             return $matrix->determinant();
+<<<<<<< HEAD
+        } catch (MatrixException) {
+=======
         } catch (MatrixException $ex) {
+>>>>>>> main
             return ExcelError::VALUE();
         } catch (Exception $e) {
             return $e->getMessage();
@@ -118,17 +136,29 @@ class MatrixFunctions
      *
      * @param mixed $matrixValues A matrix of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The result, or a string containing an error
+     */
+    public static function inverse(mixed $matrixValues): array|string
+=======
      * @return array|string The result, or a string containing an error
      */
     public static function inverse($matrixValues)
+>>>>>>> main
     {
         try {
             $matrix = self::getMatrix($matrixValues);
 
             return $matrix->inverse()->toArray();
+<<<<<<< HEAD
+        } catch (MatrixDiv0Exception) {
+            return ExcelError::NAN();
+        } catch (MatrixException) {
+=======
         } catch (MatrixDiv0Exception $e) {
             return ExcelError::NAN();
         } catch (MatrixException $e) {
+>>>>>>> main
             return ExcelError::VALUE();
         } catch (Exception $e) {
             return $e->getMessage();
@@ -141,16 +171,26 @@ class MatrixFunctions
      * @param mixed $matrixData1 A matrix of values
      * @param mixed $matrixData2 A matrix of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The result, or a string containing an error
+     */
+    public static function multiply(mixed $matrixData1, mixed $matrixData2): array|string
+=======
      * @return array|string The result, or a string containing an error
      */
     public static function multiply($matrixData1, $matrixData2)
+>>>>>>> main
     {
         try {
             $matrixA = self::getMatrix($matrixData1);
             $matrixB = self::getMatrix($matrixData2);
 
             return $matrixA->multiply($matrixB)->toArray();
+<<<<<<< HEAD
+        } catch (MatrixException) {
+=======
         } catch (MatrixException $ex) {
+>>>>>>> main
             return ExcelError::VALUE();
         } catch (Exception $e) {
             return $e->getMessage();
@@ -162,9 +202,15 @@ class MatrixFunctions
      *
      * @param mixed $dimension Number of rows and columns
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The result, or a string containing an error
+     */
+    public static function identity(mixed $dimension)
+=======
      * @return array|string The result, or a string containing an error
      */
     public static function identity($dimension)
+>>>>>>> main
     {
         try {
             $dimension = (int) Helpers::validateNumericNullBool($dimension);

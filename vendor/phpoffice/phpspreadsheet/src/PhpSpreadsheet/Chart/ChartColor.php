@@ -7,14 +7,31 @@ class ChartColor
     const EXCEL_COLOR_TYPE_STANDARD = 'prstClr';
     const EXCEL_COLOR_TYPE_SCHEME = 'schemeClr';
     const EXCEL_COLOR_TYPE_RGB = 'srgbClr';
+<<<<<<< HEAD
+    const EXCEL_COLOR_TYPES = [
+        self::EXCEL_COLOR_TYPE_RGB,
+=======
     /** @deprecated 1.24 use EXCEL_COLOR_TYPE_RGB instead */
     const EXCEL_COLOR_TYPE_ARGB = 'srgbClr';
     const EXCEL_COLOR_TYPES = [
         self::EXCEL_COLOR_TYPE_ARGB,
+>>>>>>> main
         self::EXCEL_COLOR_TYPE_SCHEME,
         self::EXCEL_COLOR_TYPE_STANDARD,
     ];
 
+<<<<<<< HEAD
+    private string $value = '';
+
+    private string $type = '';
+
+    private ?int $alpha = null;
+
+    private ?int $brightness = null;
+
+    /**
+     * @param array{value: ?string, alpha: null|int|string, brightness?: null|int|string, type: ?string}|string  $value
+=======
     /** @var string */
     private $value = '';
 
@@ -29,6 +46,7 @@ class ChartColor
 
     /**
      * @param string|string[] $value
+>>>>>>> main
      */
     public function __construct($value = '', ?int $alpha = null, ?string $type = null, ?int $brightness = null)
     {
@@ -87,6 +105,15 @@ class ChartColor
         return $this;
     }
 
+<<<<<<< HEAD
+    public function setColorProperties(?string $color, null|float|int|string $alpha = null, ?string $type = null, null|float|int|string $brightness = null): self
+    {
+        if (empty($type) && !empty($color)) {
+            if (str_starts_with($color, '*')) {
+                $type = 'schemeClr';
+                $color = substr($color, 1);
+            } elseif (str_starts_with($color, '/')) {
+=======
     /**
      * @param null|float|int|string $alpha
      * @param null|float|int|string $brightness
@@ -98,6 +125,7 @@ class ChartColor
                 $type = 'schemeClr';
                 $color = substr($color, 1);
             } elseif (substr($color, 0, 1) === '/') {
+>>>>>>> main
                 $type = 'prstClr';
                 $color = substr($color, 1);
             } elseif (preg_match('/^[0-9A-Fa-f]{6}$/', $color) === 1) {
@@ -124,6 +152,10 @@ class ChartColor
         return $this;
     }
 
+<<<<<<< HEAD
+    /** @param array{value: ?string, alpha: null|int|string, brightness?: null|int|string, type: ?string}  $color */
+=======
+>>>>>>> main
     public function setColorPropertiesArray(array $color): self
     {
         return $this->setColorProperties(
@@ -141,12 +173,17 @@ class ChartColor
 
     /**
      * Get Color Property.
+<<<<<<< HEAD
+     */
+    public function getColorProperty(string $propertyName): null|int|string
+=======
      *
      * @param string $propertyName
      *
      * @return null|int|string
      */
     public function getColorProperty($propertyName)
+>>>>>>> main
     {
         $retVal = null;
         if ($propertyName === 'value') {
@@ -167,10 +204,14 @@ class ChartColor
         return (string) (100 - $alpha) . '000';
     }
 
+<<<<<<< HEAD
+    public static function alphaFromXml(float|int|string $alpha): int
+=======
     /**
      * @param float|int|string $alpha
      */
     public static function alphaFromXml($alpha): int
+>>>>>>> main
     {
         return 100 - ((int) $alpha / 1000);
     }

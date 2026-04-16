@@ -28,8 +28,7 @@ function BendaharaPage({ children }) {
 }
 import Verifikasi from "./pages/bendahara/Verifikasi"
 import Penerimaan from "./pages/bendahara/Penerimaan"
-import MasterCOA from "./pages/bendahara/MasterCOA"
-import MasterKegiatan from "./pages/bendahara/MasterKegiatan"
+import MasterCOA from "./pages/bendahara/MasterCOA";
 import MasterTahunAnggaran from "./pages/bendahara/MasterTahunAnggaran"
 import MasterTahunAkademik from "./pages/bendahara/MasterTahunAkademik"
 import MasterSumberDana from "./pages/bendahara/MasterSumberDana"

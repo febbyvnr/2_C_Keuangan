@@ -8,9 +8,17 @@ use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 
 class Lcm
 {
+<<<<<<< HEAD
+    /**
+     *  Private method to return an array of the factors of the input value.
+     *
+     * @return int[]
+     */
+=======
     //
     //    Private method to return an array of the factors of the input value
     //
+>>>>>>> main
     private static function factors(float $value): array
     {
         $startVal = floor(sqrt($value));
@@ -27,6 +35,10 @@ class Lcm
         }
         if (!empty($factorArray)) {
             rsort($factorArray);
+<<<<<<< HEAD
+            /** @var int[] $factorArray */
+=======
+>>>>>>> main
 
             return $factorArray;
         }
@@ -49,7 +61,11 @@ class Lcm
      *
      * @return int|string Lowest Common Multiplier, or a string containing an error
      */
+<<<<<<< HEAD
+    public static function evaluate(mixed ...$args): int|string
+=======
     public static function evaluate(...$args)
+>>>>>>> main
     {
         try {
             $arrayArgs = [];
@@ -83,12 +99,23 @@ class Lcm
             self::processPoweredFactors($allPoweredFactors, $myPoweredFactors);
         }
         foreach ($allPoweredFactors as $allPoweredFactor) {
+<<<<<<< HEAD
+            /** @var scalar $allPoweredFactor */
+=======
+>>>>>>> main
             $returnValue *= (int) $allPoweredFactor;
         }
 
         return $returnValue;
     }
 
+<<<<<<< HEAD
+    /**
+     * @param mixed[] $allPoweredFactors
+     * @param mixed[] $myPoweredFactors
+     */
+=======
+>>>>>>> main
     private static function processPoweredFactors(array &$allPoweredFactors, array &$myPoweredFactors): void
     {
         foreach ($myPoweredFactors as $myPoweredValue => $myPoweredFactor) {

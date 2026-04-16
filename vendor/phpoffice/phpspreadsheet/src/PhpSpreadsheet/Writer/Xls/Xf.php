@@ -48,6 +48,60 @@ class Xf
 {
     /**
      * Style XF or a cell XF ?
+<<<<<<< HEAD
+     */
+    private bool $isStyleXf;
+
+    /**
+     * Index to the FONT record. Index 4 does not exist.
+     */
+    private int $fontIndex;
+
+    /**
+     * An index (2 bytes) to a FORMAT record (number format).
+     */
+    private int $numberFormatIndex;
+
+    /**
+     * 1 bit, apparently not used.
+     */
+    private int $textJustLast;
+
+    /**
+     * The cell's foreground color.
+     */
+    private int $foregroundColor;
+
+    /**
+     * The cell's background color.
+     */
+    private int $backgroundColor;
+
+    /**
+     * Color of the bottom border of the cell.
+     */
+    private int $bottomBorderColor;
+
+    /**
+     * Color of the top border of the cell.
+     */
+    private int $topBorderColor;
+
+    /**
+     * Color of the left border of the cell.
+     */
+    private int $leftBorderColor;
+
+    /**
+     * Color of the right border of the cell.
+     */
+    private int $rightBorderColor;
+
+    //private $diag; // theoretically int, not yet implemented
+    private int $diagColor;
+
+    private Style $style;
+=======
      *
      * @var bool
      */
@@ -127,6 +181,7 @@ class Xf
      * @var Style
      */
     private $style;
+>>>>>>> main
 
     /**
      * Constructor.
@@ -160,7 +215,11 @@ class Xf
      *
      * @return string The XF record
      */
+<<<<<<< HEAD
+    public function writeXf(): string
+=======
     public function writeXf()
+>>>>>>> main
     {
         // Set the type of the XF record and some of the attributes.
         if ($this->isStyleXf) {
@@ -174,10 +233,17 @@ class Xf
         $atr_num = ($this->numberFormatIndex != 0) ? 1 : 0;
         $atr_fnt = ($this->fontIndex != 0) ? 1 : 0;
         $atr_alc = ((int) $this->style->getAlignment()->getWrapText()) ? 1 : 0;
+<<<<<<< HEAD
+        $atr_bdr = (CellBorder::style($this->style->getBorders()->getBottom())
+            || CellBorder::style($this->style->getBorders()->getTop())
+            || CellBorder::style($this->style->getBorders()->getLeft())
+            || CellBorder::style($this->style->getBorders()->getRight())) ? 1 : 0;
+=======
         $atr_bdr = (CellBorder::style($this->style->getBorders()->getBottom()) ||
             CellBorder::style($this->style->getBorders()->getTop()) ||
             CellBorder::style($this->style->getBorders()->getLeft()) ||
             CellBorder::style($this->style->getBorders()->getRight())) ? 1 : 0;
+>>>>>>> main
         $atr_pat = ($this->foregroundColor != 0x40) ? 1 : 0;
         $atr_pat = ($this->backgroundColor != 0x41) ? 1 : $atr_pat;
         $atr_pat = CellFill::style($this->style->getFill()) ? 1 : $atr_pat;
@@ -246,9 +312,16 @@ class Xf
 
         $header = pack('vv', $record, $length);
 
+<<<<<<< HEAD
+        //BIFF8 options: indentation, shrinkToFit and text direction
+        $biff8_options = $this->style->getAlignment()->getIndent() & 15;
+        $biff8_options |= (int) $this->style->getAlignment()->getShrinkToFit() << 4;
+        $biff8_options |= $this->style->getAlignment()->getReadOrder() << 6;
+=======
         //BIFF8 options: identation, shrinkToFit and  text direction
         $biff8_options = $this->style->getAlignment()->getIndent();
         $biff8_options |= (int) $this->style->getAlignment()->getShrinkToFit() << 4;
+>>>>>>> main
 
         $data = pack('vvvC', $ifnt, $ifmt, $style, $align);
         $data .= pack('CCC', self::mapTextRotation((int) $this->style->getAlignment()->getTextRotation()), $biff8_options, $used_attrib);
@@ -259,10 +332,15 @@ class Xf
 
     /**
      * Is this a style XF ?
+<<<<<<< HEAD
+     */
+    public function setIsStyleXf(bool $value): void
+=======
      *
      * @param bool $value
      */
     public function setIsStyleXf($value): void
+>>>>>>> main
     {
         $this->isStyleXf = $value;
     }
@@ -272,7 +350,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setBottomColor(int $colorIndex): void
+=======
     public function setBottomColor($colorIndex): void
+>>>>>>> main
     {
         $this->bottomBorderColor = $colorIndex;
     }
@@ -282,7 +364,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setTopColor(int $colorIndex): void
+=======
     public function setTopColor($colorIndex): void
+>>>>>>> main
     {
         $this->topBorderColor = $colorIndex;
     }
@@ -292,7 +378,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setLeftColor(int $colorIndex): void
+=======
     public function setLeftColor($colorIndex): void
+>>>>>>> main
     {
         $this->leftBorderColor = $colorIndex;
     }
@@ -302,7 +392,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setRightColor(int $colorIndex): void
+=======
     public function setRightColor($colorIndex): void
+>>>>>>> main
     {
         $this->rightBorderColor = $colorIndex;
     }
@@ -312,7 +406,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setDiagColor(int $colorIndex): void
+=======
     public function setDiagColor($colorIndex): void
+>>>>>>> main
     {
         $this->diagColor = $colorIndex;
     }
@@ -322,7 +420,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setFgColor(int $colorIndex): void
+=======
     public function setFgColor($colorIndex): void
+>>>>>>> main
     {
         $this->foregroundColor = $colorIndex;
     }
@@ -332,7 +434,11 @@ class Xf
      *
      * @param int $colorIndex Color index
      */
+<<<<<<< HEAD
+    public function setBgColor(int $colorIndex): void
+=======
     public function setBgColor($colorIndex): void
+>>>>>>> main
     {
         $this->backgroundColor = $colorIndex;
     }
@@ -343,7 +449,11 @@ class Xf
      *
      * @param int $numberFormatIndex Index to format record
      */
+<<<<<<< HEAD
+    public function setNumberFormatIndex(int $numberFormatIndex): void
+=======
     public function setNumberFormatIndex($numberFormatIndex): void
+>>>>>>> main
     {
         $this->numberFormatIndex = $numberFormatIndex;
     }
@@ -353,19 +463,28 @@ class Xf
      *
      * @param int $value Font index, note that value 4 does not exist
      */
+<<<<<<< HEAD
+    public function setFontIndex(int $value): void
+=======
     public function setFontIndex($value): void
+>>>>>>> main
     {
         $this->fontIndex = $value;
     }
 
     /**
      * Map to BIFF8 codes for text rotation angle.
+<<<<<<< HEAD
+     */
+    private static function mapTextRotation(int $textRotation): int
+=======
      *
      * @param int $textRotation
      *
      * @return int
      */
     private static function mapTextRotation($textRotation)
+>>>>>>> main
     {
         if ($textRotation >= 0) {
             return $textRotation;
@@ -385,6 +504,12 @@ class Xf
 
     /**
      * Map locked values.
+<<<<<<< HEAD
+     */
+    private static function mapLocked(?string $locked): int
+    {
+        return $locked !== null && array_key_exists($locked, self::LOCK_ARRAY) ? self::LOCK_ARRAY[$locked] : 1;
+=======
      *
      * @param string $locked
      *
@@ -393,6 +518,7 @@ class Xf
     private static function mapLocked($locked)
     {
         return array_key_exists($locked, self::LOCK_ARRAY) ? self::LOCK_ARRAY[$locked] : 1;
+>>>>>>> main
     }
 
     private const HIDDEN_ARRAY = [
@@ -403,6 +529,12 @@ class Xf
 
     /**
      * Map hidden.
+<<<<<<< HEAD
+     */
+    private static function mapHidden(?string $hidden): int
+    {
+        return $hidden !== null && array_key_exists($hidden, self::HIDDEN_ARRAY) ? self::HIDDEN_ARRAY[$hidden] : 0;
+=======
      *
      * @param string $hidden
      *
@@ -411,5 +543,6 @@ class Xf
     private static function mapHidden($hidden)
     {
         return array_key_exists($hidden, self::HIDDEN_ARRAY) ? self::HIDDEN_ARRAY[$hidden] : 0;
+>>>>>>> main
     }
 }

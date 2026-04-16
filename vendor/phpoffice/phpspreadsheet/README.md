@@ -4,12 +4,19 @@
 [![Code Coverage](https://coveralls.io/repos/github/PHPOffice/PhpSpreadsheet/badge.svg?branch=master)](https://coveralls.io/github/PHPOffice/PhpSpreadsheet?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/PHPOffice/PhpSpreadsheet)](https://packagist.org/packages/phpoffice/phpspreadsheet)
 [![Latest Stable Version](https://img.shields.io/github/v/release/PHPOffice/PhpSpreadsheet)](https://packagist.org/packages/phpoffice/phpspreadsheet)
+<<<<<<< HEAD
+[![License](https://img.shields.io/github/license/PHPOffice/PhpSpreadsheet)](https://packagist.org/packages/phpoffice/phpspreadsheet)
+=======
 [![License](https://poser.pugx.org/phpoffice/phpspreadsheet/license)](https://packagist.org/packages/phpoffice/phpspreadsheet)
+>>>>>>> main
 [![Join the chat at https://gitter.im/PHPOffice/PhpSpreadsheet](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/PHPOffice/PhpSpreadsheet)
 
 PhpSpreadsheet is a library written in pure PHP and offers a set of classes that
 allow you to read and write various spreadsheet file formats such as Excel and LibreOffice Calc.
 
+<<<<<<< HEAD
+This is the master branch, and is maintained for security and bug fixes.
+=======
 This branch (1.30.x) is *not* the latest version of PhpSpreadsheet, and may therefore lack features and bug fixes found in the latest version.
 
 ## Security Changes Only
@@ -19,20 +26,28 @@ You are encouraged to upgrade to a maintained branch as soon as possible.
 Maintained branches are master (preferred - version is 5.4.0 as of the date when this is being written), 3.10.x (current version is 3.10.3), and 2.4.x (2.4.3).
 
 Of particular note is that this branch should not run under Php 8.5, and will *not* be updated to avoid deprecation notices which will be introduced with Php 8.5.
+>>>>>>> main
 
 ## PHP Version Support
 
 LTS: For maintained branches, support for PHP versions will only be maintained for a period of six months beyond the
 [end of life](https://www.php.net/supported-versions) of that PHP version.
 
+<<<<<<< HEAD
+Currently the required PHP minimum version is PHP __8.1__, and we [will support that version](https://www.php.net/supported-versions.php) until 30th June 2026.
+=======
 Currently the required PHP minimum version is PHP __7.4__, and we [will support that version](https://www.php.net/eol.php) until 28th June 2023.
 However, since this branch is no longer maintained, that policy is not enforced.
 The PHP maximum version supported by this release is PHP __8.4__.
+>>>>>>> main
 
 See the `composer.json` for other requirements.
 
 ## Installation
 
+<<<<<<< HEAD
+See the [install instructions](https://phpspreadsheet.readthedocs.io/en/latest/#installation).
+=======
 Use [composer](https://getcomposer.org) to install PhpSpreadsheet into your project:
 
 ```sh
@@ -99,6 +114,7 @@ Settings::setChartRenderer(\PhpOffice\PhpSpreadsheet\Chart\Renderer\MtJpGraphRen
 One or the other of these libraries is necessary if you want to generate HTML or PDF files that include charts; or to render a Chart to an Image format from within your code.
 They are not necessary to define charts for writing to `Xlsx` files.
 Other file formats don't support writing Charts.
+>>>>>>> main
 
 ## Documentation
 

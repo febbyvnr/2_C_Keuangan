@@ -19,10 +19,13 @@ final class Locale
 
     public function __construct(?string $locale, int $style)
     {
+<<<<<<< HEAD
+=======
         if (class_exists(NumberFormatter::class) === false) {
             throw new Exception();
         }
 
+>>>>>>> main
         $formatterLocale = str_replace('-', '_', $locale ?? '');
         $this->formatter = new NumberFormatter($formatterLocale, $style);
         if ($this->formatter->getLocale() !== $formatterLocale) {
@@ -30,8 +33,16 @@ final class Locale
         }
     }
 
+<<<<<<< HEAD
+    public function format(bool $stripRlm = true): string
+    {
+        $str = $this->formatter->getPattern();
+
+        return ($stripRlm && str_starts_with($str, "\xe2\x80\x8f")) ? substr($str, 3) : $str;
+=======
     public function format(): string
     {
         return $this->formatter->getPattern();
+>>>>>>> main
     }
 }

@@ -9,16 +9,28 @@ use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 
 class CashFlowValidations extends FinancialValidations
 {
+<<<<<<< HEAD
+    public static function validateRate(mixed $rate): float
+=======
     /**
      * @param mixed $rate
      */
     public static function validateRate($rate): float
+>>>>>>> main
     {
         $rate = self::validateFloat($rate);
 
         return $rate;
     }
 
+<<<<<<< HEAD
+    public static function validatePeriodType(mixed $type): int
+    {
+        $rate = self::validateInt($type);
+        if (
+            $type !== FinancialConstants::PAYMENT_END_OF_PERIOD
+            && $type !== FinancialConstants::PAYMENT_BEGINNING_OF_PERIOD
+=======
     /**
      * @param mixed $type
      */
@@ -28,6 +40,7 @@ class CashFlowValidations extends FinancialValidations
         if (
             $type !== FinancialConstants::PAYMENT_END_OF_PERIOD &&
             $type !== FinancialConstants::PAYMENT_BEGINNING_OF_PERIOD
+>>>>>>> main
         ) {
             throw new Exception(ExcelError::NAN());
         }
@@ -35,18 +48,26 @@ class CashFlowValidations extends FinancialValidations
         return $rate;
     }
 
+<<<<<<< HEAD
+    public static function validatePresentValue(mixed $presentValue): float
+=======
     /**
      * @param mixed $presentValue
      */
     public static function validatePresentValue($presentValue): float
+>>>>>>> main
     {
         return self::validateFloat($presentValue);
     }
 
+<<<<<<< HEAD
+    public static function validateFutureValue(mixed $futureValue): float
+=======
     /**
      * @param mixed $futureValue
      */
     public static function validateFutureValue($futureValue): float
+>>>>>>> main
     {
         return self::validateFloat($futureValue);
     }

@@ -9,16 +9,25 @@ class XmlScanner
     private const ENCODING_PATTERN = '/encoding\s*=\s*(["\'])(.+?)\1/s';
     private const ENCODING_UTF7 = '/encoding\s*=\s*(["\'])UTF-7\1/si';
 
+<<<<<<< HEAD
+    private string $pattern;
+=======
     /**
      * String used to identify risky xml elements.
      *
      * @var string
      */
     private $pattern;
+>>>>>>> main
 
     /** @var ?callable */
     private $callback;
 
+<<<<<<< HEAD
+    public function __construct(string $pattern = '<!DOCTYPE')
+    {
+        $this->pattern = $pattern;
+=======
     /** @var ?bool */
     private static $libxmlDisableEntityLoaderValue;
 
@@ -38,6 +47,7 @@ class XmlScanner
             self::$shutdownRegistered = true;
             register_shutdown_function([__CLASS__, 'shutdown']);
         }
+>>>>>>> main
     }
 
     public static function getInstance(Reader\IReader $reader): self
@@ -47,6 +57,8 @@ class XmlScanner
         return new self($pattern);
     }
 
+<<<<<<< HEAD
+=======
     /**
      * @codeCoverageIgnore
      */
@@ -98,23 +110,32 @@ class XmlScanner
         self::shutdown();
     }
 
+>>>>>>> main
     public function setAdditionalCallback(callable $callback): void
     {
         $this->callback = $callback;
     }
 
+<<<<<<< HEAD
+    private static function forceString(mixed $arg): string
+=======
     /** @param mixed $arg */
     private static function forceString($arg): string
+>>>>>>> main
     {
         return is_string($arg) ? $arg : '';
     }
 
+<<<<<<< HEAD
+    private function toUtf8(string $xml): string
+=======
     /**
      * @param string $xml
      *
      * @return string
      */
     private function toUtf8($xml)
+>>>>>>> main
     {
         $charset = $this->findCharSet($xml);
         $foundUtf7 = $charset === 'UTF-7';
@@ -142,7 +163,11 @@ class XmlScanner
 
     private function findCharSet(string $xml): string
     {
+<<<<<<< HEAD
+        if (str_starts_with($xml, "\x4c\x6f\xa7\x94")) {
+=======
         if (substr($xml, 0, 4) === "\x4c\x6f\xa7\x94") {
+>>>>>>> main
             throw new Reader\Exception('EBCDIC encoding not permitted');
         }
         $encoding = Reader\Csv::guessEncodingBom('', $xml);
@@ -161,6 +186,13 @@ class XmlScanner
      * Scan the XML for use of <!ENTITY to prevent XXE/XEE attacks.
      *
      * @param false|string $xml
+<<<<<<< HEAD
+     */
+    public function scan($xml): string
+    {
+        // Don't rely purely on libxml_disable_entity_loader()
+        $pattern = '/\0*' . implode('\0*', mb_str_split($this->pattern, 1, 'UTF-8')) . '\0*/';
+=======
      *
      * @return string
      */
@@ -169,6 +201,7 @@ class XmlScanner
         $this->disableEntityLoaderCheck();
         // Don't rely purely on libxml_disable_entity_loader()
         $pattern = '/\0*' . implode('\0*', /** @scrutinizer ignore-type */ str_split($this->pattern)) . '\0*/';
+>>>>>>> main
 
         $xml = "$xml";
         if (preg_match($pattern, $xml)) {
@@ -176,7 +209,10 @@ class XmlScanner
         }
 
         $xml = $this->toUtf8($xml);
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
         if (preg_match($pattern, $xml)) {
             throw new Reader\Exception('Detected use of ENTITY in XML, spreadsheet file load() aborted to prevent XXE/XEE attacks');
         }
@@ -184,18 +220,27 @@ class XmlScanner
         if ($this->callback !== null) {
             $xml = call_user_func($this->callback, $xml);
         }
+<<<<<<< HEAD
+        /** @var string $xml */
+=======
+>>>>>>> main
 
         return $xml;
     }
 
     /**
      * Scan the XML for use of <!ENTITY to prevent XXE/XEE attacks.
+<<<<<<< HEAD
+     */
+    public function scanFile(string $filestream): string
+=======
      *
      * @param string $filestream
      *
      * @return string
      */
     public function scanFile($filestream)
+>>>>>>> main
     {
         return $this->scan(file_get_contents($filestream));
     }

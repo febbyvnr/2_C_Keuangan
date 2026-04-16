@@ -9,16 +9,27 @@ class NewtonRaphson
 {
     private const MAX_ITERATIONS = 256;
 
+<<<<<<< HEAD
+    /** @var callable(float): mixed */
+    protected $callback;
+
+    /** @param callable(float): mixed $callback */
+=======
     /** @var callable */
     protected $callback;
 
+>>>>>>> main
     public function __construct(callable $callback)
     {
         $this->callback = $callback;
     }
 
+<<<<<<< HEAD
+    public function execute(float $probability): string|int|float
+=======
     /** @return float|string */
     public function execute(float $probability)
+>>>>>>> main
     {
         $xLo = 100;
         $xHi = 0;
@@ -30,6 +41,12 @@ class NewtonRaphson
         while ((abs($dx) > Functions::PRECISION) && ($i++ < self::MAX_ITERATIONS)) {
             // Apply Newton-Raphson step
             $result = call_user_func($this->callback, $x);
+<<<<<<< HEAD
+            if (!is_float($result)) {
+                return ExcelError::VALUE();
+            }
+=======
+>>>>>>> main
             $error = $result - $probability;
 
             if ($error == 0.0) {

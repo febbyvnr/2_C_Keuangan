@@ -14,11 +14,20 @@ class Workbook extends WriterPart
     /**
      * Write workbook to XML format.
      *
+<<<<<<< HEAD
+     * @param bool $preCalculateFormulas If true, formulas will be calculated before writing
+     * @param ?bool $forceFullCalc If null, !$preCalculateFormulas
+     *
+     * @return string XML Output
+     */
+    public function writeWorkbook(Spreadsheet $spreadsheet, bool $preCalculateFormulas = false, ?bool $forceFullCalc = null): string
+=======
      * @param bool $recalcRequired Indicate whether formulas should be recalculated before writing
      *
      * @return string XML Output
      */
     public function writeWorkbook(Spreadsheet $spreadsheet, $recalcRequired = false)
+>>>>>>> main
     {
         // Create XML writer
         if ($this->getParentWriter()->getUseDiskCaching()) {
@@ -32,7 +41,10 @@ class Workbook extends WriterPart
 
         // workbook
         $objWriter->startElement('workbook');
+<<<<<<< HEAD
+=======
         $objWriter->writeAttribute('xml:space', 'preserve');
+>>>>>>> main
         $objWriter->writeAttribute('xmlns', Namespaces::MAIN);
         $objWriter->writeAttribute('xmlns:r', Namespaces::SCHEMA_OFFICE_DOCUMENT);
 
@@ -40,7 +52,11 @@ class Workbook extends WriterPart
         $this->writeFileVersion($objWriter);
 
         // workbookPr
+<<<<<<< HEAD
+        $this->writeWorkbookPr($objWriter, $spreadsheet);
+=======
         $this->writeWorkbookPr($objWriter);
+>>>>>>> main
 
         // workbookProtection
         $this->writeWorkbookProtection($objWriter, $spreadsheet);
@@ -57,7 +73,11 @@ class Workbook extends WriterPart
         (new DefinedNamesWriter($objWriter, $spreadsheet))->write();
 
         // calcPr
+<<<<<<< HEAD
+        $this->writeCalcPr($objWriter, $preCalculateFormulas, $forceFullCalc);
+=======
         $this->writeCalcPr($objWriter, $recalcRequired);
+>>>>>>> main
 
         $objWriter->endElement();
 
@@ -81,11 +101,19 @@ class Workbook extends WriterPart
     /**
      * Write WorkbookPr.
      */
+<<<<<<< HEAD
+    private function writeWorkbookPr(XMLWriter $objWriter, Spreadsheet $spreadsheet): void
+    {
+        $objWriter->startElement('workbookPr');
+
+        if ($spreadsheet->getExcelCalendar() === Date::CALENDAR_MAC_1904) {
+=======
     private function writeWorkbookPr(XMLWriter $objWriter): void
     {
         $objWriter->startElement('workbookPr');
 
         if (Date::getExcelCalendar() === Date::CALENDAR_MAC_1904) {
+>>>>>>> main
             $objWriter->writeAttribute('date1904', '1');
         }
 
@@ -125,6 +153,37 @@ class Workbook extends WriterPart
      */
     private function writeWorkbookProtection(XMLWriter $objWriter, Spreadsheet $spreadsheet): void
     {
+<<<<<<< HEAD
+        $security = $spreadsheet->getSecurity();
+        if ($security->isSecurityEnabled()) {
+            $objWriter->startElement('workbookProtection');
+            $objWriter->writeAttribute('lockRevision', ($security->getLockRevision() ? 'true' : 'false'));
+            $objWriter->writeAttribute('lockStructure', ($security->getLockStructure() ? 'true' : 'false'));
+            $objWriter->writeAttribute('lockWindows', ($security->getLockWindows() ? 'true' : 'false'));
+
+            if ($security->getRevisionsPassword() !== '') {
+                $objWriter->writeAttribute('revisionsPassword', $security->getRevisionsPassword());
+            } else {
+                $hashValue = $security->getRevisionsHashValue();
+                if ($hashValue !== '') {
+                    $objWriter->writeAttribute('revisionsAlgorithmName', $security->getRevisionsAlgorithmName());
+                    $objWriter->writeAttribute('revisionsHashValue', $hashValue);
+                    $objWriter->writeAttribute('revisionsSaltValue', $security->getRevisionsSaltValue());
+                    $objWriter->writeAttribute('revisionsSpinCount', (string) $security->getRevisionsSpinCount());
+                }
+            }
+
+            if ($security->getWorkbookPassword() !== '') {
+                $objWriter->writeAttribute('workbookPassword', $security->getWorkbookPassword());
+            } else {
+                $hashValue = $security->getWorkbookHashValue();
+                if ($hashValue !== '') {
+                    $objWriter->writeAttribute('workbookAlgorithmName', $security->getWorkbookAlgorithmName());
+                    $objWriter->writeAttribute('workbookHashValue', $hashValue);
+                    $objWriter->writeAttribute('workbookSaltValue', $security->getWorkbookSaltValue());
+                    $objWriter->writeAttribute('workbookSpinCount', (string) $security->getWorkbookSpinCount());
+                }
+=======
         if ($spreadsheet->getSecurity()->isSecurityEnabled()) {
             $objWriter->startElement('workbookProtection');
             $objWriter->writeAttribute('lockRevision', ($spreadsheet->getSecurity()->getLockRevision() ? 'true' : 'false'));
@@ -137,6 +196,7 @@ class Workbook extends WriterPart
 
             if ($spreadsheet->getSecurity()->getWorkbookPassword() != '') {
                 $objWriter->writeAttribute('workbookPassword', $spreadsheet->getSecurity()->getWorkbookPassword());
+>>>>>>> main
             }
 
             $objWriter->endElement();
@@ -146,9 +206,15 @@ class Workbook extends WriterPart
     /**
      * Write calcPr.
      *
+<<<<<<< HEAD
+     * @param bool $preCalculateFormulas If true, formulas will be calculated before writing
+     */
+    private function writeCalcPr(XMLWriter $objWriter, bool $preCalculateFormulas, ?bool $forceFullCalc): void
+=======
      * @param bool $recalcRequired Indicate whether formulas should be recalculated before writing
      */
     private function writeCalcPr(XMLWriter $objWriter, $recalcRequired = true): void
+>>>>>>> main
     {
         $objWriter->startElement('calcPr');
 
@@ -157,10 +223,21 @@ class Workbook extends WriterPart
         //     because the file has changed
         $objWriter->writeAttribute('calcId', '999999');
         $objWriter->writeAttribute('calcMode', 'auto');
+<<<<<<< HEAD
+        //    fullCalcOnLoad isn't needed if we will calculate before writing
+        $objWriter->writeAttribute('calcCompleted', ($preCalculateFormulas) ? '1' : '0');
+        $objWriter->writeAttribute('fullCalcOnLoad', ($preCalculateFormulas) ? '0' : '1');
+        if ($forceFullCalc === null) {
+            $objWriter->writeAttribute('forceFullCalc', $preCalculateFormulas ? '0' : '1');
+        } else {
+            $objWriter->writeAttribute('forceFullCalc', $forceFullCalc ? '1' : '0');
+        }
+=======
         //    fullCalcOnLoad isn't needed if we've recalculating for the save
         $objWriter->writeAttribute('calcCompleted', ($recalcRequired) ? '1' : '0');
         $objWriter->writeAttribute('fullCalcOnLoad', ($recalcRequired) ? '0' : '1');
         $objWriter->writeAttribute('forceFullCalc', ($recalcRequired) ? '0' : '1');
+>>>>>>> main
 
         $objWriter->endElement();
     }
@@ -195,7 +272,11 @@ class Workbook extends WriterPart
      * @param int $relId Relationship ID
      * @param string $sheetState Sheet state (visible, hidden, veryHidden)
      */
+<<<<<<< HEAD
+    private function writeSheet(XMLWriter $objWriter, string $worksheetName, int $worksheetId = 1, int $relId = 1, string $sheetState = 'visible'): void
+=======
     private function writeSheet(XMLWriter $objWriter, $worksheetName, $worksheetId = 1, $relId = 1, $sheetState = 'visible'): void
+>>>>>>> main
     {
         if ($worksheetName != '') {
             // Write sheet

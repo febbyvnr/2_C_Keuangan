@@ -10,6 +10,10 @@ class Exception extends PhpSpreadsheetException
 
     /**
      * Error handler callback.
+<<<<<<< HEAD
+     */
+    public static function errorHandlerCallback(int $code, string $string, string $file, int $line): void
+=======
      *
      * @param mixed $code
      * @param mixed $string
@@ -18,6 +22,7 @@ class Exception extends PhpSpreadsheetException
      * @param mixed $context
      */
     public static function errorHandlerCallback($code, $string, $file, $line, /** @scrutinizer ignore-unused */ $context): void
+>>>>>>> main
     {
         $e = new self($string, $code);
         $e->line = $line;

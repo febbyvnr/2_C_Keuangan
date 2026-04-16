@@ -4,12 +4,16 @@ namespace PhpOffice\PhpSpreadsheet\Calculation\Statistical;
 
 abstract class MaxMinBase
 {
+<<<<<<< HEAD
+    protected static function datatypeAdjustmentAllowStrings(int|float|string|bool $value): int|float
+=======
     /**
      * @param mixed $value
      *
      * @return mixed
      */
     protected static function datatypeAdjustmentAllowStrings($value)
+>>>>>>> main
     {
         if (is_bool($value)) {
             return (int) $value;

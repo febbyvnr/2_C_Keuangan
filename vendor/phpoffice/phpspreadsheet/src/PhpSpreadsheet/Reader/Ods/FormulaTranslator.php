@@ -2,10 +2,38 @@
 
 namespace PhpOffice\PhpSpreadsheet\Reader\Ods;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
+=======
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 
 class FormulaTranslator
 {
+<<<<<<< HEAD
+    private static function replaceQuotedPeriod(string $value): string
+    {
+        $value2 = '';
+        $quoted = false;
+        foreach (mb_str_split($value, 1, 'UTF-8') as $char) {
+            if ($char === "'") {
+                $quoted = !$quoted;
+            } elseif ($char === '.' && $quoted) {
+                $char = "\u{fffe}";
+            }
+            $value2 .= $char;
+        }
+
+        return $value2;
+    }
+
+    public static function convertToExcelAddressValue(string $openOfficeAddress): string
+    {
+        // Cell range 3-d reference
+        // As we don't support 3-d ranges, we're just going to take a quick and dirty approach
+        //  and assume that the second worksheet reference is the same as the first
+        $excelAddress = Preg::replace(
+=======
     public static function convertToExcelAddressValue(string $openOfficeAddress): string
     {
         $excelAddress = $openOfficeAddress;
@@ -14,12 +42,17 @@ class FormulaTranslator
         // As we don't support 3-d ranges, we're just going to take a quick and dirty approach
         //  and assume that the second worksheet reference is the same as the first
         $excelAddress = (string) preg_replace(
+>>>>>>> main
             [
                 '/\$?([^\.]+)\.([^\.]+):\$?([^\.]+)\.([^\.]+)/miu',
                 '/\$?([^\.]+)\.([^\.]+):\.([^\.]+)/miu', // Cell range reference in another sheet
                 '/\$?([^\.]+)\.([^\.]+)/miu', // Cell reference in another sheet
                 '/\.([^\.]+):\.([^\.]+)/miu', // Cell range reference
                 '/\.([^\.]+)/miu', // Simple cell reference
+<<<<<<< HEAD
+                '/\x{FFFE}/miu', // restore quoted periods
+=======
+>>>>>>> main
             ],
             [
                 '$1!$2:$4',
@@ -27,8 +60,14 @@ class FormulaTranslator
                 '$1!$2',
                 '$1:$2',
                 '$1',
+<<<<<<< HEAD
+                '.',
+            ],
+            self::replaceQuotedPeriod($openOfficeAddress)
+=======
             ],
             $excelAddress
+>>>>>>> main
         );
 
         return $excelAddress;
@@ -46,20 +85,34 @@ class FormulaTranslator
             //      so that conversion isn't done in string values
             $tKey = $tKey === false;
             if ($tKey) {
+<<<<<<< HEAD
+                $value = Preg::replace(
+=======
                 $value = (string) preg_replace(
+>>>>>>> main
                     [
                         '/\[\$?([^\.]+)\.([^\.]+):\.([^\.]+)\]/miu', // Cell range reference in another sheet
                         '/\[\$?([^\.]+)\.([^\.]+)\]/miu', // Cell reference in another sheet
                         '/\[\.([^\.]+):\.([^\.]+)\]/miu', // Cell range reference
                         '/\[\.([^\.]+)\]/miu', // Simple cell reference
+<<<<<<< HEAD
+                        '/\x{FFFE}/miu', // restore quoted periods
+=======
+>>>>>>> main
                     ],
                     [
                         '$1!$2:$3',
                         '$1!$2',
                         '$1:$2',
                         '$1',
+<<<<<<< HEAD
+                        '.',
+                    ],
+                    self::replaceQuotedPeriod($value)
+=======
                     ],
                     $value
+>>>>>>> main
                 );
                 // Convert references to defined names/formulae
                 $value = str_replace('$$', '', $value);
@@ -85,7 +138,22 @@ class FormulaTranslator
                     Calculation::FORMULA_CLOSE_MATRIX_BRACE
                 );
 
+<<<<<<< HEAD
+                $value = Preg::replace(
+                    [
+                        '/\b(?<!com[.]microsoft[.])'
+                            . '(floor|ceiling)\s*[(]/ui',
+                        '/COM\.MICROSOFT\./ui',
+                    ],
+                    [
+                        '$1.ODS(',
+                        '',
+                    ],
+                    $value
+                );
+=======
                 $value = (string) preg_replace('/COM\.MICROSOFT\./ui', '', $value);
+>>>>>>> main
             }
         }
 

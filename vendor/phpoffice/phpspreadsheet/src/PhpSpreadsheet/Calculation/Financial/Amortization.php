@@ -40,6 +40,16 @@ class Amortization
      * @return float|string (string containing the error type if there is an error)
      */
     public static function AMORDEGRC(
+<<<<<<< HEAD
+        mixed $cost,
+        mixed $purchased,
+        mixed $firstPeriod,
+        mixed $salvage,
+        mixed $period,
+        mixed $rate,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+=======
         $cost,
         $purchased,
         $firstPeriod,
@@ -48,15 +58,20 @@ class Amortization
         $rate,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
     ) {
+>>>>>>> main
         $cost = Functions::flattenSingleValue($cost);
         $purchased = Functions::flattenSingleValue($purchased);
         $firstPeriod = Functions::flattenSingleValue($firstPeriod);
         $salvage = Functions::flattenSingleValue($salvage);
         $period = Functions::flattenSingleValue($period);
         $rate = Functions::flattenSingleValue($rate);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $cost = FinancialValidations::validateFloat($cost);
@@ -74,7 +89,11 @@ class Amortization
         if (is_string($yearFracx)) {
             return $yearFracx;
         }
+<<<<<<< HEAD
+        /** @var float $yearFrac */
+=======
         /** @var float */
+>>>>>>> main
         $yearFrac = $yearFracx;
 
         $amortiseCoeff = self::getAmortizationCoefficient($rate);
@@ -90,6 +109,12 @@ class Amortization
             $fRest -= $fNRate;
 
             if ($fRest < 0.0) {
+<<<<<<< HEAD
+                return match ($period - $n) {
+                    1 => round($cost * 0.5, 0),
+                    default => 0.0,
+                };
+=======
                 switch ($period - $n) {
                     case 0:
                     case 1:
@@ -97,6 +122,7 @@ class Amortization
                     default:
                         return 0.0;
                 }
+>>>>>>> main
             }
             $cost -= $fNRate;
         }
@@ -130,6 +156,16 @@ class Amortization
      * @return float|string (string containing the error type if there is an error)
      */
     public static function AMORLINC(
+<<<<<<< HEAD
+        mixed $cost,
+        mixed $purchased,
+        mixed $firstPeriod,
+        mixed $salvage,
+        mixed $period,
+        mixed $rate,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+=======
         $cost,
         $purchased,
         $firstPeriod,
@@ -138,15 +174,20 @@ class Amortization
         $rate,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
     ) {
+>>>>>>> main
         $cost = Functions::flattenSingleValue($cost);
         $purchased = Functions::flattenSingleValue($purchased);
         $firstPeriod = Functions::flattenSingleValue($firstPeriod);
         $salvage = Functions::flattenSingleValue($salvage);
         $period = Functions::flattenSingleValue($period);
         $rate = Functions::flattenSingleValue($rate);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $cost = FinancialValidations::validateFloat($cost);
@@ -168,15 +209,29 @@ class Amortization
         if (is_string($yearFracx)) {
             return $yearFracx;
         }
+<<<<<<< HEAD
+        /** @var float $yearFrac */
+=======
         /** @var float */
+>>>>>>> main
         $yearFrac = $yearFracx;
 
         if (
             $basis == FinancialConstants::BASIS_DAYS_PER_YEAR_ACTUAL
             && $yearFrac < 1
+<<<<<<< HEAD
+        ) {
+            $temp = Functions::scalar($purchasedYear);
+            if (is_int($temp) || is_string($temp)) {
+                if (DateTimeExcel\Helpers::isLeapYear($temp)) {
+                    $yearFrac *= 365 / 366;
+                }
+            }
+=======
             && DateTimeExcel\Helpers::isLeapYear(Functions::scalar($purchasedYear))
         ) {
             $yearFrac *= 365 / 366;
+>>>>>>> main
         }
 
         $f0Rate = $yearFrac * $rate * $cost;

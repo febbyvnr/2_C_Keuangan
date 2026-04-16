@@ -91,7 +91,11 @@ class Duration extends DateTimeWizard
     ];
 
     /**
+<<<<<<< HEAD
+     * @var array<?string>
+=======
      * @var string[]
+>>>>>>> main
      */
     protected array $separators;
 

@@ -9,6 +9,17 @@ class ConditionalFormattingRuleExtension
 {
     const CONDITION_EXTENSION_DATABAR = 'dataBar';
 
+<<<<<<< HEAD
+    private string $id;
+
+    /** @var string Conditional Formatting Rule */
+    private string $cfRule;
+
+    private ConditionalDataBarExtension $dataBar;
+
+    /** @var string Sequence of References */
+    private string $sqref = '';
+=======
     /** <conditionalFormatting> attributes */
 
     /** @var string */
@@ -24,6 +35,7 @@ class ConditionalFormattingRuleExtension
 
     /** @var string Sequence of References */
     private $sqref;
+>>>>>>> main
 
     /**
      * ConditionalFormattingRuleExtension constructor.
@@ -40,7 +52,11 @@ class ConditionalFormattingRuleExtension
 
     private function generateUuid(): string
     {
+<<<<<<< HEAD
+        $chars = mb_str_split('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx', 1, 'UTF-8');
+=======
         $chars = str_split('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx');
+>>>>>>> main
 
         foreach ($chars as $i => $char) {
             if ($char === 'x') {
@@ -50,9 +66,16 @@ class ConditionalFormattingRuleExtension
             }
         }
 
+<<<<<<< HEAD
+        return implode('', $chars);
+    }
+
+    /** @return mixed[] */
+=======
         return implode('', /** @scrutinizer ignore-type */ $chars);
     }
 
+>>>>>>> main
     public static function parseExtLstXml(?SimpleXMLElement $extLstXml): array
     {
         $conditionalFormattingRuleExtensions = [];
@@ -124,8 +147,13 @@ class ConditionalFormattingRuleExtension
         }
     }
 
+<<<<<<< HEAD
+    /** @param string[] $ns */
+    private static function parseExtDataBarElementChildrenFromXml(ConditionalDataBarExtension $extDataBarObj, SimpleXMLElement $dataBarXml, array $ns): void
+=======
     /** @param array|SimpleXMLElement $ns */
     private static function parseExtDataBarElementChildrenFromXml(ConditionalDataBarExtension $extDataBarObj, SimpleXMLElement $dataBarXml, $ns): void
+>>>>>>> main
     {
         if ($dataBarXml->borderColor) {
             $attributes = $dataBarXml->borderColor->attributes();
@@ -153,8 +181,12 @@ class ConditionalFormattingRuleExtension
         }
         $cfvoIndex = 0;
         foreach ($dataBarXml->cfvo as $cfvo) {
+<<<<<<< HEAD
+            $f = (string) $cfvo->children($ns['xm'])->f;
+=======
             $f = (string) $cfvo->/** @scrutinizer ignore-call */ children($ns['xm'])->f;
             /** @scrutinizer ignore-call */
+>>>>>>> main
             $attributes = $cfvo->attributes();
             if (!($attributes)) {
                 continue;
@@ -170,18 +202,26 @@ class ConditionalFormattingRuleExtension
         }
     }
 
+<<<<<<< HEAD
+    public function getId(): string
+=======
     /**
      * @return mixed
      */
     public function getId()
+>>>>>>> main
     {
         return $this->id;
     }
 
+<<<<<<< HEAD
+    public function setId(string $id): self
+=======
     /**
      * @param mixed $id
      */
     public function setId($id): self
+>>>>>>> main
     {
         $this->id = $id;
 

@@ -16,10 +16,15 @@ class Deviations
      *        DEVSQ(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function sumSquares(mixed ...$args): string|float
+=======
      *
      * @return float|string
      */
     public static function sumSquares(...$args)
+>>>>>>> main
     {
         $aArgs = Functions::flattenArrayIndexed($args);
 
@@ -34,9 +39,15 @@ class Deviations
         foreach ($aArgs as $k => $arg) {
             // Is it a numeric value?
             if (
+<<<<<<< HEAD
+                (is_bool($arg))
+                && ((!Functions::isCellValue($k))
+                    || (Functions::getCompatibilityMode() == Functions::COMPATIBILITY_OPENOFFICE))
+=======
                 (is_bool($arg)) &&
                 ((!Functions::isCellValue($k)) ||
                     (Functions::getCompatibilityMode() == Functions::COMPATIBILITY_OPENOFFICE))
+>>>>>>> main
             ) {
                 $arg = (int) $arg;
             }
@@ -57,18 +68,28 @@ class Deviations
      * kurtosis indicates a relatively peaked distribution. Negative kurtosis indicates a
      * relatively flat distribution.
      *
+<<<<<<< HEAD
+     * @param mixed[] ...$args Data Series
+     */
+    public static function kurtosis(...$args): string|int|float
+=======
      * @param array ...$args Data Series
      *
      * @return float|string
      */
     public static function kurtosis(...$args)
+>>>>>>> main
     {
         $aArgs = Functions::flattenArrayIndexed($args);
         $mean = Averages::average($aArgs);
         if (!is_numeric($mean)) {
             return ExcelError::DIV0();
         }
+<<<<<<< HEAD
+        $stdDev = (float) StandardDeviations::STDEV($aArgs);
+=======
         $stdDev = StandardDeviations::STDEV($aArgs);
+>>>>>>> main
 
         if ($stdDev > 0) {
             $count = $summer = 0;
@@ -85,9 +106,15 @@ class Deviations
             }
 
             if ($count > 3) {
+<<<<<<< HEAD
+                return $summer * ($count * ($count + 1)
+                        / (($count - 1) * ($count - 2) * ($count - 3))) - (3 * ($count - 1) ** 2
+                        / (($count - 2) * ($count - 3)));
+=======
                 return $summer * ($count * ($count + 1) /
                         (($count - 1) * ($count - 2) * ($count - 3))) - (3 * ($count - 1) ** 2 /
                         (($count - 2) * ($count - 3)));
+>>>>>>> main
             }
         }
 
@@ -102,11 +129,19 @@ class Deviations
      * asymmetric tail extending toward more positive values. Negative skewness indicates a
      * distribution with an asymmetric tail extending toward more negative values.
      *
+<<<<<<< HEAD
+     * @param mixed[] ...$args Data Series
+     *
+     * @return float|int|string The result, or a string containing an error
+     */
+    public static function skew(...$args): string|int|float
+=======
      * @param array ...$args Data Series
      *
      * @return float|int|string The result, or a string containing an error
      */
     public static function skew(...$args)
+>>>>>>> main
     {
         $aArgs = Functions::flattenArrayIndexed($args);
         $mean = Averages::average($aArgs);
@@ -126,7 +161,11 @@ class Deviations
                 return ExcelError::VALUE();
             } else {
                 // Is it a numeric value?
+<<<<<<< HEAD
+                if (!is_string($arg)) {
+=======
                 if ((is_numeric($arg)) && (!is_string($arg))) {
+>>>>>>> main
                     $summer += (($arg - $mean) / $stdDev) ** 3;
                     ++$count;
                 }
