@@ -7,16 +7,25 @@ use SimpleXMLElement;
 
 class WorkbookView
 {
+<<<<<<< HEAD
+    private Spreadsheet $spreadsheet;
+=======
     /**
      * @var Spreadsheet
      */
     private $spreadsheet;
+>>>>>>> main
 
     public function __construct(Spreadsheet $spreadsheet)
     {
         $this->spreadsheet = $spreadsheet;
     }
 
+<<<<<<< HEAD
+    /** @param array<int, ?int> $mapSheetId */
+    public function viewSettings(SimpleXMLElement $xmlWorkbook, string $mainNS, array $mapSheetId, bool $readDataOnly): void
+    {
+=======
     /**
      * @param mixed $mainNS
      */
@@ -25,6 +34,7 @@ class WorkbookView
         if ($this->spreadsheet->getSheetCount() == 0) {
             $this->spreadsheet->createSheet();
         }
+>>>>>>> main
         // Default active sheet index to the first loaded worksheet from the file
         $this->spreadsheet->setActiveSheetIndex(0);
 
@@ -34,7 +44,11 @@ class WorkbookView
             // active sheet index
             $activeTab = (int) $workbookViewAttributes->activeTab; // refers to old sheet index
             // keep active sheet index if sheet is still loaded, else first sheet is set as the active worksheet
+<<<<<<< HEAD
+            if (isset($mapSheetId[$activeTab])) {
+=======
             if (isset($mapSheetId[$activeTab]) && $mapSheetId[$activeTab] !== null) {
+>>>>>>> main
                 $this->spreadsheet->setActiveSheetIndex($mapSheetId[$activeTab]);
             }
 
@@ -49,10 +63,14 @@ class WorkbookView
         }
     }
 
+<<<<<<< HEAD
+    public static function testSimpleXml(mixed $value): SimpleXMLElement
+=======
     /**
      * @param mixed $value
      */
     public static function testSimpleXml($value): SimpleXMLElement
+>>>>>>> main
     {
         return ($value instanceof SimpleXMLElement)
             ? $value
@@ -67,7 +85,11 @@ class WorkbookView
     /**
      * Convert an 'xsd:boolean' XML value to a PHP boolean value.
      * A valid 'xsd:boolean' XML value can be one of the following
+<<<<<<< HEAD
+     * four values: 'true', 'false', '1', '0'.  It is case-sensitive.
+=======
      * four values: 'true', 'false', '1', '0'.  It is case sensitive.
+>>>>>>> main
      *
      * Note that just doing '(bool) $xsdBoolean' is not safe,
      * since '(bool) "false"' returns true.

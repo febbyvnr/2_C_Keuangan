@@ -15,9 +15,15 @@ class Secant
      *
      * Returns the secant of an angle.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $angle Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The secant of the angle
+=======
      * @param array|float $angle Number, or can be an array of numbers
      *
      * @return array|float|string The secant of the angle
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -41,9 +47,15 @@ class Secant
      *
      * Returns the hyperbolic secant of an angle.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $angle Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The hyperbolic secant of the angle
+=======
      * @param array|float $angle Number, or can be an array of numbers
      *
      * @return array|float|string The hyperbolic secant of the angle
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */

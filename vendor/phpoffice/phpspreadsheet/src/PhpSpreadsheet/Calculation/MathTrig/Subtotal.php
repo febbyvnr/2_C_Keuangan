@@ -6,14 +6,26 @@ use PhpOffice\PhpSpreadsheet\Calculation\Exception;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 use PhpOffice\PhpSpreadsheet\Calculation\Statistical;
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+=======
+>>>>>>> main
 
 class Subtotal
 {
     /**
+<<<<<<< HEAD
+     * @param mixed[] $args
+     *
+     * @return mixed[]
+     */
+    protected static function filterHiddenArgs(Cell $cellReference, array $args): array
+=======
      * @param mixed $cellReference
      * @param mixed $args
      */
     protected static function filterHiddenArgs($cellReference, $args): array
+>>>>>>> main
     {
         return array_filter(
             $args,
@@ -24,23 +36,57 @@ class Subtotal
                     return true;
                 }
 
+<<<<<<< HEAD
+                return $cellReference->getWorksheet()->getRowDimension((int) $row)->getVisible();
+=======
                 return $cellReference->getWorksheet()->getRowDimension($row)->getVisible();
+>>>>>>> main
             },
             ARRAY_FILTER_USE_KEY
         );
     }
 
     /**
+<<<<<<< HEAD
+     * @param mixed[] $args
+     *
+     * @return mixed[]
+     */
+    protected static function filterFilteredArgs(Cell $cellReference, array $args): array
+=======
      * @param mixed $cellReference
      * @param mixed $args
      */
     protected static function filterFormulaArgs($cellReference, $args): array
+>>>>>>> main
     {
         return array_filter(
             $args,
             function ($index) use ($cellReference) {
                 $explodeArray = explode('.', $index);
                 $row = $explodeArray[1] ?? '';
+<<<<<<< HEAD
+
+                return is_numeric($row) ? ($cellReference->getWorksheet()->getRowDimension((int) $row)->getVisibleAfterFilter()) : true;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
+     * @param mixed[] $args
+     *
+     * @return mixed[]
+     */
+    protected static function filterFormulaArgs(Cell $cellReference, array $args): array
+    {
+        return array_filter(
+            $args,
+            function ($index) use ($cellReference): bool {
+                $explodeArray = explode('.', $index);
+                $row = $explodeArray[1] ?? '';
+=======
+>>>>>>> main
                 $column = $explodeArray[2] ?? '';
                 $retVal = true;
                 if ($cellReference->getWorksheet()->cellExists($column . $row)) {
@@ -48,7 +94,11 @@ class Subtotal
                     $isFormula = $cellReference->getWorksheet()->getCell($column . $row)->isFormula();
                     $cellFormula = !preg_match(
                         '/^=.*\b(SUBTOTAL|AGGREGATE)\s*\(/i',
+<<<<<<< HEAD
+                        $cellReference->getWorksheet()->getCell($column . $row)->getValueString()
+=======
                         $cellReference->getWorksheet()->getCell($column . $row)->getValue() ?? ''
+>>>>>>> main
                     );
 
                     $retVal = !$isFormula || $cellFormula;
@@ -60,6 +110,12 @@ class Subtotal
         );
     }
 
+<<<<<<< HEAD
+    /**
+     * @var array<int, callable>
+     */
+=======
+>>>>>>> main
     private const CALL_FUNCTIONS = [
         1 => [Statistical\Averages::class, 'average'], // 1 and 101
         [Statistical\Counts::class, 'COUNT'], // 2 and 102
@@ -87,11 +143,18 @@ class Subtotal
      *                    but ignore any values in the range that are
      *                    in hidden rows
      * @param mixed[] $args A mixed data series of values
+<<<<<<< HEAD
+     */
+    public static function evaluate(mixed $functionType, ...$args): float|int|string
+    {
+        /** @var Cell */
+=======
      *
      * @return float|string
      */
     public static function evaluate($functionType, ...$args)
     {
+>>>>>>> main
         $cellReference = array_pop($args);
         $bArgs = Functions::flattenArrayIndexed($args);
         $aArgs = [];
@@ -120,14 +183,25 @@ class Subtotal
         if ($subtotal > 100) {
             $aArgs = self::filterHiddenArgs($cellReference, $aArgs);
             $subtotal -= 100;
+<<<<<<< HEAD
+        } else {
+            $aArgs = self::filterFilteredArgs($cellReference, $aArgs);
+=======
+>>>>>>> main
         }
 
         $aArgs = self::filterFormulaArgs($cellReference, $aArgs);
         if (array_key_exists($subtotal, self::CALL_FUNCTIONS)) {
+<<<<<<< HEAD
+            $call = self::CALL_FUNCTIONS[$subtotal];
+
+            return call_user_func_array($call, $aArgs); //* @phpstan-ignore-line
+=======
             /** @var callable */
             $call = self::CALL_FUNCTIONS[$subtotal];
 
             return call_user_func_array($call, $aArgs);
+>>>>>>> main
         }
 
         return ExcelError::VALUE();

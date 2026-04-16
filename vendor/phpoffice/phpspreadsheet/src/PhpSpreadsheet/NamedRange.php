@@ -43,10 +43,18 @@ class NamedRange extends DefinedName
         return $this;
     }
 
+<<<<<<< HEAD
+    /** @return string[] */
+    public function getCellsInRange(): array
+    {
+        $range = $this->value;
+        if (str_starts_with($range, '=')) {
+=======
     public function getCellsInRange(): array
     {
         $range = $this->value;
         if (substr($range, 0, 1) === '=') {
+>>>>>>> main
             $range = substr($range, 1);
         }
 

@@ -27,6 +27,33 @@ class Fill extends Supervisor
     const FILL_PATTERN_LIGHTVERTICAL = 'lightVertical';
     const FILL_PATTERN_MEDIUMGRAY = 'mediumGray';
 
+<<<<<<< HEAD
+    public ?int $startcolorIndex = null;
+
+    public ?int $endcolorIndex = null;
+
+    /**
+     * Fill type.
+     */
+    protected ?string $fillType = self::FILL_NONE;
+
+    /**
+     * Rotation.
+     */
+    protected float $rotation = 0.0;
+
+    /**
+     * Start color.
+     */
+    protected Color $startColor;
+
+    /**
+     * End color.
+     */
+    protected Color $endColor;
+
+    private bool $colorChanged = false;
+=======
     /**
      * @var null|int
      */
@@ -67,6 +94,7 @@ class Fill extends Supervisor
 
     /** @var bool */
     private $colorChanged = false;
+>>>>>>> main
 
     /**
      * Create a new Fill.
@@ -78,7 +106,11 @@ class Fill extends Supervisor
      *                                    Leave this value at default unless you understand exactly what
      *                                        its ramifications are
      */
+<<<<<<< HEAD
+    public function __construct(bool $isSupervisor = false, bool $isConditional = false)
+=======
     public function __construct($isSupervisor = false, $isConditional = false)
+>>>>>>> main
     {
         // Supervisor?
         parent::__construct($isSupervisor);
@@ -100,12 +132,19 @@ class Fill extends Supervisor
     /**
      * Get the shared style component for the currently active cell in currently active sheet.
      * Only used for style supervisor.
+<<<<<<< HEAD
+     */
+    public function getSharedComponent(): self
+    {
+        /** @var Style $parent */
+=======
      *
      * @return Fill
      */
     public function getSharedComponent()
     {
         /** @var Style */
+>>>>>>> main
         $parent = $this->parent;
 
         return $parent->getSharedComponent()->getFill();
@@ -114,11 +153,19 @@ class Fill extends Supervisor
     /**
      * Build style array from subcomponents.
      *
+<<<<<<< HEAD
+     * @param mixed[] $array
+     *
+     * @return array{fill: mixed[]}
+     */
+    public function getStyleArray(array $array): array
+=======
      * @param array $array
      *
      * @return array
      */
     public function getStyleArray($array)
+>>>>>>> main
     {
         return ['fill' => $array];
     }
@@ -141,11 +188,19 @@ class Fill extends Supervisor
      * );
      * </code>
      *
+<<<<<<< HEAD
+     * @param array{fillType?: string, rotation?: float, startColor?: array{rgb?: string, argb?: string}, endColor?: array{rgb?: string, argb?: string}, color?: array{rgb?: string, argb?: string}} $styleArray Array containing style information
+     *
+     * @return $this
+     */
+    public function applyFromArray(array $styleArray): static
+=======
      * @param array $styleArray Array containing style information
      *
      * @return $this
      */
     public function applyFromArray(array $styleArray)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $this->getActiveSheet()->getStyle($this->getSelectedCells())->applyFromArray($this->getStyleArray($styleArray));
@@ -157,6 +212,20 @@ class Fill extends Supervisor
                 $this->setRotation($styleArray['rotation']);
             }
             if (isset($styleArray['startColor'])) {
+<<<<<<< HEAD
+                $this->getStartColor()
+                    ->applyFromArray($styleArray['startColor']);
+            }
+            if (isset($styleArray['endColor'])) {
+                $this->getEndColor()
+                    ->applyFromArray($styleArray['endColor']);
+            }
+            if (isset($styleArray['color'])) {
+                $this->getStartColor()
+                    ->applyFromArray($styleArray['color']);
+                $this->getEndColor()
+                    ->applyFromArray($styleArray['color']);
+=======
                 $this->getStartColor()->applyFromArray($styleArray['startColor']);
             }
             if (isset($styleArray['endColor'])) {
@@ -165,6 +234,7 @@ class Fill extends Supervisor
             if (isset($styleArray['color'])) {
                 $this->getStartColor()->applyFromArray($styleArray['color']);
                 $this->getEndColor()->applyFromArray($styleArray['color']);
+>>>>>>> main
             }
         }
 
@@ -173,10 +243,15 @@ class Fill extends Supervisor
 
     /**
      * Get Fill Type.
+<<<<<<< HEAD
+     */
+    public function getFillType(): ?string
+=======
      *
      * @return null|string
      */
     public function getFillType()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getFillType();
@@ -192,7 +267,11 @@ class Fill extends Supervisor
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setFillType(string $fillType): static
+=======
     public function setFillType($fillType)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $styleArray = $this->getStyleArray(['fillType' => $fillType]);
@@ -206,10 +285,15 @@ class Fill extends Supervisor
 
     /**
      * Get Rotation.
+<<<<<<< HEAD
+     */
+    public function getRotation(): float
+=======
      *
      * @return float
      */
     public function getRotation()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getRotation();
@@ -221,11 +305,17 @@ class Fill extends Supervisor
     /**
      * Set Rotation.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setRotation(float $angleInDegrees): static
+=======
      * @param float $angleInDegrees
      *
      * @return $this
      */
     public function setRotation($angleInDegrees)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $styleArray = $this->getStyleArray(['rotation' => $angleInDegrees]);
@@ -239,10 +329,15 @@ class Fill extends Supervisor
 
     /**
      * Get Start Color.
+<<<<<<< HEAD
+     */
+    public function getStartColor(): Color
+=======
      *
      * @return Color
      */
     public function getStartColor()
+>>>>>>> main
     {
         return $this->startColor;
     }
@@ -252,7 +347,11 @@ class Fill extends Supervisor
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setStartColor(Color $color): static
+=======
     public function setStartColor(Color $color)
+>>>>>>> main
     {
         $this->colorChanged = true;
         // make sure parameter is a real color and not a supervisor
@@ -270,10 +369,15 @@ class Fill extends Supervisor
 
     /**
      * Get End Color.
+<<<<<<< HEAD
+     */
+    public function getEndColor(): Color
+=======
      *
      * @return Color
      */
     public function getEndColor()
+>>>>>>> main
     {
         return $this->endColor;
     }
@@ -283,7 +387,11 @@ class Fill extends Supervisor
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setEndColor(Color $color): static
+=======
     public function setEndColor(Color $color)
+>>>>>>> main
     {
         $this->colorChanged = true;
         // make sure parameter is a real color and not a supervisor
@@ -315,11 +423,31 @@ class Fill extends Supervisor
      *
      * @return string Hash code
      */
+<<<<<<< HEAD
+    public function getHashCode(): string
+=======
     public function getHashCode()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getHashCode();
         }
+<<<<<<< HEAD
+
+        // Note that we don't care about colours for fill type NONE, but could have duplicate NONEs with
+        //  different hashes if we don't explicitly prevent this
+        return md5(
+            $this->getFillType()
+            . $this->getRotation()
+            . ($this->getFillType() !== self::FILL_NONE ? $this->getStartColor()->getHashCode() : '')
+            . ($this->getFillType() !== self::FILL_NONE ? $this->getEndColor()->getHashCode() : '')
+            . ((string) $this->getColorsChanged())
+            . __CLASS__
+        );
+    }
+
+    /** @return mixed[] */
+=======
         // Note that we don't care about colours for fill type NONE, but could have duplicate NONEs with
         //  different hashes if we don't explicitly prevent this
         return md5(
@@ -332,6 +460,7 @@ class Fill extends Supervisor
         );
     }
 
+>>>>>>> main
     protected function exportArray1(): array
     {
         $exportedArray = [];

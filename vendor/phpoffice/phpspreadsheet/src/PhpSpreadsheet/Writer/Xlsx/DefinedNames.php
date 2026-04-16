@@ -2,21 +2,35 @@
 
 namespace PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
+=======
+>>>>>>> main
 use Exception;
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\DefinedName;
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+=======
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Shared\XMLWriter;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet as ActualWorksheet;
 
 class DefinedNames
 {
+<<<<<<< HEAD
+    private XMLWriter $objWriter;
+
+    private Spreadsheet $spreadsheet;
+=======
     /** @var XMLWriter */
     private $objWriter;
 
     /** @var Spreadsheet */
     private $spreadsheet;
+>>>>>>> main
 
     public function __construct(XMLWriter $objWriter, Spreadsheet $spreadsheet)
     {
@@ -73,7 +87,11 @@ class DefinedNames
         if ($definedName->getLocalOnly() && $definedName->getScope() !== null) {
             try {
                 $local = $definedName->getScope()->getParentOrThrow()->getIndex($definedName->getScope());
+<<<<<<< HEAD
+            } catch (Exception) {
+=======
             } catch (Exception $e) {
+>>>>>>> main
                 // See issue 2266 - deleting sheet which contains
                 //     defined names will cause Exception above.
                 return;
@@ -114,9 +132,15 @@ class DefinedNames
             //    Strip any worksheet ref so we can make the cell ref absolute
             [, $range[0]] = ActualWorksheet::extractSheetTitle($range[0], true);
 
+<<<<<<< HEAD
+            $range[0] = Coordinate::absoluteCoordinate($range[0] ?? '');
+            if (count($range) > 1) {
+                $range[1] = Coordinate::absoluteCoordinate($range[1] ?? '');
+=======
             $range[0] = Coordinate::absoluteCoordinate($range[0]);
             if (count($range) > 1) {
                 $range[1] = Coordinate::absoluteCoordinate($range[1]);
+>>>>>>> main
             }
             $range = implode(':', $range);
 
@@ -194,6 +218,15 @@ class DefinedNames
     private function getDefinedRange(DefinedName $definedName): string
     {
         $definedRange = $definedName->getValue();
+<<<<<<< HEAD
+        $splitCount = Preg::matchAllWithOffsets(
+            '/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/mui',
+            $definedRange,
+            $splitRanges
+        );
+
+        $lengths = array_map([StringHelper::class, 'strlenAllowNull'], array_column($splitRanges[0], 0));
+=======
         $splitCount = preg_match_all(
             '/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/mui',
             $definedRange,
@@ -202,6 +235,7 @@ class DefinedNames
         );
 
         $lengths = array_map('strlen', array_column($splitRanges[0], 0));
+>>>>>>> main
         $offsets = array_column($splitRanges[0], 1);
 
         $worksheets = $splitRanges[2];
@@ -235,7 +269,11 @@ class DefinedNames
             $definedRange = substr($definedRange, 0, $offset) . $newRange . substr($definedRange, $offset + $length);
         }
 
+<<<<<<< HEAD
+        if (str_starts_with($definedRange, '=')) {
+=======
         if (substr($definedRange, 0, 1) === '=') {
+>>>>>>> main
             $definedRange = substr($definedRange, 1);
         }
 

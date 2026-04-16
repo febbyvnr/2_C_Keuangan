@@ -10,10 +10,15 @@ class File
 {
     /**
      * Use Temp or File Upload Temp for temporary files.
+<<<<<<< HEAD
+     */
+    protected static bool $useUploadTempDirectory = false;
+=======
      *
      * @var bool
      */
     protected static $useUploadTempDirectory = false;
+>>>>>>> main
 
     /**
      * Set the flag indicating whether the File Upload Temp directory should be used for temporary files.
@@ -94,9 +99,15 @@ class File
             $pathArray = explode('/', $filename);
             while (in_array('..', $pathArray) && $pathArray[0] != '..') {
                 $iMax = count($pathArray);
+<<<<<<< HEAD
+                for ($i = 1; $i < $iMax; ++$i) {
+                    if ($pathArray[$i] == '..') {
+                        array_splice($pathArray, $i - 1, 2);
+=======
                 for ($i = 0; $i < $iMax; ++$i) {
                     if ($pathArray[$i] == '..' && $i > 0) {
                         unset($pathArray[$i], $pathArray[$i - 1]);
+>>>>>>> main
 
                         break;
                     }
@@ -132,6 +143,9 @@ class File
 
     public static function temporaryFilename(): string
     {
+<<<<<<< HEAD
+        return tempnam(self::sysGetTempDir(), 'phpspreadsheet') ?: throw new Exception('Could not create temporary file');
+=======
         $filename = tempnam(self::sysGetTempDir(), 'phpspreadsheet');
         if ($filename === false) {
             throw new Exception('Could not create temporary file');
@@ -156,6 +170,7 @@ class File
                 "Stream wrappers are not permitted as file paths: {$filename}"
             );
         }
+>>>>>>> main
     }
 
     /**
@@ -163,6 +178,10 @@ class File
      */
     public static function assertFile(string $filename, string $zipMember = ''): void
     {
+<<<<<<< HEAD
+        if (!is_file($filename) || !is_readable($filename)) {
+            throw new ReaderException('File "' . $filename . '" does not exist or is not readable.');
+=======
         self::prohibitWrappers($filename);
         if (!is_file($filename)) {
             throw new ReaderException('File "' . $filename . '" does not exist.');
@@ -170,6 +189,7 @@ class File
 
         if (!is_readable($filename)) {
             throw new ReaderException('Could not open "' . $filename . '" for reading.');
+>>>>>>> main
         }
 
         if ($zipMember !== '') {
@@ -186,6 +206,12 @@ class File
 
     /**
      * Same as assertFile, except return true/false and don't throw Exception.
+<<<<<<< HEAD
+     */
+    public static function testFileNoThrow(string $filename, ?string $zipMember = null): bool
+    {
+        if (!is_file($filename) || !is_readable($filename)) {
+=======
      * Will nevertheless throw if filename uses invalid protocol, e.g. phar.
      */
     public static function testFileNoThrow(string $filename, ?string $zipMember = null): bool
@@ -195,6 +221,7 @@ class File
             return false;
         }
         if (!is_readable($filename)) {
+>>>>>>> main
             return false;
         }
         if ($zipMember === null) {

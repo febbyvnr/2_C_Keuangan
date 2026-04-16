@@ -4,6 +4,18 @@ namespace PhpOffice\PhpSpreadsheet\Cell;
 
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+<<<<<<< HEAD
+use Stringable;
+
+/**
+ * @implements AddressRange<CellAddress>
+ */
+class CellRange implements AddressRange, Stringable
+{
+    protected CellAddress $from;
+
+    protected CellAddress $to;
+=======
 
 class CellRange implements AddressRange
 {
@@ -16,6 +28,7 @@ class CellRange implements AddressRange
      * @var CellAddress
      */
     protected $to;
+>>>>>>> main
 
     public function __construct(CellAddress $from, CellAddress $to)
     {

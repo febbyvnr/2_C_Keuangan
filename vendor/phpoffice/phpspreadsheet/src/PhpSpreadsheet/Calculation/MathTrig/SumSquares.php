@@ -17,10 +17,15 @@ class SumSquares
      *        SUMSQ(value1[,value2[, ...]])
      *
      * @param mixed ...$args Data values
+<<<<<<< HEAD
+     */
+    public static function sumSquare(mixed ...$args): string|int|float
+=======
      *
      * @return float|string
      */
     public static function sumSquare(...$args)
+>>>>>>> main
     {
         try {
             $returnValue = 0;
@@ -37,6 +42,13 @@ class SumSquares
         return $returnValue;
     }
 
+<<<<<<< HEAD
+    /**
+     * @param mixed[] $array1
+     * @param mixed[] $array2
+     */
+=======
+>>>>>>> main
     private static function getCount(array $array1, array $array2): int
     {
         $count = count($array1);
@@ -49,10 +61,15 @@ class SumSquares
 
     /**
      * These functions accept only numeric arguments, not even strings which are numeric.
+<<<<<<< HEAD
+     */
+    private static function numericNotString(mixed $item): bool
+=======
      *
      * @param mixed $item
      */
     private static function numericNotString($item): bool
+>>>>>>> main
     {
         return is_numeric($item) && !is_string($item);
     }
@@ -62,6 +79,15 @@ class SumSquares
      *
      * @param mixed[] $matrixData1 Matrix #1
      * @param mixed[] $matrixData2 Matrix #2
+<<<<<<< HEAD
+     */
+    public static function sumXSquaredMinusYSquared(array $matrixData1, array $matrixData2): string|int|float
+    {
+        try {
+            /** @var array<float|int> */
+            $array1 = Functions::flattenArray($matrixData1);
+            /** @var array<float|int> */
+=======
      *
      * @return float|string
      */
@@ -69,6 +95,7 @@ class SumSquares
     {
         try {
             $array1 = Functions::flattenArray($matrixData1);
+>>>>>>> main
             $array2 = Functions::flattenArray($matrixData2);
             $count = self::getCount($array1, $array2);
 
@@ -90,6 +117,15 @@ class SumSquares
      *
      * @param mixed[] $matrixData1 Matrix #1
      * @param mixed[] $matrixData2 Matrix #2
+<<<<<<< HEAD
+     */
+    public static function sumXSquaredPlusYSquared(array $matrixData1, array $matrixData2): string|int|float
+    {
+        try {
+            /** @var array<float|int> */
+            $array1 = Functions::flattenArray($matrixData1);
+            /** @var array<float|int> */
+=======
      *
      * @return float|string
      */
@@ -97,6 +133,7 @@ class SumSquares
     {
         try {
             $array1 = Functions::flattenArray($matrixData1);
+>>>>>>> main
             $array2 = Functions::flattenArray($matrixData2);
             $count = self::getCount($array1, $array2);
 
@@ -118,6 +155,15 @@ class SumSquares
      *
      * @param mixed[] $matrixData1 Matrix #1
      * @param mixed[] $matrixData2 Matrix #2
+<<<<<<< HEAD
+     */
+    public static function sumXMinusYSquared(array $matrixData1, array $matrixData2): string|int|float
+    {
+        try {
+            /** @var array<float|int> */
+            $array1 = Functions::flattenArray($matrixData1);
+            /** @var array<float|int> */
+=======
      *
      * @return float|string
      */
@@ -125,6 +171,7 @@ class SumSquares
     {
         try {
             $array1 = Functions::flattenArray($matrixData1);
+>>>>>>> main
             $array2 = Functions::flattenArray($matrixData2);
             $count = self::getCount($array1, $array2);
 

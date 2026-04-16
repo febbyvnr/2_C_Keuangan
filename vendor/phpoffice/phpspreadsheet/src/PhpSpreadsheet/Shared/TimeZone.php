@@ -9,10 +9,15 @@ class TimeZone
 {
     /**
      * Default Timezone used for date/time conversions.
+<<<<<<< HEAD
+     */
+    protected static string $timezone = 'UTC';
+=======
      *
      * @var string
      */
     protected static $timezone = 'UTC';
+>>>>>>> main
 
     /**
      * Validate a Timezone name.

@@ -25,6 +25,60 @@ class Properties
 
     /**
      * Creator.
+<<<<<<< HEAD
+     */
+    private string $creator = 'Unknown Creator';
+
+    /**
+     * LastModifiedBy.
+     */
+    private string $lastModifiedBy;
+
+    /**
+     * Created.
+     */
+    private float|int $created;
+
+    /**
+     * Modified.
+     */
+    private float|int $modified;
+
+    /**
+     * Title.
+     */
+    private string $title = 'Untitled Spreadsheet';
+
+    /**
+     * Description.
+     */
+    private string $description = '';
+
+    /**
+     * Subject.
+     */
+    private string $subject = '';
+
+    /**
+     * Keywords.
+     */
+    private string $keywords = '';
+
+    /**
+     * Category.
+     */
+    private string $category = '';
+
+    /**
+     * Manager.
+     */
+    private string $manager = '';
+
+    /**
+     * Company.
+     */
+    private string $company = '';
+=======
      *
      * @var string
      */
@@ -99,16 +153,28 @@ class Properties
      * @var string
      */
     private $company = '';
+>>>>>>> main
 
     /**
      * Custom Properties.
      *
+<<<<<<< HEAD
+     * @var array{value: null|bool|float|int|string, type: string}[]
+     */
+    private array $customProperties = [];
+
+    private string $hyperlinkBase = '';
+
+    private string $viewport = '';
+
+=======
      * @var array{value: mixed, type: string}[]
      */
     private $customProperties = [];
 
     private string $hyperlinkBase = '';
 
+>>>>>>> main
     /**
      * Create a new Document Properties instance.
      */
@@ -160,6 +226,11 @@ class Properties
         return $this;
     }
 
+<<<<<<< HEAD
+    private static function intOrFloatTimestamp(null|bool|float|int|string $timestamp): float|int
+    {
+        if ($timestamp === null || is_bool($timestamp)) {
+=======
     /**
      * @param null|float|int|string $timestamp
      *
@@ -168,6 +239,7 @@ class Properties
     private static function intOrFloatTimestamp($timestamp)
     {
         if ($timestamp === null) {
+>>>>>>> main
             $timestamp = (float) (new DateTime())->format('U');
         } elseif (is_string($timestamp)) {
             if (is_numeric($timestamp)) {
@@ -185,10 +257,15 @@ class Properties
 
     /**
      * Get Created.
+<<<<<<< HEAD
+     */
+    public function getCreated(): float|int
+=======
      *
      * @return float|int
      */
     public function getCreated()
+>>>>>>> main
     {
         return $this->created;
     }
@@ -196,11 +273,17 @@ class Properties
     /**
      * Set Created.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setCreated(null|float|int|string $timestamp): self
+=======
      * @param null|float|int|string $timestamp
      *
      * @return $this
      */
     public function setCreated($timestamp): self
+>>>>>>> main
     {
         $this->created = self::intOrFloatTimestamp($timestamp);
 
@@ -209,10 +292,15 @@ class Properties
 
     /**
      * Get Modified.
+<<<<<<< HEAD
+     */
+    public function getModified(): float|int
+=======
      *
      * @return float|int
      */
     public function getModified()
+>>>>>>> main
     {
         return $this->modified;
     }
@@ -220,11 +308,17 @@ class Properties
     /**
      * Set Modified.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setModified(null|float|int|string $timestamp): self
+=======
      * @param null|float|int|string $timestamp
      *
      * @return $this
      */
     public function setModified($timestamp): self
+>>>>>>> main
     {
         $this->modified = self::intOrFloatTimestamp($timestamp);
 
@@ -391,10 +485,15 @@ class Properties
 
     /**
      * Get a Custom Property Value.
+<<<<<<< HEAD
+     */
+    public function getCustomPropertyValue(string $propertyName): bool|int|float|string|null
+=======
      *
      * @return mixed
      */
     public function getCustomPropertyValue(string $propertyName)
+>>>>>>> main
     {
         if (isset($this->customProperties[$propertyName])) {
             return $this->customProperties[$propertyName]['value'];
@@ -405,18 +504,27 @@ class Properties
 
     /**
      * Get a Custom Property Type.
+<<<<<<< HEAD
+     */
+    public function getCustomPropertyType(string $propertyName): ?string
+=======
      *
      * @return null|string
      */
     public function getCustomPropertyType(string $propertyName)
+>>>>>>> main
     {
         return $this->customProperties[$propertyName]['type'] ?? null;
     }
 
+<<<<<<< HEAD
+    private function identifyPropertyType(bool|int|float|string|null $propertyValue): string
+=======
     /**
      * @param mixed $propertyValue
      */
     private function identifyPropertyType($propertyValue): string
+>>>>>>> main
     {
         if (is_float($propertyValue)) {
             return self::PROPERTY_TYPE_FLOAT;
@@ -434,6 +542,13 @@ class Properties
     /**
      * Set a Custom Property.
      *
+<<<<<<< HEAD
+     * @param ?string $propertyType see `self::VALID_PROPERTY_TYPE_LIST`
+     *
+     * @return $this
+     */
+    public function setCustomProperty(string $propertyName, bool|int|float|string|null $propertyValue = '', ?string $propertyType = null): self
+=======
      * @param mixed $propertyValue
      * @param string $propertyType
      *   'i' : Integer
@@ -445,17 +560,25 @@ class Properties
      * @return $this
      */
     public function setCustomProperty(string $propertyName, $propertyValue = '', $propertyType = null): self
+>>>>>>> main
     {
         if (($propertyType === null) || (!in_array($propertyType, self::VALID_PROPERTY_TYPE_LIST))) {
             $propertyType = $this->identifyPropertyType($propertyValue);
         }
 
+<<<<<<< HEAD
+        $this->customProperties[$propertyName] = [
+            'value' => self::convertProperty($propertyValue, $propertyType),
+            'type' => $propertyType,
+        ];
+=======
         if (!is_object($propertyValue)) {
             $this->customProperties[$propertyName] = [
                 'value' => self::convertProperty($propertyValue, $propertyType),
                 'type' => $propertyType,
             ];
         }
+>>>>>>> main
 
         return $this;
     }
@@ -496,24 +619,34 @@ class Properties
 
     /**
      * Convert property to form desired by Excel.
+<<<<<<< HEAD
+     */
+    public static function convertProperty(bool|int|float|string|null $propertyValue, string $propertyType): bool|int|float|string|null
+=======
      *
      * @param mixed $propertyValue
      *
      * @return mixed
      */
     public static function convertProperty($propertyValue, string $propertyType)
+>>>>>>> main
     {
         return self::SPECIAL_TYPES[$propertyType] ?? self::convertProperty2($propertyValue, $propertyType);
     }
 
     /**
      * Convert property to form desired by Excel.
+<<<<<<< HEAD
+     */
+    private static function convertProperty2(bool|int|float|string|null $propertyValue, string $type): bool|int|float|string|null
+=======
      *
      * @param mixed $propertyValue
      *
      * @return mixed
      */
     private static function convertProperty2($propertyValue, string $type)
+>>>>>>> main
     {
         $propertyType = self::convertPropertyType($type);
         switch ($propertyType) {
@@ -548,4 +681,21 @@ class Properties
 
         return $this;
     }
+<<<<<<< HEAD
+
+    public function getViewport(): string
+    {
+        return $this->viewport;
+    }
+
+    public const SUGGESTED_VIEWPORT = 'width=device-width, initial-scale=1';
+
+    public function setViewport(string $viewport): self
+    {
+        $this->viewport = $viewport;
+
+        return $this;
+    }
+=======
+>>>>>>> main
 }

@@ -29,6 +29,17 @@ class Interest
      * @param mixed $presentValue Present Value
      * @param mixed $futureValue Future Value
      * @param mixed $type Payment type: 0 = at the end of each period, 1 = at the beginning of each period
+<<<<<<< HEAD
+     */
+    public static function payment(
+        mixed $interestRate,
+        mixed $period,
+        mixed $numberOfPeriods,
+        mixed $presentValue,
+        mixed $futureValue = 0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD
+    ): string|float {
+=======
      *
      * @return float|string
      */
@@ -40,12 +51,17 @@ class Interest
         $futureValue = 0,
         $type = FinancialConstants::PAYMENT_END_OF_PERIOD
     ) {
+>>>>>>> main
         $interestRate = Functions::flattenSingleValue($interestRate);
         $period = Functions::flattenSingleValue($period);
         $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
         $presentValue = Functions::flattenSingleValue($presentValue);
         $futureValue = ($futureValue === null) ? 0.0 : Functions::flattenSingleValue($futureValue);
+<<<<<<< HEAD
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+=======
         $type = ($type === null) ? FinancialConstants::PAYMENT_END_OF_PERIOD : Functions::flattenSingleValue($type);
+>>>>>>> main
 
         try {
             $interestRate = CashFlowValidations::validateRate($interestRate);
@@ -85,6 +101,13 @@ class Interest
      *     =ISPMT(interest_rate, period, number_payments, pv)
      *
      * @param mixed $interestRate is the interest rate for the investment
+<<<<<<< HEAD
+     * @param mixed $period is the period to calculate the interest rate.  It must be between 1 and number_payments.
+     * @param mixed $numberOfPeriods is the number of payments for the annuity
+     * @param mixed $principleRemaining is the loan amount or present value of the payments
+     */
+    public static function schedulePayment(mixed $interestRate, mixed $period, mixed $numberOfPeriods, mixed $principleRemaining): string|float
+=======
      * @param mixed $period is the period to calculate the interest rate.  It must be betweeen 1 and number_payments.
      * @param mixed $numberOfPeriods is the number of payments for the annuity
      * @param mixed $principleRemaining is the loan amount or present value of the payments
@@ -92,6 +115,7 @@ class Interest
      * @return float|string
      */
     public static function schedulePayment($interestRate, $period, $numberOfPeriods, $principleRemaining)
+>>>>>>> main
     {
         $interestRate = Functions::flattenSingleValue($interestRate);
         $period = Functions::flattenSingleValue($period);
@@ -152,6 +176,26 @@ class Interest
      *                      1               At the beginning of the period.
      * @param mixed $guess Your guess for what the rate will be.
      *                          If you omit guess, it is assumed to be 10 percent.
+<<<<<<< HEAD
+     */
+    public static function rate(
+        mixed $numberOfPeriods,
+        mixed $payment,
+        mixed $presentValue,
+        mixed $futureValue = 0.0,
+        mixed $type = FinancialConstants::PAYMENT_END_OF_PERIOD,
+        mixed $guess = 0.1
+    ): string|float {
+        $numberOfPeriods = Functions::flattenSingleValue($numberOfPeriods);
+        $payment = Functions::flattenSingleValue($payment);
+        $presentValue = Functions::flattenSingleValue($presentValue);
+        $futureValue = Functions::flattenSingleValue($futureValue) ?? 0.0;
+        $type = Functions::flattenSingleValue($type) ?? FinancialConstants::PAYMENT_END_OF_PERIOD;
+        $guess = Functions::flattenSingleValue($guess) ?? 0.1;
+
+        try {
+            $numberOfPeriods = CashFlowValidations::validateFloat($numberOfPeriods);
+=======
      *
      * @return float|string
      */
@@ -172,6 +216,7 @@ class Interest
 
         try {
             $numberOfPeriods = CashFlowValidations::validateInt($numberOfPeriods);
+>>>>>>> main
             $payment = CashFlowValidations::validateFloat($payment);
             $presentValue = CashFlowValidations::validatePresentValue($presentValue);
             $futureValue = CashFlowValidations::validateFutureValue($futureValue);
@@ -199,8 +244,12 @@ class Interest
         return $close ? $rate : ExcelError::NAN();
     }
 
+<<<<<<< HEAD
+    private static function rateNextGuess(float $rate, float $numberOfPeriods, float $payment, float $presentValue, float $futureValue, int $type): string|float
+=======
     /** @return float|string */
     private static function rateNextGuess(float $rate, int $numberOfPeriods, float $payment, float $presentValue, float $futureValue, int $type)
+>>>>>>> main
     {
         if ($rate == 0.0) {
             return ExcelError::NAN();

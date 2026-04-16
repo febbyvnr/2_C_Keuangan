@@ -16,7 +16,11 @@ class RgbTint
     private const TWO_THIRD = 2.0 / 3.0;
     private const RGBMAX = 255.0;
     /**
+<<<<<<< HEAD
+     * MS Excel's tint function expects that HLS is base 240.
+=======
      * MS excel's tint function expects that HLS is base 240.
+>>>>>>> main
      *
      * @see https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
      */
@@ -60,9 +64,12 @@ class RgbTint
         return [$h, $luminance, $s];
     }
 
+<<<<<<< HEAD
+=======
     /** @var mixed */
     private static $scrutinizerZeroPointZero = 0.0;
 
+>>>>>>> main
     /**
      * Convert hue/luminance/saturation to red/green/blue.
      *
@@ -72,9 +79,15 @@ class RgbTint
      *
      * @return float[]
      */
+<<<<<<< HEAD
+    private static function hlsToRgb(float $hue, float $luminance, float $saturation): array
+    {
+        if ($saturation === 0.0) {
+=======
     private static function hlsToRgb($hue, $luminance, $saturation): array
     {
         if ($saturation === self::$scrutinizerZeroPointZero) {
+>>>>>>> main
             return [$luminance, $luminance, $luminance];
         }
         if ($luminance <= 0.5) {
