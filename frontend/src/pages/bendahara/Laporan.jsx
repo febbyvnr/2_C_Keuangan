@@ -107,13 +107,16 @@ export default function Laporan() {
     setBkuType((prev) => (prev === 0 ? bkuList.length - 1 : prev - 1));
   };
 
-  // 🔥 TAMBAHAN: HITUNG SALDO AKHIR BKU (AUTO UPDATE)
+  // 🔥 HITUNG SALDO AKHIR BKU
   const saldoAkhir = data.length > 0 ? data[data.length - 1].saldo || 0 : 0;
 
   return (
     <div style={{ padding: "30px" }}>
       <h2>Laporan</h2>
 
+      {/* ========================= */}
+      {/* TABS */}
+      {/* ========================= */}
       <div className="laporan-tabs">
         {tabs.map((tab) => (
           <div
@@ -126,6 +129,9 @@ export default function Laporan() {
         ))}
       </div>
 
+      {/* ========================= */}
+      {/* CONTENT */}
+      {/* ========================= */}
       <div className="laporan-content">
         {/* ========================= */}
         {/* TABEL */}
@@ -274,11 +280,10 @@ export default function Laporan() {
             </>
           )}
 
-          {/* 🔥 TAMBAHAN KHUSUS BKU */}
+          {/* 🔥 KHUSUS BKU */}
           {active === "BKU" && (
             <div className="laporan-total-card">
               <div className="laporan-total-title">Saldo Akhir</div>
-
               <div className="laporan-total-value">
                 Rp {Number(saldoAkhir).toLocaleString("id-ID")}
               </div>
