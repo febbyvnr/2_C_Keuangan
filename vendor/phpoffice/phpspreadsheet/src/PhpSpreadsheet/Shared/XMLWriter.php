@@ -6,8 +6,12 @@ use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 
 class XMLWriter extends \XMLWriter
 {
+<<<<<<< HEAD
+    public static bool $debugEnabled = false;
+=======
     /** @var bool */
     public static $debugEnabled = false;
+>>>>>>> main
 
     /** Temporary storage method */
     const STORAGE_MEMORY = 1;
@@ -15,18 +19,29 @@ class XMLWriter extends \XMLWriter
 
     /**
      * Temporary filename.
+<<<<<<< HEAD
+     */
+    private string $tempFileName = '';
+=======
      *
      * @var string
      */
     private $tempFileName = '';
+>>>>>>> main
 
     /**
      * Create a new XMLWriter instance.
      *
      * @param int $temporaryStorage Temporary storage location
+<<<<<<< HEAD
+     * @param ?string $temporaryStorageFolder Temporary storage folder
+     */
+    public function __construct(int $temporaryStorage = self::STORAGE_MEMORY, ?string $temporaryStorageFolder = null)
+=======
      * @param string $temporaryStorageFolder Temporary storage folder
      */
     public function __construct($temporaryStorage = self::STORAGE_MEMORY, $temporaryStorageFolder = null)
+>>>>>>> main
     {
         // Open temporary storage
         if ($temporaryStorage == self::STORAGE_MEMORY) {
@@ -42,6 +57,13 @@ class XMLWriter extends \XMLWriter
             if (empty($this->tempFileName) || $this->openUri($this->tempFileName) === false) {
                 // Fallback to memory...
                 $this->openMemory();
+<<<<<<< HEAD
+                if ($this->tempFileName != '') {
+                    @unlink($this->tempFileName);
+                }
+                $this->tempFileName = '';
+=======
+>>>>>>> main
             }
         }
 
@@ -59,12 +81,20 @@ class XMLWriter extends \XMLWriter
         // Unlink temporary files
         // There is nothing reasonable to do if unlink fails.
         if ($this->tempFileName != '') {
+<<<<<<< HEAD
+=======
             /** @scrutinizer ignore-unhandled */
+>>>>>>> main
             @unlink($this->tempFileName);
         }
     }
 
+<<<<<<< HEAD
+    /** @param mixed[] $data */
+    public function __unserialize(array $data): void
+=======
     public function __wakeup(): void
+>>>>>>> main
     {
         $this->tempFileName = '';
 
@@ -73,10 +103,15 @@ class XMLWriter extends \XMLWriter
 
     /**
      * Get written data.
+<<<<<<< HEAD
+     */
+    public function getData(): string
+=======
      *
      * @return string
      */
     public function getData()
+>>>>>>> main
     {
         if ($this->tempFileName == '') {
             return $this->outputMemory(true);
@@ -90,15 +125,24 @@ class XMLWriter extends \XMLWriter
      * Wrapper method for writeRaw.
      *
      * @param null|string|string[] $rawTextData
+<<<<<<< HEAD
+     */
+    public function writeRawData($rawTextData): bool
+=======
      *
      * @return bool
      */
     public function writeRawData($rawTextData)
+>>>>>>> main
     {
         if (is_array($rawTextData)) {
             $rawTextData = implode("\n", $rawTextData);
         }
 
+<<<<<<< HEAD
+        return $this->text($rawTextData ?? '');
+=======
         return $this->writeRaw(htmlspecialchars($rawTextData ?? ''));
+>>>>>>> main
     }
 }

@@ -21,8 +21,16 @@ namespace PhpOffice\PhpSpreadsheet\Calculation;
  * whether in an action of contract, tort or otherwise, arising from, out of or in connection with the
  * software or the use or other dealings in the software.
  *
+<<<<<<< HEAD
+ * The following links are no longer valid.
  * https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html
  * https://ewbi.blogs.com/develops/2004/12/excel_formula_p.html
+ *
+ * @deprecated 5.5.0 No replacement.
+=======
+ * https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html
+ * https://ewbi.blogs.com/develops/2004/12/excel_formula_p.html
+>>>>>>> main
  */
 class FormulaToken
 {
@@ -54,6 +62,20 @@ class FormulaToken
 
     /**
      * Value.
+<<<<<<< HEAD
+     */
+    private string $value;
+
+    /**
+     * Token Type (represented by TOKEN_TYPE_*).
+     */
+    private string $tokenType;
+
+    /**
+     * Token SubType (represented by TOKEN_SUBTYPE_*).
+     */
+    private string $tokenSubType;
+=======
      *
      * @var string
      */
@@ -72,15 +94,23 @@ class FormulaToken
      * @var string
      */
     private $tokenSubType;
+>>>>>>> main
 
     /**
      * Create a new FormulaToken.
      *
+<<<<<<< HEAD
+     * @param string $tokenType Token type (represented by TOKEN_TYPE_*)
+     * @param string $tokenSubType Token Subtype (represented by TOKEN_SUBTYPE_*)
+     */
+    public function __construct(string $value, string $tokenType = self::TOKEN_TYPE_UNKNOWN, string $tokenSubType = self::TOKEN_SUBTYPE_NOTHING)
+=======
      * @param string $value
      * @param string $tokenType Token type (represented by TOKEN_TYPE_*)
      * @param string $tokenSubType Token Subtype (represented by TOKEN_SUBTYPE_*)
      */
     public function __construct($value, $tokenType = self::TOKEN_TYPE_UNKNOWN, $tokenSubType = self::TOKEN_SUBTYPE_NOTHING)
+>>>>>>> main
     {
         // Initialise values
         $this->value = $value;
@@ -90,60 +120,90 @@ class FormulaToken
 
     /**
      * Get Value.
+<<<<<<< HEAD
+     */
+    public function getValue(): string
+=======
      *
      * @return string
      */
     public function getValue()
+>>>>>>> main
     {
         return $this->value;
     }
 
     /**
      * Set Value.
+<<<<<<< HEAD
+     */
+    public function setValue(string $value): void
+=======
      *
      * @param string $value
      */
     public function setValue($value): void
+>>>>>>> main
     {
         $this->value = $value;
     }
 
     /**
      * Get Token Type (represented by TOKEN_TYPE_*).
+<<<<<<< HEAD
+     */
+    public function getTokenType(): string
+=======
      *
      * @return string
      */
     public function getTokenType()
+>>>>>>> main
     {
         return $this->tokenType;
     }
 
     /**
      * Set Token Type (represented by TOKEN_TYPE_*).
+<<<<<<< HEAD
+     */
+    public function setTokenType(string $value): void
+=======
      *
      * @param string $value
      */
     public function setTokenType($value): void
+>>>>>>> main
     {
         $this->tokenType = $value;
     }
 
     /**
      * Get Token SubType (represented by TOKEN_SUBTYPE_*).
+<<<<<<< HEAD
+     */
+    public function getTokenSubType(): string
+=======
      *
      * @return string
      */
     public function getTokenSubType()
+>>>>>>> main
     {
         return $this->tokenSubType;
     }
 
     /**
      * Set Token SubType (represented by TOKEN_SUBTYPE_*).
+<<<<<<< HEAD
+     */
+    public function setTokenSubType(string $value): void
+=======
      *
      * @param string $value
      */
     public function setTokenSubType($value): void
+>>>>>>> main
     {
         $this->tokenSubType = $value;
     }

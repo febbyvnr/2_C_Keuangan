@@ -6,6 +6,35 @@ class PageMargins
 {
     /**
      * Left.
+<<<<<<< HEAD
+     */
+    private float $left = 0.7;
+
+    /**
+     * Right.
+     */
+    private float $right = 0.7;
+
+    /**
+     * Top.
+     */
+    private float $top = 0.75;
+
+    /**
+     * Bottom.
+     */
+    private float $bottom = 0.75;
+
+    /**
+     * Header.
+     */
+    private float $header = 0.3;
+
+    /**
+     * Footer.
+     */
+    private float $footer = 0.3;
+=======
      *
      * @var float
      */
@@ -45,6 +74,7 @@ class PageMargins
      * @var float
      */
     private $footer = 0.3;
+>>>>>>> main
 
     /**
      * Create a new PageMargins.
@@ -55,10 +85,15 @@ class PageMargins
 
     /**
      * Get Left.
+<<<<<<< HEAD
+     */
+    public function getLeft(): float
+=======
      *
      * @return float
      */
     public function getLeft()
+>>>>>>> main
     {
         return $this->left;
     }
@@ -66,11 +101,17 @@ class PageMargins
     /**
      * Set Left.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setLeft(float $left): static
+=======
      * @param float $left
      *
      * @return $this
      */
     public function setLeft($left)
+>>>>>>> main
     {
         $this->left = $left;
 
@@ -79,10 +120,15 @@ class PageMargins
 
     /**
      * Get Right.
+<<<<<<< HEAD
+     */
+    public function getRight(): float
+=======
      *
      * @return float
      */
     public function getRight()
+>>>>>>> main
     {
         return $this->right;
     }
@@ -90,11 +136,17 @@ class PageMargins
     /**
      * Set Right.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setRight(float $right): static
+=======
      * @param float $right
      *
      * @return $this
      */
     public function setRight($right)
+>>>>>>> main
     {
         $this->right = $right;
 
@@ -103,10 +155,15 @@ class PageMargins
 
     /**
      * Get Top.
+<<<<<<< HEAD
+     */
+    public function getTop(): float
+=======
      *
      * @return float
      */
     public function getTop()
+>>>>>>> main
     {
         return $this->top;
     }
@@ -114,11 +171,17 @@ class PageMargins
     /**
      * Set Top.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setTop(float $top): static
+=======
      * @param float $top
      *
      * @return $this
      */
     public function setTop($top)
+>>>>>>> main
     {
         $this->top = $top;
 
@@ -127,10 +190,15 @@ class PageMargins
 
     /**
      * Get Bottom.
+<<<<<<< HEAD
+     */
+    public function getBottom(): float
+=======
      *
      * @return float
      */
     public function getBottom()
+>>>>>>> main
     {
         return $this->bottom;
     }
@@ -138,11 +206,17 @@ class PageMargins
     /**
      * Set Bottom.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setBottom(float $bottom): static
+=======
      * @param float $bottom
      *
      * @return $this
      */
     public function setBottom($bottom)
+>>>>>>> main
     {
         $this->bottom = $bottom;
 
@@ -151,10 +225,15 @@ class PageMargins
 
     /**
      * Get Header.
+<<<<<<< HEAD
+     */
+    public function getHeader(): float
+=======
      *
      * @return float
      */
     public function getHeader()
+>>>>>>> main
     {
         return $this->header;
     }
@@ -162,11 +241,17 @@ class PageMargins
     /**
      * Set Header.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setHeader(float $header): static
+=======
      * @param float $header
      *
      * @return $this
      */
     public function setHeader($header)
+>>>>>>> main
     {
         $this->header = $header;
 
@@ -175,10 +260,15 @@ class PageMargins
 
     /**
      * Get Footer.
+<<<<<<< HEAD
+     */
+    public function getFooter(): float
+=======
      *
      * @return float
      */
     public function getFooter()
+>>>>>>> main
     {
         return $this->footer;
     }
@@ -186,11 +276,17 @@ class PageMargins
     /**
      * Set Footer.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setFooter(float $footer): static
+=======
      * @param float $footer
      *
      * @return $this
      */
     public function setFooter($footer)
+>>>>>>> main
     {
         $this->footer = $footer;
 

@@ -22,12 +22,21 @@ class Ceiling
      * Excel Function:
      *        CEILING(number[,significance])
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $number the number you want the ceiling
+     *                      Or can be an array of values
+     * @param array<mixed>|float $significance the multiple to which you want to round
+     *                      Or can be an array of values
+     *
+     * @return array<mixed>|float|string Rounded Number, or a string containing an error
+=======
      * @param array|float $number the number you want the ceiling
      *                      Or can be an array of values
      * @param array|float $significance the multiple to which you want to round
      *                      Or can be an array of values
      *
      * @return array|float|string Rounded Number, or a string containing an error
+>>>>>>> main
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -63,6 +72,16 @@ class Ceiling
      *                      Or can be an array of values
      * @param mixed $significance Significance
      *                      Or can be an array of values
+<<<<<<< HEAD
+     * @param array<mixed>|int $mode direction to round negative numbers
+     *                      Or can be an array of values
+     *
+     * @return array<mixed>|float|string Rounded Number, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function math(mixed $number, mixed $significance = null, $mode = 0, bool $checkSigns = false): array|string|float
+=======
      * @param array|int $mode direction to round negative numbers
      *                      Or can be an array of values
      *
@@ -71,6 +90,7 @@ class Ceiling
      *            with the same dimensions
      */
     public static function math($number, $significance = null, $mode = 0)
+>>>>>>> main
     {
         if (is_array($number) || is_array($significance) || is_array($mode)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $number, $significance, $mode);
@@ -87,6 +107,14 @@ class Ceiling
         if (empty($significance * $number)) {
             return 0.0;
         }
+<<<<<<< HEAD
+        if ($checkSigns) {
+            if (($number > 0 && $significance < 0) || ($number < 0 && $significance > 0)) {
+                return ExcelError::NAN();
+            }
+        }
+=======
+>>>>>>> main
         if (self::ceilingMathTest((float) $significance, (float) $number, (int) $mode)) {
             return floor($number / $significance) * $significance;
         }
@@ -104,6 +132,16 @@ class Ceiling
      *
      * @param mixed $number the number you want to round
      *                      Or can be an array of values
+<<<<<<< HEAD
+     * @param array<mixed>|float $significance the multiple to which you want to round
+     *                      Or can be an array of values
+     *
+     * @return array<mixed>|float|string Rounded Number, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function precise(mixed $number, $significance = 1): array|string|float
+=======
      * @param array|float $significance the multiple to which you want to round
      *                      Or can be an array of values
      *
@@ -112,6 +150,7 @@ class Ceiling
      *            with the same dimensions
      */
     public static function precise($number, $significance = 1)
+>>>>>>> main
     {
         if (is_array($number) || is_array($significance)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $number, $significance);
@@ -133,24 +172,62 @@ class Ceiling
     }
 
     /**
+<<<<<<< HEAD
+     * CEILING.ODS, pseudo-function - CEILING as implemented in ODS.
+     *
+     * ODS Function (theoretical):
+     *        CEILING.ODS(number[,significance[,mode]])
+     *
+     * @param mixed $number Number to round
+     * @param mixed $significance Significance
+     * @param array<mixed>|int $mode direction to round negative numbers
+     *
+     * @return array<mixed>|float|string Rounded Number, or a string containing an error
+     */
+    public static function mathOds(mixed $number, mixed $significance = null, $mode = 0): array|string|float
+    {
+        return self::math($number, $significance, $mode, true);
+    }
+
+    /**
+=======
+>>>>>>> main
      * Let CEILINGMATH complexity pass Scrutinizer.
      */
     private static function ceilingMathTest(float $significance, float $number, int $mode): bool
     {
+<<<<<<< HEAD
+        return ($significance < 0) || ($number < 0 && !empty($mode));
+=======
         return ((float) $significance < 0) || ((float) $number < 0 && !empty($mode));
+>>>>>>> main
     }
 
     /**
      * Avoid Scrutinizer problems concerning complexity.
+<<<<<<< HEAD
+     */
+    private static function argumentsOk(float $number, float $significance): float|string
+=======
      *
      * @return float|string
      */
     private static function argumentsOk(float $number, float $significance)
+>>>>>>> main
     {
         if (empty($number * $significance)) {
             return 0.0;
         }
+<<<<<<< HEAD
+        $signSig = Helpers::returnSign($significance);
+        $signNum = Helpers::returnSign($number);
+        if (
+            ($signSig === 1 && ($signNum === 1 || Functions::getCompatibilityMode() !== Functions::COMPATIBILITY_GNUMERIC))
+            || ($signSig === -1 && $signNum === -1)
+        ) {
+=======
         if (Helpers::returnSign($number) == Helpers::returnSign($significance)) {
+>>>>>>> main
             return ceil($number / $significance) * $significance;
         }
 

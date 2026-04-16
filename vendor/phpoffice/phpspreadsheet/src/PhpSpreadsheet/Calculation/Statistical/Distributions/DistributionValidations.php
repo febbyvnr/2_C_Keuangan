@@ -8,10 +8,14 @@ use PhpOffice\PhpSpreadsheet\Calculation\Statistical\StatisticalValidations;
 
 class DistributionValidations extends StatisticalValidations
 {
+<<<<<<< HEAD
+    public static function validateProbability(mixed $probability): float
+=======
     /**
      * @param mixed $probability
      */
     public static function validateProbability($probability): float
+>>>>>>> main
     {
         $probability = self::validateFloat($probability);
 

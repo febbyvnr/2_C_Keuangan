@@ -2,8 +2,21 @@
 
 namespace PhpOffice\PhpSpreadsheet\Helper;
 
+<<<<<<< HEAD
+use DateTimeImmutable;
+use DateTimeZone;
 use PhpOffice\PhpSpreadsheet\Exception;
 
+/**
+ * Assist downloading files when samples are run in browser.
+ * Never run as part of unit tests, which are command line.
+ *
+ * @codeCoverageIgnore
+ */
+=======
+use PhpOffice\PhpSpreadsheet\Exception;
+
+>>>>>>> main
 class Downloader
 {
     protected string $filepath;
@@ -23,6 +36,22 @@ class Downloader
 
     public function __construct(string $folder, string $filename, ?string $filetype = null)
     {
+<<<<<<< HEAD
+        if ((is_dir($folder) === false) || (is_readable($folder) === false)) {
+            throw new Exception('Folder is not accessible');
+        }
+        $filepath = "{$folder}/{$filename}";
+        $this->filepath = (string) realpath($filepath);
+        $this->filename = basename($filepath);
+        clearstatcache();
+        if ((is_file($this->filepath) === false) || (is_readable($this->filepath) === false)) {
+            throw new Exception('File not found, or not a regular file, or cannot be read');
+        }
+
+        $filetype ??= pathinfo($filename, PATHINFO_EXTENSION);
+        if (array_key_exists(strtolower($filetype), self::CONTENT_TYPES) === false) {
+            throw new Exception('Invalid filetype: file cannot be downloaded');
+=======
         clearstatcache();
         $filepath = realpath("{$folder}/{$filename}");
         if ($filepath === false || !is_file($filepath) || !is_readable($filepath)) {
@@ -34,6 +63,7 @@ class Downloader
         $filetype ??= pathinfo($this->filename, PATHINFO_EXTENSION);
         if (array_key_exists(strtolower($filetype), self::CONTENT_TYPES) === false) {
             throw new Exception('Invalid filetype: cannot be downloaded');
+>>>>>>> main
         }
         $this->filetype = strtolower($filetype);
     }
@@ -47,7 +77,17 @@ class Downloader
 
     public function headers(): void
     {
+<<<<<<< HEAD
+        // I cannot tell what this ob_clean is paired with.
+        // I have never seen a problem with it, but someone has - issue 3739.
+        // Perhaps it should be removed altogether,
+        // but making it conditional seems harmless, and safer.
+        if ((int) ob_get_length() > 0) {
+            ob_clean();
+        }
+=======
         ob_clean();
+>>>>>>> main
 
         $this->contentType();
         $this->contentDisposition();
@@ -75,7 +115,12 @@ class Downloader
 
         // If you're serving to IE over SSL, then the following may be needed
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+<<<<<<< HEAD
+        $dt = new DateTimeImmutable(timezone: new DateTimeZone('UTC'));
+        header('Last-Modified: ' . $dt->format('D, d M Y H:i:s') . ' GMT'); // always modified
+=======
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+>>>>>>> main
         header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
         header('Pragma: public'); // HTTP/1.0
     }

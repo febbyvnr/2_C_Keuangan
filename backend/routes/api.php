@@ -21,6 +21,7 @@ use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
+use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
 
@@ -247,6 +248,14 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update']);
     Route::delete('/delete/{id}', [RkaController::class, 'destroy']);
+});
+
+Route::prefix('keuangan')->group(function () {
+    Route::get('/penerimaan', [TrPenerimaanController::class, 'index']);      // F85 & F86
+    Route::post('/penerimaan', [TrPenerimaanController::class, 'store']);     // F82
+    Route::put('/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
+    Route::delete('/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
+    Route::get('/penerimaan/export', [TrPenerimaanController::class, 'export']); // F87
 });
 
 Route::prefix('jenis-pembayaran')->group(function () {

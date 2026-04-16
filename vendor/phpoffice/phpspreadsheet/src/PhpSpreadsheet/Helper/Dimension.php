@@ -48,6 +48,21 @@ class Dimension
      *                If this is a height, then size is measured in pixels ()
      *                   or in points () if $unit is null.
      */
+<<<<<<< HEAD
+    protected float|int $size;
+
+    protected ?string $unit = null;
+
+    public function __construct(string $dimension)
+    {
+        $size = 0.0;
+        $unit = '';
+        $sscanf = sscanf($dimension, '%[1234567890.]%s');
+        if (is_array($sscanf)) {
+            $size = (float) ($sscanf[0] ?? 0.0);
+            $unit = strtolower($sscanf[1] ?? '');
+        }
+=======
     protected $size;
 
     /**
@@ -71,6 +86,7 @@ class Dimension
         [$size, $unit] = self::stanBugFixed(sscanf($dimension, '%[1234567890.]%s'));
         $unit = strtolower(trim($unit ?? ''));
         $size = (float) $size;
+>>>>>>> main
 
         // If a UoM is specified, then convert the size to pixels for internal storage
         if (isset(self::ABSOLUTE_UNITS[$unit])) {

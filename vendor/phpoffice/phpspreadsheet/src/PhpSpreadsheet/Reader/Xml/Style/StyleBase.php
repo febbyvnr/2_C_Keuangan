@@ -6,6 +6,10 @@ use SimpleXMLElement;
 
 abstract class StyleBase
 {
+<<<<<<< HEAD
+    /** @param string[] $styleList */
+=======
+>>>>>>> main
     protected static function identifyFixedStyleValue(array $styleList, string &$styleAttributeValue): bool
     {
         $returnValue = false;

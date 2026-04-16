@@ -29,6 +29,31 @@ class Legend
 
     /**
      * Legend position.
+<<<<<<< HEAD
+     */
+    private string $position = self::POSITION_RIGHT;
+
+    /**
+     * Allow overlay of other elements?
+     */
+    private bool $overlay = true;
+
+    /**
+     * Legend Layout.
+     */
+    private ?Layout $layout;
+
+    private GridLines $borderLines;
+
+    private ChartColor $fillColor;
+
+    private ?AxisText $legendText = null;
+
+    /**
+     * Create a new Legend.
+     */
+    public function __construct(string $position = self::POSITION_RIGHT, ?Layout $layout = null, bool $overlay = false)
+=======
      *
      * @var string
      */
@@ -65,6 +90,7 @@ class Legend
      * @param bool $overlay
      */
     public function __construct($position = self::POSITION_RIGHT, ?Layout $layout = null, $overlay = false)
+>>>>>>> main
     {
         $this->setPosition($position);
         $this->layout = $layout;
@@ -79,16 +105,29 @@ class Legend
     }
 
     /**
+<<<<<<< HEAD
+     * Get legend position as an Excel string value.
+     */
+    public function getPosition(): string
+=======
      * Get legend position as an excel string value.
      *
      * @return string
      */
     public function getPosition()
+>>>>>>> main
     {
         return $this->position;
     }
 
     /**
+<<<<<<< HEAD
+     * Get legend position using an Excel string value.
+     *
+     * @param string $position see self::POSITION_*
+     */
+    public function setPosition(string $position): bool
+=======
      * Get legend position using an excel string value.
      *
      * @param string $position see self::POSITION_*
@@ -96,6 +135,7 @@ class Legend
      * @return bool
      */
     public function setPosition($position)
+>>>>>>> main
     {
         if (!in_array($position, self::POSITION_XLREF)) {
             return false;
@@ -108,12 +148,18 @@ class Legend
 
     /**
      * Get legend position as an Excel internal numeric value.
+<<<<<<< HEAD
+     */
+    public function getPositionXL(): false|int
+    {
+=======
      *
      * @return false|int
      */
     public function getPositionXL()
     {
         // Scrutinizer thinks the following could return string. It is wrong.
+>>>>>>> main
         return array_search($this->position, self::POSITION_XLREF);
     }
 
@@ -121,10 +167,15 @@ class Legend
      * Set legend position using an Excel internal numeric value.
      *
      * @param int $positionXL see self::XL_LEGEND_POSITION_*
+<<<<<<< HEAD
+     */
+    public function setPositionXL(int $positionXL): bool
+=======
      *
      * @return bool
      */
     public function setPositionXL($positionXL)
+>>>>>>> main
     {
         if (!isset(self::POSITION_XLREF[$positionXL])) {
             return false;
@@ -137,30 +188,45 @@ class Legend
 
     /**
      * Get allow overlay of other elements?
+<<<<<<< HEAD
+     */
+    public function getOverlay(): bool
+=======
      *
      * @return bool
      */
     public function getOverlay()
+>>>>>>> main
     {
         return $this->overlay;
     }
 
     /**
      * Set allow overlay of other elements?
+<<<<<<< HEAD
+     */
+    public function setOverlay(bool $overlay): void
+=======
      *
      * @param bool $overlay
      */
     public function setOverlay($overlay): void
+>>>>>>> main
     {
         $this->overlay = $overlay;
     }
 
     /**
      * Get Layout.
+<<<<<<< HEAD
+     */
+    public function getLayout(): ?Layout
+=======
      *
      * @return ?Layout
      */
     public function getLayout()
+>>>>>>> main
     {
         return $this->layout;
     }
@@ -188,4 +254,18 @@ class Legend
 
         return $this;
     }
+<<<<<<< HEAD
+
+    /**
+     * Implement PHP __clone to create a deep clone, not just a shallow copy.
+     */
+    public function __clone()
+    {
+        $this->layout = ($this->layout === null) ? null : clone $this->layout;
+        $this->legendText = ($this->legendText === null) ? null : clone $this->legendText;
+        $this->borderLines = clone $this->borderLines;
+        $this->fillColor = clone $this->fillColor;
+    }
+=======
+>>>>>>> main
 }

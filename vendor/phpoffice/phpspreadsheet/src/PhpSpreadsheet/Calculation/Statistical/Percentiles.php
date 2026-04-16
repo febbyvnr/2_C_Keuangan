@@ -24,7 +24,11 @@ class Percentiles
      *
      * @return float|string The result, or a string containing an error
      */
+<<<<<<< HEAD
+    public static function PERCENTILE(mixed ...$args)
+=======
     public static function PERCENTILE(...$args)
+>>>>>>> main
     {
         $aArgs = Functions::flattenArray($args);
 
@@ -45,11 +49,21 @@ class Percentiles
         $mValueCount = count($mArgs);
         if ($mValueCount > 0) {
             sort($mArgs);
+<<<<<<< HEAD
+            /** @var float[] $mArgs */
+            $count = Counts::COUNT($mArgs);
+            $index = $entry * ($count - 1);
+            $indexFloor = floor($index);
+            $iBase = (int) $indexFloor;
+            if ($index == $indexFloor) {
+                return $mArgs[$iBase];
+=======
             $count = Counts::COUNT($mArgs);
             $index = $entry * ($count - 1);
             $iBase = floor($index);
             if ($index == $iBase) {
                 return $mArgs[$index];
+>>>>>>> main
             }
             $iNext = $iBase + 1;
             $iProportion = $index - $iBase;
@@ -74,7 +88,11 @@ class Percentiles
      *
      * @return float|string (string if result is an error)
      */
+<<<<<<< HEAD
+    public static function PERCENTRANK(mixed $valueSet, mixed $value, mixed $significance = 3): string|float
+=======
     public static function PERCENTRANK($valueSet, $value, $significance = 3)
+>>>>>>> main
     {
         $valueSet = Functions::flattenArray($valueSet);
         $value = Functions::flattenSingleValue($value);
@@ -101,6 +119,10 @@ class Percentiles
 
         $pos = array_search($value, $valueSet);
         if ($pos === false) {
+<<<<<<< HEAD
+            /** @var float[] $valueSet */
+=======
+>>>>>>> main
             $pos = 0;
             $testValue = $valueSet[0];
             while ($testValue < $value) {
@@ -125,7 +147,11 @@ class Percentiles
      *
      * @return float|string The result, or a string containing an error
      */
+<<<<<<< HEAD
+    public static function QUARTILE(mixed ...$args)
+=======
     public static function QUARTILE(...$args)
+>>>>>>> main
     {
         $aArgs = Functions::flattenArray($args);
         $entry = array_pop($aArgs);
@@ -156,7 +182,11 @@ class Percentiles
      *
      * @return float|string The result, or a string containing an error (0 = Descending, 1 = Ascending)
      */
+<<<<<<< HEAD
+    public static function RANK(mixed $value, mixed $valueSet, mixed $order = self::RANK_SORT_DESCENDING)
+=======
     public static function RANK($value, $valueSet, $order = self::RANK_SORT_DESCENDING)
+>>>>>>> main
     {
         $value = Functions::flattenSingleValue($value);
         $valueSet = Functions::flattenArray($valueSet);
@@ -184,23 +214,47 @@ class Percentiles
         return ++$pos;
     }
 
+<<<<<<< HEAD
+    /**
+     * @param mixed[] $dataSet
+     *
+     * @return mixed[]
+     */
+=======
+>>>>>>> main
     protected static function percentileFilterValues(array $dataSet): array
     {
         return array_filter(
             $dataSet,
+<<<<<<< HEAD
+            fn ($value): bool => is_numeric($value) && !is_string($value)
+        );
+    }
+
+    /**
+     * @param mixed[] $dataSet
+     *
+     * @return mixed[]
+     */
+=======
             function ($value): bool {
                 return is_numeric($value) && !is_string($value);
             }
         );
     }
 
+>>>>>>> main
     protected static function rankFilterValues(array $dataSet): array
     {
         return array_filter(
             $dataSet,
+<<<<<<< HEAD
+            fn ($value): bool => is_numeric($value)
+=======
             function ($value): bool {
                 return is_numeric($value);
             }
+>>>>>>> main
         );
     }
 }

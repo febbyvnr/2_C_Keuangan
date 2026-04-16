@@ -11,6 +11,25 @@ abstract class Pdf extends Html
 {
     /**
      * Temporary storage directory.
+<<<<<<< HEAD
+     */
+    protected string $tempDir;
+
+    /**
+     * Font.
+     */
+    protected string $font = 'freesans';
+
+    /**
+     * Orientation (Over-ride).
+     */
+    protected ?string $orientation = null;
+
+    /**
+     * Paper size (Over-ride).
+     */
+    protected ?int $paperSize = null;
+=======
      *
      * @var string
      */
@@ -36,13 +55,20 @@ abstract class Pdf extends Html
      * @var ?int
      */
     protected $paperSize;
+>>>>>>> main
 
     /**
      * Paper Sizes xRef List.
      *
+<<<<<<< HEAD
+     * @var array<int, float[]|string>
+     */
+    protected static array $paperSizes = [
+=======
      * @var array
      */
     protected static $paperSizes = [
+>>>>>>> main
         PageSetup::PAPERSIZE_LETTER => 'LETTER', //    (8.5 in. by 11 in.)
         PageSetup::PAPERSIZE_LETTER_SMALL => 'LETTER', //    (8.5 in. by 11 in.)
         PageSetup::PAPERSIZE_TABLOID => [792.00, 1224.00], //    (11 in. by 17 in.)
@@ -126,10 +152,15 @@ abstract class Pdf extends Html
 
     /**
      * Get Font.
+<<<<<<< HEAD
+     */
+    public function getFont(): string
+=======
      *
      * @return string
      */
     public function getFont()
+>>>>>>> main
     {
         return $this->font;
     }
@@ -141,11 +172,17 @@ abstract class Pdf extends Html
      *      'arialunicid0-korean'
      *      'arialunicid0-japanese'.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setFont(string $fontName)
+=======
      * @param string $fontName
      *
      * @return $this
      */
     public function setFont($fontName)
+>>>>>>> main
     {
         $this->font = $fontName;
 
@@ -154,10 +191,15 @@ abstract class Pdf extends Html
 
     /**
      * Get Paper Size.
+<<<<<<< HEAD
+     */
+    public function getPaperSize(): ?int
+=======
      *
      * @return ?int
      */
     public function getPaperSize()
+>>>>>>> main
     {
         return $this->paperSize;
     }
@@ -166,10 +208,15 @@ abstract class Pdf extends Html
      * Set Paper Size.
      *
      * @param int $paperSize Paper size see PageSetup::PAPERSIZE_*
+<<<<<<< HEAD
+     */
+    public function setPaperSize(int $paperSize): self
+=======
      *
      * @return self
      */
     public function setPaperSize($paperSize)
+>>>>>>> main
     {
         $this->paperSize = $paperSize;
 
@@ -188,10 +235,15 @@ abstract class Pdf extends Html
      * Set Orientation.
      *
      * @param string $orientation Page orientation see PageSetup::ORIENTATION_*
+<<<<<<< HEAD
+     */
+    public function setOrientation(string $orientation): self
+=======
      *
      * @return self
      */
     public function setOrientation($orientation)
+>>>>>>> main
     {
         $this->orientation = $orientation;
 
@@ -200,10 +252,15 @@ abstract class Pdf extends Html
 
     /**
      * Get temporary storage directory.
+<<<<<<< HEAD
+     */
+    public function getTempDir(): string
+=======
      *
      * @return string
      */
     public function getTempDir()
+>>>>>>> main
     {
         return $this->tempDir;
     }
@@ -212,10 +269,15 @@ abstract class Pdf extends Html
      * Set temporary storage directory.
      *
      * @param string $temporaryDirectory Temporary storage directory
+<<<<<<< HEAD
+     */
+    public function setTempDir(string $temporaryDirectory): self
+=======
      *
      * @return self
      */
     public function setTempDir($temporaryDirectory)
+>>>>>>> main
     {
         if (is_dir($temporaryDirectory)) {
             $this->tempDir = $temporaryDirectory;
@@ -229,7 +291,11 @@ abstract class Pdf extends Html
     /**
      * Save Spreadsheet to PDF file, pre-save.
      *
+<<<<<<< HEAD
+     * @param resource|string $filename Name of the file to save as
+=======
      * @param string $filename Name of the file to save as
+>>>>>>> main
      *
      * @return resource
      */

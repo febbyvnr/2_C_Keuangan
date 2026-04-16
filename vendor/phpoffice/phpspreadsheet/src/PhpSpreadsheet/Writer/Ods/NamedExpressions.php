@@ -2,14 +2,28 @@
 
 namespace PhpOffice\PhpSpreadsheet\Writer\Ods;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 use PhpOffice\PhpSpreadsheet\DefinedName;
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+=======
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\DefinedName;
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Shared\XMLWriter;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class NamedExpressions
 {
+<<<<<<< HEAD
+    private XMLWriter $objWriter;
+
+    private Spreadsheet $spreadsheet;
+
+    private Formula $formulaConvertor;
+=======
     /** @var XMLWriter */
     private $objWriter;
 
@@ -18,6 +32,7 @@ class NamedExpressions
 
     /** @var Formula */
     private $formulaConvertor;
+>>>>>>> main
 
     public function __construct(XMLWriter $objWriter, Spreadsheet $spreadsheet, Formula $formulaConvertor)
     {
@@ -83,6 +98,15 @@ class NamedExpressions
 
     private function convertAddress(DefinedName $definedName, string $address): string
     {
+<<<<<<< HEAD
+        $splitCount = Preg::matchAllWithOffsets(
+            '/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/mui',
+            $address,
+            $splitRanges
+        );
+
+        $lengths = array_map([StringHelper::class, 'strlenAllowNull'], array_column($splitRanges[0], 0));
+=======
         $splitCount = preg_match_all(
             '/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/mui',
             $address,
@@ -91,6 +115,7 @@ class NamedExpressions
         );
 
         $lengths = array_map('strlen', array_column($splitRanges[0], 0));
+>>>>>>> main
         $offsets = array_column($splitRanges[0], 1);
 
         $worksheets = $splitRanges[2];
@@ -121,9 +146,15 @@ class NamedExpressions
                 $newRange = "'" . str_replace("'", "''", $worksheet) . "'.";
             }
 
+<<<<<<< HEAD
+            //if (!empty($column)) { // phpstan says always true
+            $newRange .= $column;
+            //}
+=======
             if (!empty($column)) {
                 $newRange .= $column;
             }
+>>>>>>> main
             if (!empty($row)) {
                 $newRange .= $row;
             }
@@ -131,7 +162,11 @@ class NamedExpressions
             $address = substr($address, 0, $offset) . $newRange . substr($address, $offset + $length);
         }
 
+<<<<<<< HEAD
+        if (str_starts_with($address, '=')) {
+=======
         if (substr($address, 0, 1) === '=') {
+>>>>>>> main
             $address = substr($address, 1);
         }
 
