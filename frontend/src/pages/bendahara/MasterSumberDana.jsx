@@ -62,7 +62,7 @@ export default function MasterSumberDana() {
         });
         const json = await res.json();
         if (res.ok) {
-            alert(isEdit ? "Berhasil update Tahun Anggaran" : "Berhasil tambah Tahun Anggaran");
+            alert(isEdit ? "Berhasil update Sumber Dana" : "Berhasil tambah Sumber Dana");
             setShowModal(false);
             setIsEdit(false);
             setEditId(null);
@@ -162,8 +162,8 @@ export default function MasterSumberDana() {
                                             disabled={item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "Tahun Anggaran sudah digunakan Program Kerja"
-                                                    : "Hapus Tahun Anggaran"
+                                                    ? "Sumber Dana sudah digunakan Program Kerja"
+                                                    : "Sumber Dana Anggaran"
                                             }
                                             onClick={() =>
                                                 handleDelete(item.ID_REF_DANA)
@@ -214,7 +214,7 @@ export default function MasterSumberDana() {
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
-                        <h3>{isEdit ? "Edit Tahun Anggaran" : "Tambah Tahun Anggaran"}</h3>
+                        <h3>{isEdit ? "Edit Sumber Dana" : "Tambah Sumber Dana"}</h3>
                         <form onSubmit={handleSubmit} className="form-container">
                             <div className="form-group">
                                 <label>Referensi ID Sumber Dana</label>
