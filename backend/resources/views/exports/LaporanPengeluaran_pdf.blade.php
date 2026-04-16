@@ -119,8 +119,6 @@
             <td class="text-right">
                 Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
                 <br><br>
-                <b>Mengetahui,</b>
-                <br>
                 <b>By: Bendahara</b>
                 <br><br><br><br><br>
                 <b>{{ Auth::user()->name ?? '' }}</b>
