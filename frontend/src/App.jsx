@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Navigate } from "react-router-dom"
 
 import SidebarBendahara from "./components/SidebarBendahara";
+import Login from "./pages/Login"; // <-- TAMBAHAN 1: Import halaman login
 
 import Dashboard from "./pages/bendahara/Dashboard";
 import Dana from "./pages/bendahara/Dana";
@@ -51,8 +52,12 @@ export default function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* sementara bendahara home dl */}
-                <Route path="/" element={<Navigate to="/bendahara/dashboard" />} />
+                {/* --- TAMBAHAN 2: Rute Login --- */}
+                <Route path="/login" element={<Login />} />
+                
+                {/* --- UBAHAN DIKIT: Kalo ngetik root (/), arahin ke login dulu --- */}
+                <Route path="/" element={<Navigate to="/login" />} />
+
                 {/* BENDHARA LAYOUT */}
                 <Route path="/bendahara" element={<BendaharaLayout />}>
                     <Route path="dashboard" element={<Dashboard />} />
