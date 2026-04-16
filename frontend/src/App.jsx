@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom"
 
 import SidebarBendahara from "./components/SidebarBendahara";
 
@@ -47,6 +48,8 @@ export default function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* sementara bendahara home dl */}
+                <Route path="/" element={<Navigate to="/bendahara/dashboard" />} />
                 {/* BENDHARA LAYOUT */}
                 <Route path="/bendahara" element={<BendaharaLayout />}>
                     <Route path="dashboard" element={<Dashboard />} />
