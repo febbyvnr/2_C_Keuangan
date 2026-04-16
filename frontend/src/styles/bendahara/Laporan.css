@@ -374,7 +374,7 @@
 }
 
 /* ========================================= */
-/* 🔥 FIX CARD TOTAL (PENERIMAAN & BKU) */
+/* FIX CARD TOTAL (PENERIMAAN & BKU) */
 /* ========================================= */
 
 .laporan-total-card {
@@ -386,21 +386,71 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px; /* 🔥 biar ga nempel */
+  gap: 10px;
 }
 
-/* 🔥 LABEL (Saldo Akhir / Total Penerimaan) */
 .laporan-total-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-/* 🔥 VALUE ANGKA */
 .laporan-total-value {
   font-size: 16px;
   font-weight: 600;
   color: var(--primary);
 
-  white-space: nowrap; /* 🔥 biar ga turun */
+  white-space: nowrap;
+}
+
+.laporan-table th:last-child,
+.laporan-table td:last-child {
+  width: 180px; /* atur lebar kolom */
+  min-width: 180px;
+}
+
+/* KHUSUS BKU SAJA */
+.laporan-content:has(.bku-switch) .laporan-side {
+  width: 520px;
+  flex-shrink: 0;
+}
+
+.laporan-content:has(.bku-switch) .laporan-total-card {
+  width: 100%;
+}
+
+.laporan-content:has(.bku-switch) .laporan-side {
+  margin-top: 58px;
+}
+
+/* ========================================= */
+/* 🔥 KHUSUS PENGELUARAN */
+/* ========================================= */
+
+/* Lebarin side biar sejajar tabel */
+.laporan-content:has(.laporan-table th:nth-child(6)) .laporan-side {
+  width: 520px;
+  flex-shrink: 0;
+}
+
+/* Card full width */
+.laporan-content:has(.laporan-table th:nth-child(6)) .laporan-total-card {
+  width: 100%;
+}
+
+/* Turunin biar sejajar tabel  */
+.laporan-content:has(.laporan-table th:nth-child(6)) .laporan-side {
+  margin-top: 2px;
+}
+
+/* Khusus kolom NOMINAL */
+.laporan-content:has(.laporan-table th:nth-child(6))
+  .laporan-table
+  th:last-child,
+.laporan-content:has(.laporan-table th:nth-child(6))
+  .laporan-table
+  td:last-child {
+  width: 200px;
+  min-width: 200px;
+  text-align: right;
 }
