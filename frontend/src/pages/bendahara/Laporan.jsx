@@ -7,7 +7,7 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
-  // 🔥 TAMBAHAN
+  // TAMBAHAN
   const [total, setTotal] = useState(0);
 
   const [start, setStart] = useState("");
@@ -37,11 +37,11 @@ export default function Laporan() {
       .then((res) => res.json())
       .then((res) => {
         setData(res.data || []);
-        setTotal(res.total || 0); // 🔥 TAMBAHAN
+        setTotal(res.total || 0); // TAMBAHAN
       })
       .catch(() => {
         setData([]);
-        setTotal(0); // 🔥 TAMBAHAN
+        setTotal(0); // TAMBAHAN
       });
   };
 
@@ -216,7 +216,7 @@ export default function Laporan() {
             </div>
           )}
 
-          {/* 🔥 TAMBAHAN: TOTAL CARD */}
+          {/* TAMBAHAN: TOTAL CARD */}
           {active === "Penerimaan" && (
             <div className="laporan-total-card">
               <div className="laporan-total-title">Total Penerimaan</div>
