@@ -27,10 +27,11 @@ class LaporanPengeluaranExport implements WithEvents
 
     public function collection()
     {
-  
+
         $query = DB::table('tr_pm as tp')
-            ->join('dtl_fpd as df', 'tp.ID_PM', '=', 'df.ID_PM')
-            ->join('fpd_anggaran as fa', 'df.ID_FPD', '=', 'fa.ID_FPD')
+            ->join('ref_pm as rp', 'tp.ID_PM', '=', 'rp.ID_PM')
+            ->join('fpd_anggaran as fa', 'rp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
+            ->join('dtl_fpd as df', 'fa.ID_DT_PROGKER', '=', 'df.ID_DT_PROGKER')
             ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
             ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
             ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
@@ -38,7 +39,7 @@ class LaporanPengeluaranExport implements WithEvents
                 'tp.TGL_PM as tanggal',
                 'mpk.PROGRAM_KERJA as program',
                 'tp.DESKRIPSI_TR_PM as uraian',
-                'df.TOTAL as nominal',
+                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal'),
                 'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana'
             );
 
