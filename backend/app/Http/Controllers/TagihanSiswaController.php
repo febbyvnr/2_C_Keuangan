@@ -134,7 +134,7 @@ class TagihanSiswaController extends Controller
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
                 'STATUS_TAGIHAN_SISWA' => $validated['STATUS_TAGIHAN_SISWA'],
-                'DUEDATE_TAGIHAN_SISWA' => $validated['DUEDATE_TAGIHAN_SISWA'],
+                'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
             $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
@@ -249,7 +249,7 @@ class TagihanSiswaController extends Controller
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
                 'STATUS_TAGIHAN_SISWA' => $statusFinal,
-                'DUEDATE_TAGIHAN_SISWA' => $validated['DUEDATE_TAGIHAN_SISWA'],
+                'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
             $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
@@ -335,7 +335,7 @@ class TagihanSiswaController extends Controller
                 'string',
                 Rule::in(self::ALLOWED_STATUS),
             ],
-            'DUEDATE_TAGIHAN_SISWA' => [
+            'DUEDATETIME_TAGIHAN_SISWA' => [
                 'required',
                 'date',
             ],
@@ -378,7 +378,7 @@ class TagihanSiswaController extends Controller
             'TAHUN_TAGIHAN_SISWA' => $tagihan->TAHUN_TAGIHAN_SISWA,
             'JUMLAH_TAGIHAN_SISWA' => (float) $tagihan->JUMLAH_TAGIHAN_SISWA,
             'STATUS_TAGIHAN_SISWA' => $tagihan->STATUS_TAGIHAN_SISWA,
-            'DUEDATE_TAGIHAN_SISWA' => $tagihan->DUEDATE_TAGIHAN_SISWA,
+            'DUEDATETIME_TAGIHAN_SISWA' => $tagihan->DUEDATETIME_TAGIHAN_SISWA,
 
             'SISWA' => [
                 'ID_SISWA_TETAP' => optional($tagihan->siswa)->ID_SISWA_TETAP,
@@ -499,7 +499,7 @@ class TagihanSiswaController extends Controller
                 'SISA_TAGIHAN',
                 'STATUS_TAGIHAN_SISWA',
                 'ADA_TUNGGAKAN',
-                'DUEDATE_TAGIHAN_SISWA',
+                'DUEDATETIME_TAGIHAN_SISWA',
                 'JUMLAH_TRANSAKSI_PEMBAYARAN',
             ]);
 
@@ -518,7 +518,7 @@ class TagihanSiswaController extends Controller
                     $item['SISA_TAGIHAN'],
                     $item['STATUS_TAGIHAN_SISWA'],
                     $item['ADA_TUNGGAKAN'] ? 'Ya' : 'Tidak',
-                    $item['DUEDATE_TAGIHAN_SISWA'],
+                    $item['DUEDATETIME_TAGIHAN_SISWA'],
                     $item['JUMLAH_TRANSAKSI_PEMBAYARAN'],
                 ]);
             }
