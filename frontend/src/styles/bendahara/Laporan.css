@@ -32,6 +32,7 @@
   gap: 70px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .laporan-tab {
@@ -334,10 +335,10 @@
 }
 
 /* ========================================= */
-/* 🔵 BKU STYLE (KHUSUS BUKU KAS UMUM) */
+/* BKU STYLE (KHUSUS BUKU KAS UMUM) */
 /* ========================================= */
 
-/* 🔥 WRAPPER SWITCH */
+/* WRAPPER SWITCH */
 .bku-switch {
   display: flex;
   align-items: center;
@@ -363,7 +364,7 @@
   color: white;
 }
 
-/* 🔥 TEXT BKU */
+/* TEXT BKU */
 .bku-switch span {
   font-size: 14px;
   font-weight: 600;
@@ -371,7 +372,7 @@
 }
 
 /* ========================================= */
-/* 🔵 TABEL KHUSUS BKU (SCOPED) */
+/* TABEL KHUSUS BKU (SCOPED) */
 /* ========================================= */
 
 .bku-table th {
@@ -386,7 +387,7 @@
 }
 
 /* ========================================= */
-/* 🔵 KOLOM KHUSUS BKU */
+/* KOLOM KHUSUS BKU */
 /* ========================================= */
 
 /* Debit */
@@ -408,7 +409,7 @@
 }
 
 /* ========================================= */
-/* 🔵 SCROLL HALUS */
+/* SCROLL HALUS */
 /* ========================================= */
 
 .bku-table {
