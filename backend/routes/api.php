@@ -182,15 +182,21 @@ Route::prefix('jenis-tarif')->group(function () {
 });
 
 Route::prefix('tarif')->group(function () {
-       Route::get('/', [RefTarifController::class, 'index']);
-       Route::get('/search', [RefTarifController::class, 'search']);
-       Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
-       Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
-       Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
-       Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
-       Route::post('/store', [RefTarifController::class, 'store']);
-       Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
-       Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
+    Route::get('/', [RefTarifController::class, 'index']);
+    Route::get('/search', [RefTarifController::class, 'search']);
+    Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
+    Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
+    Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
+    Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
+    Route::post('/store', [RefTarifController::class, 'store']);
+    Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+    Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
+
+    //ga ngedong route atas
+    Route::get('/tarif', [RefTarifController::class, 'index']);
+    Route::post('/tarif/store', [RefTarifController::class, 'store']);
+    Route::put('/tarif/update/{id}', [RefTarifController::class, 'update']);
+    Route::delete('/tarif/delete/{id}', [RefTarifController::class, 'destroy']);
 });
 
 Route::prefix('evaluasi-rkt/export')->group(function () {
@@ -245,11 +251,10 @@ Route::prefix('rka')->group(function () {
 
 Route::prefix('jenis-pembayaran')->group(function () {
     Route::get('/', [RefJenisPembayaranController::class, 'index']);
-    Route::post('/', [RefJenisPembayaranController::class, 'store']);
-    Route::put('/{id}', [RefJenisPembayaranController::class, 'update']);
-    Route::delete('/{id}', [RefJenisPembayaranController::class, 'destroy']);
+    Route::post('/store', [RefJenisPembayaranController::class, 'store']);
+    Route::put('/update/{id}', [RefJenisPembayaranController::class, 'update']);
+    Route::delete('/delete/{id}', [RefJenisPembayaranController::class, 'destroy']);
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
-    
     Route::get('/export', [RefJenisPembayaranController::class, 'export']);
 });
 

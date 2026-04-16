@@ -35,19 +35,16 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 'nullable|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
             ]);
-
             $jenis = RefJenisPembayaran::create([
                 'DESKRIPSI_JENIS_PEMBAYARAN' => $request->DESKRIPSI_JENIS_PEMBAYARAN
             ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil ditambahkan',
                 'data' => $jenis
             ], 201);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -62,14 +59,12 @@ class RefJenisPembayaranController extends Controller
         try {
             $request->validate([
                 'DESKRIPSI_JENIS_PEMBAYARAN' => 
-                    'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,' 
+                    'nullable|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,' 
                     . $id . ',ID_JENIS_PEMBAYARAN'
             ]);
-
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->DESKRIPSI_JENIS_PEMBAYARAN = $request->DESKRIPSI_JENIS_PEMBAYARAN;
             $jenis->save();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diupdate',
@@ -90,7 +85,6 @@ class RefJenisPembayaranController extends Controller
         try {
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil dihapus'
@@ -108,15 +102,12 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $keyword = $request->input('q');
-
             $data = RefJenisPembayaran::where('DESKRIPSI_JENIS_PEMBAYARAN', 'like', '%'.$keyword.'%')->get();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Hasil pencarian',
                 'data' => $data
             ], 200);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,

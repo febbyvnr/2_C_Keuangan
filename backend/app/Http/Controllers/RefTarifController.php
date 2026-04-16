@@ -32,10 +32,10 @@ class RefTarifController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ID_JENIS_TARIF' => 'required|exists:REF_JENIS_TARIF,ID_JENIS_TARIF',
-            'ID_TA_ANGGARAN' => 'required|exists:REF_TAHUN_ANGGARAN,ID_TA_ANGGARAN',
-            'NOMINAL' => 'required|numeric|min:0',
-            'TGL_PENETAPAN' => 'required|date',
+            'ID_JENIS_TARIF' => 'nullable|exists:REF_JENIS_TARIF,ID_JENIS_TARIF',
+            'ID_TA_ANGGARAN' => 'nullable|exists:REF_TAHUN_ANGGARAN,ID_TA_ANGGARAN',
+            'NOMINAL' => 'nullable|numeric|min:0',
+            'TGL_PENETAPAN' => 'nullable|date',
         ]);
 
         $data = RefTarif::create([
@@ -45,37 +45,39 @@ class RefTarifController extends Controller
             'TGL_PENETAPAN' => $request->TGL_PENETAPAN,
         ]);
 
-        return response()->json($data, 201);
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ], 201);
     }
 
-    public function update(Request $request, $idJenisTarif, $idTaAnggaran)
+    public function update(Request $request, $id)
     {
-        $data = RefTarif::where('ID_JENIS_TARIF', $idJenisTarif)
-            ->where('ID_TA_ANGGARAN', $idTaAnggaran)
-            ->firstOrFail();
-
+        $data = RefTarif::findOrFail($id);
         $request->validate([
-            'NOMINAL' => 'required|numeric|min:0',
-            'TGL_PENETAPAN' => 'required|date',
+            'ID_JENIS_TARIF' => 'nullable|exists:REF_JENIS_TARIF,ID_JENIS_TARIF',
+            'ID_TA_ANGGARAN' => 'nullable|exists:REF_TAHUN_ANGGARAN,ID_TA_ANGGARAN',
+            'NOMINAL' => 'nullable|numeric|min:0',
+            'TGL_PENETAPAN' => 'nullable|date',
         ]);
-
         $data->update([
+            'ID_JENIS_TARIF' => $request->ID_JENIS_TARIF,
+            'ID_TA_ANGGARAN' => $request->ID_TA_ANGGARAN,
             'NOMINAL' => $request->NOMINAL,
             'TGL_PENETAPAN' => $request->TGL_PENETAPAN,
         ]);
-
-        return response()->json($data);
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 
-    public function destroy($idJenisTarif, $idTaAnggaran)
+    public function destroy($id)
     {
-        $data = RefTarif::where('ID_JENIS_TARIF', $idJenisTarif)
-            ->where('ID_TA_ANGGARAN', $idTaAnggaran)
-            ->firstOrFail();
-
+        $data = RefTarif::findOrFail($id);
         $data->delete();
-
         return response()->json([
+            'success' => true,
             'message' => 'Data berhasil dihapus'
         ]);
     }
