@@ -30,7 +30,7 @@ class LaporanPengeluaranExport implements WithEvents
         $query = DB::table('tr_pm as tp')
             ->join('dtl_fpd as df', 'tp.ID_TR_PM', '=', 'df.ID_TR_PM')
             ->join('fpd_anggaran as fa', 'df.ID_FPD_ANGGARAN', '=', 'fa.ID_FPD_ANGGARAN')
-            ->join('dtl_programkerja as dpk', 'fa.ID_DTL_PROGRAMKERJA', '=', 'dpk.ID_DTL_PROGRAMKERJA')
+            ->join('dtl_program_kerja as dpk', 'fa.ID_DT_PROGKER', '=', 'dpk.ID_DT_PROGKER')
             ->join('mst_program_kerja as mpk', 'dpk.ID_MST_PROGRAM_KERJA', '=', 'mpk.ID_MST_PROGRAM_KERJA')
             ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_SUMBER_DANA', '=', 'rsd.ID_REF_SUMBER_DANA')
             ->select(
