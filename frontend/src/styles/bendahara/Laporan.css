@@ -29,9 +29,10 @@
 /* TAB */
 .laporan-tabs {
   display: flex;
-  gap: 24px;
+  gap: 70px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .laporan-tab {
@@ -57,7 +58,7 @@
 }
 
 /* ========================= */
-/* 🔥 FILTER */
+/* FILTER */
 /* ========================= */
 
 .laporan-filter {
@@ -108,7 +109,7 @@
   outline: none;
 }
 
-/* 🔥 BUTTON FIX */
+/* BUTTON FIX */
 .laporan-filter button {
   width: auto;
 }
@@ -176,12 +177,6 @@
   background: #fafafa;
 }
 
-/* ⚠️ DIHAPUS BIAR WARNA NORMAL */
-/* .laporan-table * {
-  color: rgb(103, 100, 100) !important;
-  background-color: transparent;
-} */
-
 /* ========================= */
 /* TOTAL */
 /* ========================= */
@@ -226,7 +221,7 @@
 }
 
 /* ========================= */
-/* 🔥 RANGE DATE */
+/*  RANGE DATE */
 /* ========================= */
 
 .range-input {
@@ -247,7 +242,7 @@
 }
 
 /* ========================= */
-/* 🔥 DROPDOWN SUMBER DANA */
+/* DROPDOWN SUMBER DANA */
 /* ========================= */
 
 .laporan-filter select {
@@ -288,7 +283,7 @@
 }
 
 .laporan-table {
-  max-height: calc(110vh - 220px);
+  max-height: calc(106vh - 220px);
   overflow-y: auto;
 }
 
@@ -337,4 +332,96 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--primary);
+}
+
+/* ========================================= */
+/* BKU STYLE (KHUSUS BUKU KAS UMUM) */
+/* ========================================= */
+
+/* WRAPPER SWITCH */
+.bku-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: fit-content;
+  margin: 0 auto 16px auto;
+}
+
+.bku-switch button {
+  border: none;
+  background: #e5e7eb;
+  color: var(--text-main);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.bku-switch button:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* TEXT BKU */
+.bku-switch span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ========================================= */
+/* TABEL KHUSUS BKU (SCOPED) */
+/* ========================================= */
+
+.bku-table th {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* hover */
+.bku-table tr:hover {
+  background: #f1f5f9;
+}
+
+/* ========================================= */
+/* KOLOM KHUSUS BKU */
+/* ========================================= */
+
+/* Debit */
+.bku-table td:nth-child(4) {
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* Kredit */
+.bku-table td:nth-child(5) {
+  color: var(--error);
+  font-weight: 500;
+}
+
+/* Saldo */
+.bku-table td:nth-child(6) {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ========================================= */
+/* SCROLL HALUS */
+/* ========================================= */
+
+.bku-table {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.bku-table::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bku-table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
 }
