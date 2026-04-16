@@ -7,10 +7,10 @@ export default function Laporan() {
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
 
-  // 🔥 TAMBAHAN TOTAL
+  // TAMBAHAN TOTAL
   const [total, setTotal] = useState(0);
 
-  // 🔥 TAMBAHAN BKU TYPE
+  // TAMBAHAN BKU TYPE
   const [bkuType, setBkuType] = useState(0);
   const bkuList = ["BKU", "Tunai", "Bank"];
 
@@ -40,7 +40,7 @@ export default function Laporan() {
     fetch(`${baseUrl}?${params.toString()}`)
       .then((res) => res.json())
       .then((res) => {
-        // 🔥 KHUSUS BKU
+        // KHUSUS BKU
         if (active === "BKU") {
           if (bkuType === 0) setData(res.bku || []);
           if (bkuType === 1) setData(res.p1 || []);
@@ -98,7 +98,7 @@ export default function Laporan() {
     loadData();
   }, [active, bkuType]);
 
-  // 🔥 NAVIGASI BKU
+  // NAVIGASI BKU
   const nextBku = () => {
     setBkuType((prev) => (prev + 1) % bkuList.length);
   };
@@ -128,12 +128,12 @@ export default function Laporan() {
         {/* TABEL */}
         {/* ========================= */}
         <div style={{ flex: 1 }}>
-          {/* 🔥 SWITCH BKU (FIXED) */}
+          {/* SWITCH BKU (FIXED) */}
           {active === "BKU" && (
             <div className="bku-switch">
               <button onClick={prevBku}>&lt;</button>
 
-              {/* 🔥 LABEL TENGAH */}
+              {/* LABEL TENGAH */}
               <span>{bkuList[bkuType]}</span>
 
               <button onClick={nextBku}>&gt;</button>
