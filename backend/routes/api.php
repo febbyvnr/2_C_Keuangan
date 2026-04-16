@@ -22,6 +22,8 @@ use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
+use App\Http\Controllers\LaporanRkasController;
+use App\Http\Controllers\LaporanKeuanganYayasanController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -218,7 +220,10 @@ Route::prefix('tagihan-siswa')->group(function () {
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
-    
+    Route::post('/rkas/export', [LaporanRkasController::class, 'export']);
+    Route::post('/rkas/export-pdf', [LaporanRkasController::class, 'exportPdf']);
+    Route::get('/yayasan/export-excel', [LaporanKeuanganYayasanController::class, 'exportExcel']);
+    Route::get('/yayasan/export-pdf', [LaporanKeuanganYayasanController::class, 'exportPdf']);
 });
 
 Route::prefix('laporan')->group(function () {
