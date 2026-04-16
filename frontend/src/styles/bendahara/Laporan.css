@@ -338,3 +338,93 @@
   font-weight: 600;
   color: var(--primary);
 }
+
+/* ========================================= */
+/* 🔵 BKU STYLE (KHUSUS BUKU KAS UMUM) */
+/* ========================================= */
+
+/* 🔥 WRAPPER SWITCH */
+.bku-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 🔥 BUTTON PANAH (BIAR GA KOTAK HITAM JELEK) */
+.bku-switch button {
+  border: none;
+  background: #e5e7eb; /* abu soft */
+  color: var(--text-main);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.bku-switch button:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* 🔥 TEXT BKU */
+.bku-switch span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ========================================= */
+/* 🔵 TABEL KHUSUS BKU (SCOPED) */
+/* ========================================= */
+
+.bku-table th {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* hover */
+.bku-table tr:hover {
+  background: #f1f5f9;
+}
+
+/* ========================================= */
+/* 🔵 KOLOM KHUSUS BKU */
+/* ========================================= */
+
+/* Debit */
+.bku-table td:nth-child(4) {
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* Kredit */
+.bku-table td:nth-child(5) {
+  color: var(--error);
+  font-weight: 500;
+}
+
+/* Saldo */
+.bku-table td:nth-child(6) {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ========================================= */
+/* 🔵 SCROLL HALUS */
+/* ========================================= */
+
+.bku-table {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.bku-table::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bku-table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
