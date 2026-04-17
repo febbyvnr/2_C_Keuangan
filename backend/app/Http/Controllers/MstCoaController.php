@@ -24,12 +24,12 @@ class MstCoaController extends Controller
             $query = MstCoa::query()
                 ->with([
                     'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'asc');
+                        $q->active()->orderBy('KODE_COA', 'desc');
                     }
                 ])
                 ->active()
                 // ->whereNull('MST_ID_MASTER_COA')
-                ->orderBy('KODE_COA', 'asc');
+                ->orderBy('KODE_COA', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -71,7 +71,7 @@ class MstCoaController extends Controller
                 ->with([
                     'parent',
                     'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'asc');
+                        $q->active()->orderBy('KODE_COA', 'desc');
                     },
                     'programKerja',
                 ])
@@ -110,7 +110,7 @@ class MstCoaController extends Controller
                     Rule::exists('mst_coa', 'ID_MASTER_COA')
                         ->where(fn ($q) => $q->where('IS_DELETE', 0)),
                 ],
-                'DESKRIPSI_COA' => ['required', 'string', 'max:100'],
+                'DESKRIPSI_COA' => ['nullable', 'string', 'max:100'],
             ]);
 
             DB::beginTransaction();
@@ -167,7 +167,6 @@ class MstCoaController extends Controller
                     'data' => null,
                 ], 422);
             }
-
             $validated = $request->validate(
                 [
                     'MST_ID_MASTER_COA' => [
@@ -178,22 +177,19 @@ class MstCoaController extends Controller
                         }),
                     ],
                     'DESKRIPSI_COA' => [
-                        'required',
+                        'nullable',
                         'string',
                         'max:100',
                     ],
                 ],
                 [
                     'MST_ID_MASTER_COA.exists' => 'Parent COA tidak valid.',
-                    'DESKRIPSI_COA.required' => 'Deskripsi COA wajib diisi.',
                     'DESKRIPSI_COA.max' => 'Deskripsi COA maksimal 100 karakter.',
                 ]
             );
-
             $newParentId = array_key_exists('MST_ID_MASTER_COA', $validated)
                 ? $validated['MST_ID_MASTER_COA']
                 : $coa->MST_ID_MASTER_COA;
-
             if (!is_null($newParentId) && (int) $newParentId === (int) $coa->ID_MASTER_COA) {
                 return response()->json([
                     'success' => false,
@@ -201,7 +197,6 @@ class MstCoaController extends Controller
                     'data' => null,
                 ], 422);
             }
-
             if (
                 !is_null($newParentId) &&
                 $this->isDescendant((int) $newParentId, (int) $coa->ID_MASTER_COA)
@@ -212,14 +207,11 @@ class MstCoaController extends Controller
                     'data' => null,
                 ], 422);
             }
-
             $parentChanged = (int) ($coa->MST_ID_MASTER_COA ?? 0) !== (int) ($newParentId ?? 0);
-
             // if ($parentChanged) {
             //     $hasActiveChildren = $coa->children()
             //         ->active()
             //         ->exists();
-
             //     if ($hasActiveChildren) {
             //         return response()->json([
             //             'success' => false,
@@ -228,18 +220,11 @@ class MstCoaController extends Controller
             //         ], 422);
             //     }
             // }
-
             $updateData = [
                 'MST_ID_MASTER_COA' => $newParentId,
                 'DESKRIPSI_COA' => $validated['DESKRIPSI_COA'],
             ];
-
-            if ($parentChanged) {
-                $updateData['KODE_COA'] = $this->generateNextCoaCode($newParentId, $coa->ID_MASTER_COA);
-            }
-
             $coa->update($updateData);
-
             return response()->json([
                 'success' => true,
                 'message' => 'COA berhasil diperbarui',
@@ -360,7 +345,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'asc');
+            ->orderBy('KODE_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -424,7 +409,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'asc');
+            ->orderBy('KODE_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {

@@ -10,19 +10,29 @@ export default function MasterCOA() {
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
     const [coaList, setCoaList] = useState([]);
+    const [search, setSearch] = useState("");
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
         DESKRIPSI_COA: ""
     });
 
-    const fetchData = async () => {
+    const fetchData = async (keyword = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/coa");
+            setLoading(true);
+
+            const url = keyword
+                ? `http://localhost:8000/api/coa?search=${keyword}`
+                : "http://localhost:8000/api/coa";
+
+            const res = await fetch(url);
             const json = await res.json();
+
             setData(json.data || []);
             setCoaList(json.data || []);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -109,6 +119,9 @@ export default function MasterCOA() {
     const indexOfFirst = indexOfLast - itemsPerPage;
     const currentData = data.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -118,9 +131,58 @@ export default function MasterCOA() {
         <div className="coa-container">
             <div className="coa-header">
                 <h2>Master COA</h2>
-                <button className="btn-primary" onClick={() => setShowModal(true)}>
-                    Tambah COA
-                </button>
+                <div className="header-actions">
+                    <button
+                        className="btn-secondary"
+                        onClick={() => {
+                            setSearch("");
+                            fetchData();
+                        }}
+                    >
+                        Reset
+                    </button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                            type="text"
+                            placeholder="Cari deskripsi / kode COA..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="search-input"
+                        />
+
+                        <button
+                            className="btn-primary"
+                            onClick={() => {
+                                setCurrentPage(1);
+                                fetchData(search);
+                            }}
+                        >
+                            Search
+                        </button>
+                    </div>
+                    <button
+                        className="btn-primary"
+                        onClick={() => {
+                            setIsEdit(false);
+                            setEditId(null);
+                            setForm({
+                                MST_ID_MASTER_COA: "",
+                                DESKRIPSI_COA: ""
+                            });
+                            setShowModal(true);
+                        }}
+                    >
+                        Tambah COA
+                    </button>
+                </div>
+            </div>
+            <div className="export-wrapper">
+                <a href={`http://localhost:8000/api/coa/export/excel?search=${search}`} className="btn btn-outline-success custom-btn">
+                    <i className="bi bi-filetype-xlsx"></i>Export Excel
+                </a>
+                <a href={`http://localhost:8000/api/coa/export/pdf?search=${search}`} className="btn btn-outline-danger custom-btn">
+                    <i className="bi bi-file-earmark-pdf"></i>Export PDF
+                </a>
             </div>
             <div className="coa-table-wrapper">
                 <table className="coa-table">
@@ -178,38 +240,43 @@ export default function MasterCOA() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination">
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                >
-                    <i className="bi bi-chevron-left"></i>
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
+            <div className="pagination-wrapper">
+                <div className="pagination-info">
+                    Showing {startData} - {endData} of {totalData} data
+                </div>
+                <div className="pagination">
                     <button
-                        key={i + 1}
-                        onClick={() => changePage(i + 1)}
-                        className={`page-btn ${
-                            currentPage === i + 1 ? "active" : ""
-                        }`}
+                        className="page-btn"
+                        onClick={() =>
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
                     >
-                        {i + 1}
+                        <i className="bi bi-chevron-left"></i>
                     </button>
-                ))}
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                        )
-                    }
-                    disabled={currentPage === totalPages}
-                >
-                    <i className="bi bi-chevron-right"></i>
-                </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i + 1}
+                            onClick={() => changePage(i + 1)}
+                            className={`page-btn ${
+                                currentPage === i + 1 ? "active" : ""
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button
+                        className="page-btn"
+                        onClick={() =>
+                            setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                            )
+                        }
+                        disabled={currentPage === totalPages}
+                    >
+                        <i className="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
             {showModal && (
                 <div className="modal-overlay">
@@ -235,14 +302,13 @@ export default function MasterCOA() {
                                 name="DESKRIPSI_COA"
                                 value={form.DESKRIPSI_COA}
                                 onChange={handleChange}
-                                required
                                 placeholder="Masukkan deskripsi"
                             />
                             <div className="modal-actions">
                                 <button
                                     type="button"
                                     className="btn-cancel"
-                                    onClick={() => setShowModal(false)}
+                                    onClick={closeModal}
                                 >
                                     Batal
                                 </button>
