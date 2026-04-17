@@ -52,6 +52,18 @@
     padding: 12px;
     color: #585858;
     border-bottom: 2px solid #f0f0f0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.coa-table th i {
+    margin-left: 5px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.coa-table th:hover i {
+    opacity: 1;
 }
 
 .coa-table th:nth-child(1),

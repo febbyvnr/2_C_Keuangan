@@ -11,6 +11,10 @@ export default function MasterCOA() {
     const [editId, setEditId] = useState(null); 
     const [coaList, setCoaList] = useState([]);
     const [search, setSearch] = useState("");
+    const [sortConfig, setSortConfig] = useState({
+        key: "ID_MASTER_COA",
+        direction: "asc"
+    });
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
         DESKRIPSI_COA: ""
@@ -19,14 +23,12 @@ export default function MasterCOA() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
-
             const url = keyword
                 ? `http://localhost:8000/api/coa?search=${keyword}`
                 : "http://localhost:8000/api/coa";
 
             const res = await fetch(url);
             const json = await res.json();
-
             setData(json.data || []);
             setCoaList(json.data || []);
         } catch (err) {
@@ -39,6 +41,21 @@ export default function MasterCOA() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getIcon = (key) => {
+        if (sortConfig.key !== key) return "bi bi-funnel";
+        return sortConfig.direction === "asc"
+            ? "bi bi-funnel-fill"
+            : "bi bi-funnel-fill";
+    };
 
     const handleChange = (e) => {
         setForm({
@@ -117,11 +134,25 @@ export default function MasterCOA() {
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = data.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const totalData = data.length;
     const startData = totalData === 0 ? 0 : indexOfFirst + 1;
     const endData = Math.min(indexOfLast, totalData);
+
+    const sortedData = [...data].sort((a, b) => {
+        let valA = a[sortConfig.key] || "";
+        let valB = b[sortConfig.key] || "";
+        if (sortConfig.key === "ID_MASTER_COA" || sortConfig.key === "MST_ID_MASTER_COA") {
+            valA = Number(valA);
+            valB = Number(valB);
+        }
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+    });
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -188,10 +219,18 @@ export default function MasterCOA() {
                 <table className="coa-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>MST ID</th>
-                            <th>Kode COA</th>
-                            <th>Deskripsi</th>
+                            <th onClick={() => handleSort("ID_MASTER_COA")}>
+                                ID <i className={getIcon("ID_MASTER_COA")}></i>
+                            </th>
+                            <th onClick={() => handleSort("MST_ID_MASTER_COA")}>
+                                MST ID <i className={getIcon("MST_ID_MASTER_COA")}></i>
+                            </th>
+                            <th onClick={() => handleSort("KODE_COA")}>
+                                Kode COA <i className={getIcon("KODE_COA")}></i>
+                            </th>
+                            <th onClick={() => handleSort("DESKRIPSI_COA")}>
+                                Deskripsi <i className={getIcon("DESKRIPSI_COA")}></i>
+                            </th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
