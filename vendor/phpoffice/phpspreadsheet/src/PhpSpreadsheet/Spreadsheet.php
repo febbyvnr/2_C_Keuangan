@@ -2,16 +2,35 @@
 
 namespace PhpOffice\PhpSpreadsheet;
 
+<<<<<<< HEAD
+use Composer\Pcre\Preg;
+use JsonSerializable;
+use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
+use PhpOffice\PhpSpreadsheet\Cell\IValueBinder;
+use PhpOffice\PhpSpreadsheet\Document\Properties;
+use PhpOffice\PhpSpreadsheet\Document\Security;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Shared\Font as SharedFont;
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+use PhpOffice\PhpSpreadsheet\Style\Style;
+use PhpOffice\PhpSpreadsheet\Worksheet\Iterator;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table;
+=======
 use JsonSerializable;
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Iterator;
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class Spreadsheet implements JsonSerializable
 {
+<<<<<<< HEAD
+    // Allowable values for workbook window visibility
+=======
     // Allowable values for workbook window visilbity
+>>>>>>> main
     const VISIBILITY_VISIBLE = 'visible';
     const VISIBILITY_HIDDEN = 'hidden';
     const VISIBILITY_VERY_HIDDEN = 'veryHidden';
@@ -25,6 +44,24 @@ class Spreadsheet implements JsonSerializable
         self::VISIBILITY_VERY_HIDDEN,
     ];
 
+<<<<<<< HEAD
+    protected int $excelCalendar = Date::CALENDAR_WINDOWS_1900;
+
+    /**
+     * Unique ID.
+     */
+    private string $uniqueID;
+
+    /**
+     * Document properties.
+     */
+    private Properties $properties;
+
+    /**
+     * Document security.
+     */
+    private Security $security;
+=======
     /**
      * Unique ID.
      *
@@ -45,12 +82,26 @@ class Spreadsheet implements JsonSerializable
      * @var Document\Security
      */
     private $security;
+>>>>>>> main
 
     /**
      * Collection of Worksheet objects.
      *
      * @var Worksheet[]
      */
+<<<<<<< HEAD
+    private array $workSheetCollection;
+
+    /**
+     * Calculation Engine.
+     */
+    private Calculation $calculationEngine;
+
+    /**
+     * Active sheet index.
+     */
+    private int $activeSheetIndex;
+=======
     private $workSheetCollection = [];
 
     /**
@@ -66,12 +117,21 @@ class Spreadsheet implements JsonSerializable
      * @var int
      */
     private $activeSheetIndex = 0;
+>>>>>>> main
 
     /**
      * Named ranges.
      *
      * @var DefinedName[]
      */
+<<<<<<< HEAD
+    private array $definedNames;
+
+    /**
+     * CellXf supervisor.
+     */
+    private Style $cellXfSupervisor;
+=======
     private $definedNames = [];
 
     /**
@@ -80,19 +140,57 @@ class Spreadsheet implements JsonSerializable
      * @var Style
      */
     private $cellXfSupervisor;
+>>>>>>> main
 
     /**
      * CellXf collection.
      *
      * @var Style[]
      */
+<<<<<<< HEAD
+    private array $cellXfCollection = [];
+=======
     private $cellXfCollection = [];
+>>>>>>> main
 
     /**
      * CellStyleXf collection.
      *
      * @var Style[]
      */
+<<<<<<< HEAD
+    private array $cellStyleXfCollection = [];
+
+    /**
+     * hasMacros : this workbook have macros ?
+     */
+    private bool $hasMacros = false;
+
+    /**
+     * macrosCode : all macros code as binary data (the vbaProject.bin file, this include form, code,  etc.), null if no macro.
+     */
+    private ?string $macrosCode = null;
+
+    /**
+     * macrosCertificate : if macros are signed, contains binary data vbaProjectSignature.bin file, null if not signed.
+     */
+    private ?string $macrosCertificate = null;
+
+    /**
+     * ribbonXMLData : null if workbook isn't Excel 2007 or not contain a customized UI.
+     *
+     * @var null|array{target: string, data: string}
+     */
+    private ?array $ribbonXMLData = null;
+
+    /**
+     * ribbonBinObjects : null if workbook isn't Excel 2007 or not contain embedded objects (picture(s)) for Ribbon Elements
+     * ignored if $ribbonXMLData is null.
+     *
+     * @var null|mixed[]
+     */
+    private ?array $ribbonBinObjects = null;
+=======
     private $cellStyleXfCollection = [];
 
     /**
@@ -130,11 +228,32 @@ class Spreadsheet implements JsonSerializable
      * @var null|array
      */
     private $ribbonBinObjects;
+>>>>>>> main
 
     /**
      * List of unparsed loaded data for export to same format with better compatibility.
      * It has to be minimized when the library start to support currently unparsed data.
      *
+<<<<<<< HEAD
+     * @var array<array<array<array<string>|string>>>
+     */
+    private array $unparsedLoadedData = [];
+
+    /**
+     * Controls visibility of the horizonal scroll bar in the application.
+     */
+    private bool $showHorizontalScroll = true;
+
+    /**
+     * Controls visibility of the horizonal scroll bar in the application.
+     */
+    private bool $showVerticalScroll = true;
+
+    /**
+     * Controls visibility of the sheet tabs in the application.
+     */
+    private bool $showSheetTabs = true;
+=======
      * @var array
      */
     private $unparsedLoadedData = [];
@@ -159,10 +278,32 @@ class Spreadsheet implements JsonSerializable
      * @var bool
      */
     private $showSheetTabs = true;
+>>>>>>> main
 
     /**
      * Specifies a boolean value that indicates whether the workbook window
      * is minimized.
+<<<<<<< HEAD
+     */
+    private bool $minimized = false;
+
+    /**
+     * Specifies a boolean value that indicates whether to group dates
+     * when presenting the user with filtering options in the user
+     * interface.
+     */
+    private bool $autoFilterDateGrouping = true;
+
+    /**
+     * Specifies the index to the first sheet in the book view.
+     */
+    private int $firstSheetIndex = 0;
+
+    /**
+     * Specifies the visible status of the workbook.
+     */
+    private string $visibility = self::VISIBILITY_VISIBLE;
+=======
      *
      * @var bool
      */
@@ -190,11 +331,50 @@ class Spreadsheet implements JsonSerializable
      * @var string
      */
     private $visibility = self::VISIBILITY_VISIBLE;
+>>>>>>> main
 
     /**
      * Specifies the ratio between the workbook tabs bar and the horizontal
      * scroll bar.  TabRatio is assumed to be out of 1000 of the horizontal
      * window width.
+<<<<<<< HEAD
+     */
+    private int $tabRatio = 600;
+
+    private Theme $theme;
+
+    private ?IValueBinder $valueBinder = null;
+
+    /** @var array<string, int> */
+    private array $fontCharsets = [
+        'B Nazanin' => SharedFont::CHARSET_ANSI_ARABIC,
+    ];
+
+    /**
+     * @param int $charset uses any value from Shared\Font,
+     *    but defaults to ARABIC because that is the only known
+     *    charset for which this declaration might be needed
+     */
+    public function addFontCharset(string $fontName, int $charset = SharedFont::CHARSET_ANSI_ARABIC): void
+    {
+        $this->fontCharsets[$fontName] = $charset;
+    }
+
+    public function getFontCharset(string $fontName): int
+    {
+        return $this->fontCharsets[$fontName] ?? -1;
+    }
+
+    /**
+     * Return all fontCharsets.
+     *
+     * @return array<string, int>
+     */
+    public function getFontCharsets(): array
+    {
+        return $this->fontCharsets;
+    }
+=======
      *
      * @var int
      */
@@ -202,6 +382,7 @@ class Spreadsheet implements JsonSerializable
 
     /** @var Theme */
     private $theme;
+>>>>>>> main
 
     public function getTheme(): Theme
     {
@@ -210,10 +391,15 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * The workbook has macros ?
+<<<<<<< HEAD
+     */
+    public function hasMacros(): bool
+=======
      *
      * @return bool
      */
     public function hasMacros()
+>>>>>>> main
     {
         return $this->hasMacros;
     }
@@ -223,17 +409,26 @@ class Spreadsheet implements JsonSerializable
      *
      * @param bool $hasMacros true|false
      */
+<<<<<<< HEAD
+    public function setHasMacros(bool $hasMacros): void
+=======
     public function setHasMacros($hasMacros): void
+>>>>>>> main
     {
         $this->hasMacros = (bool) $hasMacros;
     }
 
     /**
      * Set the macros code.
+<<<<<<< HEAD
+     */
+    public function setMacrosCode(?string $macroCode): void
+=======
      *
      * @param string $macroCode string|null
      */
     public function setMacrosCode($macroCode): void
+>>>>>>> main
     {
         $this->macrosCode = $macroCode;
         $this->setHasMacros($macroCode !== null);
@@ -241,20 +436,30 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Return the macros code.
+<<<<<<< HEAD
+     */
+    public function getMacrosCode(): ?string
+=======
      *
      * @return null|string
      */
     public function getMacrosCode()
+>>>>>>> main
     {
         return $this->macrosCode;
     }
 
     /**
      * Set the macros certificate.
+<<<<<<< HEAD
+     */
+    public function setMacrosCertificate(?string $certificate): void
+=======
      *
      * @param null|string $certificate
      */
     public function setMacrosCertificate($certificate): void
+>>>>>>> main
     {
         $this->macrosCertificate = $certificate;
     }
@@ -264,17 +469,26 @@ class Spreadsheet implements JsonSerializable
      *
      * @return bool true|false
      */
+<<<<<<< HEAD
+    public function hasMacrosCertificate(): bool
+=======
     public function hasMacrosCertificate()
+>>>>>>> main
     {
         return $this->macrosCertificate !== null;
     }
 
     /**
      * Return the macros certificate.
+<<<<<<< HEAD
+     */
+    public function getMacrosCertificate(): ?string
+=======
      *
      * @return null|string
      */
     public function getMacrosCertificate()
+>>>>>>> main
     {
         return $this->macrosCertificate;
     }
@@ -291,6 +505,12 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * set ribbon XML data.
+<<<<<<< HEAD
+     */
+    public function setRibbonXMLData(mixed $target, mixed $xmlData): void
+    {
+        if (is_string($target) && is_string($xmlData)) {
+=======
      *
      * @param null|mixed $target
      * @param null|mixed $xmlData
@@ -298,6 +518,7 @@ class Spreadsheet implements JsonSerializable
     public function setRibbonXMLData($target, $xmlData): void
     {
         if ($target !== null && $xmlData !== null) {
+>>>>>>> main
             $this->ribbonXMLData = ['target' => $target, 'data' => $xmlData];
         } else {
             $this->ribbonXMLData = null;
@@ -307,11 +528,17 @@ class Spreadsheet implements JsonSerializable
     /**
      * retrieve ribbon XML Data.
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    public function getRibbonXMLData(string $what = 'all'): null|array|string //we need some constants here...
+=======
      * @param string $what
      *
      * @return null|array|string
      */
     public function getRibbonXMLData($what = 'all') //we need some constants here...
+>>>>>>> main
     {
         $returnData = null;
         $what = strtolower($what);
@@ -334,6 +561,13 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * store binaries ribbon objects (pictures).
+<<<<<<< HEAD
+     */
+    public function setRibbonBinObjects(mixed $binObjectsNames, mixed $binObjectsData): void
+    {
+        if ($binObjectsNames !== null && $binObjectsData !== null) {
+            $this->ribbonBinObjects = ['names' => $binObjectsNames, 'data' => $binObjectsData];
+=======
      *
      * @param null|mixed $BinObjectsNames
      * @param null|mixed $BinObjectsData
@@ -342,6 +576,7 @@ class Spreadsheet implements JsonSerializable
     {
         if ($BinObjectsNames !== null && $BinObjectsData !== null) {
             $this->ribbonBinObjects = ['names' => $BinObjectsNames, 'data' => $BinObjectsData];
+>>>>>>> main
         } else {
             $this->ribbonBinObjects = null;
         }
@@ -353,9 +588,15 @@ class Spreadsheet implements JsonSerializable
      *
      * @internal
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    public function getUnparsedLoadedData(): array
+=======
      * @return array
      */
     public function getUnparsedLoadedData()
+>>>>>>> main
     {
         return $this->unparsedLoadedData;
     }
@@ -365,6 +606,11 @@ class Spreadsheet implements JsonSerializable
      * It has to be minimized when the library start to support currently unparsed data.
      *
      * @internal
+<<<<<<< HEAD
+     *
+     * @param array<array<array<array<string>|string>>> $unparsedLoadedData
+=======
+>>>>>>> main
      */
     public function setUnparsedLoadedData(array $unparsedLoadedData): void
     {
@@ -372,6 +618,13 @@ class Spreadsheet implements JsonSerializable
     }
 
     /**
+<<<<<<< HEAD
+     * retrieve Binaries Ribbon Objects.
+     *
+     * @return mixed[]
+     */
+    public function getRibbonBinObjects(string $what = 'all'): ?array
+=======
      * return the extension of a filename. Internal use for a array_map callback (php<5.3 don't like lambda function).
      *
      * @param mixed $path
@@ -393,6 +646,7 @@ class Spreadsheet implements JsonSerializable
      * @return null|array
      */
     public function getRibbonBinObjects($what = 'all')
+>>>>>>> main
     {
         $ReturnData = null;
         $what = strtolower($what);
@@ -401,18 +655,30 @@ class Spreadsheet implements JsonSerializable
                 return $this->ribbonBinObjects;
             case 'names':
             case 'data':
+<<<<<<< HEAD
+                if (is_array($this->ribbonBinObjects) && is_array($this->ribbonBinObjects[$what] ?? null)) {
+=======
                 if (is_array($this->ribbonBinObjects) && isset($this->ribbonBinObjects[$what])) {
+>>>>>>> main
                     $ReturnData = $this->ribbonBinObjects[$what];
                 }
 
                 break;
             case 'types':
                 if (
+<<<<<<< HEAD
+                    is_array($this->ribbonBinObjects)
+                    && isset($this->ribbonBinObjects['data']) && is_array($this->ribbonBinObjects['data'])
+                ) {
+                    $tmpTypes = array_keys($this->ribbonBinObjects['data']);
+                    $ReturnData = array_unique(array_map(fn (string $path): string => pathinfo($path, PATHINFO_EXTENSION), $tmpTypes));
+=======
                     is_array($this->ribbonBinObjects) &&
                     isset($this->ribbonBinObjects['data']) && is_array($this->ribbonBinObjects['data'])
                 ) {
                     $tmpTypes = array_keys($this->ribbonBinObjects['data']);
                     $ReturnData = array_unique(array_map([$this, 'getExtensionOnly'], $tmpTypes));
+>>>>>>> main
                 } else {
                     $ReturnData = []; // the caller want an array... not null if empty
                 }
@@ -425,25 +691,58 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * This workbook have a custom UI ?
+<<<<<<< HEAD
+     */
+    public function hasRibbon(): bool
+=======
      *
      * @return bool
      */
     public function hasRibbon()
+>>>>>>> main
     {
         return $this->ribbonXMLData !== null;
     }
 
     /**
+<<<<<<< HEAD
+     * This workbook have additional object for the ribbon ?
+     */
+    public function hasRibbonBinObjects(): bool
+=======
      * This workbook have additionnal object for the ribbon ?
      *
      * @return bool
      */
     public function hasRibbonBinObjects()
+>>>>>>> main
     {
         return $this->ribbonBinObjects !== null;
     }
 
     /**
+<<<<<<< HEAD
+     * This workbook has in cell images.
+     */
+    public function hasInCellDrawings(): bool
+    {
+        $sheetCount = $this->getSheetCount();
+        for ($i = 0; $i < $sheetCount; ++$i) {
+            if ($this->getSheet($i)->getInCellDrawingCollection()->count() > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a sheet with a specified code name already exists.
+     *
+     * @param string $codeName Name of the worksheet to check
+     */
+    public function sheetCodeNameExists(string $codeName): bool
+=======
      * Check if a sheet with a specified code name already exists.
      *
      * @param string $codeName Name of the worksheet to check
@@ -451,6 +750,7 @@ class Spreadsheet implements JsonSerializable
      * @return bool
      */
     public function sheetCodeNameExists($codeName)
+>>>>>>> main
     {
         return $this->getSheetByCodeName($codeName) !== null;
     }
@@ -459,10 +759,15 @@ class Spreadsheet implements JsonSerializable
      * Get sheet by code name. Warning : sheet don't have always a code name !
      *
      * @param string $codeName Sheet name
+<<<<<<< HEAD
+     */
+    public function getSheetByCodeName(string $codeName): ?Worksheet
+=======
      *
      * @return null|Worksheet
      */
     public function getSheetByCodeName($codeName)
+>>>>>>> main
     {
         $worksheetCount = count($this->workSheetCollection);
         for ($i = 0; $i < $worksheetCount; ++$i) {
@@ -489,10 +794,17 @@ class Spreadsheet implements JsonSerializable
         $this->activeSheetIndex = 0;
 
         // Create document properties
+<<<<<<< HEAD
+        $this->properties = new Properties();
+
+        // Create document security
+        $this->security = new Security();
+=======
         $this->properties = new Document\Properties();
 
         // Create document security
         $this->security = new Document\Security();
+>>>>>>> main
 
         // Set defined names
         $this->definedNames = [];
@@ -512,9 +824,16 @@ class Spreadsheet implements JsonSerializable
     public function __destruct()
     {
         $this->disconnectWorksheets();
+<<<<<<< HEAD
+        unset($this->calculationEngine);
+        $this->cellXfCollection = [];
+        $this->cellStyleXfCollection = [];
+        $this->definedNames = [];
+=======
         $this->calculationEngine = null;
         $this->cellXfCollection = [];
         $this->cellStyleXfCollection = [];
+>>>>>>> main
     }
 
     /**
@@ -532,20 +851,45 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Return the calculation engine for this worksheet.
-     *
-     * @return null|Calculation
+<<<<<<< HEAD
      */
-    public function getCalculationEngine()
+    public function getCalculationEngine(): Calculation
     {
         return $this->calculationEngine;
     }
 
     /**
+     * Intended for use only via a destructor.
+     *
+     * @internal
+     */
+    public function getCalculationEngineOrNull(): ?Calculation
+    {
+        if (!isset($this->calculationEngine)) { //* @phpstan-ignore-line
+            return null;
+        }
+
+=======
+     *
+     * @return null|Calculation
+     */
+    public function getCalculationEngine()
+    {
+>>>>>>> main
+        return $this->calculationEngine;
+    }
+
+    /**
      * Get properties.
+<<<<<<< HEAD
+     */
+    public function getProperties(): Properties
+=======
      *
      * @return Document\Properties
      */
     public function getProperties()
+>>>>>>> main
     {
         return $this->properties;
     }
@@ -553,17 +897,26 @@ class Spreadsheet implements JsonSerializable
     /**
      * Set properties.
      */
+<<<<<<< HEAD
+    public function setProperties(Properties $documentProperties): void
+=======
     public function setProperties(Document\Properties $documentProperties): void
+>>>>>>> main
     {
         $this->properties = $documentProperties;
     }
 
     /**
      * Get security.
+<<<<<<< HEAD
+     */
+    public function getSecurity(): Security
+=======
      *
      * @return Document\Security
      */
     public function getSecurity()
+>>>>>>> main
     {
         return $this->security;
     }
@@ -571,17 +924,26 @@ class Spreadsheet implements JsonSerializable
     /**
      * Set security.
      */
+<<<<<<< HEAD
+    public function setSecurity(Security $documentSecurity): void
+=======
     public function setSecurity(Document\Security $documentSecurity): void
+>>>>>>> main
     {
         $this->security = $documentSecurity;
     }
 
     /**
      * Get active sheet.
+<<<<<<< HEAD
+     */
+    public function getActiveSheet(): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function getActiveSheet()
+>>>>>>> main
     {
         return $this->getSheet($this->activeSheetIndex);
     }
@@ -590,10 +952,15 @@ class Spreadsheet implements JsonSerializable
      * Create sheet and add it to this workbook.
      *
      * @param null|int $sheetIndex Index where sheet should go (0,1,..., or null for last)
+<<<<<<< HEAD
+     */
+    public function createSheet(?int $sheetIndex = null): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function createSheet($sheetIndex = null)
+>>>>>>> main
     {
         $newSheet = new Worksheet($this);
         $this->addSheet($newSheet, $sheetIndex, true);
@@ -605,24 +972,46 @@ class Spreadsheet implements JsonSerializable
      * Check if a sheet with a specified name already exists.
      *
      * @param string $worksheetName Name of the worksheet to check
+<<<<<<< HEAD
+     */
+    public function sheetNameExists(string $worksheetName): bool
+=======
      *
      * @return bool
      */
     public function sheetNameExists($worksheetName)
+>>>>>>> main
     {
         return $this->getSheetByName($worksheetName) !== null;
     }
 
+<<<<<<< HEAD
+    public function duplicateWorksheetByTitle(string $title): Worksheet
+    {
+        $original = $this->getSheetByNameOrThrow($title);
+        $index = $this->getIndex($original) + 1;
+        $clone = clone $original;
+
+        return $this->addSheet($clone, $index, true);
+    }
+
+=======
+>>>>>>> main
     /**
      * Add sheet.
      *
      * @param Worksheet $worksheet The worksheet to add
      * @param null|int $sheetIndex Index where sheet should go (0,1,..., or null for last)
+<<<<<<< HEAD
+     */
+    public function addSheet(Worksheet $worksheet, ?int $sheetIndex = null, bool $retitleIfNeeded = false): Worksheet
+=======
      * @param bool $retitleIfNeeded add suffix if title exists in spreadsheet
      *
      * @return Worksheet
      */
     public function addSheet(Worksheet $worksheet, $sheetIndex = null, $retitleIfNeeded = false)
+>>>>>>> main
     {
         if ($retitleIfNeeded) {
             $title = $worksheet->getTitle();
@@ -660,6 +1049,12 @@ class Spreadsheet implements JsonSerializable
             if ($this->activeSheetIndex >= $sheetIndex) {
                 ++$this->activeSheetIndex;
             }
+<<<<<<< HEAD
+            if ($this->activeSheetIndex < 0) {
+                $this->activeSheetIndex = 0;
+            }
+=======
+>>>>>>> main
         }
 
         if ($worksheet->getParent() === null) {
@@ -674,7 +1069,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param int $sheetIndex Index position of the worksheet to remove
      */
+<<<<<<< HEAD
+    public function removeSheetByIndex(int $sheetIndex): void
+=======
     public function removeSheetByIndex($sheetIndex): void
+>>>>>>> main
     {
         $numSheets = count($this->workSheetCollection);
         if ($sheetIndex > $numSheets - 1) {
@@ -686,8 +1085,13 @@ class Spreadsheet implements JsonSerializable
 
         // Adjust active sheet index if necessary
         if (
+<<<<<<< HEAD
+            ($this->activeSheetIndex >= $sheetIndex)
+            && ($this->activeSheetIndex > 0 || $numSheets <= 1)
+=======
             ($this->activeSheetIndex >= $sheetIndex) &&
             ($this->activeSheetIndex > 0 || $numSheets <= 1)
+>>>>>>> main
         ) {
             --$this->activeSheetIndex;
         }
@@ -697,10 +1101,15 @@ class Spreadsheet implements JsonSerializable
      * Get sheet by index.
      *
      * @param int $sheetIndex Sheet index
+<<<<<<< HEAD
+     */
+    public function getSheet(int $sheetIndex): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function getSheet($sheetIndex)
+>>>>>>> main
     {
         if (!isset($this->workSheetCollection[$sheetIndex])) {
             $numSheets = $this->getSheetCount();
@@ -718,7 +1127,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return Worksheet[]
      */
+<<<<<<< HEAD
+    public function getAllSheets(): array
+=======
     public function getAllSheets()
+>>>>>>> main
     {
         return $this->workSheetCollection;
     }
@@ -727,6 +1140,15 @@ class Spreadsheet implements JsonSerializable
      * Get sheet by name.
      *
      * @param string $worksheetName Sheet name
+<<<<<<< HEAD
+     */
+    public function getSheetByName(string $worksheetName): ?Worksheet
+    {
+        $trimWorksheetName = StringHelper::strToUpper(trim($worksheetName, "'"));
+        foreach ($this->workSheetCollection as $worksheet) {
+            if (StringHelper::strToUpper($worksheet->getTitle()) === $trimWorksheetName) {
+                return $worksheet;
+=======
      *
      * @return null|Worksheet
      */
@@ -736,6 +1158,7 @@ class Spreadsheet implements JsonSerializable
         for ($i = 0; $i < $worksheetCount; ++$i) {
             if ($this->workSheetCollection[$i]->getTitle() === trim($worksheetName, "'")) {
                 return $this->workSheetCollection[$i];
+>>>>>>> main
             }
         }
 
@@ -760,11 +1183,18 @@ class Spreadsheet implements JsonSerializable
      *
      * @return int index
      */
+<<<<<<< HEAD
+    public function getIndex(Worksheet $worksheet, bool $noThrow = false): int
+    {
+        foreach ($this->workSheetCollection as $key => $value) {
+            if ($value === $worksheet) {
+=======
     public function getIndex(Worksheet $worksheet, bool $noThrow = false)
     {
         $wsHash = $worksheet->getHashInt();
         foreach ($this->workSheetCollection as $key => $value) {
             if ($value->getHashInt() === $wsHash) {
+>>>>>>> main
                 return $key;
             }
         }
@@ -783,7 +1213,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return int New sheet index
      */
+<<<<<<< HEAD
+    public function setIndexByName(string $worksheetName, int $newIndexPosition): int
+=======
     public function setIndexByName($worksheetName, $newIndexPosition)
+>>>>>>> main
     {
         $oldIndex = $this->getIndex($this->getSheetByNameOrThrow($worksheetName));
         $worksheet = array_splice(
@@ -803,10 +1237,15 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Get sheet count.
+<<<<<<< HEAD
+     */
+    public function getSheetCount(): int
+=======
      *
      * @return int
      */
     public function getSheetCount()
+>>>>>>> main
     {
         return count($this->workSheetCollection);
     }
@@ -816,7 +1255,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return int Active sheet index
      */
+<<<<<<< HEAD
+    public function getActiveSheetIndex(): int
+=======
     public function getActiveSheetIndex()
+>>>>>>> main
     {
         return $this->activeSheetIndex;
     }
@@ -825,10 +1268,15 @@ class Spreadsheet implements JsonSerializable
      * Set active sheet index.
      *
      * @param int $worksheetIndex Active sheet index
+<<<<<<< HEAD
+     */
+    public function setActiveSheetIndex(int $worksheetIndex): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function setActiveSheetIndex($worksheetIndex)
+>>>>>>> main
     {
         $numSheets = count($this->workSheetCollection);
 
@@ -846,10 +1294,15 @@ class Spreadsheet implements JsonSerializable
      * Set active sheet index by name.
      *
      * @param string $worksheetName Sheet title
+<<<<<<< HEAD
+     */
+    public function setActiveSheetIndexByName(string $worksheetName): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function setActiveSheetIndexByName($worksheetName)
+>>>>>>> main
     {
         if (($worksheet = $this->getSheetByName($worksheetName)) instanceof Worksheet) {
             $this->setActiveSheetIndex($this->getIndex($worksheet));
@@ -865,7 +1318,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return string[]
      */
+<<<<<<< HEAD
+    public function getSheetNames(): array
+=======
     public function getSheetNames()
+>>>>>>> main
     {
         $returnValue = [];
         $worksheetCount = $this->getSheetCount();
@@ -881,10 +1338,15 @@ class Spreadsheet implements JsonSerializable
      *
      * @param Worksheet $worksheet External sheet to add
      * @param null|int $sheetIndex Index where sheet should go (0,1,..., or null for last)
+<<<<<<< HEAD
+     */
+    public function addExternalSheet(Worksheet $worksheet, ?int $sheetIndex = null): Worksheet
+=======
      *
      * @return Worksheet
      */
     public function addExternalSheet(Worksheet $worksheet, $sheetIndex = null)
+>>>>>>> main
     {
         if ($this->sheetNameExists($worksheet->getTitle())) {
             throw new Exception("Workbook already contains a worksheet named '{$worksheet->getTitle()}'. Rename the external sheet first.");
@@ -932,9 +1394,13 @@ class Spreadsheet implements JsonSerializable
     {
         return array_filter(
             $this->definedNames,
+<<<<<<< HEAD
+            fn (DefinedName $definedName): bool => $definedName->isFormula() === self::DEFINED_NAME_IS_RANGE
+=======
             function (DefinedName $definedName) {
                 return $definedName->isFormula() === self::DEFINED_NAME_IS_RANGE;
             }
+>>>>>>> main
         );
     }
 
@@ -947,9 +1413,13 @@ class Spreadsheet implements JsonSerializable
     {
         return array_filter(
             $this->definedNames,
+<<<<<<< HEAD
+            fn (DefinedName $definedName): bool => $definedName->isFormula() === self::DEFINED_NAME_IS_FORMULA
+=======
             function (DefinedName $definedName) {
                 return $definedName->isFormula() === self::DEFINED_NAME_IS_FORMULA;
             }
+>>>>>>> main
         );
     }
 
@@ -1070,6 +1540,36 @@ class Spreadsheet implements JsonSerializable
         if ($definedName !== '') {
             $definedName = StringHelper::strToUpper($definedName);
             // first look for global defined name
+<<<<<<< HEAD
+            foreach ($this->definedNames as $dn) {
+                $upper = StringHelper::strToUpper($dn->getName());
+                if (
+                    !$dn->getLocalOnly()
+                    && $definedName === $upper
+                ) {
+                    $returnValue = $dn;
+
+                    break;
+                }
+            }
+
+            // then look for local defined name (has priority over global defined name if both names exist)
+            if ($worksheet !== null) {
+                $wsTitle = StringHelper::strToUpper($worksheet->getTitle());
+                $definedName = Preg::replace('/^.*!/', '', $definedName);
+                foreach ($this->definedNames as $dn) {
+                    $sheet = $dn->getScope() ?? $dn->getWorksheet();
+                    $upper = StringHelper::strToUpper($dn->getName());
+                    $upperTitle = StringHelper::strToUpper((string) $sheet?->getTitle());
+                    if (
+                        $dn->getLocalOnly()
+                        && $upper === $definedName
+                        && $upperTitle === $wsTitle
+                    ) {
+                        return $dn;
+                    }
+                }
+=======
             if (isset($this->definedNames[$definedName])) {
                 $returnValue = $this->definedNames[$definedName];
             }
@@ -1077,6 +1577,7 @@ class Spreadsheet implements JsonSerializable
             // then look for local defined name (has priority over global defined name if both names exist)
             if (($worksheet !== null) && isset($this->definedNames[$worksheet->getTitle() . '!' . $definedName])) {
                 $returnValue = $this->definedNames[$worksheet->getTitle() . '!' . $definedName];
+>>>>>>> main
             }
         }
 
@@ -1143,16 +1644,119 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Get worksheet iterator.
+<<<<<<< HEAD
+     */
+    public function getWorksheetIterator(): Iterator
+=======
      *
      * @return Iterator
      */
     public function getWorksheetIterator()
+>>>>>>> main
     {
         return new Iterator($this);
     }
 
     /**
      * Copy workbook (!= clone!).
+<<<<<<< HEAD
+     */
+    public function copy(): self
+    {
+        return unserialize(serialize($this)); //* @phpstan-ignore-line
+    }
+
+    /**
+     * Implement PHP __clone to create a deep clone, not just a shallow copy.
+     */
+    public function __clone()
+    {
+        $this->uniqueID = uniqid('', true);
+
+        $usedKeys = [];
+        // I don't know why new Style rather than clone.
+        $this->cellXfSupervisor = new Style(true);
+        //$this->cellXfSupervisor = clone $this->cellXfSupervisor;
+        $this->cellXfSupervisor->bindParent($this);
+        $usedKeys['cellXfSupervisor'] = true;
+
+        $oldCalc = $this->calculationEngine;
+        $this->calculationEngine = new Calculation($this);
+        $this->calculationEngine
+            ->setSuppressFormulaErrors(
+                $oldCalc->getSuppressFormulaErrors()
+            )
+            ->setCalculationCacheEnabled(
+                $oldCalc->getCalculationCacheEnabled()
+            )
+            ->setBranchPruningEnabled(
+                $oldCalc->getBranchPruningEnabled()
+            )
+            ->setInstanceArrayReturnType(
+                $oldCalc->getInstanceArrayReturnType()
+            );
+        $usedKeys['calculationEngine'] = true;
+
+        $currentCollection = $this->cellStyleXfCollection;
+        $this->cellStyleXfCollection = [];
+        foreach ($currentCollection as $item) {
+            $clone = $item->exportArray();
+            $style = (new Style())->applyFromArray($clone);
+            $this->addCellStyleXf($style);
+        }
+        $usedKeys['cellStyleXfCollection'] = true;
+
+        $currentCollection = $this->cellXfCollection;
+        $this->cellXfCollection = [];
+        foreach ($currentCollection as $item) {
+            $clone = $item->exportArray();
+            $style = (new Style())->applyFromArray($clone);
+            $this->addCellXf($style);
+        }
+        $usedKeys['cellXfCollection'] = true;
+
+        $currentCollection = $this->workSheetCollection;
+        $this->workSheetCollection = [];
+        foreach ($currentCollection as $item) {
+            $clone = clone $item;
+            $clone->setParent($this);
+            $this->workSheetCollection[] = $clone;
+        }
+        $usedKeys['workSheetCollection'] = true;
+
+        foreach (get_object_vars($this) as $key => $val) {
+            if (isset($usedKeys[$key])) {
+                continue;
+            }
+            switch ($key) {
+                // arrays of objects not covered above
+                case 'definedNames':
+                    /** @var DefinedName[] */
+                    $currentCollection = $val;
+                    $this->$key = [];
+                    foreach ($currentCollection as $item) {
+                        $clone = clone $item;
+                        $title = $clone->getWorksheet()?->getTitle();
+                        if ($title !== null) {
+                            $ws = $this->getSheetByName($title);
+                            $clone->setWorksheet($ws);
+                        }
+                        $title = $clone->getScope()?->getTitle();
+                        if ($title !== null) {
+                            $ws = $this->getSheetByName($title);
+                            $clone->setScope($ws);
+                        }
+                        $this->{$key}[] = $clone;
+                    }
+
+                    break;
+                default:
+                    if (is_object($val)) {
+                        $this->$key = clone $val;
+                    }
+            }
+        }
+=======
      *
      * @return Spreadsheet
      */
@@ -1166,6 +1770,7 @@ class Spreadsheet implements JsonSerializable
         throw new Exception(
             'Do not use clone on spreadsheet. Use spreadsheet->copy() instead.'
         );
+>>>>>>> main
     }
 
     /**
@@ -1173,23 +1778,45 @@ class Spreadsheet implements JsonSerializable
      *
      * @return Style[]
      */
+<<<<<<< HEAD
+    public function getCellXfCollection(): array
+=======
     public function getCellXfCollection()
+>>>>>>> main
     {
         return $this->cellXfCollection;
     }
 
     /**
      * Get cellXf by index.
+<<<<<<< HEAD
+     */
+    public function getCellXfByIndex(int $cellStyleIndex): Style
+=======
      *
      * @param int $cellStyleIndex
      *
      * @return Style
      */
     public function getCellXfByIndex($cellStyleIndex)
+>>>>>>> main
     {
         return $this->cellXfCollection[$cellStyleIndex];
     }
 
+<<<<<<< HEAD
+    public function getCellXfByIndexOrNull(?int $cellStyleIndex): ?Style
+    {
+        return ($cellStyleIndex === null) ? null : ($this->cellXfCollection[$cellStyleIndex] ?? null);
+    }
+
+    /**
+     * Get cellXf by hash code.
+     *
+     * @return false|Style
+     */
+    public function getCellXfByHashCode(string $hashcode): bool|Style
+=======
     /**
      * Get cellXf by hash code.
      *
@@ -1198,6 +1825,7 @@ class Spreadsheet implements JsonSerializable
      * @return false|Style
      */
     public function getCellXfByHashCode($hashcode)
+>>>>>>> main
     {
         foreach ($this->cellXfCollection as $cellXf) {
             if ($cellXf->getHashCode() === $hashcode) {
@@ -1210,20 +1838,30 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Check if style exists in style collection.
+<<<<<<< HEAD
+     */
+    public function cellXfExists(Style $cellStyleIndex): bool
+=======
      *
      * @return bool
      */
     public function cellXfExists(Style $cellStyleIndex)
+>>>>>>> main
     {
         return in_array($cellStyleIndex, $this->cellXfCollection, true);
     }
 
     /**
      * Get default style.
+<<<<<<< HEAD
+     */
+    public function getDefaultStyle(): Style
+=======
      *
      * @return Style
      */
     public function getDefaultStyle()
+>>>>>>> main
     {
         if (isset($this->cellXfCollection[0])) {
             return $this->cellXfCollection[0];
@@ -1246,7 +1884,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param int $cellStyleIndex Index to cellXf
      */
+<<<<<<< HEAD
+    public function removeCellXfByIndex(int $cellStyleIndex): void
+=======
     public function removeCellXfByIndex($cellStyleIndex): void
+>>>>>>> main
     {
         if ($cellStyleIndex > count($this->cellXfCollection) - 1) {
             throw new Exception('CellXf index is out of bounds.');
@@ -1273,10 +1915,15 @@ class Spreadsheet implements JsonSerializable
 
     /**
      * Get the cellXf supervisor.
+<<<<<<< HEAD
+     */
+    public function getCellXfSupervisor(): Style
+=======
      *
      * @return Style
      */
     public function getCellXfSupervisor()
+>>>>>>> main
     {
         return $this->cellXfSupervisor;
     }
@@ -1286,7 +1933,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return Style[]
      */
+<<<<<<< HEAD
+    public function getCellStyleXfCollection(): array
+=======
     public function getCellStyleXfCollection()
+>>>>>>> main
     {
         return $this->cellStyleXfCollection;
     }
@@ -1295,10 +1946,15 @@ class Spreadsheet implements JsonSerializable
      * Get cellStyleXf by index.
      *
      * @param int $cellStyleIndex Index to cellXf
+<<<<<<< HEAD
+     */
+    public function getCellStyleXfByIndex(int $cellStyleIndex): Style
+=======
      *
      * @return Style
      */
     public function getCellStyleXfByIndex($cellStyleIndex)
+>>>>>>> main
     {
         return $this->cellStyleXfCollection[$cellStyleIndex];
     }
@@ -1306,11 +1962,17 @@ class Spreadsheet implements JsonSerializable
     /**
      * Get cellStyleXf by hash code.
      *
+<<<<<<< HEAD
+     * @return false|Style
+     */
+    public function getCellStyleXfByHashCode(string $hashcode): bool|Style
+=======
      * @param string $hashcode
      *
      * @return false|Style
      */
     public function getCellStyleXfByHashCode($hashcode)
+>>>>>>> main
     {
         foreach ($this->cellStyleXfCollection as $cellStyleXf) {
             if ($cellStyleXf->getHashCode() === $hashcode) {
@@ -1335,7 +1997,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param int $cellStyleIndex Index to cellXf
      */
+<<<<<<< HEAD
+    public function removeCellStyleXfByIndex(int $cellStyleIndex): void
+=======
     public function removeCellStyleXfByIndex($cellStyleIndex): void
+>>>>>>> main
     {
         if ($cellStyleIndex > count($this->cellStyleXfCollection) - 1) {
             throw new Exception('CellStyleXf index is out of bounds.');
@@ -1427,9 +2093,17 @@ class Spreadsheet implements JsonSerializable
     /**
      * Return the unique ID value assigned to this spreadsheet workbook.
      *
+<<<<<<< HEAD
+     * @deprecated 5.2.0 Serves no useful purpose. No replacement.
+     *
+     * @codeCoverageIgnore
+     */
+    public function getID(): string
+=======
      * @return string
      */
     public function getID()
+>>>>>>> main
     {
         return $this->uniqueID;
     }
@@ -1439,7 +2113,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return bool True if horizonal scroll bar is visible
      */
+<<<<<<< HEAD
+    public function getShowHorizontalScroll(): bool
+=======
     public function getShowHorizontalScroll()
+>>>>>>> main
     {
         return $this->showHorizontalScroll;
     }
@@ -1449,7 +2127,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param bool $showHorizontalScroll True if horizonal scroll bar is visible
      */
+<<<<<<< HEAD
+    public function setShowHorizontalScroll(bool $showHorizontalScroll): void
+=======
     public function setShowHorizontalScroll($showHorizontalScroll): void
+>>>>>>> main
     {
         $this->showHorizontalScroll = (bool) $showHorizontalScroll;
     }
@@ -1459,7 +2141,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return bool True if vertical scroll bar is visible
      */
+<<<<<<< HEAD
+    public function getShowVerticalScroll(): bool
+=======
     public function getShowVerticalScroll()
+>>>>>>> main
     {
         return $this->showVerticalScroll;
     }
@@ -1469,7 +2155,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param bool $showVerticalScroll True if vertical scroll bar is visible
      */
+<<<<<<< HEAD
+    public function setShowVerticalScroll(bool $showVerticalScroll): void
+=======
     public function setShowVerticalScroll($showVerticalScroll): void
+>>>>>>> main
     {
         $this->showVerticalScroll = (bool) $showVerticalScroll;
     }
@@ -1479,7 +2169,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return bool True if the sheet tabs are visible
      */
+<<<<<<< HEAD
+    public function getShowSheetTabs(): bool
+=======
     public function getShowSheetTabs()
+>>>>>>> main
     {
         return $this->showSheetTabs;
     }
@@ -1489,7 +2183,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param bool $showSheetTabs True if sheet tabs are visible
      */
+<<<<<<< HEAD
+    public function setShowSheetTabs(bool $showSheetTabs): void
+=======
     public function setShowSheetTabs($showSheetTabs): void
+>>>>>>> main
     {
         $this->showSheetTabs = (bool) $showSheetTabs;
     }
@@ -1499,7 +2197,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return bool true if workbook window is minimized
      */
+<<<<<<< HEAD
+    public function getMinimized(): bool
+=======
     public function getMinimized()
+>>>>>>> main
     {
         return $this->minimized;
     }
@@ -1509,29 +2211,49 @@ class Spreadsheet implements JsonSerializable
      *
      * @param bool $minimized true if workbook window is minimized
      */
+<<<<<<< HEAD
+    public function setMinimized(bool $minimized): void
+=======
     public function setMinimized($minimized): void
+>>>>>>> main
     {
         $this->minimized = (bool) $minimized;
     }
 
     /**
      * Return whether to group dates when presenting the user with
+<<<<<<< HEAD
+     * filtering options in the user interface.
+     *
+     * @return bool true if workbook window is minimized
+     */
+    public function getAutoFilterDateGrouping(): bool
+=======
      * filtering optiomd in the user interface.
      *
      * @return bool true if workbook window is minimized
      */
     public function getAutoFilterDateGrouping()
+>>>>>>> main
     {
         return $this->autoFilterDateGrouping;
     }
 
     /**
      * Set whether to group dates when presenting the user with
+<<<<<<< HEAD
+     * filtering options in the user interface.
+     *
+     * @param bool $autoFilterDateGrouping true if workbook window is minimized
+     */
+    public function setAutoFilterDateGrouping(bool $autoFilterDateGrouping): void
+=======
      * filtering optiomd in the user interface.
      *
      * @param bool $autoFilterDateGrouping true if workbook window is minimized
      */
     public function setAutoFilterDateGrouping($autoFilterDateGrouping): void
+>>>>>>> main
     {
         $this->autoFilterDateGrouping = (bool) $autoFilterDateGrouping;
     }
@@ -1541,7 +2263,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return int First sheet in book view
      */
+<<<<<<< HEAD
+    public function getFirstSheetIndex(): int
+=======
     public function getFirstSheetIndex()
+>>>>>>> main
     {
         return $this->firstSheetIndex;
     }
@@ -1551,7 +2277,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param int $firstSheetIndex First sheet in book view
      */
+<<<<<<< HEAD
+    public function setFirstSheetIndex(int $firstSheetIndex): void
+=======
     public function setFirstSheetIndex($firstSheetIndex): void
+>>>>>>> main
     {
         if ($firstSheetIndex >= 0) {
             $this->firstSheetIndex = (int) $firstSheetIndex;
@@ -1568,7 +2298,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return string Visible status
      */
+<<<<<<< HEAD
+    public function getVisibility(): string
+=======
     public function getVisibility()
+>>>>>>> main
     {
         return $this->visibility;
     }
@@ -1588,7 +2322,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param null|string $visibility visibility status of the workbook
      */
+<<<<<<< HEAD
+    public function setVisibility(?string $visibility): void
+=======
     public function setVisibility($visibility): void
+>>>>>>> main
     {
         if ($visibility === null) {
             $visibility = self::VISIBILITY_VISIBLE;
@@ -1607,7 +2345,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @return int Ratio between the workbook tabs bar and the horizontal scroll bar
      */
+<<<<<<< HEAD
+    public function getTabRatio(): int
+=======
     public function getTabRatio()
+>>>>>>> main
     {
         return $this->tabRatio;
     }
@@ -1618,7 +2360,11 @@ class Spreadsheet implements JsonSerializable
      *
      * @param int $tabRatio Ratio between the tabs bar and the horizontal scroll bar
      */
+<<<<<<< HEAD
+    public function setTabRatio(int $tabRatio): void
+=======
     public function setTabRatio($tabRatio): void
+>>>>>>> main
     {
         if ($tabRatio >= 0 && $tabRatio <= 1000) {
             $this->tabRatio = (int) $tabRatio;
@@ -1641,6 +2387,8 @@ class Spreadsheet implements JsonSerializable
     }
 
     /**
+<<<<<<< HEAD
+=======
      * Silliness to mollify Scrutinizer.
      *
      * @codeCoverageIgnore
@@ -1651,6 +2399,7 @@ class Spreadsheet implements JsonSerializable
     }
 
     /**
+>>>>>>> main
      * @throws Exception
      */
     public function jsonSerialize(): mixed
@@ -1680,6 +2429,179 @@ class Spreadsheet implements JsonSerializable
         }
     }
 
+<<<<<<< HEAD
+    public function getTableByName(string $tableName): ?Table
+    {
+        $table = null;
+        foreach ($this->workSheetCollection as $sheet) {
+            $table = $sheet->getTableByName($tableName);
+            if ($table !== null) {
+                break;
+            }
+        }
+
+        return $table;
+    }
+
+    /**
+     * @return bool Success or failure
+     */
+    public function setExcelCalendar(int $baseYear): bool
+    {
+        if (($baseYear === Date::CALENDAR_WINDOWS_1900) || ($baseYear === Date::CALENDAR_MAC_1904)) {
+            $this->excelCalendar = $baseYear;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return int Excel base date (1900 or 1904)
+     */
+    public function getExcelCalendar(): int
+    {
+        return $this->excelCalendar;
+    }
+
+    public function deleteLegacyDrawing(Worksheet $worksheet): void
+    {
+        unset($this->unparsedLoadedData['sheets'][$worksheet->getCodeName()]['legacyDrawing']);
+    }
+
+    public function getLegacyDrawing(Worksheet $worksheet): ?string
+    {
+        /** @var ?string */
+        $temp = $this->unparsedLoadedData['sheets'][$worksheet->getCodeName()]['legacyDrawing'] ?? null;
+
+        return $temp;
+    }
+
+    public function getValueBinder(): ?IValueBinder
+    {
+        return $this->valueBinder;
+    }
+
+    public function setValueBinder(?IValueBinder $valueBinder): self
+    {
+        $this->valueBinder = $valueBinder;
+
+        return $this;
+    }
+
+    /**
+     * All the PDF writers treat charts as if they occupy a single cell.
+     * This will be better most of the time.
+     * It is not needed for any other output type.
+     * It changes the contents of the spreadsheet, so you might
+     * be better off cloning the spreadsheet and then using
+     * this method on, and then writing, the clone.
+     */
+    public function mergeChartCellsForPdf(): void
+    {
+        foreach ($this->workSheetCollection as $worksheet) {
+            foreach ($worksheet->getChartCollection() as $chart) {
+                $br = $chart->getBottomRightCell();
+                $tl = $chart->getTopLeftCell();
+                if ($br !== '' && $br !== $tl) {
+                    if (!$worksheet->cellExists($br)) {
+                        $worksheet->getCell($br)->setValue(' ');
+                    }
+                    $worksheet->mergeCells("$tl:$br");
+                }
+            }
+        }
+    }
+
+    /**
+     * All the PDF writers do better with drawings than charts.
+     * This will be better some of the time.
+     * It is not needed for any other output type.
+     * It changes the contents of the spreadsheet, so you might
+     * be better off cloning the spreadsheet and then using
+     * this method on, and then writing, the clone.
+     */
+    public function mergeDrawingCellsForPdf(): void
+    {
+        foreach ($this->workSheetCollection as $worksheet) {
+            foreach ($worksheet->getDrawingCollection() as $drawing) {
+                $br = $drawing->getCoordinates2();
+                $tl = $drawing->getCoordinates();
+                if ($br !== '' && $br !== $tl) {
+                    if (!$worksheet->cellExists($br)) {
+                        $worksheet->getCell($br)->setValue(' ');
+                    }
+                    $worksheet->mergeCells("$tl:$br");
+                }
+            }
+        }
+    }
+
+    /**
+     * Excel will sometimes replace user's formatting choice
+     * with a built-in choice that it thinks is equivalent.
+     * Its choice is often not equivalent after all.
+     * Such treatment is astonishingly user-hostile.
+     * This function will undo such changes.
+     */
+    public function replaceBuiltinNumberFormat(int $builtinFormatIndex, string $formatCode): void
+    {
+        foreach ($this->cellXfCollection as $style) {
+            $numberFormat = $style->getNumberFormat();
+            if ($numberFormat->getBuiltInFormatCode() === $builtinFormatIndex) {
+                $numberFormat->setFormatCode($formatCode);
+            }
+        }
+    }
+
+    /**
+     * Change all 2-digit-year date styles to use 4-digit year;
+     * change all dd-mm-yyyy and mm-dd-yyyy styles to yyyy-mm-dd;
+     * dd-mmm-yyyy is unambiguous and left unchanged.
+     */
+    public function disambiguateDateStyles(): void
+    {
+        foreach ($this->cellXfCollection as $style) {
+            $numberFormat = $style->getNumberFormat();
+            $oldFormat = (string) $numberFormat->getFormatCode();
+            $newFormat = Preg::replace('/\byy\b/i', 'yyyy', $oldFormat);
+            $newFormat = Preg::replace(
+                '~\bdd?(-|/|"-"|"/")'
+                    . 'mm?(-|/|"-"|"/")'
+                    . 'yyyy~',
+                'yyyy-mm-dd',
+                $newFormat
+            );
+            $newFormat = Preg::replace(
+                '~\bmm?(-|/|"-"|"/")'
+                    . 'dd?(-|/|"-"|"/")'
+                    . 'yyyy~',
+                'yyyy-mm-dd',
+                $newFormat
+            );
+            if ($newFormat !== $oldFormat) {
+                $numberFormat->setFormatCode($newFormat);
+            }
+        }
+    }
+
+    public function returnArrayAsArray(): void
+    {
+        $this->calculationEngine->setInstanceArrayReturnType(
+            Calculation::RETURN_ARRAY_AS_ARRAY
+        );
+    }
+
+    public function returnArrayAsValue(): void
+    {
+        $this->calculationEngine->setInstanceArrayReturnType(
+            Calculation::RETURN_ARRAY_AS_VALUE
+        );
+    }
+
+=======
+>>>>>>> main
     /** @var string[] */
     private $domainWhiteList = [];
 
@@ -1700,4 +2622,28 @@ class Spreadsheet implements JsonSerializable
     {
         return $this->domainWhiteList;
     }
+<<<<<<< HEAD
+
+    private bool $usesCheckBoxStyle = false;
+
+    public function getUsesCheckBoxStyle(): bool
+    {
+        return $this->usesCheckBoxStyle;
+    }
+
+    public function setUsesCheckBoxStyle(): bool
+    {
+        $this->usesCheckBoxStyle = false;
+        foreach ($this->getCellXfCollection() as $cellXf) {
+            if ($cellXf->getCheckBox()) {
+                $this->usesCheckBoxStyle = true;
+
+                break;
+            }
+        }
+
+        return $this->usesCheckBoxStyle;
+    }
+=======
+>>>>>>> main
 }

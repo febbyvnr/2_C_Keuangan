@@ -17,14 +17,23 @@ class VLookup extends LookupBase
      *     in the same row based on the index_number.
      *
      * @param mixed $lookupValue The value that you want to match in lookup_array
+<<<<<<< HEAD
+     * @param mixed[] $lookupArray The range of cells being searched
+     * @param array<mixed>|float|int|string $indexNumber The column number in table_array from which the matching value must be returned.
+=======
      * @param mixed $lookupArray The range of cells being searched
      * @param mixed $indexNumber The column number in table_array from which the matching value must be returned.
+>>>>>>> main
      *                                The first column is 1.
      * @param mixed $notExactMatch determines if you are looking for an exact match based on lookup_value
      *
      * @return mixed The value of the found cell
      */
+<<<<<<< HEAD
+    public static function lookup(mixed $lookupValue, $lookupArray, mixed $indexNumber, mixed $notExactMatch = true): mixed
+=======
     public static function lookup($lookupValue, $lookupArray, $indexNumber, $notExactMatch = true)
+>>>>>>> main
     {
         if (is_array($lookupValue) || is_array($indexNumber)) {
             return self::evaluateArrayArgumentsIgnore([self::class, __FUNCTION__], 1, $lookupValue, $lookupArray, $indexNumber, $notExactMatch);
@@ -49,11 +58,19 @@ class VLookup extends LookupBase
         $firstColumn = array_shift($columnKeys) ?? 1;
 
         if (!$notExactMatch) {
+<<<<<<< HEAD
+            /** @var callable $callable */
+=======
             /** @var callable */
+>>>>>>> main
             $callable = [self::class, 'vlookupSort'];
             uasort($lookupArray, $callable);
         }
 
+<<<<<<< HEAD
+        /** @var string[][] $lookupArray */
+=======
+>>>>>>> main
         $rowNumber = self::vLookupSearch($lookupValue, $lookupArray, $firstColumn, $notExactMatch);
 
         if ($rowNumber !== null) {
@@ -64,6 +81,13 @@ class VLookup extends LookupBase
         return ExcelError::NA();
     }
 
+<<<<<<< HEAD
+    /**
+     * @param scalar[] $a
+     * @param scalar[] $b
+     */
+=======
+>>>>>>> main
     private static function vlookupSort(array $a, array $b): int
     {
         reset($a);
@@ -80,6 +104,19 @@ class VLookup extends LookupBase
 
     /**
      * @param mixed $lookupValue The value that you want to match in lookup_array
+<<<<<<< HEAD
+     * @param string[][] $lookupArray
+     * @param  int|string $column
+     */
+    private static function vLookupSearch(mixed $lookupValue, array $lookupArray, $column, bool $notExactMatch): ?int
+    {
+        $lookupLower = StringHelper::strToLower(StringHelper::convertToString($lookupValue));
+
+        $rowNumber = null;
+        foreach ($lookupArray as $rowKey => $rowData) {
+            $bothNumeric = self::numeric($lookupValue) && self::numeric($rowData[$column]);
+            $bothNotNumeric = !self::numeric($lookupValue) && !self::numeric($rowData[$column]);
+=======
      * @param  int|string $column
      */
     private static function vLookupSearch($lookupValue, array $lookupArray, $column, bool $notExactMatch): ?int
@@ -90,13 +127,20 @@ class VLookup extends LookupBase
         foreach ($lookupArray as $rowKey => $rowData) {
             $bothNumeric = is_numeric($lookupValue) && is_numeric($rowData[$column]);
             $bothNotNumeric = !is_numeric($lookupValue) && !is_numeric($rowData[$column]);
+>>>>>>> main
             $cellDataLower = StringHelper::strToLower((string) $rowData[$column]);
 
             // break if we have passed possible keys
             if (
+<<<<<<< HEAD
+                $notExactMatch
+                && (($bothNumeric && ($rowData[$column] > $lookupValue))
+                || ($bothNotNumeric && ($cellDataLower > $lookupLower)))
+=======
                 $notExactMatch &&
                 (($bothNumeric && ($rowData[$column] > $lookupValue)) ||
                 ($bothNotNumeric && ($cellDataLower > $lookupLower)))
+>>>>>>> main
             ) {
                 break;
             }
@@ -114,4 +158,12 @@ class VLookup extends LookupBase
 
         return $rowNumber;
     }
+<<<<<<< HEAD
+
+    private static function numeric(mixed $value): bool
+    {
+        return is_int($value) || is_float($value);
+    }
+=======
+>>>>>>> main
 }

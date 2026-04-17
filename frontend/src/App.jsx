@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import SidebarBendahara from "./components/SidebarBendahara";
+import Login from "./pages/Login"; // <-- TAMBAHAN 1: Import halaman login
 
 import Dashboard from "./pages/bendahara/Dashboard";
-// import Persetujuan from "./pages/bendahara/Persetujuan";
 import Dana from "./pages/bendahara/Dana";
 import RKA from "./pages/bendahara/RKA";
 import BKU from "./pages/bendahara/BKU";
@@ -25,6 +26,17 @@ import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
 import Log from "./pages/bendahara/LogAktivitas";
 import "./index.css";
+
+function BendaharaLayout() {
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarBendahara />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   return (

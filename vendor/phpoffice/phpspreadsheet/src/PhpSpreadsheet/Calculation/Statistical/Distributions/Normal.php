@@ -29,11 +29,19 @@ class Normal
      * @param mixed $cumulative Boolean value indicating if we want the cdf (true) or the pdf (false)
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string The result, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function distribution(mixed $value, mixed $mean, mixed $stdDev, mixed $cumulative): array|string|float
+=======
      * @return array|float|string The result, or a string containing an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function distribution($value, $mean, $stdDev, $cumulative)
+>>>>>>> main
     {
         if (is_array($value) || is_array($mean) || is_array($stdDev) || is_array($cumulative)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $mean, $stdDev, $cumulative);
@@ -71,11 +79,19 @@ class Normal
      * @param mixed $stdDev Standard Deviation as a float
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string The result, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function inverse(mixed $probability, mixed $mean, mixed $stdDev): array|string|float
+=======
      * @return array|float|string The result, or a string containing an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function inverse($probability, $mean, $stdDev)
+>>>>>>> main
     {
         if (is_array($probability) || is_array($mean) || is_array($stdDev)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $probability, $mean, $stdDev);
@@ -116,9 +132,16 @@ class Normal
         //    whatever purpose you want, but please show common courtesy and give credit
         //    where credit is due.
 
+<<<<<<< HEAD
+        //    Input parameter is $p - probability - where 0 < p < 1.
+
+        //    Coefficients in rational approximations
+        /** @var array<int, float> */
+=======
         //    Input paramater is $p - probability - where 0 < p < 1.
 
         //    Coefficients in rational approximations
+>>>>>>> main
         static $a = [
             1 => -3.969683028665376e+01,
             2 => 2.209460984245205e+02,
@@ -128,6 +151,10 @@ class Normal
             6 => 2.506628277459239e+00,
         ];
 
+<<<<<<< HEAD
+        /** @var array<int, float> */
+=======
+>>>>>>> main
         static $b = [
             1 => -5.447609879822406e+01,
             2 => 1.615858368580409e+02,
@@ -136,6 +163,10 @@ class Normal
             5 => -1.328068155288572e+01,
         ];
 
+<<<<<<< HEAD
+        /** @var array<int, float> */
+=======
+>>>>>>> main
         static $c = [
             1 => -7.784894002430293e-03,
             2 => -3.223964580411365e-01,
@@ -145,6 +176,10 @@ class Normal
             6 => 2.938163982698783e+00,
         ];
 
+<<<<<<< HEAD
+        /** @var array<int, float> */
+=======
+>>>>>>> main
         static $d = [
             1 => 7.784695709041462e-03,
             2 => 3.224671290700398e-01,
@@ -160,21 +195,36 @@ class Normal
             //    Rational approximation for lower region.
             $q = sqrt(-2 * log($p));
 
+<<<<<<< HEAD
+            return ((((($c[1] * $q + $c[2]) * $q + $c[3]) * $q + $c[4]) * $q + $c[5]) * $q + $c[6])
+                / (((($d[1] * $q + $d[2]) * $q + $d[3]) * $q + $d[4]) * $q + 1);
+=======
             return ((((($c[1] * $q + $c[2]) * $q + $c[3]) * $q + $c[4]) * $q + $c[5]) * $q + $c[6]) /
                 (((($d[1] * $q + $d[2]) * $q + $d[3]) * $q + $d[4]) * $q + 1);
+>>>>>>> main
         } elseif ($p_high < $p && $p < 1) {
             //    Rational approximation for upper region.
             $q = sqrt(-2 * log(1 - $p));
 
+<<<<<<< HEAD
+            return -((((($c[1] * $q + $c[2]) * $q + $c[3]) * $q + $c[4]) * $q + $c[5]) * $q + $c[6])
+                / (((($d[1] * $q + $d[2]) * $q + $d[3]) * $q + $d[4]) * $q + 1);
+=======
             return -((((($c[1] * $q + $c[2]) * $q + $c[3]) * $q + $c[4]) * $q + $c[5]) * $q + $c[6]) /
                 (((($d[1] * $q + $d[2]) * $q + $d[3]) * $q + $d[4]) * $q + 1);
+>>>>>>> main
         }
 
         //    Rational approximation for central region.
         $q = $p - 0.5;
         $r = $q * $q;
 
+<<<<<<< HEAD
+        return ((((($a[1] * $r + $a[2]) * $r + $a[3]) * $r + $a[4]) * $r + $a[5]) * $r + $a[6]) * $q
+                / ((((($b[1] * $r + $b[2]) * $r + $b[3]) * $r + $b[4]) * $r + $b[5]) * $r + 1);
+=======
         return ((((($a[1] * $r + $a[2]) * $r + $a[3]) * $r + $a[4]) * $r + $a[5]) * $r + $a[6]) * $q /
                 ((((($b[1] * $r + $b[2]) * $r + $b[3]) * $r + $b[4]) * $r + $b[5]) * $r + 1);
+>>>>>>> main
     }
 }

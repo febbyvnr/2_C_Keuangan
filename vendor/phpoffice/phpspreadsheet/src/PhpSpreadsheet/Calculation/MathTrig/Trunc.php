@@ -18,6 +18,16 @@ class Trunc
      * (or possibly that value minus 1).
      * Excel is unlikely to do any better.
      *
+<<<<<<< HEAD
+     * @param null|array<mixed>|float|string $value Or can be an array of values
+     * @param array<mixed>|float|int|string $digits Or can be an array of values
+     *
+     * @return array<mixed>|float|string Truncated value, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function evaluate(array|float|string|null $value = 0, array|float|int|string $digits = 0): array|float|string
+=======
      * @param null|array|float|string $value Or can be an array of values
      * @param array|float|int|string $digits Or can be an array of values
      *
@@ -26,6 +36,7 @@ class Trunc
      *            with the same dimensions
      */
     public static function evaluate($value = 0, $digits = 0)
+>>>>>>> main
     {
         if (is_array($value) || is_array($digits)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $digits);

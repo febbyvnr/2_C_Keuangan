@@ -20,18 +20,30 @@ class Extract
      * @param mixed $chars The number of characters to extract (as an integer)
      *                         Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The joined string
+     *         If an array of values is passed for the $value or $chars arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function left(mixed $value, mixed $chars = 1): array|string
+=======
      * @return array|string The joined string
      *         If an array of values is passed for the $value or $chars arguments, then the returned result
      *            will also be an array with matching dimensions
      */
     public static function left($value, $chars = 1)
+>>>>>>> main
     {
         if (is_array($value) || is_array($chars)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $chars);
         }
 
         try {
+<<<<<<< HEAD
+            $value = Helpers::extractString($value, true);
+=======
             $value = Helpers::extractString($value);
+>>>>>>> main
             $chars = Helpers::extractInt($chars, 0, 1);
         } catch (CalcExp $e) {
             return $e->getMessage();
@@ -50,18 +62,30 @@ class Extract
      * @param mixed $chars The number of characters to extract (as an integer)
      *                         Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The joined string
+     *         If an array of values is passed for the $value, $start or $chars arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function mid(mixed $value, mixed $start, mixed $chars): array|string
+=======
      * @return array|string The joined string
      *         If an array of values is passed for the $value, $start or $chars arguments, then the returned result
      *            will also be an array with matching dimensions
      */
     public static function mid($value, $start, $chars)
+>>>>>>> main
     {
         if (is_array($value) || is_array($start) || is_array($chars)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $start, $chars);
         }
 
         try {
+<<<<<<< HEAD
+            $value = Helpers::extractString($value, true);
+=======
             $value = Helpers::extractString($value);
+>>>>>>> main
             $start = Helpers::extractInt($start, 1);
             $chars = Helpers::extractInt($chars, 0);
         } catch (CalcExp $e) {
@@ -79,18 +103,30 @@ class Extract
      * @param mixed $chars The number of characters to extract (as an integer)
      *                         Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string The joined string
+     *         If an array of values is passed for the $value or $chars arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function right(mixed $value, mixed $chars = 1): array|string
+=======
      * @return array|string The joined string
      *         If an array of values is passed for the $value or $chars arguments, then the returned result
      *            will also be an array with matching dimensions
      */
     public static function right($value, $chars = 1)
+>>>>>>> main
     {
         if (is_array($value) || is_array($chars)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $chars);
         }
 
         try {
+<<<<<<< HEAD
+            $value = Helpers::extractString($value, true);
+=======
             $value = Helpers::extractString($value);
+>>>>>>> main
             $chars = Helpers::extractInt($chars, 0, 1);
         } catch (CalcExp $e) {
             return $e->getMessage();
@@ -104,7 +140,11 @@ class Extract
      *
      * @param mixed $text the text that you're searching
      *                    Or can be an array of values
+<<<<<<< HEAD
+     * @param null|array<string>|string $delimiter the text that marks the point before which you want to extract
+=======
      * @param null|array|string $delimiter the text that marks the point before which you want to extract
+>>>>>>> main
      *                                 Multiple delimiters can be passed as an array of string values
      * @param mixed $instance The instance of the delimiter after which you want to extract the text.
      *                            By default, this is the first instance (1).
@@ -118,6 +158,17 @@ class Extract
      *                          0 - Don't match the delimiter against the end of the text.
      *                          1 - Match the delimiter against the end of the text.
      *                        Or can be an array of values
+<<<<<<< HEAD
+     * @param array<string>|bool|float|int|string $ifNotFound value to return if no match is found
+     *                             The default is a #N/A Error
+     *                          Or can be an array of values
+     *
+     * @return array<mixed>|string the string extracted from text before the delimiter; or the $ifNotFound value
+     *         If an array of values is passed for any of the arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function before(mixed $text, $delimiter, mixed $instance = 1, mixed $matchMode = 0, mixed $matchEnd = 0, mixed $ifNotFound = '#N/A'): array|string
+=======
      * @param mixed $ifNotFound value to return if no match is found
      *                             The default is a #N/A Error
      *                          Or can be an array of values
@@ -127,15 +178,29 @@ class Extract
      *            will also be an array with matching dimensions
      */
     public static function before($text, $delimiter, $instance = 1, $matchMode = 0, $matchEnd = 0, $ifNotFound = '#N/A')
+>>>>>>> main
     {
         if (is_array($text) || is_array($instance) || is_array($matchMode) || is_array($matchEnd) || is_array($ifNotFound)) {
             return self::evaluateArrayArgumentsIgnore([self::class, __FUNCTION__], 1, $text, $delimiter, $instance, $matchMode, $matchEnd, $ifNotFound);
         }
 
+<<<<<<< HEAD
+        try {
+            $text = Helpers::extractString($text ?? '', true);
+            Helpers::extractString(Functions::flattenSingleValue($delimiter ?? ''), true);
+        } catch (CalcExp $e) {
+            return $e->getMessage();
+        }
+
+        $instance = (int) StringHelper::convertToString($instance);
+        $matchMode = (int) StringHelper::convertToString($matchMode);
+        $matchEnd = (int) StringHelper::convertToString($matchEnd);
+=======
         $text = Helpers::extractString($text ?? '');
         $instance = (int) $instance;
         $matchMode = (int) $matchMode;
         $matchEnd = (int) $matchEnd;
+>>>>>>> main
 
         $split = self::validateTextBeforeAfter($text, $delimiter, $instance, $matchMode, $matchEnd, $ifNotFound);
         if (is_string($split)) {
@@ -162,7 +227,11 @@ class Extract
      * TEXTAFTER.
      *
      * @param mixed $text the text that you're searching
+<<<<<<< HEAD
+     * @param null|array<string>|string $delimiter the text that marks the point before which you want to extract
+=======
      * @param null|array|string $delimiter the text that marks the point before which you want to extract
+>>>>>>> main
      *                                 Multiple delimiters can be passed as an array of string values
      * @param mixed $instance The instance of the delimiter after which you want to extract the text.
      *                          By default, this is the first instance (1).
@@ -176,6 +245,17 @@ class Extract
      *                          0 - Don't match the delimiter against the end of the text.
      *                          1 - Match the delimiter against the end of the text.
      *                        Or can be an array of values
+<<<<<<< HEAD
+     * @param array<string>|scalar $ifNotFound value to return if no match is found
+     *                             The default is a #N/A Error
+     *                          Or can be an array of values
+     *
+     * @return array<mixed>|string the string extracted from text before the delimiter; or the $ifNotFound value
+     *         If an array of values is passed for any of the arguments, then the returned result
+     *            will also be an array with matching dimensions
+     */
+    public static function after(mixed $text, $delimiter, mixed $instance = 1, mixed $matchMode = 0, mixed $matchEnd = 0, mixed $ifNotFound = '#N/A'): array|string
+=======
      * @param mixed $ifNotFound value to return if no match is found
      *                             The default is a #N/A Error
      *                          Or can be an array of values
@@ -185,15 +265,29 @@ class Extract
      *            will also be an array with matching dimensions
      */
     public static function after($text, $delimiter, $instance = 1, $matchMode = 0, $matchEnd = 0, $ifNotFound = '#N/A')
+>>>>>>> main
     {
         if (is_array($text) || is_array($instance) || is_array($matchMode) || is_array($matchEnd) || is_array($ifNotFound)) {
             return self::evaluateArrayArgumentsIgnore([self::class, __FUNCTION__], 1, $text, $delimiter, $instance, $matchMode, $matchEnd, $ifNotFound);
         }
 
+<<<<<<< HEAD
+        try {
+            $text = Helpers::extractString($text ?? '', true);
+            Helpers::extractString(Functions::flattenSingleValue($delimiter ?? ''), true);
+        } catch (CalcExp $e) {
+            return $e->getMessage();
+        }
+
+        $instance = (int) StringHelper::convertToString($instance);
+        $matchMode = (int) StringHelper::convertToString($matchMode);
+        $matchEnd = (int) StringHelper::convertToString($matchEnd);
+=======
         $text = Helpers::extractString($text ?? '');
         $instance = (int) $instance;
         $matchMode = (int) $matchMode;
         $matchEnd = (int) $matchEnd;
+>>>>>>> main
 
         $split = self::validateTextBeforeAfter($text, $delimiter, $instance, $matchMode, $matchEnd, $ifNotFound);
         if (is_string($split)) {
@@ -217,6 +311,14 @@ class Extract
     }
 
     /**
+<<<<<<< HEAD
+     * @param null|array<string>|string $delimiter
+     * @param array<string>|scalar $ifNotFound
+     *
+     * @return array<string>|string
+     */
+    private static function validateTextBeforeAfter(string $text, null|array|string $delimiter, int $instance, int $matchMode, int $matchEnd, mixed $ifNotFound): array|string
+=======
      * @param null|array|string $delimiter
      * @param int $matchMode
      * @param int $matchEnd
@@ -225,12 +327,17 @@ class Extract
      * @return array|string
      */
     private static function validateTextBeforeAfter(string $text, $delimiter, int $instance, $matchMode, $matchEnd, $ifNotFound)
+>>>>>>> main
     {
         $flags = self::matchFlags($matchMode);
         $delimiter = self::buildDelimiter($delimiter);
 
         if (preg_match('/' . $delimiter . "/{$flags}", $text) === 0 && $matchEnd === 0) {
+<<<<<<< HEAD
+            return is_array($ifNotFound) ? $ifNotFound : StringHelper::convertToString($ifNotFound);
+=======
             return $ifNotFound;
+>>>>>>> main
         }
 
         $split = preg_split('/' . $delimiter . "/{$flags}", $text, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
@@ -252,23 +359,38 @@ class Extract
     }
 
     /**
+<<<<<<< HEAD
+     * @param null|array<string>|string $delimiter the text that marks the point before which you want to extract
+=======
      * @param null|array|string $delimiter the text that marks the point before which you want to extract
+>>>>>>> main
      *                                 Multiple delimiters can be passed as an array of string values
      */
     private static function buildDelimiter($delimiter): string
     {
         if (is_array($delimiter)) {
+<<<<<<< HEAD
+            /** @var array<?string> */
+            $delimiter = Functions::flattenArray($delimiter);
+            $quotedDelimiters = array_map(
+                fn (?string $delimiter): string => preg_quote($delimiter ?? '', '/'),
+=======
             $delimiter = Functions::flattenArray($delimiter);
             $quotedDelimiters = array_map(
                 function ($delimiter) {
                     return preg_quote($delimiter ?? '', '/');
                 },
+>>>>>>> main
                 $delimiter
             );
             $delimiters = implode('|', $quotedDelimiters);
 
             return '(' . $delimiters . ')';
         }
+<<<<<<< HEAD
+        /** @var ?string $delimiter */
+=======
+>>>>>>> main
 
         return '(' . preg_quote($delimiter ?? '', '/') . ')';
     }

@@ -20,18 +20,29 @@ class Fisher
      * @param mixed $value Float value for which we want the probability
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function distribution(mixed $value): array|string|float
+=======
      * @return array|float|string
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function distribution($value)
+>>>>>>> main
     {
         if (is_array($value)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $value);
         }
 
         try {
+<<<<<<< HEAD
+            $value = DistributionValidations::validateFloat($value);
+=======
             DistributionValidations::validateFloat($value);
+>>>>>>> main
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -53,18 +64,29 @@ class Fisher
      * @param mixed $probability Float probability at which you want to evaluate the distribution
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function inverse(mixed $probability): array|string|float
+=======
      * @return array|float|string
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function inverse($probability)
+>>>>>>> main
     {
         if (is_array($probability)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $probability);
         }
 
         try {
+<<<<<<< HEAD
+            $probability = DistributionValidations::validateFloat($probability);
+=======
             DistributionValidations::validateFloat($probability);
+>>>>>>> main
         } catch (Exception $e) {
             return $e->getMessage();
         }

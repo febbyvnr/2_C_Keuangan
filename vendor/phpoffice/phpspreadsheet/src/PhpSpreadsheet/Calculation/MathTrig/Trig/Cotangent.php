@@ -15,9 +15,15 @@ class Cotangent
      *
      * Returns the cotangent of an angle.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $angle Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The cotangent of the angle
+=======
      * @param array|float $angle Number, or can be an array of numbers
      *
      * @return array|float|string The cotangent of the angle
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -41,9 +47,15 @@ class Cotangent
      *
      * Returns the hyperbolic cotangent of an angle.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $angle Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The hyperbolic cotangent of the angle
+=======
      * @param array|float $angle Number, or can be an array of numbers
      *
      * @return array|float|string The hyperbolic cotangent of the angle
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -67,6 +79,15 @@ class Cotangent
      *
      * Returns the arccotangent of a number.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $number Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The arccotangent of the number
+     *         If an array of numbers is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function acot($number): array|string|float
+=======
      * @param array|float $number Number, or can be an array of numbers
      *
      * @return array|float|string The arccotangent of the number
@@ -74,6 +95,7 @@ class Cotangent
      *            with the same dimensions
      */
     public static function acot($number)
+>>>>>>> main
     {
         if (is_array($number)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $number);
@@ -93,9 +115,15 @@ class Cotangent
      *
      * Returns the hyperbolic arccotangent of a number.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $number Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The hyperbolic arccotangent of the number
+=======
      * @param array|float $number Number, or can be an array of numbers
      *
      * @return array|float|string The hyperbolic arccotangent of the number
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */

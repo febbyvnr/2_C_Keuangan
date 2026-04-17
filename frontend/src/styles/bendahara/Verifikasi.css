@@ -52,6 +52,11 @@
 .detail-section {
     display: flex;
     flex-direction: column;
+    padding-top: 0px;
+}
+
+.detail-section h3 {
+    color: #1a1a1a;
 }
 
 table {

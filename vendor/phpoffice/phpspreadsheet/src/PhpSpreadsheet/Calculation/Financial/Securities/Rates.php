@@ -7,6 +7,10 @@ use PhpOffice\PhpSpreadsheet\Calculation\Exception;
 use PhpOffice\PhpSpreadsheet\Calculation\Financial\Constants as FinancialConstants;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+=======
+>>>>>>> main
 
 class Rates
 {
@@ -31,6 +35,16 @@ class Rates
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function discount(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $price,
+        mixed $redemption,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): float|string {
+=======
      *
      * @return float|string
      */
@@ -41,13 +55,18 @@ class Rates
         $redemption,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
     ) {
+>>>>>>> main
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $price = Functions::flattenSingleValue($price);
         $redemption = Functions::flattenSingleValue($redemption);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -67,7 +86,11 @@ class Rates
         $daysBetweenSettlementAndMaturity = Functions::scalar(DateTimeExcel\YearFrac::fraction($settlement, $maturity, $basis));
         if (!is_numeric($daysBetweenSettlementAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenSettlementAndMaturity);
+=======
             return $daysBetweenSettlementAndMaturity;
+>>>>>>> main
         }
 
         return (1 - $price / $redemption) / $daysBetweenSettlementAndMaturity;
@@ -94,6 +117,16 @@ class Rates
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function interest(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $investment,
+        mixed $redemption,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): float|string {
+=======
      *
      * @return float|string
      */
@@ -104,13 +137,18 @@ class Rates
         $redemption,
         $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
     ) {
+>>>>>>> main
         $settlement = Functions::flattenSingleValue($settlement);
         $maturity = Functions::flattenSingleValue($maturity);
         $investment = Functions::flattenSingleValue($investment);
         $redemption = Functions::flattenSingleValue($redemption);
+<<<<<<< HEAD
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = SecurityValidations::validateSettlementDate($settlement);
@@ -130,7 +168,11 @@ class Rates
         $daysBetweenSettlementAndMaturity = Functions::scalar(DateTimeExcel\YearFrac::fraction($settlement, $maturity, $basis));
         if (!is_numeric($daysBetweenSettlementAndMaturity)) {
             //    return date error
+<<<<<<< HEAD
+            return StringHelper::convertToString($daysBetweenSettlementAndMaturity);
+=======
             return $daysBetweenSettlementAndMaturity;
+>>>>>>> main
         }
 
         return (($redemption / $investment) - 1) / ($daysBetweenSettlementAndMaturity);

@@ -9,17 +9,26 @@ class Dompdf extends Pdf
 {
     /**
      * embed images, or link to images.
+<<<<<<< HEAD
+     */
+    protected bool $embedImages = true;
+=======
      *
      * @var bool
      */
     protected $embedImages = true;
+>>>>>>> main
 
     /**
      * Gets the implementation of external PDF library that should be used.
      *
      * @return \Dompdf\Dompdf implementation
      */
+<<<<<<< HEAD
+    protected function createExternalWriterInstance(): \Dompdf\Dompdf
+=======
     protected function createExternalWriterInstance()
+>>>>>>> main
     {
         return new \Dompdf\Dompdf();
     }
@@ -38,7 +47,11 @@ class Dompdf extends Pdf
         $orientation = $this->getOrientation() ?? $setup->getOrientation();
         $orientation = ($orientation === PageSetup::ORIENTATION_LANDSCAPE) ? 'L' : 'P';
         $printPaperSize = $this->getPaperSize() ?? $setup->getPaperSize();
+<<<<<<< HEAD
+        $paperSize = self::$paperSizes[$printPaperSize] ?? self::$paperSizes[PageSetup::getPaperSizeDefault()] ?? 'LETTER';
+=======
         $paperSize = self::$paperSizes[$printPaperSize] ?? PageSetup::getPaperSizeDefault();
+>>>>>>> main
         if (is_array($paperSize) && count($paperSize) === 2) {
             $paperSize = [0.0, 0.0, $paperSize[0], $paperSize[1]];
         }
@@ -51,10 +64,24 @@ class Dompdf extends Pdf
 
         $pdf->loadHtml($this->generateHTMLAll());
         $pdf->render();
+<<<<<<< HEAD
+        $this->callPageScript($pdf);
+
+        //  Write to file
+        fwrite($fileHandle, $pdf->output());
+
+        parent::restoreStateAfterSave();
+    }
+
+    protected function callPageScript(\Dompdf\Dompdf $pdf): void
+    {
+    }
+=======
 
         //  Write to file
         fwrite($fileHandle, $pdf->output() ?? '');
 
         parent::restoreStateAfterSave();
     }
+>>>>>>> main
 }

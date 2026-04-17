@@ -9,11 +9,18 @@ use SimpleXMLElement;
 
 class Hyperlinks
 {
+<<<<<<< HEAD
+    private Worksheet $worksheet;
+
+    /** @var string[] */
+    private array $hyperlinks = [];
+=======
     /** @var Worksheet */
     private $worksheet;
 
     /** @var array */
     private $hyperlinks = [];
+>>>>>>> main
 
     public function __construct(Worksheet $workSheet)
     {
@@ -33,9 +40,13 @@ class Hyperlinks
     public function setHyperlinks(SimpleXMLElement $worksheetXml): void
     {
         foreach ($worksheetXml->children(Namespaces::MAIN)->hyperlink as $hyperlink) {
+<<<<<<< HEAD
+            $this->setHyperlink($hyperlink, $this->worksheet);
+=======
             if ($hyperlink !== null) {
                 $this->setHyperlink($hyperlink, $this->worksheet);
             }
+>>>>>>> main
         }
     }
 
@@ -47,6 +58,13 @@ class Hyperlinks
         $attributes = Xlsx::getAttributes($hyperlink);
         foreach (Coordinate::extractAllCellReferencesInRange($attributes->ref) as $cellReference) {
             $cell = $worksheet->getCell($cellReference);
+<<<<<<< HEAD
+            if (isset($attributes['location'])) {
+                $cell->getHyperlink()->setUrl('sheet://' . (string) $attributes['location']);
+            } elseif (isset($linkRel['id'])) {
+                $hyperlinkUrl = $this->hyperlinks[(string) $linkRel['id']] ?? '';
+                $cell->getHyperlink()->setUrl($hyperlinkUrl);
+=======
             if (isset($linkRel['id'])) {
                 $hyperlinkUrl = $this->hyperlinks[(string) $linkRel['id']] ?? null;
                 if (isset($attributes['location'])) {
@@ -55,12 +73,20 @@ class Hyperlinks
                 $cell->getHyperlink()->setUrl($hyperlinkUrl);
             } elseif (isset($attributes['location'])) {
                 $cell->getHyperlink()->setUrl('sheet://' . (string) $attributes['location']);
+>>>>>>> main
             }
 
             // Tooltip
             if (isset($attributes['tooltip'])) {
                 $cell->getHyperlink()->setTooltip((string) $attributes['tooltip']);
             }
+<<<<<<< HEAD
+
+            if (isset($attributes['display'])) {
+                $cell->getHyperlink()->setDisplay((string) $attributes['display']);
+            }
+=======
+>>>>>>> main
         }
     }
 }

@@ -39,6 +39,19 @@ class Coupons
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function COUPDAYBS(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|int|float {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      *
      * @return float|string
      */
@@ -54,6 +67,7 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
@@ -102,6 +116,19 @@ class Coupons
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function COUPDAYS(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|int|float {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      *
      * @return float|string
      */
@@ -117,6 +144,7 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
@@ -173,6 +201,19 @@ class Coupons
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function COUPDAYSNC(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      *
      * @return float|string
      */
@@ -188,6 +229,7 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
@@ -199,7 +241,11 @@ class Coupons
             return $e->getMessage();
         }
 
+<<<<<<< HEAD
+        /** @var int $daysPerYear */
+=======
         /** @var int */
+>>>>>>> main
         $daysPerYear = Helpers::daysPerYear(Functions::Scalar(DateTimeExcel\DateParts::year($settlement)), $basis);
         $next = self::couponFirstPeriodDate($settlement, $maturity, $frequency, self::PERIOD_DATE_NEXT);
 
@@ -239,6 +285,20 @@ class Coupons
      *                         3               Actual/365
      *                         4               European 30/360
      *
+<<<<<<< HEAD
+     * @return float|string Excel date/time serial value or error message
+     */
+    public static function COUPNCD(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      * @return mixed Excel date/time serial value, PHP date/time serial value or PHP date/time object,
      *                     depending on the value of the ReturnDateType flag
      */
@@ -254,14 +314,19 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
             $maturity = FinancialValidations::validateMaturityDate($maturity);
             self::validateCouponPeriod($settlement, $maturity);
             $frequency = FinancialValidations::validateFrequency($frequency);
+<<<<<<< HEAD
+            FinancialValidations::validateBasis($basis);
+=======
             $basis = FinancialValidations::validateBasis($basis);
             self::doNothing($basis);
+>>>>>>> main
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -294,6 +359,19 @@ class Coupons
      *                         2               Actual/360
      *                         3               Actual/365
      *                         4               European 30/360
+<<<<<<< HEAD
+     */
+    public static function COUPNUM(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|int {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      *
      * @return int|string
      */
@@ -309,14 +387,19 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
             $maturity = FinancialValidations::validateMaturityDate($maturity);
             self::validateCouponPeriod($settlement, $maturity);
             $frequency = FinancialValidations::validateFrequency($frequency);
+<<<<<<< HEAD
+            FinancialValidations::validateBasis($basis);
+=======
             $basis = FinancialValidations::validateBasis($basis);
             self::doNothing($basis);
+>>>>>>> main
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -355,6 +438,20 @@ class Coupons
      *                         3               Actual/365
      *                         4               European 30/360
      *
+<<<<<<< HEAD
+     * @return float|string Excel date/time serial value or error message
+     */
+    public static function COUPPCD(
+        mixed $settlement,
+        mixed $maturity,
+        mixed $frequency,
+        mixed $basis = FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
+    ): string|float {
+        $settlement = Functions::flattenSingleValue($settlement);
+        $maturity = Functions::flattenSingleValue($maturity);
+        $frequency = Functions::flattenSingleValue($frequency);
+        $basis = Functions::flattenSingleValue($basis) ?? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD;
+=======
      * @return mixed Excel date/time serial value, PHP date/time serial value or PHP date/time object,
      *                     depending on the value of the ReturnDateType flag
      */
@@ -370,14 +467,19 @@ class Coupons
         $basis = ($basis === null)
             ? FinancialConstants::BASIS_DAYS_PER_YEAR_NASD
             : Functions::flattenSingleValue($basis);
+>>>>>>> main
 
         try {
             $settlement = FinancialValidations::validateSettlementDate($settlement);
             $maturity = FinancialValidations::validateMaturityDate($maturity);
             self::validateCouponPeriod($settlement, $maturity);
             $frequency = FinancialValidations::validateFrequency($frequency);
+<<<<<<< HEAD
+            FinancialValidations::validateBasis($basis);
+=======
             $basis = FinancialValidations::validateBasis($basis);
             self::doNothing($basis);
+>>>>>>> main
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -417,10 +519,13 @@ class Coupons
             throw new Exception(ExcelError::NAN());
         }
     }
+<<<<<<< HEAD
+=======
 
     /** @param mixed $basis */
     private static function doNothing($basis): bool
     {
         return $basis;
     }
+>>>>>>> main
 }
