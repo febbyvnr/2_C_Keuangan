@@ -9,6 +9,7 @@ export default function MasterCOA() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
+    const [coaList, setCoaList] = useState([]);
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
         DESKRIPSI_COA: ""
@@ -19,6 +20,7 @@ export default function MasterCOA() {
             const res = await fetch("http://localhost:8000/api/coa");
             const json = await res.json();
             setData(json.data || []);
+            setCoaList(json.data || []);
         } catch (err) {
             console.error(err);
         }
@@ -215,13 +217,18 @@ export default function MasterCOA() {
                        <h3>{isEdit ? "Edit COA" : "Tambah COA"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent COA (opsional)</label>
-                            <input
-                                type="number"
+                            <select
                                 name="MST_ID_MASTER_COA"
                                 value={form.MST_ID_MASTER_COA}
                                 onChange={handleChange}
-                                placeholder="ID Parent COA"
-                            />
+                            >
+                                <option value="">-- Pilih Parent --</option>
+                                {coaList.map((coa) => (
+                                    <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
+                                        {coa.KODE_COA} - {coa.DESKRIPSI_COA}
+                                    </option>
+                                ))}
+                            </select>
                             <label>Deskripsi COA</label>
                             <input
                                 type="text"
