@@ -16,19 +16,24 @@ class LaporanPenerimaanController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
-        $role = $request->role ?? null; 
+        $nip = $request->nip ?? null;
 
-        //VALIDASI BENDAHARA
-          if ($type == 'excel' && $role && $role !== 'Bendahara') {
-        return response()->json([
-            'message' => 'Hanya Bendahara yang boleh generate laporan'
-        ], 403);
-    }
+        $role = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('tj.NIP_KARYAWAN', $nip)
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->value('rj.DESKRIPSI_JABATAN');
+
+        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+            return response()->json([
+                'message' => 'Role tidak diizinkan generate laporan'
+            ], 403);
+        }
 
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana, $role),
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role), // role dari DB
                 'Laporan_Penerimaan.xlsx'
             );
         }
