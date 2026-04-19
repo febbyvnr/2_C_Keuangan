@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanPenerimaanExport;
+use Illuminate\Support\Facades\Auth; 
 
 class LaporanPenerimaanController extends Controller
 {
@@ -17,13 +18,17 @@ class LaporanPenerimaanController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
         $nip = $request->nip ?? null;
+        $authRole = Auth::check() ? Auth::user()->role : null;
 
-        $role = DB::table('tr_jabatan as tj')
+        $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
             ->where('tj.NIP_KARYAWAN', $nip)
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
+        $role = $authRole ?? $dbRole;
+
+        // VALIDASI ROLE
         if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
                 'message' => 'Role tidak diizinkan generate laporan'
@@ -33,7 +38,7 @@ class LaporanPenerimaanController extends Controller
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana, $role), // role dari DB
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role),
                 'Laporan_Penerimaan.xlsx'
             );
         }
