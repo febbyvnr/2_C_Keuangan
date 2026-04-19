@@ -17,7 +17,10 @@ class LaporanPenerimaanController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
-        $nip = $request->nip ?? null;
+
+        // 🔥 FIX: ambil NIP dari request atau login
+        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+
         $authRole = Auth::check() ? Auth::user()->role : null;
 
         $dbRole = DB::table('tr_jabatan as tj')
@@ -26,7 +29,9 @@ class LaporanPenerimaanController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        $role = $authRole ?? $dbRole;
+        // 🔥 FIX UTAMA
+        $role = $dbRole ?? $authRole;
+        $role = trim($role);
 
         // VALIDASI ROLE
         if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
@@ -56,12 +61,10 @@ class LaporanPenerimaanController extends Controller
             )
             ->whereNotNull('p.NIP_PENERIMA');
 
-        // FILTER PERIODE 
         if ($start && $end) {
             $query->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
         }
 
-        // FILTER SUMBER DANA
         if ($sumberDana) {
             $query->where('p.ID_REF_DANA', $sumberDana);
         }
@@ -69,9 +72,7 @@ class LaporanPenerimaanController extends Controller
         $data = $query->get();
         $total = $data->sum('jumlah');
 
-        // PDF
         if ($type == 'pdf') {
-
             $pdf = Pdf::loadView(
                 'exports.LaporanPenerimaan_pdf',
                 compact('data', 'total', 'start', 'end')
