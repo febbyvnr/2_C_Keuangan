@@ -41,7 +41,7 @@
             font-weight: bold;
         }
 
-        /* WATERMARK (LEBIH HALUS & TENGAH) */
+        /* WATERMARK */
         .watermark {
             position: absolute;
             top: 50%;
@@ -62,7 +62,7 @@
 </head>
 <body>
 
-<!-- WATERMARK LOGO -->
+<!-- WATERMARK -->
 <img src="{{ public_path('logo.png') }}" class="watermark" width="400">
 
 <!-- HEADER -->
@@ -70,57 +70,168 @@
     <tr class="no-border">
         <td class="header-text">
             <div class="title-main">SMK BOPKRI 2 YOGYAKARTA</div>
-            <div class="title-sub">LAPORAN PENERIMAAN (KM) </div>
+            <div class="title-sub">LAPORAN BUKU KAS UMUM (BKU)</div>
             <span>Periode: {{ $start ?? '-' }} s/d {{ $end ?? '-' }}</span>
         </td>
     </tr>
 </table>
 
-<!-- GARIS KOP -->
 <div class="double-line"></div>
 
 <br>
 
-<!-- TABLE UTAMA -->
+<!-- ===================== -->
+<!-- BKU (SEMUA) -->
+<!-- ===================== -->
 <table>
     <thead>
         <tr>
+            <th>No</th>
             <th>Tanggal</th>
-            <th>Jenis</th>
             <th>Uraian</th>
-            <th>Jumlah</th>
+            <th>Debit</th>
+            <th>Kredit</th>
+            <th>Saldo</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($data as $row)
+        @php 
+            $no = 1; 
+            $saldoAkhir = 0;
+        @endphp
+
+        @foreach($bku as $row)
         <tr>
+            <td>{{ $no++ }}</td>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
-            <td>{{ $row->jenis }}</td>
             <td>{{ $row->uraian }}</td>
-            <td>Rp {{ number_format($row->jumlah, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
         </tr>
+
+        @php $saldoAkhir = $row->saldo; @endphp
         @endforeach
 
         <tr>
-            <td colspan="3"><b>TOTAL</b></td>
-            <td><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+            <td colspan="5"><b>SALDO AKHIR</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
-<br><br><br><br>
-
-<br><br>
+<br><br><br>
 
 @php
 \Carbon\Carbon::setLocale('id');
 @endphp
 
+<!-- 🔥 FOOTER (DISAMAKAN DENGAN REFERENSI + NIP) -->
 <p style="text-align:right; margin-top: 40px;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
     <br><br>
-    <b>By: Bendahara</b>
+    <b>By: {{ $role }}</b>
+    <br><br>
+    ---------------------------
+    <br>
+    NIP: {{ $nip ?? '-' }}
 </p>
+
+
+<!-- ===================== -->
+<!-- PAGE BREAK 1 -->
+<!-- ===================== -->
+<div style="page-break-before: always;"></div>
+
+<!-- ===================== -->
+<!-- P1 - TUNAI -->
+<!-- ===================== -->
+<h3 style="text-align:center;">LAPORAN BKU - TUNAI (P1)</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Tanggal</th>
+            <th>Uraian</th>
+            <th>Debit</th>
+            <th>Kredit</th>
+            <th>Saldo</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php 
+            $no = 1; 
+            $saldoAkhir = 0;
+        @endphp
+
+        @foreach($p1 as $row)
+        <tr>
+            <td>{{ $no++ }}</td>
+            <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
+            <td>{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
+        </tr>
+
+        @php $saldoAkhir = $row->saldo; @endphp
+        @endforeach
+
+        <tr>
+            <td colspan="5"><b>SALDO AKHIR</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ===================== -->
+<!-- PAGE BREAK -->
+<!-- ===================== -->
+<div style="page-break-before: always;"></div>
+
+<!-- ===================== -->
+<!-- P2 - BANK -->
+<!-- ===================== -->
+<h3 style="text-align:center;">LAPORAN BKU - BANK (P2)</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Tanggal</th>
+            <th>Uraian</th>
+            <th>Debit</th>
+            <th>Kredit</th>
+            <th>Saldo</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php 
+            $no = 1; 
+            $saldoAkhir = 0;
+        @endphp
+
+        @foreach($p2 as $row)
+        <tr>
+            <td>{{ $no++ }}</td>
+            <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
+            <td>{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
+        </tr>
+
+        @php $saldoAkhir = $row->saldo; @endphp
+        @endforeach
+
+        <tr>
+            <td colspan="5"><b>SALDO AKHIR</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
+        </tr>
+    </tbody>
+</table>
 
 </body>
 </html>
