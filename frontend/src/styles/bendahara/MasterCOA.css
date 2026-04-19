@@ -34,6 +34,24 @@
     border: 2px solid #1F4E82;
 }
 
+.search-btn {
+    background-color: transparent;
+    color: #1F4E82;
+    border: 1.5px solid #1F4E82;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.search-btn:hover {
+    background-color: #1F4E82;
+    color: #f6f7f9;
+    border: 1.5px solid #1F4E82;
+}
+
 .coa-table-wrapper {
     background: #ffffff;
     border-radius: 12px;
@@ -335,45 +353,38 @@
 }
 
 .custom-btn {
-    transition: all 0.3s ease;
-}
-
-.btn-outline-success.custom-btn {
-    border: 2px solid #198754;
-    color: #198754;
-    background-color: transparent;
-}
-
-.custom-btn {
-    display: inline-flex;
+    text-decoration: none;
+    padding: 5px 14px !important;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0px 8px;
-    font-size: 13px;
-    line-height: 1;
-    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
-.btn-outline-success.custom-btn:hover {
-    background-color: #198754;
-    color: #fff;
+.btn-outline-success {
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
 }
 
-.btn-outline-danger.custom-btn {
-    border: 2px solid #dc3545;
-    color: #dc3545;
-    background-color: transparent;
+.btn-outline-success:hover {
+    background-color: #2e7d32;
+    color: white;
 }
 
-.btn-outline-danger.custom-btn:hover {
-    background-color: #dc3545;
-    color: #fff;
+.btn-outline-danger {
+    color: #c62828;
+    border: 1px solid #c62828;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c62828;
+    color: white;
 }
 
 .export-wrapper {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 15px;
-    width: 100%;
+    gap: 8px;
 }

@@ -183,6 +183,11 @@ tr:hover {
     color: #1e293b;
 }
 
+.bukti-header {
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
 .bukti img,
 .bukti iframe {
     width: 100%;

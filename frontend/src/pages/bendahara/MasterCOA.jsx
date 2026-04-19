@@ -38,6 +38,13 @@ export default function MasterCOA() {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            setCurrentPage(1);
+            fetchData(search);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -164,7 +171,7 @@ export default function MasterCOA() {
                 <h2>Master COA</h2>
                 <div className="header-actions">
                     <button
-                        className="btn-secondary"
+                        className="btn-reset"
                         onClick={() => {
                             setSearch("");
                             fetchData();
@@ -178,11 +185,11 @@ export default function MasterCOA() {
                             placeholder="Cari deskripsi / kode COA..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
-
                         <button
-                            className="btn-primary"
+                            className="search-btn"
                             onClick={() => {
                                 setCurrentPage(1);
                                 fetchData(search);
@@ -206,14 +213,6 @@ export default function MasterCOA() {
                         Tambah COA
                     </button>
                 </div>
-            </div>
-            <div className="export-wrapper">
-                <a href={`http://localhost:8000/api/coa/export/excel?search=${search}`} className="btn btn-outline-success custom-btn">
-                    <i className="bi bi-filetype-xlsx"></i>Export Excel
-                </a>
-                <a href={`http://localhost:8000/api/coa/export/pdf?search=${search}`} className="btn btn-outline-danger custom-btn">
-                    <i className="bi bi-file-earmark-pdf"></i>Export PDF
-                </a>
             </div>
             <div className="coa-table-wrapper">
                 <table className="coa-table">
@@ -315,6 +314,14 @@ export default function MasterCOA() {
                     >
                         <i className="bi bi-chevron-right"></i>
                     </button>
+                </div>
+                <div className="export-wrapper">
+                    <a href={`http://localhost:8000/api/coa/export/excel?search=${search}`} className="btn btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-xlsx"></i>Export Excel
+                    </a>
+                    <a href={`http://localhost:8000/api/coa/export/pdf?search=${search}`} className="btn btn-outline-danger custom-btn">
+                        <i className="bi bi-file-earmark-pdf"></i>Export PDF
+                    </a>
                 </div>
             </div>
             {showModal && (

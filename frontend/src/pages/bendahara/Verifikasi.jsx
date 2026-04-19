@@ -103,16 +103,38 @@ export default function Verifikasi() {
 
     const handleApprove = async () => {
         if (!selected) return;
-        await fetch(`http://localhost:8000/api/tr-pembayaran/${selected.ID_PEMBAYARAN}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...selected,
-                NIP_VALIDATOR_PEMBAYARAN: "VALID"
-            })
-        });
-        fetchData();
-        setSelected(null);
+        const userData = localStorage.getItem("user"); 
+        if (!userData) {
+            alert("Sesi login tidak ditemukan. Silakan login kembali.");
+            return;
+        }
+        const user = JSON.parse(userData);
+        const nipBendahara = user.NIP_KARYAWAN;
+        if (!nipBendahara) {
+            alert("Data NIP tidak ditemukan pada akun Anda.");
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:8000/api/tr-pembayaran/update/${selected.ID_PEMBAYARAN}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...selected,
+                    NIP_VALIDATOR_PEMBAYARAN: nipBendahara 
+                })
+            });
+            if (response.ok) {
+                alert("Pembayaran berhasil diverifikasi!");
+                fetchData();
+                setSelected(null);
+            } else {
+                const errorData = await response.json();
+                alert("Gagal verifikasi: " + (errorData.message || "Terjadi kesalahan"));
+            }
+        } catch (err) {
+            console.error("Error update:", err);
+            alert("Terjadi kesalahan koneksi ke server.");
+        }
     };
 
     const isVerified = selected?.NIP_VALIDATOR_PEMBAYARAN;
@@ -168,7 +190,9 @@ export default function Verifikasi() {
                                         <td>Rp {Number(item.JUMLAH_BAYAR).toLocaleString("id-ID")}</td>
                                         <td>
                                             {item.NIP_VALIDATOR_PEMBAYARAN ? (
-                                                <i className="bi bi-check-circle icon-success"></i>
+                                                <span title={`Divalidasi oleh: ${item.NIP_VALIDATOR_PEMBAYARAN}`}>
+                                                    <i className="bi bi-check-circle icon-success"></i>
+                                                </span>
                                             ) : (
                                                 <i className="bi bi-exclamation-circle-fill icon-danger"></i>
                                             )}
