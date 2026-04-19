@@ -72,14 +72,16 @@ class LaporanPenerimaanController extends Controller
         $data = $query->get();
         $total = $data->sum('jumlah');
 
-        if ($type == 'pdf') {
-            $pdf = Pdf::loadView(
-                'exports.LaporanPenerimaan_pdf',
-                compact('data', 'total', 'start', 'end')
-            );
+        // PDF
+        if (strtolower(trim($type)) === 'pdf') {
 
-            return $pdf->download('Laporan_Penerimaan.pdf');
-        }
+        $pdf = Pdf::loadView(
+             'exports.LaporanPenerimaan_pdf',
+            compact('data', 'total', 'start', 'end', 'role') // 🔥 penting!
+        );
+
+        return $pdf->download('Laporan_Penerimaan.pdf');
+    }
 
         return response()->json([
             'data' => $data,
