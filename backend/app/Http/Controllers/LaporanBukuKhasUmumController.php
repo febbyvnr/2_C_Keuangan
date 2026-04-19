@@ -17,12 +17,17 @@ class LaporanBukuKhasUmumController extends Controller
         $type = $request->type;
         $role = $request->role ?? 'Bendahara';
 
-        // VALIDASI BENDAHARA
-        if ($type == 'excel' && $role && $role !== 'Bendahara') {
+        if ($type == 'excel' && $role && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Hanya Bendahara yang boleh generate laporan'
+                'message' => 'Hanya Bendahara & Kepala Sekolah yang boleh generate laporan'
             ], 403);
         }
+
+        $nip = DB::table('TR_JABATAN as tj')
+            ->join('REF_JABATAN_STR as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('rj.DESKRIPSI_JABATAN', $role)
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->value('tj.NIP_KARYAWAN');
 
         // =========================
         // 1. PENERIMAAN SISWA
@@ -48,7 +53,7 @@ class LaporanBukuKhasUmumController extends Controller
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as debit',
                 DB::raw('0 as kredit'),
-                DB::raw("'Bank' as metode") 
+                DB::raw("'Bank' as metode")
             );
 
         // =========================
@@ -62,7 +67,7 @@ class LaporanBukuKhasUmumController extends Controller
                 DB::raw("CONCAT('Pengeluaran - ', pk.PROGRAM_KERJA) as uraian"),
                 DB::raw('0 as debit'),
                 'd.TOTAL as kredit',
-                DB::raw("'Bank' as metode") 
+                DB::raw("'Bank' as metode")
             );
 
         // =========================
@@ -75,9 +80,9 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // UNION SEMUA DATA
+        // UNION
         // =========================
-         $data = DB::query()
+        $data = DB::query()
             ->fromSub(
                 $pembayaran
                     ->unionAll($penerimaan)
@@ -86,9 +91,9 @@ class LaporanBukuKhasUmumController extends Controller
             )
             ->orderBy('tanggal', 'asc')
             ->get();
-            
+
         // =========================
-        // HITUNG SALDO
+        // SALDO
         // =========================
         $saldo = 0;
         foreach ($data as $item) {
@@ -97,22 +102,17 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // SPLIT P1 & P2
+        // SPLIT
         // =========================
-        $p1 = collect($data)->filter(function ($item) {
-            return $item->metode === 'Tunai';
-        })->values();
-
-        $p2 = collect($data)->filter(function ($item) {
-            return $item->metode !== 'Tunai';
-        })->values();
+        $p1 = collect($data)->filter(fn($item) => $item->metode === 'Tunai')->values();
+        $p2 = collect($data)->filter(fn($item) => $item->metode !== 'Tunai')->values();
 
         // =========================
         // EXCEL
         // =========================
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role),
+                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role, $nip), 
                 'Laporan_BKU.xlsx'
             );
         }
@@ -129,7 +129,8 @@ class LaporanBukuKhasUmumController extends Controller
                     'p2' => $p2,
                     'start' => $start,
                     'end' => $end,
-                    'role' => $role
+                    'role' => $role,
+                    'nip' => $nip 
                 ]
             );
 
@@ -139,7 +140,8 @@ class LaporanBukuKhasUmumController extends Controller
         return response()->json([
             'bku' => $data,
             'p1' => $p1,
-            'p2' => $p2
+            'p2' => $p2,
+            'nip' => $nip 
         ]);
     }
 }
