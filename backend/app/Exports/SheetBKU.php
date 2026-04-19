@@ -13,11 +13,13 @@ class SheetBKU implements WithEvents,withTitle
 {
     protected $data;
     protected $role;
+    protected $nip;
 
-    public function __construct($data, $role = 'Bendahara')
+    public function __construct($data, $role = 'Bendahara', $nip = null) 
     {
         $this->data = $data;
         $this->role = $role;
+        $this->nip = $nip; 
     }
 
     public function title(): string
@@ -154,6 +156,7 @@ class SheetBKU implements WithEvents,withTitle
 
                 $sheet->setCellValue("F$footerRow", 'Yogyakarta, ' . date('d F Y'));
                 $sheet->setCellValue("F" . ($footerRow + 1), 'By: ' . $this->role);
+                $sheet->setCellValue("F" . ($footerRow + 2), 'NIP: ' . $this->nip);
 
                 // ALIGN RIGHT
                 $sheet->getStyle("F$footerRow:F" . ($footerRow + 1))
