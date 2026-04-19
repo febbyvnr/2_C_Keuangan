@@ -8,9 +8,9 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 class SheetBKUP2Bank extends SheetBKU implements WithTitle
 {   
 
-    public function __construct($data, $role)
+    public function __construct($data, $role, $nip)
     {
-        parent::__construct($data, $role);
+        parent::__construct($data, $role, $nip);
     }
 
     public function title(): string
