@@ -9,6 +9,7 @@ export default function MasterSumberDana() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
+    const [parentList, setParentList] = useState([]);
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_DANA", 
@@ -31,8 +32,19 @@ export default function MasterSumberDana() {
         }
     };
 
+    const fetchParent = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/ref-sumber-dana");
+            const json = await res.json();
+            setParentList(json.data || []);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchParent();
     }, []);
 
     const handleSort = (key) => {
@@ -78,7 +90,9 @@ export default function MasterSumberDana() {
         setIsEdit(true);
         setEditId(item.ID_REF_DANA);
         setForm({
-            REF_ID_REF_DANA: item.REF_ID_REF_DANA || "",
+            REF_ID_REF_DANA: item.REF_ID_REF_DANA 
+                ? String(item.REF_ID_REF_DANA) 
+                : "",
             DESKRIPSI_SUMBER_DANA: item.DESKRIPSI_SUMBER_DANA || ""
         });
         setShowModal(true);
@@ -275,15 +289,21 @@ export default function MasterSumberDana() {
                         <h3>{isEdit ? "Edit Sumber Dana" : "Tambah Sumber Dana"}</h3>
                         <form onSubmit={handleSubmit} className="form-container">
                             <div className="form-group">
-                                <label>Referensi ID Sumber Dana</label>
-                                <input
-                                    type="text"
+                                <label>Referensi ID Sumber Dana (Opsional) </label>
+                                <select
                                     name="REF_ID_REF_DANA"
                                     value={form.REF_ID_REF_DANA}
                                     onChange={handleChange}
-                                    required
-                                    placeholder="Contoh: 1"
-                                />
+                                >
+                                    <option value="">-- Pilih Parent --</option>
+                                    {parentList
+                                        .filter(item => String(item.ID_REF_DANA) !== String(editId) || String(item.ID_REF_DANA) === form.REF_ID_REF_DANA) // bs pilih ga
+                                        .map((item) => (
+                                            <option key={item.ID_REF_DANA} value={String(item.ID_REF_DANA)}>
+                                                [{item.ID_REF_DANA}] {item.DESKRIPSI_SUMBER_DANA}
+                                            </option>
+                                        ))}
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label>Deskripsi Sumber Dana</label>

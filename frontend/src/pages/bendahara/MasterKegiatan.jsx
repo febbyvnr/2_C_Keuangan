@@ -9,6 +9,7 @@ export default function MasterKegiatan() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null);
+    const [parentList, setParentList] = useState([]);
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({
         key: "ID_KEGIATAN",
@@ -38,7 +39,18 @@ export default function MasterKegiatan() {
 
     useEffect(() => {
         fetchData();
+        fetchParent();
     }, []);
+
+    const fetchParent = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/kegiatan");
+            const json = await res.json();
+            setParentList(json.data || []);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -85,6 +97,10 @@ export default function MasterKegiatan() {
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const changePage = (page) => {
+        setCurrentPage(page);
     };
 
     const handleEdit = (item) => {
@@ -232,6 +248,9 @@ export default function MasterKegiatan() {
                     <a href={`http://localhost:8000/api/kegiatan/export/excel?search=${search}`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
+                    <a href={`http://localhost:8000/api/kegiatan/export/csv?search=${search}`} className="btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-csv"></i> Export CSV
+                    </a>
                     <a href={`http://localhost:8000/api/kegiatan/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
                     </a>
@@ -243,7 +262,20 @@ export default function MasterKegiatan() {
                         <h3>{isEdit ? "Edit Kegiatan" : "Tambah Kegiatan"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent Kegiatan (opsional)</label>
-                            <input type="number" name="MST_ID_KEGIATAN" value={form.MST_ID_KEGIATAN} onChange={handleChange} />
+                            <select
+                                name="MST_ID_KEGIATAN"
+                                value={form.MST_ID_KEGIATAN}
+                                onChange={handleChange}
+                            >
+                                <option value="">-- Pilih Parent --</option>
+                                {parentList
+                                    .filter(item => item.ID_KEGIATAN !== editId) //bisa ref ke diri sendiri kah?
+                                    .map((item) => (
+                                        <option key={item.ID_KEGIATAN} value={item.ID_KEGIATAN}>
+                                            [{item.ID_KEGIATAN}] {item.DESKRIPSI_KEGIATAN}
+                                        </option>
+                                    ))}
+                            </select>
                             <label>Deskripsi Kegiatan</label>
                             <input type="text" name="DESKRIPSI_KEGIATAN" value={form.DESKRIPSI_KEGIATAN} onChange={handleChange} required />
                             <div className="modal-actions">

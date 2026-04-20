@@ -82,6 +82,10 @@ export default function MasterTahunAnggaran() {
             [e.target.name]: e.target.value
         });
     };
+
+    const changePage = (page) => {
+        setCurrentPage(page);
+    };
     
     const handleEdit = (item) => {
         setIsEdit(true);

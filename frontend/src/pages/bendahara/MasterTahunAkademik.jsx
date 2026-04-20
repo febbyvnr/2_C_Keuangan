@@ -293,7 +293,7 @@ export default function MasterTahunAkademik() {
                         <h3>{isEdit ? "Edit Tahun Akademik" : "Tambah Tahun Akademik"}</h3>
                         <form onSubmit={handleSubmit} className="form-container">
                             <div className="form-group">
-                                <label>Tahun Ajaran</label>
+                                <label>Tahun Akademik</label>
                                 <input
                                     type="text"
                                     name="TAHUN"

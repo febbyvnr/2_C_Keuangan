@@ -9,6 +9,7 @@ export default function MasterRefPenerimaan() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
+    const [parentList, setParentList] = useState([]);
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_PENERIMAAN", 
@@ -29,6 +30,16 @@ export default function MasterRefPenerimaan() {
         }
     };
 
+    const fetchParent = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/ref-penerimaan");
+            const json = await res.json();
+            setParentList(json.data || []);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const handleSort = (key) => {
         let direction = "asc";
         if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -44,6 +55,7 @@ export default function MasterRefPenerimaan() {
 
     useEffect(() => {
         fetchData();
+        fetchParent();
     }, []);
 
     const handleChange = (e) => {
@@ -57,7 +69,9 @@ export default function MasterRefPenerimaan() {
         setIsEdit(true);
         setEditId(item.ID_REF_PENERIMAAN);
         setForm({
-            REF_ID_REF_PENERIMAAN: item.REF_ID_REF_PENERIMAAN || "",
+            REF_ID_REF_PENERIMAAN: item.REF_ID_REF_PENERIMAAN 
+                ? String(item.REF_ID_REF_PENERIMAAN) 
+                : "",
             DESKRIPSI_REF_PENERIMAAN: item.DESKRIPSI_REF_PENERIMAAN || ""
         });
         setShowModal(true);
@@ -271,13 +285,26 @@ export default function MasterRefPenerimaan() {
                        <h3>{isEdit ? "Edit Referensi Penerimaan" : "Tambah Referensi Penerimaan"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent Referensi Penerimaan (opsional)</label>
-                            <input
-                                type="number"
+                            <select
                                 name="REF_ID_REF_PENERIMAAN"
-                                value={form.REF_ID_REF_PENERIMAAN}
+                                value={form.REF_ID_REF_PENERIMAAN || ""}
                                 onChange={handleChange}
-                                placeholder="ID Parent Referensi Penerimaan"
-                            />
+                            >
+                                <option value="">-- Pilih Parent --</option>
+                                {parentList
+                                    .filter(item =>
+                                        String(item.ID_REF_PENERIMAAN) !== String(editId) ||
+                                        String(item.ID_REF_PENERIMAAN) === form.REF_ID_REF_PENERIMAAN
+                                    )
+                                    .map((item) => (
+                                        <option
+                                            key={item.ID_REF_PENERIMAAN}
+                                            value={String(item.ID_REF_PENERIMAAN)}
+                                        >
+                                            [{item.ID_REF_PENERIMAAN}] {item.DESKRIPSI_REF_PENERIMAAN}
+                                        </option>
+                                    ))}
+                            </select>
                             <label>Deskripsi Referensi Penerimaan</label>
                             <input
                                 type="text"
