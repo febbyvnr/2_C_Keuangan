@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; 
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -13,14 +14,17 @@ class LaporanPenerimaanExport implements WithEvents
 {
     protected $start, $end, $sumberDana;
     protected $total = 0;
-    protected $role = 'Bendahara'; 
+    protected $role = 'Bendahara';
+    
+    protected $nip;
 
-    public function __construct($start, $end, $sumberDana, $role = null)
+    public function __construct($start, $end, $sumberDana, $role = null, $nip = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
         $this->role = $role ?: 'Bendahara';
+        $this->nip = $nip;
     }
 
     public function collection()
@@ -162,12 +166,12 @@ class LaporanPenerimaanExport implements WithEvents
 
                 if ($role === 'Kepala Sekolah') {
                     $nama = 'Drs. Budi Santoso';
-                    $nip  = '1976543210';
                 } else {
                     $role = 'Bendahara';
                     $nama = 'Rina Putri, S.E.';
-                    $nip  = '1987654321';
                 }
+
+                $nip = $this->nip ?: '-';
 
                 // TTD
                 $sheet->mergeCells("B" . ($footerRow+1) . ":D" . ($footerRow+1));
