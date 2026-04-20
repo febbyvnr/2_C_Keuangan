@@ -280,7 +280,7 @@ export default function MasterCOA() {
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">
-                    Showing {startData} - {endData} of {totalData} data
+                    Menampilkan {startData} - {endData} dari {totalData} data
                 </div>
                 <div className="pagination">
                     <button

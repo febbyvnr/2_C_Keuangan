@@ -5,10 +5,13 @@ export default function Verifikasi() {
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 11;
+    const itemsPerPage = 10;
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
     const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_PEMBAYARAN",
         direction: "asc"
@@ -186,7 +189,9 @@ export default function Verifikasi() {
                                         <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || '-'}</td>
                                         <td>{item.tagihan?.BULAN_TAGIHAN_SISWA || "-"}</td>
                                         <td>{item.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}</td>
-                                        <td>{item.TGL_BAYAR}</td>
+                                        <td>
+                                            {new Date(item.TGL_BAYAR).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}
+                                        </td>
                                         <td>Rp {Number(item.JUMLAH_BAYAR).toLocaleString("id-ID")}</td>
                                         <td>
                                             {item.NIP_VALIDATOR_PEMBAYARAN ? (
@@ -202,35 +207,48 @@ export default function Verifikasi() {
                             </tbody>
                         </table>
                     </div>
-                    <div className="pagination">
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <i className="bi bi-chevron-left"></i>
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => (
+                    <div className="pagination-wrapper">
+                        <div className="pagination-info">
+                            Menampilkan {startData} - {endData} dari {totalData} data
+                        </div>
+                        <div className="pagination">
                             <button
-                                key={i + 1}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className={currentPage === i + 1 ? "active" : ""}
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                }
+                                disabled={currentPage === 1}
                             >
-                                {i + 1}
+                                <i className="bi bi-chevron-left"></i>
                             </button>
-                        ))}
-                        <button
-                            onClick={() =>
-                                setCurrentPage(prev => Math.min(prev + 1, totalPages))
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            <i className="bi bi-chevron-right"></i>
-                        </button>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => setCurrentPage(i + 1)}
+                                    className={`page-btn ${
+                                        currentPage === i + 1 ? "active" : ""
+                                    }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages)
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <i className="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="detail-section">
                     {selected ? (
-                        <>
+                        <div className="detail-content">
                             <h3>Rincian Pembayaran</h3>
                             <div className={`status-pill ${isVerified ? "success" : "danger"}`}>
                                 {isVerified ? "Diverifikasi" : "Menunggu Verifikasi"}
@@ -261,7 +279,7 @@ export default function Verifikasi() {
                             </div>
                             <div className="detail-row">
                                 <span className="label">Tanggal</span>
-                                <span className="value">{selected.TGL_BAYAR}</span>
+                                <span className="value">{new Date(selected.TGL_BAYAR).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}</span>
                             </div>
                             <div className="bukti">
                                 <div className="bukti-header">
@@ -297,7 +315,7 @@ export default function Verifikasi() {
                             >
                                 <i className="check-circle"></i> Setujui
                             </button>
-                        </>
+                        </div>
                     ) : (
                         <div className="empty-state">
                             <i className="bi bi-receipt"></i>

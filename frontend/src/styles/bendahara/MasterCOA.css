@@ -1,5 +1,5 @@
 .coa-container {
-    padding: 20px;
+    padding: 18px 25px;
     background-color: #f6f7f9;
     min-height: 100vh;
 }
@@ -182,6 +182,33 @@
 .pagination-info {
     font-size: 14px;
     color: #6c757d;
+}
+
+.pagination button {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #1a1a1a;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+    background-color: #f6f7f9;
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.pagination button.active {
+    background-color: #265f9c;
+    color: #ffffff;
+    border-color: #265f9c;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .page-btn {

@@ -246,7 +246,7 @@ export default function MasterSumberDana() {
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">
-                    Showing {startData} - {endData} of {totalData} data
+                    Menampilkan {startData} - {endData} dari {totalData} data
                 </div>
                 <div className="pagination">
                     <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
