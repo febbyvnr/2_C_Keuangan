@@ -267,48 +267,37 @@
 
 .modal-box select {
     width: 100%;
-    padding: 10px;
-    margin: 6px 0 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    padding: 12px 40px 12px 12px;
+    margin: 6px 0 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     outline: none;
     background-color: #ffffff;
     color: #1a1a1a;
+    font-size: 14px;
+    font-weight: 500;
     appearance: none;
     cursor: pointer;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23265f9c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+.modal-box select:hover {
+    border-color: #cbd5f5;
 }
 
 .modal-box select:focus {
     border-color: #265f9c;
-    box-shadow: 0 0 0 2px rgba(38, 95, 156, 0.15);
+    box-shadow: 0 0 0 3px rgba(38, 95, 156, 0.15);
 }
 
-.modal-box select {
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7L10 12L15 7' stroke='%23585858' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-}
-
-.modal-box select option {
-    color: #1a1a1a;
-    background-color: #ffffff;
-}
-
-.modal-box input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    outline: none;
-    background-color: #ffffff;
-    color: #1a1a1a;
-}
-
-.modal-box input[type="date"]:focus {
-    border-color: #265f9c;
-    box-shadow: 0 0 0 2px rgba(38, 95, 156, 0.15);
+.modal-box select:disabled {
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .btn-cancel {
@@ -356,4 +345,32 @@
 .modal-box input[type="number"] {
     -moz-appearance: textfield;
     -webkit-appearance: none;
+}
+
+.date-wrapper {
+    position: relative;
+}
+
+.date-wrapper input {
+    padding-right: 42px;
+}
+
+.date-icon {
+    position: absolute;
+    right: 12px;
+    top: 47%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #265f9c;
+    pointer-events: none;
+    transition: 0.2s;
+}
+
+.date-wrapper:hover .date-icon {
+    transform: translateY(-50%) scale(1.1);
+    color: #1F4E82;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
 }

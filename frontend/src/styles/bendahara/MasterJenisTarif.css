@@ -130,6 +130,20 @@
     color: #7d7d7e;
 }
 
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #7d7d7e;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
