@@ -14,11 +14,13 @@ class SheetBKU implements WithEvents, WithTitle
 {
     protected $data;
     protected $role;
+    protected $nip;
 
-    public function __construct($data, $role = 'Bendahara') 
+    public function __construct($data, $role = 'Bendahara', $nip = null) 
     {
         $this->data = $data;
         $this->role = $role;
+        $this->nip = $nip;
     }
 
     public function title(): string
@@ -34,21 +36,14 @@ class SheetBKU implements WithEvents, WithTitle
                 $sheet = $event->sheet;
 
                 // =====================
-                // 🔥 AMBIL DATA DARI DB (NIP)
+                // WIDTH (TAMBAHAN SESUAI REFERENSI)
                 // =====================
-                $pejabat = DB::table('tr_jabatan as tj')
-                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-                    ->where('rj.DESKRIPSI_JABATAN', $this->role)
-                    ->whereNull('tj.TGL_SELESAI_JABATAN')
-                    ->select('tj.NIP_KARYAWAN')
-                    ->first();
-
-                $nip = $pejabat->NIP_KARYAWAN ?? '-';
-
-                // 🔥 Nama sementara (karena belum ada tabel karyawan)
-                $nama = $this->role === 'Kepala Sekolah'
-                    ? 'Nama Kepala Sekolah'
-                    : 'Nama Bendahara';
+                $sheet->getColumnDimension('A')->setWidth(6);
+                $sheet->getColumnDimension('B')->setWidth(18);
+                $sheet->getColumnDimension('C')->setWidth(35);
+                $sheet->getColumnDimension('D')->setWidth(18);
+                $sheet->getColumnDimension('E')->setWidth(18);
+                $sheet->getColumnDimension('F')->setWidth(20);
 
                 // =====================
                 // TITLE
@@ -61,11 +56,11 @@ class SheetBKU implements WithEvents, WithTitle
                 $sheet->mergeCells('A3:F3');
                 $sheet->mergeCells('A4:F4');
 
-                $sheet->getStyle('A2:A4')->getAlignment()
+                $sheet->getStyle('A2:F4')->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
 
                 // =====================
                 // HEADER TABLE
@@ -87,57 +82,46 @@ class SheetBKU implements WithEvents, WithTitle
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FF2E75B6');
 
-                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
+                $sheet->getStyle("A$headerRow:F$headerRow")->getFont()
+                    ->getColor()->setARGB('FFFFFFFF');
 
-                // =====================
-                // WIDTH
-                // =====================
-                $sheet->getColumnDimension('A')->setWidth(5);
-                $sheet->getColumnDimension('B')->setWidth(18);
-                $sheet->getColumnDimension('C')->setWidth(40);
-                $sheet->getColumnDimension('D')->setWidth(18);
-                $sheet->getColumnDimension('E')->setWidth(18);
-                $sheet->getColumnDimension('F')->setWidth(22);
+                // FILTER (DITAMBAHKAN SESUAI REFERENSI)
+                $sheet->setAutoFilter("A$headerRow:F$headerRow");
 
                 // =====================
                 // DATA
                 // =====================
-                $startData = $headerRow + 1;
-                $row = $startData;
+                $row = $headerRow + 1;
                 $no = 1;
                 $saldoAkhir = 0;
 
                 foreach ($this->data as $item) {
-
-                    $sheet->setCellValue("A$row", $no);
-                    $sheet->setCellValue("B$row", date('d-m-Y', strtotime($item->tanggal)));
+                    $sheet->setCellValue("A$row", $no++);
+                    $sheet->setCellValue("B$row", $item->tanggal);
                     $sheet->setCellValue("C$row", $item->uraian);
                     $sheet->setCellValue("D$row", $item->debit);
                     $sheet->setCellValue("E$row", $item->kredit);
                     $sheet->setCellValue("F$row", $item->saldo);
 
                     $saldoAkhir = $item->saldo;
-
                     $row++;
-                    $no++;
                 }
 
                 $endData = $row - 1;
 
-                // FORMAT NUMBER (NO RP)
-                $sheet->getStyle("D$startData:F$endData")
+                // FORMAT ANGKA (TANPA RP)
+                $sheet->getStyle("D" . ($headerRow+1) . ":F$endData")
                     ->getNumberFormat()
                     ->setFormatCode('#,##0');
+
+                // WRAP TEXT
+                $sheet->getStyle("C" . ($headerRow+1) . ":C$endData")
+                    ->getAlignment()->setWrapText(true);
 
                 // BORDER
                 $sheet->getStyle("A$headerRow:F$endData")
                     ->getBorders()->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
-
-                // =====================
-                // 🔥 AUTO FILTER
-                // =====================
-                $sheet->setAutoFilter("A$headerRow:F$endData");
 
                 // =====================
                 // SALDO AKHIR
@@ -147,41 +131,48 @@ class SheetBKU implements WithEvents, WithTitle
                 $sheet->setCellValue("E$totalRow", 'SALDO AKHIR');
                 $sheet->setCellValue("F$totalRow", $saldoAkhir);
 
-                $sheet->getStyle("F$totalRow")->getNumberFormat()
+                $sheet->getStyle("E$totalRow:F$totalRow")->getFont()->setBold(true);
+
+                $sheet->getStyle("F$totalRow")
+                    ->getNumberFormat()
                     ->setFormatCode('#,##0');
 
+                $sheet->getStyle("E$totalRow:F$totalRow")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFFFE699');
+
                 // =====================
-                // 🔥 FOOTER (SESUAI REFERENSI DOSEN)
+                // FOOTER 
                 // =====================
-                $footer = $totalRow + 4;
+                $footerRow = $totalRow + 4;
 
-                // ROLE
-                $sheet->mergeCells("B$footer:E$footer");
-                $sheet->setCellValue("B$footer", $this->role . ',');
-                $sheet->getStyle("B$footer")->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $role = $this->role;
 
-                // NAMA
-                $sheet->mergeCells("B" . ($footer + 2) . ":E" . ($footer + 2));
-                $sheet->setCellValue("B" . ($footer + 2), $nama);
-                $sheet->getStyle("B" . ($footer + 2))
+                if ($role === 'Kepala Sekolah') {
+                    $nama = 'Drs. Budi Santoso';
+                } else {
+                    $role = 'Bendahara';
+                    $nama = 'Rina Putri, S.E.';
+                }
+
+                $nip = $this->nip ?: '-';
+
+                // TTD (CENTER)
+                $sheet->mergeCells("B" . ($footerRow+1) . ":E" . ($footerRow+1));
+                $sheet->mergeCells("B" . ($footerRow+3) . ":E" . ($footerRow+3));
+                $sheet->mergeCells("B" . ($footerRow+7) . ":E" . ($footerRow+7));
+                $sheet->mergeCells("B" . ($footerRow+8) . ":E" . ($footerRow+8));
+
+                $sheet->setCellValue("B" . ($footerRow+1), $role . ',');
+                $sheet->setCellValue("B" . ($footerRow+3), $nama);
+                $sheet->setCellValue("B" . ($footerRow+7), '-------------------------');
+                $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
+
+                $sheet->getStyle("B" . ($footerRow+1) . ":E" . ($footerRow+8))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // GARIS
-                $sheet->mergeCells("B" . ($footer + 4) . ":E" . ($footer + 4));
-                $sheet->setCellValue("B" . ($footer + 4), '--------------------------');
-                $sheet->getStyle("B" . ($footer + 4))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                // NIP (DARI DB)
-                $sheet->mergeCells("B" . ($footer + 5) . ":E" . ($footer + 5));
-                $sheet->setCellValue("B" . ($footer + 5), 'NIP: ' . $nip);
-                $sheet->getStyle("B" . ($footer + 5))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                // TANGGAL (KANAN)
-                $sheet->setCellValue("F" . ($footer + 6), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("F" . ($footer + 6))
+                $sheet->setCellValue("F" . ($footerRow+10), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("F" . ($footerRow+10))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // FREEZE

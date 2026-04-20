@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanBukuKhasUmumExport;
+use Illuminate\Support\Facades\Auth; // TAMBAHAN
 
 class LaporanBukuKhasUmumController extends Controller
 {
@@ -15,19 +16,35 @@ class LaporanBukuKhasUmumController extends Controller
         $start = $request->start;
         $end = $request->end;
         $type = $request->type;
-        $role = $request->role ?? 'Bendahara';
 
-        if ($type == 'excel' && $role && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+        // =========================
+        // FIX: AMBIL NIP (REQUEST / LOGIN)
+        // =========================
+        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+
+        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        // =========================
+        // FIX: AMBIL ROLE DARI DB
+        // =========================
+        $dbRole = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('tj.NIP_KARYAWAN', $nip)
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->value('rj.DESKRIPSI_JABATAN');
+
+        // PRIORITAS ROLE
+        $role = $dbRole ?? $authRole;
+        $role = trim($role);
+
+        // =========================
+        // VALIDASI ROLE 
+        // =========================
+        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Hanya Bendahara & Kepala Sekolah yang boleh generate laporan'
+                'message' => 'Role tidak diizinkan generate laporan'
             ], 403);
         }
-
-        $nip = DB::table('TR_JABATAN as tj')
-            ->join('REF_JABATAN_STR as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->where('rj.DESKRIPSI_JABATAN', $role)
-            ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->value('tj.NIP_KARYAWAN');
 
         // =========================
         // 1. PENERIMAAN SISWA
@@ -80,7 +97,7 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // UNION
+        // UNION DATA
         // =========================
         $data = DB::query()
             ->fromSub(
@@ -93,7 +110,7 @@ class LaporanBukuKhasUmumController extends Controller
             ->get();
 
         // =========================
-        // SALDO
+        // HITUNG SALDO
         // =========================
         $saldo = 0;
         foreach ($data as $item) {
@@ -102,10 +119,15 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // SPLIT
+        // SPLIT P1 & P2
         // =========================
-        $p1 = collect($data)->filter(fn($item) => $item->metode === 'Tunai')->values();
-        $p2 = collect($data)->filter(fn($item) => $item->metode !== 'Tunai')->values();
+        $p1 = collect($data)->filter(function ($item) {
+            return $item->metode === 'Tunai';
+        })->values();
+
+        $p2 = collect($data)->filter(function ($item) {
+            return $item->metode !== 'Tunai';
+        })->values();
 
         // =========================
         // EXCEL
@@ -120,7 +142,8 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         // PDF
         // =========================
-        if ($type == 'pdf') {
+        if (strtolower(trim($type)) === 'pdf') {
+
             $pdf = Pdf::loadView(
                 'exports.LaporanBukuKhasUmum',
                 [
@@ -140,8 +163,7 @@ class LaporanBukuKhasUmumController extends Controller
         return response()->json([
             'bku' => $data,
             'p1' => $p1,
-            'p2' => $p2,
-            'nip' => $nip 
+            'p2' => $p2
         ]);
     }
 }
