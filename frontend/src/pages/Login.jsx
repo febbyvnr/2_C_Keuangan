@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../api/api'; // Pastikan path ini benar mengarah ke fungsi fetch-mu
+import { apiFetch } from '../api/api'; 
+// TAMBAHAN: Import logo dari folder assets (sesuaikan path-nya ya!)
+import logoSekolah from '../assets/logo.png'; 
 
 export default function Login() {
     const [nip, setNip] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // State untuk Hide/Show Password
+    const [showPassword, setShowPassword] = useState(false); 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -21,12 +23,10 @@ export default function Login() {
                 body: JSON.stringify({ nip, password })
             });
 
-            // Simpan data login ke localStorage
             localStorage.setItem('token', response.data.access_token);
             localStorage.setItem('roles', JSON.stringify(response.data.roles));
             localStorage.setItem('user', JSON.stringify(response.data.user));
 
-            // Lempar ke dashboard Bendahara
             navigate('/bendahara/dashboard');
         } catch (error) {
             setErrorMsg(error.status === 401 ? 'NIP atau Password salah!' : (error.message || 'Gagal terhubung ke server.'));
@@ -39,7 +39,21 @@ export default function Login() {
         <div style={styles.container}>
             <div style={styles.card}>
                 <div style={styles.header}>
-                    <h2 style={styles.title}>Login SI BOPKRI</h2>
+                    {/* TAMBAHAN: Gambar Logo */}
+                    <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                        <img 
+                            src={logoSekolah} 
+                            alt="Logo SMK Bopkri Dua" 
+                            style={{ width: '80px', height: 'auto' }} // Atur ukuran logonya di sini
+                        />
+                    </div>
+                    {/* --------------------- */}
+                    
+                    {/* Aku ubah textAlign dari 'left' jadi 'center' biar teksnya ikut ke tengah di bawah logo */}
+                    <div style={{ textAlign: 'center' }}>
+                        <h2 style={styles.title}>Selamat Datang di SIBOKU</h2>
+                        <p style={styles.subtitle}>Sistem Informasi Keuangan SMK 2 BOPKRI</p>
+                    </div>
                 </div>
                 
                 <div style={styles.formContainer}>
@@ -104,7 +118,7 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        backgroundColor: '#e9ecef', // Warna abu-abu terang mirip background Windows
+        backgroundColor: '#e9ecef', 
         fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
     },
     card: {
@@ -114,19 +128,19 @@ const styles = {
         width: '100%',
         maxWidth: '450px',
         overflow: 'hidden',
-        color: '#333' // Memaksa teks jadi gelap meski browser di dark mode
+        color: '#333' 
     },
     header: {
         backgroundColor: '#f8f9fa',
         padding: '20px',
         borderBottom: '1px solid #e0e0e0',
-        textAlign: 'left'
+        // textAlign: 'left' <-- Dihapus, dipindah ke div inline biar rapi sama logo
     },
     title: {
         margin: 0,
         fontSize: '1.25rem',
         fontWeight: 'bold',
-        color: '#212529' // Memaksa teks header hitam
+        color: '#212529' 
     },
     subtitle: {
         margin: '5px 0 0 0',
@@ -144,7 +158,7 @@ const styles = {
         marginBottom: '8px',
         fontWeight: '600',
         fontSize: '0.9rem',
-        color: '#495057' // Warna abu-abu gelap
+        color: '#495057' 
     },
     input: {
         width: '100%',
@@ -153,9 +167,9 @@ const styles = {
         border: '1px solid #ced4da',
         borderRadius: '4px',
         boxSizing: 'border-box',
-        backgroundColor: '#ffffff', // Paksa background putih 
-        color: '#212529', // Paksa teks hitam
-        colorScheme: 'light' // Trik kebal ekstensi Dark Mode
+        backgroundColor: '#ffffff', 
+        color: '#212529', 
+        colorScheme: 'light' 
     },
     passwordWrapper: {
         position: 'relative',
@@ -164,7 +178,7 @@ const styles = {
     },
     inputPassword: {
         width: '100%',
-        padding: '10px 40px 10px 12px', // Kasih ruang buat ikon mata di kanan
+        padding: '10px 40px 10px 12px', 
         fontSize: '1rem',
         border: '1px solid #ced4da',
         borderRadius: '4px',
@@ -189,7 +203,7 @@ const styles = {
     submitButton: {
         width: '100%',
         padding: '12px',
-        backgroundColor: '#0d6efd', // Warna biru mirip bootstrap/asli gambar
+        backgroundColor: '#0d6efd', 
         color: '#ffffff',
         border: 'none',
         borderRadius: '4px',
