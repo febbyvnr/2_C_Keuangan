@@ -18,7 +18,7 @@ class LaporanPenerimaanController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        // 🔥 FIX: ambil NIP dari request atau login
+        // FIX: ambil NIP dari request atau login
         $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
 
         $authRole = Auth::check() ? Auth::user()->role : null;
@@ -29,7 +29,7 @@ class LaporanPenerimaanController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        // 🔥 FIX UTAMA
+        // FIX UTAMA
         $role = $dbRole ?? $authRole;
         $role = trim($role);
 
@@ -43,7 +43,7 @@ class LaporanPenerimaanController extends Controller
         // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana, $role),
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role, $nip),
                 'Laporan_Penerimaan.xlsx'
             );
         }
@@ -77,7 +77,7 @@ class LaporanPenerimaanController extends Controller
 
         $pdf = Pdf::loadView(
              'exports.LaporanPenerimaan_pdf',
-            compact('data', 'total', 'start', 'end', 'role') // 🔥 penting!
+            compact('data', 'total', 'start', 'end', 'role', 'nip') 
         );
 
         return $pdf->download('Laporan_Penerimaan.pdf');
