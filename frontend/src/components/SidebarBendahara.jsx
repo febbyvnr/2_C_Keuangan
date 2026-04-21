@@ -34,10 +34,27 @@ export default function SidebarBendahara() {
         }
     }, [isMasterActive]);
 
-    // TAMBAHAN: Fungsi yang jalan kalau tombol "Iya" ditekan
-    const confirmLogout = () => {
-        localStorage.clear(); 
-        navigate("/login");   
+    const confirmLogout = async () => {
+        try {
+            // 1. Ambil token dari localStorage (sesuaikan jika nama key-mu beda, misal 'access_token')
+            const token = localStorage.getItem('token'); 
+            
+            // 2. Tembak API logout ke Laravel supaya waktu logout dicatat
+            await fetch('http://localhost:8000/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.error("Gagal lapor logout ke backend:", error);
+        } finally {
+            // 3. Apapun hasilnya (sukses/gagal tembak API), bersihkan sesi dan redirect
+            localStorage.clear(); 
+            setShowLogoutConfirm(false);
+            navigate("/login");   
+        }
     };
 
     return (

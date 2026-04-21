@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AccessLogController;
 use App\Http\Controllers\MstCoaController;
 use App\Http\Controllers\MstKegiatanController;
 use App\Http\Controllers\MstProgramKerjaController;
@@ -36,7 +38,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+Route::get('/access-logs', [AccessLogController::class, 'index']);
 
 // 2. F82, F83, F84 (Create, Update, Delete) - HANYA BENDAHARA
 Route::middleware(['role:Bendahara'])->group(function () {
