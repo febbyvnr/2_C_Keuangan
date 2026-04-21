@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Navigate } from "react-router-dom"
 
 import SidebarBendahara from "./components/SidebarBendahara";
+import SidebarWaka from "./components/SidebarWaka";
 import Login from "./pages/Login"; // <-- TAMBAHAN 1: Import halaman login
 
 import Dashboard from "./pages/bendahara/Dashboard";
@@ -30,6 +31,8 @@ import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
 import PicGuruFPD from "./pages/pic/guru/FPD";
 import WakaRKT from "./pages/waka/RKT";
 import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
+import WakaApprovalCenter from "./pages/waka/ApprovalCenter";
+import WakaMonitoring from "./pages/waka/Monitoring";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
@@ -41,6 +44,17 @@ function BendaharaLayout() {
     return (
         <div className="layout" style={{ display: "flex" }}>
             <SidebarBendahara />
+            <div className="content-wrapper" style={{ flex: 1 }}>
+                <Outlet />
+            </div>
+        </div>
+    );
+}
+
+function WakaLayout() {
+    return (
+        <div className="layout" style={{ display: "flex" }}>
+            <SidebarWaka />
             <div className="content-wrapper" style={{ flex: 1 }}>
                 <Outlet />
             </div>
@@ -94,10 +108,15 @@ export default function App() {
                 <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
 
                 {/* WAKA */}
-                <Route path="/waka" element={<WakaRKT />} />
-                <Route path="/waka/rkt" element={<WakaRKT />} />
-                <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
-                <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
+                {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
+                {/* <Route path="/waka" element={<WakaLayout />}> */}
+                    <Route path="/waka" element={<WakaRKT />} />
+                    <Route path="/waka/rkt" element={<WakaRKT />} />
+                    <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
+                    <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
+                    <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
+                    <Route path="/waka/monitoring" element={<WakaMonitoring />} />
+                {/* </Route> */}
 
             </Routes>
         </BrowserRouter>

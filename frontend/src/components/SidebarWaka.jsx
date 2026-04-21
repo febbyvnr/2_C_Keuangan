@@ -6,6 +6,8 @@ const MENU_ITEMS = [
     { label: "Realisasi RKT" },
     { label: "Bridging RKT" },
     { label: "Evaluasi RKT", to: "/waka/evaluasi-rkt" },
+    { label: "Approval Center", to: "/waka/approval-center" },
+    { label: "Monitoring", to: "/waka/monitoring" },
 ];
 
 const styles = {
