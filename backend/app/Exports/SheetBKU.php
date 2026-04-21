@@ -142,7 +142,7 @@ class SheetBKU implements WithEvents, WithTitle
                     ->getStartColor()->setARGB('FFFFE699');
 
                 // =====================
-                // FOOTER 
+                // FOOTER
                 // =====================
                 $footerRow = $totalRow + 4;
 
