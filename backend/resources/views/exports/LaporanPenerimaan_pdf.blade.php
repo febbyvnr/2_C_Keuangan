@@ -55,9 +55,6 @@
             margin: 8px 0 12px 0;
         }
 
-        /* ===================== */
-        /* TTD CENTER */
-        /* ===================== */
         .ttd-center {
             text-align: center;
             margin-top: 80px;
@@ -79,14 +76,10 @@
             margin-top: 10px;
         }
 
-        /* ===================== */
-        /* TANGGAL */
-        /* ===================== */
         .tanggal-kanan {
             text-align: right;
             margin-top: 40px;
         }
-
     </style>
 </head>
 <body>
@@ -142,12 +135,13 @@
 
     if ($role === 'Kepala Sekolah') {
         $nama = 'Drs. Budi Santoso';
-        $nip  = '1976543210';
     } else {
         $role = 'Bendahara';
         $nama = 'Rina Putri, S.E.';
-        $nip  = '1987654321';
     }
+
+    //  NIP dari controller (DB)
+    $nip = $nip ?? '-';
 @endphp
 
 <!-- ===================== -->

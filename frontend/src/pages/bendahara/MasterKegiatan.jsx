@@ -248,9 +248,9 @@ export default function MasterKegiatan() {
                     <a href={`http://localhost:8000/api/kegiatan/export/excel?search=${search}`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
-                    <a href={`http://localhost:8000/api/kegiatan/export/csv?search=${search}`} className="btn-outline-success custom-btn">
+                    {/* <a href={`http://localhost:8000/api/kegiatan/export/csv?search=${search}`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-csv"></i> Export CSV
-                    </a>
+                    </a> */}
                     <a href={`http://localhost:8000/api/kegiatan/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
                     </a>
