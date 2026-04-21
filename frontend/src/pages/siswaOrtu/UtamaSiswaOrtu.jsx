@@ -239,7 +239,7 @@ const [siswaData, setSiswaData] = useState(null);
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileOpen(false);
-                    navigate("/siswa-ortu/profile");
+                    navigate(`/siswa-ortu/profile/${id}`);
                   }}
                 >
                   Lihat Profile

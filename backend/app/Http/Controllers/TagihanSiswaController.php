@@ -642,4 +642,25 @@ class TagihanSiswaController extends Controller
 
         return $pdf->download('tagihan_siswa.pdf');
     }
+
+    public function getProfileSiswa(int $id): JsonResponse
+    {
+        $siswa = MstSiswa::where('ID_SISWA_TETAP', $id)
+            ->where('IS_DELETE', 0)
+            ->first();
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data siswa tidak ditemukan.',
+                'data' => null,
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile siswa berhasil diambil.',
+            'data' => $siswa,
+        ]);
+    }
 }
