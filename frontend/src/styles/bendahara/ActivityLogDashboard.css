@@ -149,6 +149,38 @@
     text-align: center !important;
 }
 
+/* =========================================================
+   6. TAB NAVIGATION
+   ========================================================= */
+.log-tabs-container {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e5e7eb !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
+}
+
+.log-tab-btn {
+    padding: 12px 24px !important;
+    background: none !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+.log-tab-btn:hover {
+    color: #111827 !important;
+}
+
+.log-tab-btn.active {
+    color: #1d4ed8 !important; /* Warna biru aktif */
+    border-bottom: 3px solid #1d4ed8 !important;
+}
+
 .badge-created { background-color: #d1fae5 !important; color: #065f46 !important; }
 .badge-updated { background-color: #fef3c7 !important; color: #92400e !important; }
 .badge-deleted { background-color: #fee2e2 !important; color: #991b1b !important; }
