@@ -1,19 +1,21 @@
 import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
-// TAMBAHAN: Import useNavigate
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function SidebarBendahara() {
     const location = useLocation();
-    const navigate = useNavigate(); // TAMBAHAN: Inisialisasi fungsi navigasi
+    const navigate = useNavigate();
 
     const [openMaster, setOpenMaster] = useState(false);
     const isMasterActive = location.pathname.startsWith("/bendahara/master");
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    
+    // TAMBAHAN: State untuk nampilin pop-up konfirmasi logout
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -32,14 +34,41 @@ export default function SidebarBendahara() {
         }
     }, [isMasterActive]);
 
-    // TAMBAHAN: Fungsi untuk handle aksi logout
-    const handleLogout = () => {
-        localStorage.clear(); // 1. Hapus token dan data user dari memori browser
-        navigate("/login");   // 2. Lempar kembali ke halaman login
+    // TAMBAHAN: Fungsi yang jalan kalau tombol "Iya" ditekan
+    const confirmLogout = () => {
+        localStorage.clear(); 
+        navigate("/login");   
     };
 
     return (
         <>
+            {/* --- POP-UP KONFIRMASI LOGOUT --- */}
+            {showLogoutConfirm && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalBox}>
+                        <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>Konfirmasi Keluar</h4>
+                        <p style={{ margin: "0 0 20px 0", color: "#666" }}>Apakah Anda yakin ingin logout dari sistem?</p>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                            {/* Tombol TIDAK (Warna Merah) */}
+                            <button 
+                                onClick={() => setShowLogoutConfirm(false)} 
+                                style={styles.btnTidak}
+                            >
+                                Tidak
+                            </button>
+                            {/* Tombol IYA */}
+                            <button 
+                                onClick={confirmLogout} 
+                                style={styles.btnIya}
+                            >
+                                Iya
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* -------------------------------- */}
+
             {isMobile && isOpen && (
                 <div 
                     className="sidebar-overlay" 
@@ -153,8 +182,8 @@ export default function SidebarBendahara() {
                         </ul>
                         <div className="logout">
                             <div className="logout-button">
-                                {/* TAMBAHAN: Pasang onClick ke tombol ini */}
-                                <button className="btn-logout" onClick={handleLogout}>
+                                {/* UBAHAN: Tombol ini sekarang cuma nampilin pop-up, bukan langsung logout */}
+                                <button className="btn-logout" onClick={() => setShowLogoutConfirm(true)}>
                                     <i className="bi bi-box-arrow-right"></i>
                                     <span>Logout</span>
                                 </button>
@@ -166,3 +195,29 @@ export default function SidebarBendahara() {
         </>
     )
 }
+
+// Objek gaya khusus buat Pop-up biar rapi tanpa perlu edit file CSS lagi
+const styles = {
+    modalOverlay: {
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex", justifyContent: "center", alignItems: "center",
+        zIndex: 9999 // Pastikan muncul paling depan
+    },
+    modalBox: {
+        backgroundColor: "white", padding: "20px 25px",
+        borderRadius: "8px", boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+        maxWidth: "400px", width: "90%", textAlign: "left",
+        fontFamily: "sans-serif"
+    },
+    btnTidak: {
+        backgroundColor: "#dc2626", color: "white", // Merah
+        border: "none", padding: "8px 16px", borderRadius: "4px",
+        cursor: "pointer", fontWeight: "bold"
+    },
+    btnIya: {
+        backgroundColor: "#0d6efd", color: "white", // Biru
+        border: "none", padding: "8px 16px", borderRadius: "4px",
+        cursor: "pointer", fontWeight: "bold"
+    }
+};
