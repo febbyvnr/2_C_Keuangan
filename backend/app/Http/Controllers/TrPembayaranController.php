@@ -12,7 +12,12 @@ class TrPembayaranController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = TrPembayaran::all();
+            $data = TrPembayaran::with([
+                'tahunAnggaran',
+                'jenisPembayaran',
+                'siswa',
+                'tagihan'
+            ])->get();
             return response()->json([
                 'data' => $data
             ]);

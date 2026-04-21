@@ -12,7 +12,10 @@ class RefPmController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = RefPm::all();
+            $data = RefPm::with(['trPm.programKerja'])
+                ->orderBy('REF_ID_REF_PM', 'asc')
+                ->orderBy('NAMA_PM', 'asc')
+                ->get();
 
             return response()->json([
                 'success' => true,
@@ -40,11 +43,18 @@ class RefPmController extends Controller
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('NAMA_PM', 'like', "%{$keyword}%")
-                      ->orWhere('DESKRIPSI_PM', 'like', "%{$keyword}%");
+                      ->orWhere('DESKRIPSI_PM', 'like', "%{$keyword}%")
+                      ->orWhereHas('trPm.programKerja', function ($q) use ($keyword) {
+                          $q->where('PROGRAM_KERJA', 'like', "%{$keyword}%")
+                            ->orWhere('INDIKATOR', 'like', "%{$keyword}%");
+                      });
                 });
             }
 
-            $data = $query->get();
+            $data = $query->with(['trPm.programKerja'])
+                ->orderBy('REF_ID_REF_PM', 'asc')
+                ->orderBy('NAMA_PM', 'asc')
+                ->get();
 
             return response()->json([
                 'success' => true,
@@ -66,7 +76,17 @@ class RefPmController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = RefPm::with('trPm')->find($id);
+            $data = RefPm::with([
+                'parent' => function ($query) {
+                    $query->select('ID_REF_PM', 'NAMA_PM', 'DESKRIPSI_PM');
+                },
+                'children' => function ($query) {
+                    $query->select('ID_REF_PM', 'REF_ID_REF_PM', 'NAMA_PM', 'DESKRIPSI_PM');
+                },
+                'trPm.programKerja' => function ($query) {
+                    $query->select('ID_PROGRAM_KERJA', 'PROGRAM_KERJA', 'INDIKATOR');
+                }
+            ])->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -94,7 +114,7 @@ class RefPmController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_PM' => 'required|integer',
+                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ]);
@@ -136,7 +156,7 @@ class RefPmController extends Controller
             }
 
             $validated = $request->validate([
-                'REF_ID_REF_PM' => 'required|integer',
+                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ]);

@@ -10,10 +10,8 @@ class RefJenisPembayaran extends Model
 
     protected $primaryKey = 'ID_JENIS_PEMBAYARAN';
     public $timestamps = false;
-
+    public $incrementing = true;
     protected $fillable = [
-
-        'ID_JENIS_PEMBAYARAN',
         'DESKRIPSI_JENIS_PEMBAYARAN'
     ];
 }
