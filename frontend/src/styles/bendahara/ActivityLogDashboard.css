@@ -1,113 +1,154 @@
-/* src/style/ActivityLogDashboard.css */
-
-.log-dashboard-container {
-    padding: 24px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-family: sans-serif;
+/* =========================================================
+   1. RESET GLOBAL CSS (TAMENG)
+   Mematikan efek * { padding: 2rem; width: 100%; text-align: center; } 
+   khusus untuk elemen di dalam halaman ini saja.
+   ========================================================= */
+.log-page-wrapper * {
+    width: auto;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
 }
 
-.log-dashboard-header {
+/* =========================================================
+   2. STYLING DASHBOARD UTAMA
+   ========================================================= */
+.log-page-wrapper {
+    width: 100% !important;
+    padding: 32px 40px !important;
+    box-sizing: border-box;
+}
+
+.log-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    width: 100% !important;
+    margin-bottom: 24px !important;
 }
 
-.log-dashboard-header h2 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
+.log-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
 }
 
-.log-controls {
+/* =========================================================
+   3. KONTROL FILTER & SEARCH
+   ========================================================= */
+.log-actions {
     display: flex;
-    gap: 16px;
+    align-items: center;
+    gap: 12px !important; /* Memaksa jarak antar elemen */
 }
 
-.log-select, .log-input {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    outline: none;
+.log-btn-reset {
+    padding: 8px 16px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    color: #374151 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    height: 38px !important;
+}
+
+.log-btn-reset:hover {
+    background-color: #f3f4f6 !important;
+}
+
+.log-select {
+    padding: 8px 14px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    height: 38px !important;
+    outline: none !important;
+    color-scheme: light !important;
 }
 
 .log-input {
-    width: 250px;
+    padding: 8px 14px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    width: 260px !important; /* Lebar box search dikunci segini */
+    height: 38px !important;
+    outline: none !important;
+    box-sizing: border-box !important;
 }
 
-.log-table-wrapper {
-    overflow-x: auto;
+.log-input::placeholder {
+    color: #9ca3af !important;
+}
+
+/* =========================================================
+   4. BOX TABEL & ISI TABEL
+   ========================================================= */
+.log-content-box {
+    width: 100% !important;
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06) !important;
+    border: 1px solid #e5e7eb !important;
+    overflow-x: auto !important;
 }
 
 .log-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
-
-.log-table th, .log-table td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    min-width: 800px !important;
 }
 
 .log-table th {
-    background-color: #f9fafb;
-    color: #6b7280;
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-.log-table tbody tr:hover {
-    background-color: #f9fafb;
+    background-color: #ffffff !important;
+    color: #374151 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 16px 24px !important;
+    text-transform: uppercase !important;
+    border-bottom: 2px solid #f3f4f6 !important;
 }
 
 .log-table td {
-    font-size: 14px;
-    color: #374151;
+    padding: 16px 24px !important;
+    font-size: 14px !important;
+    color: #111827 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+}
+
+.log-table tbody tr:hover td {
+    background-color: #f9fafb !important;
 }
 
 .username-cell {
-    font-weight: 500;
-    color: #111827;
+    font-weight: 500 !important;
 }
 
 .empty-state {
-    text-align: center;
-    padding: 20px;
-    color: #6b7280;
+    text-align: center !important;
+    padding: 40px !important;
+    color: #6b7280 !important;
+    width: 100% !important;
 }
 
-/* Badge Styles */
+/* =========================================================
+   5. LABEL BADGE AKTIVITAS
+   ========================================================= */
 .badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 9999px;
-    font-size: 12px;
-    font-weight: 600;
+    display: inline-block !important;
+    padding: 6px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
 }
 
-.badge-created {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.badge-updated {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-
-.badge-deleted {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.badge-default {
-    background-color: #f3f4f6;
-    color: #1f2937;
-}
+.badge-created { background-color: #d1fae5 !important; color: #065f46 !important; }
+.badge-updated { background-color: #fef3c7 !important; color: #92400e !important; }
+.badge-deleted { background-color: #fee2e2 !important; color: #991b1b !important; }

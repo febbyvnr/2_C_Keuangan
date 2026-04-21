@@ -16,7 +16,7 @@ import Laporan from "./pages/bendahara/Laporan";
 
 import Verifikasi from "./pages/bendahara/Verifikasi";
 import Penerimaan from "./pages/bendahara/Penerimaan";
-import Log from "./pages/bendahara/LogAktivitas";
+import Log from "./pages/bendahara/ActivityLogDashboard";
 
 import MasterCOA from "./pages/bendahara/MasterCOA";
 import MasterKegiatan from "./pages/bendahara/MasterKegiatan";
