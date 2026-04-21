@@ -45,19 +45,40 @@ trait RecordsActivity
         // 3. Data yang Terkait
         $relatedData = 'PK ID: ' . $this->getKey();
 
-        // 4. Deskripsi Perubahan
+        // 4. Deskripsi Perubahan (Bahasa Manusia)
         $description = '';
-        if ($event === 'updated') {
-            $changes = [
-                'old' => $this->getOriginal(),
-                'new' => $this->getChanges()
-            ];
-            $description = json_encode($changes);
-        } else {
-            $description = json_encode($this->getAttributes());
+        
+        if ($event === 'created') {
+            $description = "Menambah data baru (ID: " . $this->getKey() . ")";
+        } elseif ($event === 'deleted') {
+            $description = "Menghapus data (ID: " . $this->getKey() . ")";
+        } elseif ($event === 'updated') {
+            $changes = $this->getChanges();
+            $original = $this->getOriginal();
+            $teksPerubahan = [];
+
+            foreach ($changes as $kolom => $nilaiBaru) {
+                // Abaikan jika yang berubah cuma timestamp
+                if ($kolom === 'updated_at' || $kolom === 'created_at') continue;
+
+                $nilaiLama = $original[$kolom] ?? 'kosong';
+                
+                // Pastikan nilainya string supaya tidak error saat digabung
+                $nilaiLamaStr = is_scalar($nilaiLama) ? $nilaiLama : json_encode($nilaiLama);
+                $nilaiBaruStr = is_scalar($nilaiBaru) ? $nilaiBaru : json_encode($nilaiBaru);
+
+                $teksPerubahan[] = "kolom {$kolom} dari '{$nilaiLamaStr}' menjadi '{$nilaiBaruStr}'";
+            }
+
+            if (count($teksPerubahan) > 0) {
+                $description = "Mengubah " . implode(', ', $teksPerubahan);
+            } else {
+                $description = "Memperbarui data";
+            }
         }
 
-        $description = substr($description, 0, 250); 
+        // Potong string agar tidak error batas varchar(255) di database
+        $description = substr($description, 0, 250);
 
         // 5. Simpan Log
         ActivityLog::create([

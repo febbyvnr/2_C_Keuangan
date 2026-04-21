@@ -151,12 +151,12 @@ const ActivityLogDashboard = () => {
                                 </tr>
                             ) : (
                                 <tr>
-                                    <th>ID LOG</th>
-                                    <th>WAKTU LOGIN</th>
-                                    <th>WAKTU LOGOUT</th>
-                                    <th>USERNAME</th>
-                                    <th>NIP/NIS</th>
-                                    <th>ROLE</th>
+                                    <th style={{ width: '5%' }}>ID LOG</th>
+                                    <th style={{ width: '20%' }}>WAKTU LOGIN</th>
+                                    <th style={{ width: '20%' }}>WAKTU LOGOUT</th>
+                                    <th style={{ width: '25%' }}>USERNAME</th>
+                                    <th style={{ width: '15%' }}>NIP/NIS</th>
+                                    <th style={{ width: '15%' }}>ROLE</th>
                                 </tr>
                             )}
                         </thead>
@@ -195,7 +195,7 @@ const ActivityLogDashboard = () => {
                                             <td>{log.end_login}</td>
                                             <td className="username-cell">{log.username}</td>
                                             <td>{log.nip_nis}</td>
-                                            <td>{log.role || '-'}</td>
+                                            <td style={{ whiteSpace: 'nowrap' }}>{log.role || '-'}</td>
                                         </tr>
                                     )
                                 ))

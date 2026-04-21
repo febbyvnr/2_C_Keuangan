@@ -53,4 +53,33 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
+
+    public function logout(Request $request)
+    {
+        // 1. Ambil token dari Header
+        $token = $request->bearerToken();
+
+        if ($token) {
+            try {
+                // 2. Decrypt token buat nyari ID Access Log-nya
+                $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($token);
+                $tokenData = json_decode($decrypted);
+                $accessLogId = $tokenData->id_access_log ?? null;
+
+                // 3. Catat waktu END_LOGIN
+                if ($accessLogId) {
+                    \App\Models\AccessLog::where('ID_ACCESS_LOG', $accessLogId)
+                        ->update(['END_LOGIN' => now()]);
+                }
+            } catch (\Exception $e) {
+                // Token invalid/expired, biarkan saja langsung terlogout di frontend
+            }
+        }
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Berhasil logout dan log dicatat'
+        ], 200);
+    }
 }

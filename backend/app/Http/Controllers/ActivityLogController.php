@@ -23,6 +23,7 @@ class ActivityLogController extends Controller
                 'nip_nis'   => $log->ACTOR_USERNAME,
                 'role'      => $log->ACTOR_ROLE,
                 'aktivitas' => $log->ACTIVITY_NAME,
+                'deskripsi' => $log->ACTIVITY_DESCRIPTION
             ];
         });
 
