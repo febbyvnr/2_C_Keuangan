@@ -1,0 +1,120 @@
+.container {
+    padding: 20px;
+    background: #f1f5f9;
+    min-height: 100vh;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.top-bar input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    width: 250px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+.table-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+.active-row {
+    background: #e0f2fe;
+}
+
+.detail-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.status-ok {
+    color: green;
+}
+
+.status-wait {
+    columns: red;
+}
+
+.status-pill {
+    padding: 5px 10px;
+    border-radius: 999px;
+    color: white;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.status-pill.success {
+    background: green;
+}
+
+.status-pill.danger {
+    background: red;
+}
+
+.btn-approve {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+.pagination {
+    margin-top: 10px;
+}
+
+.pagination button {
+    margin: 2px;
+}
+
+.export-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.custom-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid green;
+    color: green;
+}
+
+.custom-btn:hover {
+    background: green;
+    color: white;
+}
