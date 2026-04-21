@@ -4,6 +4,7 @@ import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+const [siswaData, setSiswaData] = useState(null);
   const [tagihanData, setTagihanData] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,10 +37,12 @@ function UtamaSiswaOrtu() {
           ? pembayaranJson.data
           : [];
 
+        setSiswaData(tagihanJson.siswa || null);
         setTagihanData(tagihan);
         setPaymentHistory(pembayaran);
       } catch (error) {
         console.error("Gagal mengambil data:", error);
+        setSiswaData(null);
         setTagihanData([]);
         setPaymentHistory([]);
       } finally {
@@ -52,17 +55,17 @@ function UtamaSiswaOrtu() {
     }
   }, [id]);
 
-  const siswa = useMemo(() => {
-    if (tagihanData.length > 0 && tagihanData[0]?.SISWA) {
-      return tagihanData[0].SISWA;
-    }
+  // const siswa = useMemo(() => {
+  //   if (tagihanData.length > 0 && tagihanData[0]?.SISWA) {
+  //     return tagihanData[0].SISWA;
+  //   }
 
-    if (paymentHistory.length > 0 && paymentHistory[0]?.siswa) {
-      return paymentHistory[0].siswa;
-    }
+  //   if (paymentHistory.length > 0 && paymentHistory[0]?.siswa) {
+  //     return paymentHistory[0].siswa;
+  //   }
 
-    return null;
-  }, [tagihanData, paymentHistory]);
+  //   return null;
+  // }, [tagihanData, paymentHistory]);
 
   const activeBills = useMemo(() => {
     return tagihanData.map((item) => {
@@ -192,7 +195,7 @@ function UtamaSiswaOrtu() {
           <div className="portal-header-left">
             <p className="portal-label">Portal Siswa / Ortu</p>
             <h1 className="portal-title">
-              Halo, {siswa?.NAMA_SISWA_TETAP || "Siswa"}!
+              Halo, {siswaData?.NAMA_SISWA_TETAP || "Siswa"}!
             </h1>
             <p className="portal-subtitle">
               Pantau tagihan administrasi sekolah dan riwayat pembayaran Anda di
@@ -207,7 +210,7 @@ function UtamaSiswaOrtu() {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
               <div className="profile-avatar">
-                {(siswa?.NAMA_SISWA_TETAP || "S")
+                {(siswaData?.NAMA_SISWA_TETAP || "S")
                   .split(" ")
                   .map((word) => word[0])
                   .slice(0, 2)
@@ -217,7 +220,7 @@ function UtamaSiswaOrtu() {
 
               <div className="profile-text">
                 <span className="profile-name">
-                  {siswa?.NAMA_SISWA_TETAP || "Siswa"}
+                  {siswaData?.NAMA_SISWA_TETAP || "Siswa"}
                 </span>
                 <span className="profile-class">
                   Siswa

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TagihanSiswa;
+use App\Models\MstSiswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,20 +66,12 @@ class TagihanSiswaController extends Controller
             $query->where('STATUS_TAGIHAN_SISWA', $request->STATUS_TAGIHAN_SISWA);
         }
 
-        // if ($request->filled('KELAS')) {
-        //     $kelas = trim($request->KELAS);
-
-        //     $query->whereHas('siswa', function ($q) use ($kelas) {
-        //         $q->where('KELAS_SISWA', 'like', '%' . $kelas . '%');
-        //     });
-        // }
-
         if ($request->filled('search')) {
             $search = trim($request->search);
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                  ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -103,9 +96,25 @@ class TagihanSiswaController extends Controller
             }
         }
 
+        $siswa = null;
+
+        if ($request->filled('ID_SISWA_TETAP')) {
+            $siswaModel = MstSiswa::where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP)->first();
+
+            if ($siswaModel) {
+                $siswa = [
+                    'ID_SISWA_TETAP' => (int) $siswaModel->ID_SISWA_TETAP,
+                    'NAMA_SISWA_TETAP' => $siswaModel->NAMA_SISWA_TETAP,
+                    'NISN_SISWA' => $siswaModel->NISN_SISWA,
+                    'KODE_TA' => $siswaModel->KODE_TA,
+                ];
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Daftar tagihan siswa berhasil diambil.',
+            'siswa' => $siswa,
             'data' => $data,
         ]);
     }
