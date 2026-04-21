@@ -55,31 +55,6 @@
             margin: 8px 0 12px 0;
         }
 
-        .ttd-center {
-            text-align: center;
-            margin-top: 80px;
-        }
-
-        .ttd-role {
-            margin-bottom: 8px;
-        }
-
-        .ttd-nama {
-            margin-bottom: 10px;
-        }
-
-        .ttd-garis {
-            margin-top: 50px;   
-        }
-
-        .ttd-nip {
-            margin-top: 10px;
-        }
-
-        .tanggal-kanan {
-            text-align: right;
-            margin-top: 40px;
-        }
     </style>
 </head>
 <body>
@@ -129,37 +104,10 @@
 </table>
 
 @php
-    \Carbon\Carbon::setLocale('id');
-
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    //  NIP dari controller (DB)
-    $nip = $nip ?? '-';
+\Carbon\Carbon::setLocale('id');
 @endphp
 
-<!-- ===================== -->
-<!-- TTD -->
-<!-- ===================== -->
-<div class="ttd-center">
-    <p class="ttd-role">{{ $role }},</p>
-
-    <p class="ttd-nama"><b>{{ $nama }}</b></p>
-
-    <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip }}</p>
-</div>
-
-<!-- ===================== -->
-<!-- TANGGAL -->
-<!-- ===================== -->
-<div class="tanggal-kanan">
+<p style="text-align:right; margin-top: 40px;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 </div>
 
