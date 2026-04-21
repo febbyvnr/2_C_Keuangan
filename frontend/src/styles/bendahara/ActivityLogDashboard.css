@@ -1,0 +1,113 @@
+/* src/style/ActivityLogDashboard.css */
+
+.log-dashboard-container {
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: sans-serif;
+}
+
+.log-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.log-dashboard-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.log-controls {
+    display: flex;
+    gap: 16px;
+}
+
+.log-select, .log-input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+}
+
+.log-input {
+    width: 250px;
+}
+
+.log-table-wrapper {
+    overflow-x: auto;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.log-table th, .log-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.log-table th {
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.log-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.log-table td {
+    font-size: 14px;
+    color: #374151;
+}
+
+.username-cell {
+    font-weight: 500;
+    color: #111827;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-created {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-updated {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-deleted {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-default {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
