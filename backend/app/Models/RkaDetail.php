@@ -9,12 +9,11 @@ class RkaDetail extends Model
 {
     protected $table = 'dtl_program_kerja';
     protected $primaryKey = 'ID_DT_PROGKER';
-    public $incrementing = false;
+    public $incrementing = true; // Diubah ke true
     protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
-        'ID_DT_PROGKER',
         'ID_PROGRAM_KERJA',
         'ID_REF_DANA',
         'NOMINAL',
@@ -32,8 +31,8 @@ class RkaDetail extends Model
         'ID_PROGRAM_KERJA' => 'integer',
         'ID_REF_DANA' => 'integer',
         'NOMINAL' => 'double',
-        'TGL_AWAL' => 'date',
-        'TGL_AKHIR' => 'date',
+        'TGL_AWAL' => 'datetime',
+        'TGL_AKHIR' => 'datetime',
         'QTY' => 'integer',
         'HARGA_SATUAN' => 'double',
         'VOLUME' => 'integer',
