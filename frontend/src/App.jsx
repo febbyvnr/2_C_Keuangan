@@ -101,9 +101,9 @@ export default function App() {
                 </Route>
 
                 {/* SISWA ORTU */}
-                <Route path="/siswa-ortu/utama" element={<UtamaSiswaOrtu />} />
+                <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
                 <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
-                <Route path="/siswa-ortu/profile" element={<ProfileSiswaOrtu />} />
+                <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
                 {/* PIC GURU */}
                 <Route path="/pic/guru" element={<PicGuruFPD />} />
