@@ -11,4 +11,11 @@ class MstSiswa extends Model
     public $timestamps = false;
     public $incrementing = false;
     protected $keyType = 'int';
+
+    protected $fillable = [
+        'NO_HP_SISWA',
+        'PEKERJAAN_AYAH_SISWA',
+        'PEKERJAAN_IBU_SISWA',
+        'NAMA_WALI_SISWA',
+    ];
 }

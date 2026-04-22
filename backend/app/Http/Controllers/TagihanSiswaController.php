@@ -663,4 +663,41 @@ class TagihanSiswaController extends Controller
             'data' => $siswa,
         ]);
     }
+
+    public function updateProfileSiswa(Request $request, int $id): JsonResponse
+    {
+        try {
+            $siswa = MstSiswa::where('ID_SISWA_TETAP', $id)
+                ->where('IS_DELETE', 0)
+                ->first();
+
+            if (!$siswa) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data siswa tidak ditemukan.',
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'NO_HP_SISWA' => ['nullable', 'string', 'max:20'],
+                'PEKERJAAN_AYAH_SISWA' => ['nullable', 'string', 'max:255'],
+                'PEKERJAAN_IBU_SISWA' => ['nullable', 'string', 'max:255'],
+                'NAMA_WALI_SISWA' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            $siswa->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile siswa berhasil diperbarui.',
+                'data' => $siswa,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui profile siswa.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

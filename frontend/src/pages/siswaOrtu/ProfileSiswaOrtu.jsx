@@ -59,52 +59,52 @@ function ProfileSiswaOrtu() {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-
-        const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`);
-        const json = await res.json();
-
-        console.log("PROFILE RESPONSE:", json);
-
-        const siswa = json?.data || null;
-
-        if (siswa) {
-          setFormData({
-            namaSiswa: siswa.NAMA_SISWA_TETAP || "",
-            nis: siswa.ID_PENDAFTARAN || "",
-            nisn: siswa.NISN_SISWA || "",
-            kelas: "-",
-            jenisKelamin:
-              siswa.GENDER_SISWA === "L"
-                ? "Laki-laki"
-                : siswa.GENDER_SISWA === "P"
-                ? "Perempuan"
-                : siswa.GENDER_SISWA || "",
-            tempatLahir: siswa.TEMPAT_LAHIR_SISWA || "",
-            tanggalLahir: formatTanggalIndonesia(siswa.TGL_LAHIR_SISWA),
-            alamat: formatAlamat(siswa),
-            noHp: siswa.NO_HP_SISWA || "",
-            tahunLulus: siswa.TAHUN_LULUS || "",
-            namaAyah: siswa.NAMA_AYAH_SISWA || "",
-            pekerjaanAyah: siswa.PEKERJAAN_AYAH_SISWA || "",
-            namaIbu: siswa.NAMA_IBU_SISWA || "",
-            pekerjaanIbu: siswa.PEKERJAAN_IBU_SISWA || "",
-            namaWali: siswa.NAMA_WALI_SISWA || "-",
-          });
-        }
-      } catch (error) {
-        console.error("Gagal mengambil profile:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
       fetchProfile();
     }
   }, [id]);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`);
+      const json = await res.json();
+
+      console.log("PROFILE RESPONSE:", json);
+
+      const siswa = json?.data || null;
+
+      if (siswa) {
+        setFormData({
+          namaSiswa: siswa.NAMA_SISWA_TETAP || "",
+          nis: siswa.ID_PENDAFTARAN || "",
+          nisn: siswa.NISN_SISWA || "",
+          kelas: "-",
+          jenisKelamin:
+            siswa.GENDER_SISWA === "L"
+              ? "Laki-laki"
+              : siswa.GENDER_SISWA === "P"
+              ? "Perempuan"
+              : siswa.GENDER_SISWA || "",
+          tempatLahir: siswa.TEMPAT_LAHIR_SISWA || "",
+          tanggalLahir: formatTanggalIndonesia(siswa.TGL_LAHIR_SISWA),
+          alamat: formatAlamat(siswa),
+          noHp: siswa.NO_HP_SISWA || "",
+          tahunLulus: siswa.TAHUN_LULUS || "",
+          namaAyah: siswa.NAMA_AYAH_SISWA || "",
+          pekerjaanAyah: siswa.PEKERJAAN_AYAH_SISWA || "",
+          namaIbu: siswa.NAMA_IBU_SISWA || "",
+          pekerjaanIbu: siswa.PEKERJAAN_IBU_SISWA || "",
+          namaWali: siswa.NAMA_WALI_SISWA || "-",
+        });
+      }
+    } catch (error) {
+      console.error("Gagal mengambil profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,9 +114,41 @@ function ProfileSiswaOrtu() {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Data disimpan:", formData);
+  const handleCancel = async () => {
+    await fetchProfile();
     setIsEdit(false);
+  };
+
+  const handleSave = async () => {
+    try {
+      const payload = {
+        NO_HP_SISWA: formData.noHp,
+        PEKERJAAN_AYAH_SISWA: formData.pekerjaanAyah,
+        PEKERJAAN_IBU_SISWA: formData.pekerjaanIbu,
+        NAMA_WALI_SISWA: formData.namaWali,
+      };
+
+      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal menyimpan profile");
+      }
+
+      await fetchProfile();
+      alert("Profile berhasil disimpan");
+      setIsEdit(false);
+    } catch (error) {
+      console.error("Gagal menyimpan profile:", error);
+      alert(error.message || "Terjadi kesalahan saat menyimpan");
+    }
   };
 
   const avatarText = useMemo(() => {
@@ -149,7 +181,7 @@ function ProfileSiswaOrtu() {
             </button>
           ) : (
             <div className="topbar-actions">
-              <button className="cancel-btn" onClick={() => setIsEdit(false)}>
+              <button className="cancel-btn" onClick={handleCancel}>
                 Batal
               </button>
               <button className="save-btn" onClick={handleSave}>
@@ -224,7 +256,7 @@ function ProfileSiswaOrtu() {
                   name="alamat"
                   value={formData.alamat}
                   onChange={handleChange}
-                  disabled={!isEdit}
+                  disabled
                   rows="3"
                 />
               </div>
