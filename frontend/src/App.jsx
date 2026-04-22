@@ -39,6 +39,12 @@ import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
 import ProfileSiswaOrtu from "./pages/siswaOrtu/ProfileSiswaOrtu";
 
+import SidebarYayasan from "./components/SidebarYayasan";
+import DashboardYayasan from "./pages/yayasan/Dashboard.jsx";
+import LaporanYayasan from "./pages/yayasan/Laporan.jsx";
+import MonitoringYayasan from "./pages/yayasan/Monitoring.jsx";
+import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
+
 import "./index.css";
 
 function BendaharaLayout() {
@@ -56,6 +62,17 @@ function WakaLayout() {
     return (
         <div className="layout" style={{ display: "flex" }}>
             <SidebarWaka />
+            <div className="content-wrapper" style={{ flex: 1 }}>
+                <Outlet />
+            </div>
+        </div>
+    );
+}
+
+function YayasanLayout() {
+    return (
+        <div className="layout" style={{ display: "flex" }}>
+            <SidebarYayasan />
             <div className="content-wrapper" style={{ flex: 1 }}>
                 <Outlet />
             </div>
@@ -119,6 +136,13 @@ export default function App() {
                     <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
                     <Route path="/waka/monitoring" element={<WakaMonitoring />} />
                 {/* </Route> */}
+
+                <Route path="/yayasan" element={<YayasanLayout />}>
+                    <Route path="dashboard" element={<DashboardYayasan />} />
+                    <Route path="approval" element={<ApprovalYayasan />} />
+                    <Route path="laporan" element={<LaporanYayasan />} />
+                    <Route path="monitoring" element={<MonitoringYayasan />} />
+                </Route>
 
             </Routes>
         </BrowserRouter>

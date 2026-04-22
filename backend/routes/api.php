@@ -28,6 +28,7 @@ use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\MstUnitController;
+use App\Http\Controllers\MstKaryawanController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -48,7 +49,6 @@ Route::middleware(['role:Bendahara'])->group(function () {
     Route::put('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
     Route::delete('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
 });
-
 
 // 3. F85, F86, F87 (Read, Search, Export) & Route /me - BENDAHARA ATAU KEPALA SEKOLAH
 Route::middleware(['role:Bendahara,Kepala Sekolah'])->group(function () {
@@ -83,6 +83,7 @@ Route::prefix('unit')->group(function () {
     Route::get('/', [MstUnitController::class, 'index']);
 });
 
+Route::get('/karyawan/{nip}', [MstKaryawanController::class, 'show']);
 
 Route::prefix('kegiatan')->group(function () {
     Route::get('/', [MstKegiatanController::class, 'index']);
