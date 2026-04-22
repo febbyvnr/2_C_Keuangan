@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Dashboard.css";
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Legend,
+} from "recharts";
+
 export default function Dashboard() {
   const [rkt, setRkt] = useState([]);
   const [rka, setRka] = useState([]);
@@ -21,21 +34,32 @@ export default function Dashboard() {
       .then((data) => setFpd(data.data || []));
   }, []);
 
-  // KPI
   const totalRKT = rkt.length;
   const totalRKA = rka.length;
-  const totalFPD = fpd.length;
 
-  const totalAnggaran = rkt.reduce((sum, d) => sum + (d?.NOMINAL || 0), 0);
   const totalTerpakai = fpd.reduce((sum, d) => sum + (d?.NOMINAL_FPD || 0), 0);
+
   const totalSisa = fpd.reduce((sum, d) => sum + (d?.NOMINAL_SISA || 0), 0);
+
+  // === LINE CHART (trend per bulan)
+  const trendData = fpd.map((d) => ({
+    bulan: d.BULAN || "Data",
+    nominal: d.NOMINAL_FPD || 0,
+  }));
+
+  // === BAR CHART
+  const barData = [
+    {
+      name: "Keuangan",
+      terpakai: totalTerpakai,
+      sisa: totalSisa,
+    },
+  ];
 
   return (
     <div style={{ display: "flex" }}>
-      {/* SIDEBAR */}
       <SidebarWaka />
 
-      {/* CONTENT */}
       <div className="waka-container">
         <h2 className="waka-title">Dashboard Waka</h2>
 
@@ -51,19 +75,6 @@ export default function Dashboard() {
             <h3>{totalRKA}</h3>
           </div>
 
-          <div className="card">
-            <p>Total FPD</p>
-            <h3>{totalFPD}</h3>
-          </div>
-
-          <div className="card primary">
-            <p>Total Anggaran</p>
-            <h3>Rp {totalAnggaran.toLocaleString()}</h3>
-          </div>
-        </div>
-
-        {/* KEUANGAN */}
-        <div className="waka-grid">
           <div className="card success">
             <p>Terpakai</p>
             <h3>Rp {totalTerpakai.toLocaleString()}</h3>
@@ -75,27 +86,68 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* TABLE RKT */}
-        <div className="waka-table">
-          <h3>Program Kerja (RKT)</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Program</th>
-                <th>Indikator</th>
-                <th>Nominal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rkt.map((item, i) => (
-                <tr key={i}>
-                  <td>{item.PROGRAM_KERJA}</td>
-                  <td>{item.INDIKATOR}</td>
-                  <td>Rp {item.NOMINAL?.toLocaleString()}</td>
+        {/* GRID UTAMA */}
+        <div className="main-grid">
+          {/* LEFT SIDE */}
+          <div className="chart-section">
+            {/* LINE */}
+            <div className="chart-card">
+              <h4>Trend Penggunaan Dana</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="bulan" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="nominal"
+                    stroke="#1e3a8a"
+                    strokeWidth={3}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* BAR */}
+            <div className="chart-card">
+              <h4>Anggaran vs Realisasi</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="terpakai" fill="#1e3a8a" />
+                  <Bar dataKey="sisa" fill="#f59e0b" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE TABLE */}
+          <div className="table-section">
+            <h3>Program Kerja (RKT)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Program</th>
+                  <th>Indikator</th>
+                  <th>Nominal</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rkt.map((item, i) => (
+                  <tr key={i}>
+                    <td>{item.PROGRAM_KERJA}</td>
+                    <td>{item.INDIKATOR}</td>
+                    <td>Rp {item.NOMINAL?.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
