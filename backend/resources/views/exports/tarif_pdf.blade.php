@@ -11,6 +11,7 @@
             color: #111;
             padding: 28px 36px;
         }
+
         .header { text-align: center; margin-bottom: 16px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
         .header h2 { font-size: 13px; font-weight: bold; text-transform: uppercase; }
@@ -28,6 +29,7 @@
             padding: 6px 5px;
             border: 1px solid #000;
             font-size: 11px;
+            background-color: #f2f2f2; 
         }
         tbody tr td {
             padding: 5px 5px;
@@ -45,6 +47,7 @@
         .total-label   { text-align: right; padding-right: 8px; }
         .total-nominal { text-align: right; }
         .empty-row td  { text-align: center; font-style: italic; padding: 14px; }
+        
         .footer { margin-top: 36px; width: 100%; }
         .footer-right  { float: right; text-align: center; font-size: 11px; min-width: 200px; }
         .jabatan       { margin-bottom: 50px; }
@@ -54,10 +57,11 @@
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>SMK BOPKRI 2 YOGYAKARTA</h1>
         <h2>DATA TARIF</h2>
-        <p class="periode">Dicetak: {{ $tanggalCetak }}</p>
+        <p class="periode">Dicetak: {{ $tanggalCetak ?? date('d F Y') }}</p>
     </div>
     <div class="header-line"></div>
 
@@ -73,7 +77,7 @@
             </tr>
         </thead>
         <tbody>
-            @if($data->isEmpty())
+            @if(!isset($data) || collect($data)->isEmpty())
                 <tr class="empty-row"><td colspan="6">Tidak ada data tarif.</td></tr>
             @else
                 @php $totalNominal = 0; @endphp
@@ -99,9 +103,11 @@
 
     <div class="footer clearfix">
         <div class="footer-right">
-            <p>Yogyakarta, {{ $tanggalCetak }}</p>
-            <p class="jabatan">{{ $role }},</p>
-            <p>-------------------------</p>
+            <p>Yogyakarta, {{ $tanggalCetak ?? date('d F Y') }}</p>
+            <p class="jabatan">{{ $role ?? 'Bendahara' }},</p>
+            <br><br><br>
+            <p class="nama-ttd">Siti Aminah, S.E</p>
+            <p class="nip">NIP. 19850505 201001 2 002</p>
         </div>
     </div>
 </body>
