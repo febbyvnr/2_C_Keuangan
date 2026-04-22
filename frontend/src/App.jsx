@@ -34,7 +34,6 @@ import WakaRKT from "./pages/waka/RKT";
 import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
 import WakaApprovalCenter from "./pages/waka/ApprovalCenter";
 import WakaMonitoring from "./pages/waka/Monitoring";
-import DashboardWaka from "./pages/waka/Dashboard";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
@@ -151,7 +150,6 @@ export default function App() {
         <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
         <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
         <Route path="/waka/monitoring" element={<WakaMonitoring />} />
-        <Route path="/waka/dashboard" element={<WakaDashboard />} />
         {/* </Route> */}
 
         <Route path="/yayasan" element={<YayasanLayout />}>

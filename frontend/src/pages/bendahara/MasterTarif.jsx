@@ -11,6 +11,11 @@ export default function MasterTarif() {
     const [editId, setEditId] = useState(null); 
     const [jenisTarifList, setJenisTarifList] = useState([]);
     const [tahunAnggaranList, setTahunAnggaranList] = useState([]);
+    const [search, setSearch] = useState("");
+    const [sortConfig, setSortConfig] = useState({
+        key: "ID_REF_TARIF",
+        direction: "asc"
+    });
     const [form, setForm] = useState({
         ID_JENIS_TARIF: "",
         ID_TA_ANGGARAN: "",
@@ -19,15 +24,88 @@ export default function MasterTarif() {
         TGL_PENETAPAN: "",
     });
 
-    const fetchData = async () => {
+    const fetchData = async (keyword = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/tarif");
+            setLoading(true);
+            const url = keyword
+                ? `http://localhost:8000/api/tarif?search=${keyword}`
+                : "http://localhost:8000/api/tarif";
+
+            const res = await fetch(url);
             const json = await res.json();
             setData(json.data || json || []);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
+    
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            setCurrentPage(1);
+            fetchData(search);
+        }
+    };
+
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getIcon = (key) => {
+        if (sortConfig.key !== key) return "bi bi-funnel";
+        return "bi bi-funnel-fill";
+    };
+
+    const filteredData = data.filter((item) => {
+        const keyword = search.toLowerCase();
+        return (
+            item.ID_REF_TARIF?.toString().includes(keyword) ||
+            item.DESKRIPSI_TARIF?.toLowerCase().includes(keyword) ||
+            item.jenis_tarif?.DESKRIPSI_JENIS_TARIF?.toLowerCase().includes(keyword) ||
+            item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN?.toLowerCase().includes(keyword)
+        );
+    });
+
+    const sortedData = [...filteredData].sort((a, b) => {
+        let valA, valB;
+        switch (sortConfig.key) {
+            case "ID_REF_TARIF":
+                valA = Number(a.ID_REF_TARIF);
+                valB = Number(b.ID_REF_TARIF);
+                break;
+            case "ID_JENIS_TARIF":
+                valA = a.jenis_tarif?.DESKRIPSI_JENIS_TARIF?.toLowerCase() || "";
+                valB = b.jenis_tarif?.DESKRIPSI_JENIS_TARIF?.toLowerCase() || "";
+                break;
+            case "ID_TA_ANGGARAN":
+                valA = a.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN?.toLowerCase() || "";
+                valB = b.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN?.toLowerCase() || "";
+                break;
+            case "DESKRIPSI_TARIF":
+                valA = a.DESKRIPSI_TARIF?.toLowerCase() || "";
+                valB = b.DESKRIPSI_TARIF?.toLowerCase() || "";
+                break;
+            case "NOMINAL":
+                valA = Number(a.NOMINAL);
+                valB = Number(b.NOMINAL);
+                break;
+            case "TGL_PENETAPAN":
+                valA = new Date(a.TGL_PENETAPAN);
+                valB = new Date(b.TGL_PENETAPAN);
+                break;
+            default:
+                valA = "";
+                valB = "";
+        }
+        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+    });
 
     const fetchDropdown = async () => {
         try {
@@ -65,7 +143,7 @@ export default function MasterTarif() {
             DESKRIPSI_TARIF: item.DESKRIPSI_TARIF || "",
             NOMINAL: item.NOMINAL || "",
             TGL_PENETAPAN: item.TGL_PENETAPAN
-                ? item.TGL_PENETAPAN.replace(" ", "T").slice(0, 16)
+                ? new Date(item.TGL_PENETAPAN).toISOString().split("T")[0]
                 : ""
         });
         setShowModal(true);
@@ -73,6 +151,14 @@ export default function MasterTarif() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const now = new Date();
+        const formattedDateTime = form.TGL_PENETAPAN
+            ? `${form.TGL_PENETAPAN} ${now.toTimeString().split(" ")[0]}`
+            : null;
+        const payload = {
+            ...form,
+            TGL_PENETAPAN: formattedDateTime
+        };
         const url = isEdit
             ? `http://localhost:8000/api/tarif/update/${editId}`
             : "http://localhost:8000/api/tarif/store";
@@ -80,7 +166,7 @@ export default function MasterTarif() {
         const res = await fetch(url, {
             method,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form)
+            body: JSON.stringify(payload)
         });
         const json = await res.json();
         if (json.success) {
@@ -137,8 +223,11 @@ export default function MasterTarif() {
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = data.slice(indexOfFirst, indexOfLast);
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -148,33 +237,63 @@ export default function MasterTarif() {
         <div className="tarif-container">
             <div className="tarif-header">
                 <h2>Master Tarif</h2>
-                <button className="btn-primary" 
-                    onClick={() => {
-                        setIsEdit(false);
-                        setEditId(null);
-                        setForm({
-                            ID_JENIS_TARIF: "",
-                            ID_TA_ANGGARAN: "",
-                            DESKRIPSI_TARIF: "",
-                            NOMINAL: "",
-                            TGL_PENETAPAN: "",
-                        });
-                        setShowModal(true);
-                    }}
-                >
-                    Tambah Tarif
-                </button>
+                <div className="header-actions">
+                    <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
+                        Reset
+                    </button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                            type="text"
+                            placeholder="Cari tarif..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="search-input"
+                        />
+                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
+                            Search
+                        </button>
+                    </div>
+                    <button className="btn-primary" 
+                        onClick={() => {
+                            setIsEdit(false);
+                            setEditId(null);
+                            setForm({
+                                ID_JENIS_TARIF: "",
+                                ID_TA_ANGGARAN: "",
+                                DESKRIPSI_TARIF: "",
+                                NOMINAL: "",
+                                TGL_PENETAPAN: "",
+                            });
+                            setShowModal(true);
+                        }}
+                    >
+                        Tambah Tarif
+                    </button>
+                </div>
             </div>
             <div className="tarif-table-wrapper">
                 <table className="tarif-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>ID Jenis Tarif</th>
-                            <th>ID TA Anggaran</th>
-                            <th>Deskripsi</th>
-                            <th>Nominal</th>
-                            <th>Tanggal Penetapan</th>
+                            <th onClick={() => handleSort("ID_REF_TARIF")}>
+                                ID <i className={getIcon("ID_REF_TARIF")}></i>
+                            </th>
+                            <th onClick={() => handleSort("ID_JENIS_TARIF")}>
+                                Jenis Tarif <i className={getIcon("ID_JENIS_TARIF")}></i>
+                            </th>
+                            <th onClick={() => handleSort("ID_TA_ANGGARAN")}>
+                                TA Anggaran <i className={getIcon("ID_TA_ANGGARAN")}></i>
+                            </th>
+                            <th onClick={() => handleSort("DESKRIPSI_TARIF")}>
+                                Deskripsi <i className={getIcon("DESKRIPSI_TARIF")}></i>
+                            </th>
+                            <th onClick={() => handleSort("NOMINAL")}>
+                                Nominal <i className={getIcon("NOMINAL")}></i>
+                            </th>
+                            <th onClick={() => handleSort("TGL_PENETAPAN")}>
+                                Tanggal Penetapan <i className={getIcon("TGL_PENETAPAN")}></i>
+                            </th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -203,7 +322,7 @@ export default function MasterTarif() {
                                     </td>
                                     <td>{item.DESKRIPSI_TARIF}</td>
                                     <td>Rp {item.NOMINAL}</td>
-                                    <td>{item.TGL_PENETAPAN}</td>
+                                    <td>{new Date(item.TGL_PENETAPAN).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}</td>
                                     <td className="aksi">
                                         <button className="btn-edit" onClick={() => handleEdit(item)}>
                                             <i className="bi bi-pencil"></i>
@@ -229,38 +348,37 @@ export default function MasterTarif() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination">
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                >
-                    <i className="bi bi-chevron-left"></i>
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i + 1}
-                        onClick={() => changePage(i + 1)}
-                        className={`page-btn ${
-                            currentPage === i + 1 ? "active" : ""
-                        }`}
-                    >
-                        {i + 1}
+            <div className="pagination-wrapper">
+                <div className="pagination-info">
+                    Menampilkan {startData} - {endData} dari {totalData} data
+                </div>
+                <div className="pagination">
+                    <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+                        <i className="bi bi-chevron-left"></i>
                     </button>
-                ))}
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                        )
-                    }
-                    disabled={currentPage === totalPages}
-                >
-                    <i className="bi bi-chevron-right"></i>
-                </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i + 1}
+                            onClick={() => changePage(i + 1)}
+                            className={`page-btn ${
+                                currentPage === i + 1 ? "active" : ""
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+                        <i className="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div className="export-wrapper">
+                    <a href={`http://localhost:8000/api/tarif/export/excel?search=${search}`} className="btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-xlsx"></i> Export Excel
+                    </a>
+                    <a href={`http://localhost:8000/api/tarif/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                        <i className="bi bi-file-earmark-pdf"></i> Export PDF
+                    </a>
+                </div>
             </div>
             {showModal && (
                 <div className="modal-overlay">
@@ -310,13 +428,16 @@ export default function MasterTarif() {
                                 placeholder="Masukkan nominal"
                             />
                             <label>Tanggal Penetapan</label>
-                            <input
-                                type="datetime-local"
-                                name="TGL_PENETAPAN"
-                                value={form.TGL_PENETAPAN}
-                                onChange={handleChange}
-                                placeholder="Masukkan tanggal penetapan"
-                            />
+                            <div className="date-wrapper">
+                                <input
+                                    type="date"
+                                    name="TGL_PENETAPAN"
+                                    value={form.TGL_PENETAPAN}
+                                    onChange={handleChange}
+                                    placeholder="Masukkan tanggal penetapan"
+                                />
+                                <i className="bi bi-calendar-plus date-icon"></i>
+                            </div>
                             <div className="modal-actions">
                                 <button
                                     type="button"

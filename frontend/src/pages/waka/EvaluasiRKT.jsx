@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "../../styles/waka/EvaluasiRKT.css";
 import SidebarWaka from "../../components/SidebarWaka";
 
@@ -97,6 +97,8 @@ export default function WakaEvaluasiRKT() {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const tanggalEvaluasiRef = useRef(null);
+    const tanggalFilterRef = useRef(null);
 
     const stats = useMemo(() => {
         const total = rows.length;
@@ -263,26 +265,35 @@ export default function WakaEvaluasiRKT() {
         window.open(`${API_BASE_URL}/evaluasi-rkt/export/${type}${suffix}`, "_blank");
     };
 
+    const openDatePicker = (inputRef) => {
+        if (!inputRef.current) {
+            return;
+        }
+
+        inputRef.current.focus();
+
+        if (typeof inputRef.current.showPicker === "function") {
+            inputRef.current.showPicker();
+        } else {
+            inputRef.current.click();
+        }
+    };
+
     return (
         <div className="waka-evaluasi-shell">
             <SidebarWaka />
 
             <main className="waka-evaluasi-main">
-                <header className="waka-evaluasi-header">
-                    <h1>Evaluasi RKT Waka</h1>
-                    <p>Kelola monitoring program kerja tahunan langsung dari database, lengkap dengan form CRUD, pencarian, dan export laporan.</p>
-                </header>
-
                 <section className="waka-evaluasi-stats">
-                    <article className="waka-evaluasi-stat-card">
+                    <article className="waka-evaluasi-stat-card waka-evaluasi-stat-card-blue">
                         <span>Total Evaluasi</span>
                         <strong>{stats.total}</strong>
                     </article>
-                    <article className="waka-evaluasi-stat-card">
+                    <article className="waka-evaluasi-stat-card waka-evaluasi-stat-card-green">
                         <span>Status Selesai</span>
                         <strong>{stats.selesai}</strong>
                     </article>
-                    <article className="waka-evaluasi-stat-card">
+                    <article className="waka-evaluasi-stat-card waka-evaluasi-stat-card-orange">
                         <span>Tanggal Terbaru</span>
                         <strong>{formatDateLabel(stats.terbaru)}</strong>
                     </article>
@@ -292,7 +303,7 @@ export default function WakaEvaluasiRKT() {
                     <div className="waka-evaluasi-card-head">
                         <div>
                             <h2>Form Evaluasi</h2>
-                            <p>Pilih program kerja, status monitoring, tanggal evaluasi, lalu simpan ke tabel `tr_pm`.</p>
+                            <p>Pilih program kerja, status monitoring, tanggal evaluasi.</p>
                         </div>
                         <div className="waka-evaluasi-actions-top">
                             <button type="button" className="waka-evaluasi-button ghost" onClick={() => loadRows()}>
@@ -341,7 +352,24 @@ export default function WakaEvaluasiRKT() {
 
                             <label className="waka-evaluasi-field">
                                 <span>Tanggal Evaluasi</span>
-                                <input type="date" name="TGL_PM" value={form.TGL_PM} onChange={handleChange} required />
+                                <div className="waka-evaluasi-date-input">
+                                    <input
+                                        ref={tanggalEvaluasiRef}
+                                        type="date"
+                                        name="TGL_PM"
+                                        value={form.TGL_PM}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="waka-evaluasi-date-trigger"
+                                        onClick={() => openDatePicker(tanggalEvaluasiRef)}
+                                        aria-label="Buka kalender tanggal evaluasi"
+                                    >
+                                        <i className="bi bi-calendar3"></i>
+                                    </button>
+                                </div>
                             </label>
 
                             <label className="waka-evaluasi-field waka-evaluasi-field-full">
@@ -414,7 +442,23 @@ export default function WakaEvaluasiRKT() {
 
                         <label className="waka-evaluasi-field">
                             <span>Tanggal</span>
-                            <input type="date" name="TGL_PM" value={filters.TGL_PM} onChange={handleFilterChange} />
+                            <div className="waka-evaluasi-date-input">
+                                <input
+                                    ref={tanggalFilterRef}
+                                    type="date"
+                                    name="TGL_PM"
+                                    value={filters.TGL_PM}
+                                    onChange={handleFilterChange}
+                                />
+                                <button
+                                    type="button"
+                                    className="waka-evaluasi-date-trigger"
+                                    onClick={() => openDatePicker(tanggalFilterRef)}
+                                    aria-label="Buka kalender filter tanggal"
+                                >
+                                    <i className="bi bi-calendar3"></i>
+                                </button>
+                            </div>
                         </label>
 
                         <div className="waka-evaluasi-filter-actions">
