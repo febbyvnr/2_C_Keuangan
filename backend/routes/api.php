@@ -34,7 +34,6 @@ use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
 use App\Http\Controllers\LaporanBukuKhasUmumController;
 use App\Http\Controllers\LaporanPengeluaranController;
-use Termwind\Components\Raw;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
