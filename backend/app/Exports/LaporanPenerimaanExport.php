@@ -2,196 +2,210 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class LaporanPenerimaanExport implements WithEvents
+class LaporanPenerimaanExport implements FromArray, WithEvents
 {
-    protected $start, $end, $sumberDana;
-    protected $total = 0;
-    protected $role = 'Bendahara';
-    
-    protected $nip;
+    protected $data;
+    protected $periode;
+    protected $saldoAkhir;
+    protected $tanggalCetak;
 
-    public function __construct($start, $end, $sumberDana, $role = null, $nip = null)
+    public function __construct(Collection $data, $periode, $saldoAkhir, $tanggalCetak)
     {
-        $this->start = $start;
-        $this->end = $end;
-        $this->sumberDana = $sumberDana;
-        $this->role = $role ?: 'Bendahara';
-        $this->nip = $nip;
+        $this->data = $data;
+        $this->periode = $periode;
+        $this->saldoAkhir = $saldoAkhir;
+        $this->tanggalCetak = $tanggalCetak;
     }
 
-    public function collection()
+    public function array(): array
     {
-        return DB::table('tr_penerimaan as p') 
-            ->join('ref_penerimaan as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
-            ->select(
-                'p.TANGGAL_TR_PENERIMAAN as tanggal',
-                'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
-                'p.DESKRIPSI_TR_PENERIMAAN as uraian',
-                'p.JUMLAH_TR_PENERIMAAN as jumlah'
-            )
-            ->when($this->start && $this->end, function ($q) {
-                $q->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$this->start, $this->end]);
-            })
-            ->when($this->sumberDana, function ($q) {
-                $q->where('p.ID_REF_DANA', $this->sumberDana);
-            })
-            ->orderBy('p.TANGGAL_TR_PENERIMAAN')
-            ->get();
+        $rows = [];
+
+        $rows[] = ['', '', '', '', '', '', ''];
+        $rows[] = ['', 'SMK BOPKRI 2 YOGYAKARTA'];
+        $rows[] = ['', 'LAPORAN PENERIMAAN'];
+        $rows[] = ['', 'Periode ' . $this->periode];
+        $rows[] = ['', '', '', '', '', '', ''];
+
+        $rows[] = ['', 'NO', 'TANGGAL', 'URAIAN', 'DEBIT', 'KREDIT', 'SALDO'];
+
+        foreach ($this->data as $item) {
+            $rows[] = [
+                '',
+                $item->no,
+                $item->tanggal ? date('Y-m-d H:i:s', strtotime($item->tanggal)) : '-',
+                $item->uraian,
+                $item->debit,
+                $item->kredit,
+                $item->saldo,
+            ];
+        }
+
+        $rows[] = ['', '', '', '', '', '', ''];
+        $rows[] = ['', '', '', '', 'SALDO AKHIR', '', $this->saldoAkhir];
+        $rows[] = ['', '', '', '', '', '', ''];
+
+        // tanda tangan
+        $rows[] = ['', '', '', 'Bendahara,', '', '', ''];
+        $rows[] = ['', '', '', 'Rina Putri, S.E.', '', '', ''];
+
+        // ruang kosong besar untuk tanda tangan (3 row kosong)
+        $rows[] = ['', '', '', '', '', '', ''];
+        $rows[] = ['', '', '', '', '', '', ''];
+        $rows[] = ['', '', '', '', '', '', ''];
+
+        $rows[] = ['', '', '', '-------------------------', '', '', ''];
+        $rows[] = ['', '', '', 'NIP: 19800101', '', '', ''];
+
+        // tanggal cetak
+        $rows[] = ['', '', '', '', '', 'Yogyakarta, ' . $this->tanggalCetak, ''];
+
+        return $rows;
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function ($event) {
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
 
-                $sheet = $event->sheet;
-
-                // =====================
-                // WIDTH
-                // =====================
-                $sheet->getColumnDimension('A')->setWidth(6);
-                $sheet->getColumnDimension('B')->setWidth(18);
-                $sheet->getColumnDimension('C')->setWidth(30);
-                $sheet->getColumnDimension('D')->setWidth(35);
-                $sheet->getColumnDimension('E')->setWidth(22);
-
-                // =====================
-                // TITLE
-                // =====================
-                $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
-                $sheet->setCellValue('A3', 'LAPORAN PENERIMAAN (KM)');
-                $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
-
-                $sheet->mergeCells('A2:E2');
-                $sheet->mergeCells('A3:E3');
-                $sheet->mergeCells('A4:E4');
-
-                $sheet->getStyle('A2:E4')->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
-
-                // =====================
-                // HEADER
-                // =====================
+                $jumlahData = count($this->data);
                 $headerRow = 6;
+                $startDataRow = 7;
+                $endDataRow = $startDataRow + $jumlahData - 1;
+                $saldoRow = $endDataRow + 2;
 
-                $sheet->setCellValue("A$headerRow", 'NO');
-                $sheet->setCellValue("B$headerRow", 'TANGGAL');
-                $sheet->setCellValue("C$headerRow", 'JENIS PENERIMAAN');
-                $sheet->setCellValue("D$headerRow", 'URAIAN');
-                $sheet->setCellValue("E$headerRow", 'JUMLAH');
+                $ttdJabatanRow = $saldoRow + 2;   // Bendahara,
+                $ttdNamaRow = $saldoRow + 3;      // Nama
+                $spasi1Row = $saldoRow + 4;       // kosong
+                $spasi2Row = $saldoRow + 5;       // kosong
+                $spasi3Row = $saldoRow + 6;       // kosong
+                $ttdGarisRow = $saldoRow + 7;     // garis
+                $ttdNipRow = $saldoRow + 8;       // NIP
+                $tanggalRow = $saldoRow + 9;      // tanggal
 
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->setBold(true);
-                $sheet->getStyle("A$headerRow:E$headerRow")->getAlignment()
+                $sheet->mergeCells('B2:G2');
+                $sheet->mergeCells('B3:G3');
+                $sheet->mergeCells('B4:G4');
+
+                $sheet->getStyle('B2:G4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('B2:G4')->getFont()->setBold(true);
+                $sheet->getStyle('B2')->getFont()->setSize(16);
+                $sheet->getStyle('B3')->getFont()->setSize(14);
+                $sheet->getStyle('B4')->getFont()->setSize(11);
+
+                $sheet->getStyle("B{$headerRow}:G{$headerRow}")->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '2F75B5'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $sheet->freezePane('B7');
+
+                if ($jumlahData > 0) {
+                    $sheet->getStyle("B{$startDataRow}:G{$endDataRow}")->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '000000'],
+                            ],
+                        ],
+                    ]);
+
+                    $sheet->getStyle("B{$startDataRow}:C{$endDataRow}")
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $sheet->getStyle("E{$startDataRow}:G{$endDataRow}")
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                    $sheet->getStyle("E{$startDataRow}:G{$endDataRow}")
+                        ->getNumberFormat()
+                        ->setFormatCode('#,##0');
+                }
+
+                $sheet->getStyle("E{$saldoRow}:G{$saldoRow}")->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'FFE699'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $sheet->getStyle("G{$saldoRow}")
+                    ->getNumberFormat()
+                    ->setFormatCode('#,##0');
+
+                $sheet->getStyle("E{$saldoRow}:G{$saldoRow}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                $sheet->getStyle("E{$saldoRow}")
+                    ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FF2E75B6');
+                $sheet->getColumnDimension('A')->setWidth(3);
+                $sheet->getColumnDimension('B')->setWidth(6);
+                $sheet->getColumnDimension('C')->setWidth(18);
+                $sheet->getColumnDimension('D')->setWidth(40);
+                $sheet->getColumnDimension('E')->setWidth(16);
+                $sheet->getColumnDimension('F')->setWidth(16);
+                $sheet->getColumnDimension('G')->setWidth(16);
 
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()
-                    ->getColor()->setARGB('FFFFFFFF');
+                // posisi tanda tangan di tengah
+                $sheet->mergeCells("D{$ttdJabatanRow}:E{$ttdJabatanRow}");
+                $sheet->mergeCells("D{$ttdNamaRow}:E{$ttdNamaRow}");
+                $sheet->mergeCells("D{$ttdGarisRow}:E{$ttdGarisRow}");
+                $sheet->mergeCells("D{$ttdNipRow}:E{$ttdNipRow}");
 
-                $sheet->setAutoFilter("A$headerRow:E$headerRow");
+                $sheet->getStyle("D{$ttdJabatanRow}:E{$ttdNipRow}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // =====================
-                // DATA
-                // =====================
-                $row = $headerRow + 1;
-                $no = 1;
-                $data = $this->collection();
+                $sheet->getStyle("D{$ttdNamaRow}")
+                    ->getFont()
+                    ->setBold(true);
 
-                foreach ($data as $item) {
-                    $sheet->setCellValue("A$row", $no++);
-                    $sheet->setCellValue("B$row", $item->tanggal);
-                    $sheet->setCellValue("C$row", $item->jenis);
-                    $sheet->setCellValue("D$row", $item->uraian);
-                    $sheet->setCellValue("E$row", $item->jumlah);
-                    $row++;
-                }
+                // bikin ruang tanda tangan beneran luas
+                $sheet->getRowDimension($spasi1Row)->setRowHeight(18);
+                $sheet->getRowDimension($spasi2Row)->setRowHeight(18);
+                $sheet->getRowDimension($spasi3Row)->setRowHeight(18);
 
-                $endData = $row - 1;
-
-                // ALIGN + FORMAT
-                $sheet->getStyle("A$headerRow:E$endData")
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("C" . ($headerRow+1) . ":D$endData")
-                    ->getAlignment()->setWrapText(true);
-
-                $sheet->getStyle("E" . ($headerRow+1) . ":E$endData")
-                    ->getNumberFormat()
-                    ->setFormatCode('"Rp" #,##0');
-
-                // BORDER
-                $sheet->getStyle("A$headerRow:E$endData")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
-
-                // =====================
-                // TOTAL
-                // =====================
-                $total = $data->sum('jumlah');
-                $totalRow = $endData + 2;
-
-                $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
-                $sheet->setCellValue("E$totalRow", $total);
-
-                $sheet->getStyle("D$totalRow:E$totalRow")->getFont()->setBold(true);
-
-                $sheet->getStyle("E$totalRow")
-                    ->getNumberFormat()
-                    ->setFormatCode('"Rp" #,##0');
-
-                $sheet->getStyle("D$totalRow:E$totalRow")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FFFFE699');
-
-                // =====================
-                // FOOTER
-                // =====================
-                $footerRow = $totalRow + 4;
-
-                $role = $this->role;
-
-                if ($role === 'Kepala Sekolah') {
-                    $nama = 'Drs. Budi Santoso';
-                } else {
-                    $role = 'Bendahara';
-                    $nama = 'Rina Putri, S.E.';
-                }
-
-                $nip = $this->nip ?: '-';
-
-                // TTD
-                $sheet->mergeCells("B" . ($footerRow+1) . ":D" . ($footerRow+1));
-                $sheet->mergeCells("B" . ($footerRow+3) . ":D" . ($footerRow+3));
-                $sheet->mergeCells("B" . ($footerRow+7) . ":D" . ($footerRow+7));
-                $sheet->mergeCells("B" . ($footerRow+8) . ":D" . ($footerRow+8));
-
-                $sheet->setCellValue("B" . ($footerRow+1), $role . ',');
-                $sheet->setCellValue("B" . ($footerRow+3), $nama);
-                $sheet->setCellValue("B" . ($footerRow+7), '-------------------------');
-                $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
-
-                $sheet->getStyle("B" . ($footerRow+1) . ":D" . ($footerRow+8))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->setCellValue("E" . ($footerRow+10), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("E" . ($footerRow+10))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-                $sheet->freezePane("A7");
+                // tanggal cetak jangan terlalu kanan
+                $sheet->mergeCells("F{$tanggalRow}:G{$tanggalRow}");
+                $sheet->getStyle("F{$tanggalRow}:G{$tanggalRow}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             },
         ];
     }
