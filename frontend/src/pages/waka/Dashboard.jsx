@@ -34,6 +34,7 @@ export default function Dashboard() {
       .then((data) => setFpd(data.data || []));
   }, []);
 
+  // ===== KPI =====
   const totalRKT = rkt.length;
   const totalRKA = rka.length;
 
@@ -41,13 +42,21 @@ export default function Dashboard() {
 
   const totalSisa = fpd.reduce((sum, d) => sum + (d?.NOMINAL_SISA || 0), 0);
 
-  // === LINE CHART (trend per bulan)
+  // ===== FORMAT ANGKA (BIAR RAPI)
+  const formatJt = (value) => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)} jt`;
+    }
+    return value;
+  };
+
+  // ===== LINE CHART DATA
   const trendData = fpd.map((d) => ({
     bulan: d.BULAN || "Data",
     nominal: d.NOMINAL_FPD || 0,
   }));
 
-  // === BAR CHART
+  // ===== BAR CHART DATA
   const barData = [
     {
       name: "Keuangan",
@@ -63,7 +72,7 @@ export default function Dashboard() {
       <div className="waka-container">
         <h2 className="waka-title">Dashboard Waka</h2>
 
-        {/* KPI */}
+        {/* ===== KPI ===== */}
         <div className="waka-grid">
           <div className="card">
             <p>Total RKT</p>
@@ -86,39 +95,56 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* GRID UTAMA */}
+        {/* ===== MAIN GRID ===== */}
         <div className="main-grid">
-          {/* LEFT SIDE */}
+          {/* LEFT SIDE (CHART) */}
           <div className="chart-section">
-            {/* LINE */}
+            {/* LINE CHART */}
             <div className="chart-card">
               <h4>Trend Penggunaan Dana</h4>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="bulan" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="nominal"
-                    stroke="#1e3a8a"
-                    strokeWidth={3}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+
+              {trendData.length <= 1 ? (
+                <p style={{ fontSize: "12px", color: "#6b7280" }}>
+                  Data belum cukup untuk ditampilkan
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+
+                    <XAxis dataKey="bulan" tick={{ fontSize: 12 }} />
+
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={formatJt} />
+
+                    <Tooltip contentStyle={{ fontSize: "12px" }} />
+
+                    <Line
+                      type="monotone"
+                      dataKey="nominal"
+                      stroke="#1e3a8a"
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            {/* BAR */}
+            {/* BAR CHART */}
             <div className="chart-card">
               <h4>Anggaran vs Realisasi</h4>
+
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={barData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
+
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={formatJt} />
+
+                  <Tooltip contentStyle={{ fontSize: "12px" }} />
+                  <Legend wrapperStyle={{ fontSize: "12px" }} />
+
                   <Bar dataKey="terpakai" fill="#1e3a8a" />
                   <Bar dataKey="sisa" fill="#f59e0b" />
                 </BarChart>
@@ -126,9 +152,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT SIDE TABLE */}
+          {/* RIGHT SIDE (TABLE) */}
           <div className="table-section">
             <h3>Program Kerja (RKT)</h3>
+
             <table>
               <thead>
                 <tr>
