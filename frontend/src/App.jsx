@@ -145,13 +145,12 @@ export default function App() {
         {/* WAKA */}
         {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
         {/* <Route path="/waka" element={<WakaLayout />}> */}
-        <Route path="/waka" element={<WakaRKT />} />
+        <Route path="/waka" element={<DashboardWaka />} />
         <Route path="/waka/rkt" element={<WakaRKT />} />
         <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
         <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
         <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
         <Route path="/waka/monitoring" element={<WakaMonitoring />} />
-        <Route path="/waka" element={<DashboardWaka />} />
         {/* </Route> */}
 
         <Route path="/yayasan" element={<YayasanLayout />}>
