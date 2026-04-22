@@ -185,7 +185,7 @@ export default function MasterRefPM() {
     return (
         <div className="ref-pm-container">
             <div className="ref-pm-header">
-                <h2>Master Referensi Penerimaan</h2>
+                <h2>Master Referensi PM</h2>
                 <div className="header-actions">
                     <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
                         Reset
@@ -211,7 +211,7 @@ export default function MasterRefPM() {
                         setForm({ REF_ID_REF_PM: "", DESKRIPSI_PM: "" });
                         setShowModal(true);
                     }}>
-                        Tambah Referensi Penerimaan
+                        Tambah Referensi PM
                     </button>
                 </div>
             </div>
@@ -263,8 +263,8 @@ export default function MasterRefPM() {
                                             disabled={item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "Referensi Penerimaan sudah digunakan Program Kerja"
-                                                    : "Hapus Referensi Penerimaan"
+                                                    ? "Referensi PM sudah digunakan Program Kerja"
+                                                    : "Hapus Referensi PM"
                                             }
                                             onClick={() =>
                                                 handleDelete(item.ID_REF_PM)
@@ -307,9 +307,9 @@ export default function MasterRefPM() {
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
-                       <h3>{isEdit ? "Edit Referensi Penerimaan" : "Tambah Referensi Penerimaan"}</h3>
+                       <h3>{isEdit ? "Edit Referensi PM" : "Tambah Referensi PM"}</h3>
                         <form onSubmit={handleSubmit}>
-                            <label>Parent Referensi Penerimaan (opsional)</label>
+                            <label>Parent Referensi PM (opsional)</label>
                             <select
                                 name="REF_ID_REF_PM"
                                 value={form.REF_ID_REF_PM || ""}
