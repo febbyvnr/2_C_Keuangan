@@ -49,7 +49,6 @@ Route::middleware(['role:Bendahara'])->group(function () {
     Route::put('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
     Route::delete('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
 });
-
 // 3. F85, F86, F87 (Read, Search, Export) & Route /me - BENDAHARA ATAU KEPALA SEKOLAH
 Route::middleware(['role:Bendahara,Kepala Sekolah'])->group(function () {
     
