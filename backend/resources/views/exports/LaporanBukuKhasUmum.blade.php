@@ -15,7 +15,6 @@
         th, td { 
             border: 1px solid black; 
             padding: 6px; 
-            text-align: center;
         }
 
         th { 
@@ -55,33 +54,6 @@
             margin: 8px 0 12px 0;
         }
 
-        /* TTD STYLE  */
-        .ttd-center {
-            text-align: center;
-            margin-top: 80px;
-        }
-
-        .ttd-role {
-            margin-bottom: 8px;
-        }
-
-        .ttd-nama {
-            margin-bottom: 10px;
-        }
-
-        .ttd-garis {
-            margin-top: 50px;   
-        }
-
-        .ttd-nip {
-            margin-top: 10px;
-        }
-
-        .tanggal-kanan {
-            text-align: right;
-            margin-top: 40px;
-        }
-
     </style>
 </head>
 <body>
@@ -105,7 +77,7 @@
 <br>
 
 <!-- ===================== -->
-<!-- BKU -->
+<!-- BKU (SEMUA) -->
 <!-- ===================== -->
 <table>
     <thead>
@@ -128,10 +100,10 @@
         <tr>
             <td>{{ $no++ }}</td>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
-            <td style="text-align:left;">{{ $row->uraian }}</td>
-            <td>{{ number_format($row->debit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->kredit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->saldo, 0, ',', '.') }}</td>
+            <td>{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
         </tr>
 
         @php $saldoAkhir = $row->saldo; @endphp
@@ -139,50 +111,32 @@
 
         <tr>
             <td colspan="5"><b>SALDO AKHIR</b></td>
-            <td><b>{{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
+<br><br><br>
+
 @php
-    \Carbon\Carbon::setLocale('id');
-
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    $nip = $nip ?? '-';
+\Carbon\Carbon::setLocale('id');
 @endphp
 
-<!-- ===================== -->
-<!-- TTD -->
-<!-- ===================== -->
-<div class="ttd-center">
-    <p class="ttd-role">{{ $role }},</p>
-    <p class="ttd-nama"><b>{{ $nama }}</b></p>
-    <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip }}</p>
-</div>
-
-<!-- ===================== -->
-<!-- TANGGAL -->
-<!-- ===================== -->
-<div class="tanggal-kanan">
+<p style="text-align:right;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-</div>
+    <br><br>
+   <b>By: {{ $role }}</b>
+</p>
+
 
 <!-- ===================== -->
-<!-- PAGE BREAK -->
+<!-- PAGE BREAK 1 -->
+<!-- Pindah ke halaman baru (BKU -> P1) -->
 <!-- ===================== -->
 <div style="page-break-before: always;"></div>
 
 <!-- ===================== -->
-<!-- P1 -->
+<!-- P1 - TUNAI -->
 <!-- ===================== -->
 <h3 style="text-align:center;">LAPORAN BKU - TUNAI (P1)</h3>
 
@@ -198,16 +152,19 @@
         </tr>
     </thead>
     <tbody>
-        @php $no = 1; $saldoAkhir = 0; @endphp
+        @php 
+            $no = 1; 
+            $saldoAkhir = 0;
+        @endphp
 
         @foreach($p1 as $row)
         <tr>
             <td>{{ $no++ }}</td>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
-            <td style="text-align:left;">{{ $row->uraian }}</td>
-            <td>{{ number_format($row->debit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->kredit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->saldo, 0, ',', '.') }}</td>
+            <td>{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
         </tr>
 
         @php $saldoAkhir = $row->saldo; @endphp
@@ -215,18 +172,20 @@
 
         <tr>
             <td colspan="5"><b>SALDO AKHIR</b></td>
-            <td><b>{{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
+
 <!-- ===================== -->
 <!-- PAGE BREAK -->
+ <!-- Pindah Halaman Baru (P1 -> P2) -->
 <!-- ===================== -->
 <div style="page-break-before: always;"></div>
 
 <!-- ===================== -->
-<!-- P2 -->
+<!-- P2 - BANK -->
 <!-- ===================== -->
 <h3 style="text-align:center;">LAPORAN BKU - BANK (P2)</h3>
 
@@ -242,16 +201,19 @@
         </tr>
     </thead>
     <tbody>
-        @php $no = 1; $saldoAkhir = 0; @endphp
+        @php 
+            $no = 1; 
+            $saldoAkhir = 0;
+        @endphp
 
         @foreach($p2 as $row)
         <tr>
             <td>{{ $no++ }}</td>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
-            <td style="text-align:left;">{{ $row->uraian }}</td>
-            <td>{{ number_format($row->debit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->kredit, 0, ',', '.') }}</td>
-            <td>{{ number_format($row->saldo, 0, ',', '.') }}</td>
+            <td>{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->debit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->kredit, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->saldo, 0, ',', '.') }}</td>
         </tr>
 
         @php $saldoAkhir = $row->saldo; @endphp
@@ -259,7 +221,7 @@
 
         <tr>
             <td colspan="5"><b>SALDO AKHIR</b></td>
-            <td><b>{{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
+            <td><b>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>

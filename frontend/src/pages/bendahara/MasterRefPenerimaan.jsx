@@ -9,12 +9,6 @@ export default function MasterRefPenerimaan() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
-    const [parentList, setParentList] = useState([]);
-    const [search, setSearch] = useState("");
-    const [sortConfig, setSortConfig] = useState({ 
-        key: "ID_REF_PENERIMAAN", 
-        direction: "asc" 
-    });
     const [form, setForm] = useState({
         REF_ID_REF_PENERIMAAN: "",
         DESKRIPSI_REF_PENERIMAAN: ""
@@ -30,32 +24,8 @@ export default function MasterRefPenerimaan() {
         }
     };
 
-    const fetchParent = async () => {
-        try {
-            const res = await fetch("http://localhost:8000/api/ref-penerimaan");
-            const json = await res.json();
-            setParentList(json.data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const getIcon = (key) => {
-        if (sortConfig.key !== key) return "bi bi-funnel";
-        return "bi bi-funnel-fill";
-    };
-
     useEffect(() => {
         fetchData();
-        fetchParent();
     }, []);
 
     const handleChange = (e) => {
@@ -69,9 +39,7 @@ export default function MasterRefPenerimaan() {
         setIsEdit(true);
         setEditId(item.ID_REF_PENERIMAAN);
         setForm({
-            REF_ID_REF_PENERIMAAN: item.REF_ID_REF_PENERIMAAN 
-                ? String(item.REF_ID_REF_PENERIMAAN) 
-                : "",
+            REF_ID_REF_PENERIMAAN: item.REF_ID_REF_PENERIMAAN || "",
             DESKRIPSI_REF_PENERIMAAN: item.DESKRIPSI_REF_PENERIMAAN || ""
         });
         setShowModal(true);
@@ -135,32 +103,10 @@ export default function MasterRefPenerimaan() {
         });
     };
 
-    const sortedData = [...data]
-        .filter((item) =>
-            (item.DESKRIPSI_REF_PENERIMAAN || "").toLowerCase().includes(search.toLowerCase()) ||
-            (item.REF_ID_REF_PENERIMAAN + "").includes(search) ||
-            (item.ID_REF_PENERIMAAN + "").includes(search)
-        )
-        .sort((a, b) => {
-            let valA = a[sortConfig.key];
-            let valB = b[sortConfig.key];
-            if (typeof valA === 'number' && typeof valB === 'number') {
-                return sortConfig.direction === "asc" ? valA - valB : valB - valA;
-            }
-            valA = (valA || "").toString().toLowerCase();
-            valB = (valB || "").toString().toLowerCase();
-            if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-            if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const totalData = sortedData.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
+    const currentData = data.slice(indexOfFirst, indexOfLast);
+    const totalPages = Math.ceil(data.length / itemsPerPage);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -170,43 +116,17 @@ export default function MasterRefPenerimaan() {
         <div className="ref-penerimaan-container">
             <div className="ref-penerimaan-header">
                 <h2>Master Referensi Penerimaan</h2>
-                <div className="header-actions">
-                    <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
-                        Reset
-                    </button>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <input 
-                            type="text" 
-                            placeholder="Cari deskripsi..." 
-                            className="search-input"
-                            value={search}
-                            onChange={(e) => {
-                                setSearch(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                        />
-                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
-                            Search
-                        </button>
-                    </div>
-                    <button className="btn-primary" onClick={() => setShowModal(true)}>
-                        Tambah Referensi Penerimaan
-                    </button>
-                </div>
+                <button className="btn-primary" onClick={() => setShowModal(true)}>
+                    Tambah Referensi Penerimaan
+                </button>
             </div>
             <div className="ref-penerimaan-table-wrapper">
                 <table className="ref-penerimaan-table">
                     <thead>
                         <tr>
-                            <th onClick={() => handleSort("ID_REF_PENERIMAAN")}>
-                                ID <i className={getIcon("ID_REF_PENERIMAAN")}></i>
-                            </th>
-                            <th onClick={() => handleSort("REF_ID_REF_PENERIMAAN")}>
-                                REF ID <i className={getIcon("REF_ID_REF_PENERIMAAN")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_REF_PENERIMAAN")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_REF_PENERIMAAN")}></i>
-                            </th>
+                            <th>ID</th>
+                            <th>REF ID</th>
+                            <th>Deskripsi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -254,30 +174,38 @@ export default function MasterRefPenerimaan() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination-wrapper">
-                <div className="pagination-info">
-                    Menampilkan {startData} - {endData} dari {totalData} data
-                </div>
-                <div className="pagination">
-                    <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-                        <i className="bi bi-chevron-left"></i>
+            <div className="pagination">
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                >
+                    <i className="bi bi-chevron-left"></i>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i + 1}
+                        onClick={() => changePage(i + 1)}
+                        className={`page-btn ${
+                            currentPage === i + 1 ? "active" : ""
+                        }`}
+                    >
+                        {i + 1}
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => changePage(i + 1)}
-                            className={`page-btn ${
-                                currentPage === i + 1 ? "active" : ""
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                    <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-                        <i className="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-                <div></div>
+                ))}
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                        )
+                    }
+                    disabled={currentPage === totalPages}
+                >
+                    <i className="bi bi-chevron-right"></i>
+                </button>
             </div>
             {showModal && (
                 <div className="modal-overlay">
@@ -285,26 +213,13 @@ export default function MasterRefPenerimaan() {
                        <h3>{isEdit ? "Edit Referensi Penerimaan" : "Tambah Referensi Penerimaan"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent Referensi Penerimaan (opsional)</label>
-                            <select
+                            <input
+                                type="number"
                                 name="REF_ID_REF_PENERIMAAN"
-                                value={form.REF_ID_REF_PENERIMAAN || ""}
+                                value={form.REF_ID_REF_PENERIMAAN}
                                 onChange={handleChange}
-                            >
-                                <option value="">-- Pilih Parent --</option>
-                                {parentList
-                                    .filter(item =>
-                                        String(item.ID_REF_PENERIMAAN) !== String(editId) ||
-                                        String(item.ID_REF_PENERIMAAN) === form.REF_ID_REF_PENERIMAAN
-                                    )
-                                    .map((item) => (
-                                        <option
-                                            key={item.ID_REF_PENERIMAAN}
-                                            value={String(item.ID_REF_PENERIMAAN)}
-                                        >
-                                            [{item.ID_REF_PENERIMAAN}] {item.DESKRIPSI_REF_PENERIMAAN}
-                                        </option>
-                                    ))}
-                            </select>
+                                placeholder="ID Parent Referensi Penerimaan"
+                            />
                             <label>Deskripsi Referensi Penerimaan</label>
                             <input
                                 type="text"

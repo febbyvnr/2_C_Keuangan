@@ -19,7 +19,7 @@ class TagihanSiswa extends Model
         'TAHUN_TAGIHAN_SISWA',
         'JUMLAH_TAGIHAN_SISWA',
         'STATUS_TAGIHAN_SISWA',
-        'DUEDATETIME_TAGIHAN_SISWA',
+        'DUEDATE_TAGIHAN_SISWA',
     ];
 
     protected $casts = [
@@ -27,7 +27,7 @@ class TagihanSiswa extends Model
         'ID_SISWA_TETAP' => 'integer',
         'ID_JENIS_PEMBAYARAN' => 'integer',
         'JUMLAH_TAGIHAN_SISWA' => 'double',
-        'DUEDATETIME_TAGIHAN_SISWA' => 'date',
+        'DUEDATE_TAGIHAN_SISWA' => 'date',
     ];
 
     public function siswa(): BelongsTo

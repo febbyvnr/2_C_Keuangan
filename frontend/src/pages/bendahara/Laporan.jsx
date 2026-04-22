@@ -25,8 +25,6 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
     } else {
       setData([]);
       setTotal(0);
@@ -42,6 +40,7 @@ export default function Laporan() {
     fetch(`${baseUrl}?${params.toString()}`)
       .then((res) => res.json())
       .then((res) => {
+        // KHUSUS BKU
         if (active === "BKU") {
           if (bkuType === 0) setData(res.bku || []);
           if (bkuType === 1) setData(res.p1 || []);
@@ -64,8 +63,6 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
     }
 
     const params = new URLSearchParams({
@@ -85,8 +82,6 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
     }
 
     const params = new URLSearchParams({
@@ -103,6 +98,7 @@ export default function Laporan() {
     loadData();
   }, [active, bkuType]);
 
+  // NAVIGASI BKU
   const nextBku = () => {
     setBkuType((prev) => (prev + 1) % bkuList.length);
   };
@@ -111,12 +107,16 @@ export default function Laporan() {
     setBkuType((prev) => (prev === 0 ? bkuList.length - 1 : prev - 1));
   };
 
+  // 🔥 HITUNG SALDO AKHIR BKU
   const saldoAkhir = data.length > 0 ? data[data.length - 1].saldo || 0 : 0;
 
   return (
     <div style={{ padding: "30px" }}>
       <h2>Laporan</h2>
 
+      {/* ========================= */}
+      {/* TABS */}
+      {/* ========================= */}
       <div className="laporan-tabs">
         {tabs.map((tab) => (
           <div
@@ -129,8 +129,15 @@ export default function Laporan() {
         ))}
       </div>
 
+      {/* ========================= */}
+      {/* CONTENT */}
+      {/* ========================= */}
       <div className="laporan-content">
+        {/* ========================= */}
+        {/* TABEL */}
+        {/* ========================= */}
         <div style={{ flex: 1 }}>
+          {/* SWITCH BKU */}
           {active === "BKU" && (
             <div className="bku-switch">
               <button onClick={prevBku}>&lt;</button>
@@ -159,15 +166,6 @@ export default function Laporan() {
                       <th>Jenis</th>
                       <th>Uraian</th>
                       <th>Jumlah</th>
-                    </>
-                  ) : active === "Pengeluaran" ? (
-                    <>
-                      <th>No</th>
-                      <th>Tanggal</th>
-                      <th>Program Kerja</th>
-                      <th>Sumber Dana</th>
-                      <th>Uraian</th>
-                      <th>Nominal</th>
                     </>
                   ) : (
                     <>
@@ -206,16 +204,6 @@ export default function Laporan() {
                             Rp {Number(item.saldo).toLocaleString("id-ID")}
                           </td>
                         </>
-                      ) : active === "Pengeluaran" ? (
-                        <>
-                          <td>{item.program}</td>
-                          <td>{item.sumber_dana}</td>
-                          <td>{item.uraian}</td>
-                          <td>
-                            Rp{" "}
-                            {Number(item.nominal ?? 0).toLocaleString("id-ID")}
-                          </td>
-                        </>
                       ) : (
                         <>
                           <td>{item.jenis || "-"}</td>
@@ -240,12 +228,16 @@ export default function Laporan() {
           </div>
         </div>
 
+        {/* ========================= */}
+        {/* KANAN */}
+        {/* ========================= */}
         <div className="laporan-side">
           {active === "Penerimaan" && (
             <>
               <div className="laporan-filter">
                 <div className="filter-range">
                   <label>Periode</label>
+
                   <div className="range-input">
                     <input
                       type="date"
@@ -288,15 +280,7 @@ export default function Laporan() {
             </>
           )}
 
-          {active === "Pengeluaran" && (
-            <div className="laporan-total-card">
-              <div className="laporan-total-title">Total Pengeluaran</div>
-              <div className="laporan-total-value">
-                Rp {Number(total).toLocaleString("id-ID")}
-              </div>
-            </div>
-          )}
-
+          {/* 🔥 KHUSUS BKU */}
           {active === "BKU" && (
             <div className="laporan-total-card">
               <div className="laporan-total-title">Saldo Akhir</div>
@@ -306,10 +290,12 @@ export default function Laporan() {
             </div>
           )}
 
+          {/* EXPORT */}
           <div className="laporan-actions">
             <button className="btn-export excel" onClick={handleExportExcel}>
               Excel
             </button>
+
             <button className="btn-export pdf" onClick={handleExportPDF}>
               PDF
             </button>

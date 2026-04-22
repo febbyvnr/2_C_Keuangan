@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../../styles/waka/RKT.css";
 import SidebarWaka from "../../components/SidebarWaka";
 
@@ -103,8 +103,6 @@ export default function WakaRKT() {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-    const waktuAwalRef = useRef(null);
-    const waktuAkhirRef = useRef(null);
 
     const filteredRows = useMemo(() => {
         const term = keyword.trim().toLowerCase();
@@ -284,25 +282,16 @@ export default function WakaRKT() {
         window.open(`${API_BASE_URL}/rkt/export/excel`, "_blank");
     };
 
-    const openDatePicker = (inputRef) => {
-        if (!inputRef.current) {
-            return;
-        }
-
-        inputRef.current.focus();
-
-        if (typeof inputRef.current.showPicker === "function") {
-            inputRef.current.showPicker();
-        } else {
-            inputRef.current.click();
-        }
-    };
-
     return (
         <div className="waka-rkt-shell">
             <SidebarWaka />
 
             <main className="waka-rkt-main">
+                <header className="waka-rkt-header">
+                    <h1>RKT Waka</h1>
+                    <p>Halaman ini langsung terhubung ke database melalui endpoint `api/rkt` dan siap dipakai untuk CRUD data program kerja tahunan.</p>
+                </header>
+
                 <section className="waka-rkt-card">
                     <div className="waka-rkt-card-head">
                         <div>
@@ -397,46 +386,12 @@ export default function WakaRKT() {
 
                             <label className="waka-rkt-field">
                                 <span>Waktu Awal</span>
-                                <div className="waka-rkt-date-input">
-                                    <input
-                                        ref={waktuAwalRef}
-                                        type="date"
-                                        name="WAKTU_AWAL"
-                                        value={form.WAKTU_AWAL}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        className="waka-rkt-date-trigger"
-                                        onClick={() => openDatePicker(waktuAwalRef)}
-                                        aria-label="Buka kalender waktu awal"
-                                    >
-                                        <i className="bi bi-calendar3"></i>
-                                    </button>
-                                </div>
+                                <input type="date" name="WAKTU_AWAL" value={form.WAKTU_AWAL} onChange={handleChange} required />
                             </label>
 
                             <label className="waka-rkt-field">
                                 <span>Waktu Akhir</span>
-                                <div className="waka-rkt-date-input">
-                                    <input
-                                        ref={waktuAkhirRef}
-                                        type="date"
-                                        name="WAKTU_AKHIR"
-                                        value={form.WAKTU_AKHIR}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        className="waka-rkt-date-trigger"
-                                        onClick={() => openDatePicker(waktuAkhirRef)}
-                                        aria-label="Buka kalender waktu akhir"
-                                    >
-                                        <i className="bi bi-calendar3"></i>
-                                    </button>
-                                </div>
+                                <input type="date" name="WAKTU_AKHIR" value={form.WAKTU_AKHIR} onChange={handleChange} required />
                             </label>
 
                             <label className="waka-rkt-field">

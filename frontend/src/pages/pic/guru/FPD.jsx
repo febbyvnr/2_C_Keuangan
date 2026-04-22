@@ -225,6 +225,13 @@ export default function PicGuruFPD() {
         <div className="pic-fpd-shell">
             <SidebarPic />
             <main className="pic-fpd-main">
+                <header className="pic-fpd-page-heading">
+                    <h1>Form Pengajuan Dana</h1>
+                    <p>
+                        Halaman ini sudah disiapkan untuk mengambil data FPD langsung dari database,
+                        lalu dipakai untuk create, update, delete, refresh, dan export detail pengajuan.
+                    </p>
+                </header>
                 <section className="pic-fpd-card">
                     <div className="pic-fpd-card-heading">
                         <div>
@@ -232,8 +239,8 @@ export default function PicGuruFPD() {
                             <p>Pilih FPD anggaran aktif, lalu kelola detail pengajuan yang tersimpan di database.</p>
                         </div>
                         <div className="pic-fpd-toolbar">
-                            <button type="button" className="pic-fpd-button secondary" onClick={loadInitialData}>Refresh Data</button>
-                            <button type="button" className="pic-fpd-button primary" onClick={handleExport}>Export Excel</button>
+                            <button type="button" className="pic-fpd-button ghost" onClick={loadInitialData}>Refresh Data</button>
+                            <button type="button" className="pic-fpd-button primary" onClick={handleExport}>Export CSV</button>
                         </div>
                     </div>
                     {message ? <div className="pic-fpd-feedback success">{message}</div> : null}

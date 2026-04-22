@@ -66,11 +66,29 @@
 
 .waka-evaluasi-main {
     padding: 28px 34px 40px;
-    background: #f3f6fb;
+    background: linear-gradient(180deg, #111827 0, #111827 160px, #f3f6fb 160px, #f3f6fb 100%);
 }
 
+.waka-evaluasi-header {
+    margin-bottom: 22px;
+    color: #fff;
+}
+
+.waka-evaluasi-header h1,
 .waka-evaluasi-card h2 {
     margin: 0;
+}
+
+.waka-evaluasi-header h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 800;
+}
+
+.waka-evaluasi-header p {
+    max-width: 760px;
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.65;
 }
 
 .waka-evaluasi-stats {
@@ -90,24 +108,6 @@
 
 .waka-evaluasi-stat-card {
     padding: 18px 20px;
-    transition: 0.2s ease;
-}
-
-.waka-evaluasi-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-}
-
-.waka-evaluasi-stat-card-blue {
-    border-left: 4px solid #265f9c;
-}
-
-.waka-evaluasi-stat-card-green {
-    border-left: 4px solid #2e7d32;
-}
-
-.waka-evaluasi-stat-card-orange {
-    border-left: 4px solid #f4b000;
 }
 
 .waka-evaluasi-stat-card span {
@@ -163,10 +163,6 @@
     gap: 8px;
 }
 
-.waka-evaluasi-date-input {
-    position: relative;
-}
-
 .waka-evaluasi-field-full,
 .waka-evaluasi-filter-actions {
     grid-column: 1 / -1;
@@ -200,34 +196,8 @@
 .waka-evaluasi-field input:focus,
 .waka-evaluasi-field select:focus,
 .waka-evaluasi-field textarea:focus {
-    border-color: #1f4e82;
-    box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
-}
-
-.waka-evaluasi-date-input input {
-    padding-right: 50px;
-}
-
-.waka-evaluasi-date-trigger {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    border: none;
-    border-radius: 10px;
-    background: #eef3ff;
-    color: #1f4e82;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.waka-evaluasi-date-trigger:hover {
-    background: #dbeafe;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
 }
 
 .waka-evaluasi-submit,
@@ -252,18 +222,18 @@
 }
 
 .waka-evaluasi-button.primary {
-    background: #1f4e82;
+    background: #1d4ed8;
     color: #fff;
 }
 
 .waka-evaluasi-button.secondary {
     background: #dbeafe;
-    color: #1f4e82;
+    color: #1d4ed8;
 }
 
 .waka-evaluasi-button.ghost {
     background: #fff;
-    color: #1f4e82;
+    color: #1d4ed8;
     border-color: #cfdce8;
 }
 
@@ -277,7 +247,7 @@
 .waka-evaluasi-feedback.success {
     background: #eef6ff;
     border: 1px solid #bfd7fb;
-    color: #1f4e82;
+    color: #215ca0;
 }
 
 .waka-evaluasi-feedback.error {
@@ -340,7 +310,7 @@
 
 .waka-evaluasi-mini-button.edit {
     background: #e6f0ff;
-    color: #1f4e82;
+    color: #215ca0;
 }
 
 .waka-evaluasi-mini-button.delete {

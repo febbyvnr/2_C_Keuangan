@@ -3,12 +3,12 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth; 
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanPenerimaanExport implements WithEvents
 {
@@ -27,7 +27,7 @@ class LaporanPenerimaanExport implements WithEvents
 
     public function collection()
     {
-        return DB::table('tr_penerimaan as p') 
+        $query = DB::table('tr_penerimaan as p') 
             ->join('ref_penerimaan as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
             ->select(
                 'p.TANGGAL_TR_PENERIMAAN as tanggal',
@@ -35,14 +35,22 @@ class LaporanPenerimaanExport implements WithEvents
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as jumlah'
             )
-            ->when($this->start && $this->end, function ($q) {
-                $q->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$this->start, $this->end]);
-            })
-            ->when($this->sumberDana, function ($q) {
-                $q->where('p.ID_REF_DANA', $this->sumberDana);
-            })
-            ->orderBy('p.TANGGAL_TR_PENERIMAAN')
-            ->get();
+            ->whereNotNull('p.NIP_PENERIMA'); 
+
+        if ($this->start && $this->end) {
+            $query->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$this->start, $this->end]);
+        }
+
+        if ($this->sumberDana) {
+            $query->where('p.ID_REF_DANA', $this->sumberDana);
+        }
+
+        $data = $query->orderBy('p.TANGGAL_TR_PENERIMAAN', 'asc')->get();
+
+        $this->total = $data->sum('jumlah');
+        $this->rowCount = $data->count();
+
+        return $data;
     }
 
     public function registerEvents(): array
@@ -51,15 +59,6 @@ class LaporanPenerimaanExport implements WithEvents
             AfterSheet::class => function ($event) {
 
                 $sheet = $event->sheet;
-
-                // =====================
-                // WIDTH
-                // =====================
-                $sheet->getColumnDimension('A')->setWidth(6);
-                $sheet->getColumnDimension('B')->setWidth(18);
-                $sheet->getColumnDimension('C')->setWidth(30);
-                $sheet->getColumnDimension('D')->setWidth(35);
-                $sheet->getColumnDimension('E')->setWidth(22);
 
                 // =====================
                 // TITLE
@@ -72,14 +71,20 @@ class LaporanPenerimaanExport implements WithEvents
                 $sheet->mergeCells('A3:E3');
                 $sheet->mergeCells('A4:E4');
 
-                $sheet->getStyle('A2:E4')->getAlignment()
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
+                $sheet->getStyle('A4')->getFont()->setSize(11);
+
+                $sheet->getStyle('A2:A4')->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
+                // SPACING JUDUL
+                $sheet->getRowDimension(2)->setRowHeight(26);
+                $sheet->getRowDimension(3)->setRowHeight(24);
+                $sheet->getRowDimension(4)->setRowHeight(22);
 
                 // =====================
-                // HEADER
+                // HEADER TABLE
                 // =====================
                 $headerRow = 6;
 
@@ -97,37 +102,54 @@ class LaporanPenerimaanExport implements WithEvents
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FF2E75B6');
 
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()
-                    ->getColor()->setARGB('FFFFFFFF');
+                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
 
+                // DROPDOWN FILTER
                 $sheet->setAutoFilter("A$headerRow:E$headerRow");
+
+                // WIDTH
+                $sheet->getColumnDimension('A')->setWidth(5);
+                $sheet->getColumnDimension('B')->setWidth(15);
+                $sheet->getColumnDimension('C')->setWidth(30);
+                $sheet->getColumnDimension('D')->setWidth(32);
+                $sheet->getColumnDimension('E')->setWidth(20);
 
                 // =====================
                 // DATA
                 // =====================
-                $row = $headerRow + 1;
+                $startData = $headerRow + 1;
+                $row = $startData;
                 $no = 1;
-                $data = $this->collection();
 
-                foreach ($data as $item) {
-                    $sheet->setCellValue("A$row", $no++);
+                $dataCollection = $this->collection();
+
+                foreach ($dataCollection as $item) {
+                    $sheet->setCellValue("A$row", $no);
                     $sheet->setCellValue("B$row", $item->tanggal);
                     $sheet->setCellValue("C$row", $item->jenis);
                     $sheet->setCellValue("D$row", $item->uraian);
                     $sheet->setCellValue("E$row", $item->jumlah);
                     $row++;
+                    $no++;
                 }
 
                 $endData = $row - 1;
 
-                // ALIGN + FORMAT
-                $sheet->getStyle("A$headerRow:E$endData")
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("C" . ($headerRow+1) . ":D$endData")
+                 // =====================
+                // AUTO WRAP
+                // =====================
+                $sheet->getStyle("C$startData:D$endData")
                     ->getAlignment()->setWrapText(true);
 
-                $sheet->getStyle("E" . ($headerRow+1) . ":E$endData")
+                // =====================
+                // AUTO HEIGHT
+                // =====================
+                for ($i = $startData; $i <= $endData; $i++) {
+                    $sheet->getRowDimension($i)->setRowHeight(-1);
+                }
+
+                // FORMAT RP
+                $sheet->getStyle("E$startData:E$endData")
                     ->getNumberFormat()
                     ->setFormatCode('"Rp" #,##0');
 
@@ -139,26 +161,24 @@ class LaporanPenerimaanExport implements WithEvents
                 // =====================
                 // TOTAL
                 // =====================
-                $total = $data->sum('jumlah');
                 $totalRow = $endData + 2;
 
                 $sheet->setCellValue("D$totalRow", 'TOTAL PENERIMAAN');
-                $sheet->setCellValue("E$totalRow", $total);
+                $sheet->setCellValue("E$totalRow", $this->total);
 
                 $sheet->getStyle("D$totalRow:E$totalRow")->getFont()->setBold(true);
 
-                $sheet->getStyle("E$totalRow")
-                    ->getNumberFormat()
+                $sheet->getStyle("E$totalRow")->getNumberFormat()
                     ->setFormatCode('"Rp" #,##0');
 
                 $sheet->getStyle("D$totalRow:E$totalRow")->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FFFFE699');
 
-                // =====================
-                // FOOTER
-                // =====================
-                $footerRow = $totalRow + 4;
+               // =====================
+              // FOOTER
+             // =====================
+            $footerRow = $totalRow + 4;
 
 
             // =====================
@@ -178,6 +198,7 @@ class LaporanPenerimaanExport implements WithEvents
             $sheet->getStyle("E" . ($footerRow+3))
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
+                // FREEZE
                 $sheet->freezePane("A7");
             },
         ];
