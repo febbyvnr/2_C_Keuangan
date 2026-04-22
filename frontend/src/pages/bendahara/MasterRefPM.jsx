@@ -17,6 +17,7 @@ export default function MasterRefPM() {
     });
     const [form, setForm] = useState({
         REF_ID_REF_PM: "",
+        NAMA_PM: "",
         DESKRIPSI_PM: ""
     });
 
@@ -54,8 +55,21 @@ export default function MasterRefPM() {
     };
 
     useEffect(() => {
-        fetchData();
-        fetchParent();
+        const initData = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch("http://localhost:8000/api/ref-pm");
+                const json = await res.json();
+                const result = json.data || [];
+                setData(result);
+                setParentList(result);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        initData();
     }, []);
 
     const handleChange = (e) => {
@@ -70,6 +84,7 @@ export default function MasterRefPM() {
         setEditId(item.ID_REF_PM);
         setForm({
             REF_ID_REF_PM: item.REF_ID_REF_PM ? String(item.REF_ID_REF_PM) : "",
+            NAMA_PM: item.NAMA_PM || "",
             DESKRIPSI_PM: item.DESKRIPSI_PM || ""
         });
         setShowModal(true);
@@ -94,6 +109,7 @@ export default function MasterRefPM() {
             setEditId(null);
             setForm({
                 REF_ID_REF_PM: "",
+                NAMA_PM: "",
                 DESKRIPSI_PM: ""
             });
             fetchData();
@@ -129,6 +145,7 @@ export default function MasterRefPM() {
         setEditId(null);
         setForm({
             REF_ID_REF_PM: "",
+            NAMA_PM: "",
             DESKRIPSI_PM: ""
         });
     };
@@ -137,6 +154,7 @@ export default function MasterRefPM() {
         .filter((item) =>
             (item.DESKRIPSI_PM || "").toLowerCase().includes(search.toLowerCase()) ||
             (item.REF_ID_REF_PM + "").includes(search) ||
+            (item.NAMA_PM || "").toLowerCase().includes(search.toLowerCase()) ||
             (item.ID_REF_PM + "").includes(search)
         )
         .sort((a, b) => {
@@ -207,6 +225,9 @@ export default function MasterRefPM() {
                             <th onClick={() => handleSort("REF_ID_REF_PM")}>
                                 REF ID <i className={getIcon("REF_ID_REF_PM")}></i>
                             </th>
+                            <th onClick={() => handleSort("NAMA_PM")}>
+                                Nama PM <i className={getIcon("NAMA_PM")}></i>
+                            </th>
                             <th onClick={() => handleSort("DESKRIPSI_PM")}>
                                 Deskripsi <i className={getIcon("DESKRIPSI_PM")}></i>
                             </th>
@@ -231,6 +252,7 @@ export default function MasterRefPM() {
                                 <tr key={item.ID_REF_PM}>
                                     <td>{item.ID_REF_PM}</td>
                                     <td>{item.REF_ID_REF_PM}</td>
+                                    <td>{item.NAMA_PM}</td>
                                     <td>{item.DESKRIPSI_PM}</td>
                                     <td className="aksi">
                                         <button className="btn-edit" onClick={() => handleEdit(item)}>
@@ -308,7 +330,15 @@ export default function MasterRefPM() {
                                         </option>
                                     ))}
                             </select>
-                            <label>Deskripsi Referensi Penerimaan</label>
+                            <label>Nama Referensi PM</label>
+                            <input
+                                type="text"
+                                name="NAMA_PM"
+                                value={form.NAMA_PM}
+                                onChange={handleChange}
+                                placeholder="Masukkan nama PM"
+                            />
+                            <label>Deskripsi Referensi PM (opsional)</label>
                             <input
                                 type="text"
                                 name="DESKRIPSI_PM"

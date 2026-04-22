@@ -68,19 +68,19 @@
 
 .ref-pm-table th:nth-child(3),
 .ref-pm-table td:nth-child(3) {
-    width: auto;
-}
-
-.ref-pm-table td:nth-child(3) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 200px;
+    text-align: left;
 }
 
 .ref-pm-table th:nth-child(4),
 .ref-pm-table td:nth-child(4) {
-    width: 120px;
-    text-align: center;
+    width: auto;
+}
+
+.ref-pm-table td:nth-child(4) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ref-pm-table td {

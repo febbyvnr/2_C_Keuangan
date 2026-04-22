@@ -203,11 +203,11 @@ Route::prefix('ref-visi-misi')->group(function () {
 
 Route::prefix('ref-pm')->group(function () {
     Route::get('/', [RefPmController::class, 'index']);
-    Route::post('/', [RefPmController::class, 'store']);
+    Route::post('/store', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
     Route::get('/{id}', [RefPmController::class, 'show']);
-    Route::put('/{id}', [RefPmController::class, 'update']);
-    Route::delete('/{id}', [RefPmController::class, 'destroy']);
+    Route::put('/update/{id}', [RefPmController::class, 'update']);
+    Route::delete('/delete/{id}', [RefPmController::class, 'destroy']);
 });
 
 Route::prefix('jenis-tarif')->group(function () {
