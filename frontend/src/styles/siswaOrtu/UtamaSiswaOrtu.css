@@ -262,12 +262,17 @@
 
 
 .status-badge {
-  display: inline-block;
-  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .status-badge.success {

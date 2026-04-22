@@ -68,30 +68,12 @@
 
 .pic-fpd-main {
     padding: 28px 34px 40px;
-    background: linear-gradient(180deg, #111827 0, #111827 148px, #f3f6fb 148px, #f3f6fb 100%);
+    background: #f3f6fb;
 }
 
-.pic-fpd-page-heading {
-    margin-bottom: 22px;
-    color: #ffffff;
-}
-
-.pic-fpd-page-heading h1,
 .pic-fpd-card h2,
 .pic-fpd-subcard h3 {
     margin: 0;
-}
-
-.pic-fpd-page-heading h1 {
-    font-size: clamp(2rem, 3vw, 3rem);
-    font-weight: 800;
-}
-
-.pic-fpd-page-heading p {
-    max-width: 760px;
-    margin: 10px 0 0;
-    color: rgba(255, 255, 255, 0.76);
-    line-height: 1.65;
 }
 
 .pic-fpd-card,
@@ -403,8 +385,8 @@
 }
 
 .pic-fpd-button.secondary {
-    background: #e8f0fb;
-    color: #245b9c;
+    background: #dbeafe;
+    color: #1f4e82;
 }
 
 .pic-fpd-button.ghost {
@@ -414,7 +396,7 @@
 }
 
 .pic-fpd-button.primary {
-    background: #2f67ad;
+    background: #1f4e82;
     color: #fff;
 }
 
