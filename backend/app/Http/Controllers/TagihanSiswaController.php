@@ -551,24 +551,6 @@ class TagihanSiswaController extends Controller
         return Excel::download(new TagihanSiswaExport($filters), 'tagihan_siswa.xlsx');
     }
 
-    public function exportCsv(Request $request)
-    {
-        $filters = $request->only([
-            'ID_SISWA_TETAP',
-            'ID_JENIS_PEMBAYARAN',
-            'BULAN_TAGIHAN_SISWA',
-            'TAHUN_TAGIHAN_SISWA',
-            'STATUS_TAGIHAN_SISWA',
-            'search',
-            'tunggakan',
-        ]);
-
-        return Excel::download(
-            new TagihanSiswaExport($filters),
-            'tagihan_siswa.csv'
-        );
-    }
-
     public function exportPdf(Request $request)
     {
         $filters = $request->only([

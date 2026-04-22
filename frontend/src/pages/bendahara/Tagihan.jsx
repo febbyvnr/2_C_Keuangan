@@ -442,8 +442,24 @@ function Tagihan() {
     setFilterStatus("Semua");
   };
 
-  const handleExport = () => {
-    alert("Export laporan tagihan siswa masih dummy.");
+  const buildExportParams = () => {
+    const params = new URLSearchParams();
+
+    if (search) params.append("search", search);
+
+    return params.toString();
+  };
+
+  const handleExportExcel = () => {
+    const query = buildExportParams();
+    const url = `${API_BASE_URL}/tagihan-siswa/export/excel${query ? `?${query}` : ""}`;
+    window.open(url, "_blank");
+  };
+
+  const handleExportPdf = () => {
+    const query = buildExportParams();
+    const url = `${API_BASE_URL}/tagihan-siswa/export/pdf${query ? `?${query}` : ""}`;
+    window.open(url, "_blank");
   };
 
   return (
@@ -687,13 +703,25 @@ function Tagihan() {
             >
               Reset Filter
             </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleExport}
-            >
-              Export
-            </button>
+
+            <div className="export-group">
+              <button
+                type="button"
+                className="btn btn-export-excel"
+                onClick={handleExportExcel}
+              >
+                Export Excel
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-export-pdf"
+                onClick={handleExportPdf}
+              >
+                Export PDF
+              </button>
+            </div>
+
           </div>
         </div>
 

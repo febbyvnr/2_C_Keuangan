@@ -165,7 +165,7 @@
 
 .filter-bar {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr auto;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
   gap: 14px;
   align-items: end;
   margin-bottom: 18px;
@@ -208,7 +208,8 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  align-items: flex-end;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .btn {
@@ -600,6 +601,36 @@
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
+}
+
+.export-group {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.export-group .btn,
+.filter-actions > .btn {
+  height: 44px;
+}
+
+.btn-export-excel {
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+.btn-export-excel:hover {
+  background: #185c37;
+}
+
+.btn-export-pdf {
+  background: #c62828;
+  color: #ffffff;
+}
+
+.btn-export-pdf:hover {
+  background: #b71c1c;
 }
 
 @media (max-width: 768px) {
