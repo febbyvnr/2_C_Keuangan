@@ -27,7 +27,9 @@ use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
+use App\Http\Controllers\TarifExportController;
 use App\Http\Controllers\MstUnitController;
+
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -220,6 +222,10 @@ Route::prefix('jenis-tarif')->group(function () {
 });
 
 Route::prefix('tarif')->group(function () {
+
+    Route::get('/export/excel', [RefTarifController::class, 'exportExcel']);
+    Route::get('/export/pdf',   [RefTarifController::class, 'exportPdf']);
+
     Route::get('/', [RefTarifController::class, 'index']);
     Route::get('/search', [RefTarifController::class, 'search']);
     Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
@@ -230,11 +236,12 @@ Route::prefix('tarif')->group(function () {
     Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
     Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
 
-    //ga ngedong route atas
+
     Route::get('/tarif', [RefTarifController::class, 'index']);
     Route::post('/tarif/store', [RefTarifController::class, 'store']);
     Route::put('/tarif/update/{id}', [RefTarifController::class, 'update']);
     Route::delete('/tarif/delete/{id}', [RefTarifController::class, 'destroy']);
+    
 });
 
 Route::prefix('evaluasi-rkt/export')->group(function () {

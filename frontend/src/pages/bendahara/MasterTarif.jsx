@@ -12,6 +12,8 @@ export default function MasterTarif() {
     const [jenisTarifList, setJenisTarifList] = useState([]);
     const [tahunAnggaranList, setTahunAnggaranList] = useState([]);
     const [search, setSearch] = useState("");
+    const [filterJenis, setFilterJenis] = useState("");
+    const [filterTahun, setFilterTahun] = useState("");
     const [sortConfig, setSortConfig] = useState({
         key: "ID_REF_TARIF",
         direction: "asc"
@@ -39,6 +41,15 @@ export default function MasterTarif() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Bangun query string untuk export berdasarkan filter aktif
+    const filterExportParams = () => {
+        const params = new URLSearchParams();
+        if (filterJenis) params.append("id_jenis_tarif", filterJenis);
+        if (filterTahun) params.append("id_ta_anggaran", filterTahun);
+        const qs = params.toString();
+        return qs ? `?${qs}` : "";
     };
     
     const handleKeyDown = (e) => {
@@ -238,7 +249,7 @@ export default function MasterTarif() {
             <div className="tarif-header">
                 <h2>Master Tarif</h2>
                 <div className="header-actions">
-                    <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
+                    <button className="btn-reset" onClick={() => { setSearch(""); setFilterJenis(""); setFilterTahun(""); fetchData(); }}>
                         Reset
                     </button>
                     <div style={{ display: "flex", gap: "10px" }}>
@@ -253,6 +264,37 @@ export default function MasterTarif() {
                         <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
                             Search
                         </button>
+                    </div>
+                    {/* Filter untuk export */}
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <select
+                            value={filterJenis}
+                            onChange={(e) => setFilterJenis(e.target.value)}
+                            className="search-input"
+                            style={{ minWidth: "160px" }}
+                            title="Filter export berdasarkan Jenis Tarif"
+                        >
+                            <option value="">Semua Jenis Tarif</option>
+                            {jenisTarifList.map((item) => (
+                                <option key={item.ID_JENIS_TARIF} value={item.ID_JENIS_TARIF}>
+                                    {item.DESKRIPSI_JENIS_TARIF}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={filterTahun}
+                            onChange={(e) => setFilterTahun(e.target.value)}
+                            className="search-input"
+                            style={{ minWidth: "140px" }}
+                            title="Filter export berdasarkan Tahun Anggaran"
+                        >
+                            <option value="">Semua Tahun</option>
+                            {tahunAnggaranList.map((item) => (
+                                <option key={item.ID_TA_ANGGARAN} value={item.ID_TA_ANGGARAN}>
+                                    {item.DESKRIPSI_TAHUN_ANGGARAN || item.TAHUN_ANGGARAN}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <button className="btn-primary" 
                         onClick={() => {
@@ -372,10 +414,16 @@ export default function MasterTarif() {
                     </button>
                 </div>
                 <div className="export-wrapper">
-                    <a href={`http://localhost:8000/api/tarif/export/excel?search=${search}`} className="btn-outline-success custom-btn">
+                    <a
+                        href={`http://localhost:8000/api/tarif/export/excel${filterExportParams()}`}
+                        className="btn-outline-success custom-btn"
+                    >
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
-                    <a href={`http://localhost:8000/api/tarif/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                    <a
+                        href={`http://localhost:8000/api/tarif/export/pdf${filterExportParams()}`}
+                        className="btn-outline-danger custom-btn"
+                    >
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
                     </a>
                 </div>
