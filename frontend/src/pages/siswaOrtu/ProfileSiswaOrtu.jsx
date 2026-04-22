@@ -1,110 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/siswaOrtu/ProfileSiswaOrtu.css";
 
 function ProfileSiswaOrtu() {
   const navigate = useNavigate();
-  const { id } = useParams();
-
   const [isEdit, setIsEdit] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    namaSiswa: "",
-    nis: "",
-    nisn: "",
-    kelas: "",
-    jenisKelamin: "",
-    tempatLahir: "",
-    tanggalLahir: "",
-    alamat: "",
-    noHp: "",
-    tahunLulus: "",
-    namaAyah: "",
-    pekerjaanAyah: "",
-    namaIbu: "",
-    pekerjaanIbu: "",
-    namaWali: "",
+    namaSiswa: "Andi Susanto",
+    nis: "2026001",
+    nisn: "1234567890",
+    kelas: "X RPL",
+    jenisKelamin: "Laki-laki",
+    tempatLahir: "Yogyakarta",
+    tanggalLahir: "12 Januari 2010",
+    alamat: "Jl. Kaliurang No. 10, Sleman, Yogyakarta",
+    noHp: "081234567890",
+    tahunLulus: "2028",
+    namaAyah: "Budi Santoso",
+    pekerjaanAyah: "Wiraswasta",
+    namaIbu: "Siti Aminah",
+    pekerjaanIbu: "Ibu Rumah Tangga",
+    namaWali: "-",
   });
-
-  const formatTanggalIndonesia = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    if (Number.isNaN(date.getTime())) return dateStr;
-
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  const formatAlamat = (siswa) => {
-    const parts = [];
-
-    if (siswa.ALAMAT_JALAN_SISWA) parts.push(siswa.ALAMAT_JALAN_SISWA);
-
-    const rtRw = [];
-    if (siswa.RT_SISWA) rtRw.push(`RT ${siswa.RT_SISWA}`);
-    if (siswa.RW_SISWA) rtRw.push(`RW ${siswa.RW_SISWA}`);
-    if (rtRw.length) parts.push(rtRw.join(" "));
-
-    if (siswa.KELURAHAN_SISWA) parts.push(siswa.KELURAHAN_SISWA);
-    if (siswa.KECAMATAN_SISWA) parts.push(siswa.KECAMATAN_SISWA);
-    if (siswa.KOTA_KAB_SISWA) parts.push(siswa.KOTA_KAB_SISWA);
-    if (siswa.PROVINSI_SISWA) parts.push(siswa.PROVINSI_SISWA);
-    if (siswa.KODE_POS_SISWA) parts.push(siswa.KODE_POS_SISWA);
-
-    return parts.join(", ");
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchProfile();
-    }
-  }, [id]);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-
-      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`);
-      const json = await res.json();
-
-      console.log("PROFILE RESPONSE:", json);
-
-      const siswa = json?.data || null;
-
-      if (siswa) {
-        setFormData({
-          namaSiswa: siswa.NAMA_SISWA_TETAP || "",
-          nis: siswa.ID_PENDAFTARAN || "",
-          nisn: siswa.NISN_SISWA || "",
-          kelas: "-",
-          jenisKelamin:
-            siswa.GENDER_SISWA === "L"
-              ? "Laki-laki"
-              : siswa.GENDER_SISWA === "P"
-              ? "Perempuan"
-              : siswa.GENDER_SISWA || "",
-          tempatLahir: siswa.TEMPAT_LAHIR_SISWA || "",
-          tanggalLahir: formatTanggalIndonesia(siswa.TGL_LAHIR_SISWA),
-          alamat: formatAlamat(siswa),
-          noHp: siswa.NO_HP_SISWA || "",
-          tahunLulus: siswa.TAHUN_LULUS || "",
-          namaAyah: siswa.NAMA_AYAH_SISWA || "",
-          pekerjaanAyah: siswa.PEKERJAAN_AYAH_SISWA || "",
-          namaIbu: siswa.NAMA_IBU_SISWA || "",
-          pekerjaanIbu: siswa.PEKERJAAN_IBU_SISWA || "",
-          namaWali: siswa.NAMA_WALI_SISWA || "-",
-        });
-      }
-    } catch (error) {
-      console.error("Gagal mengambil profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,55 +32,11 @@ function ProfileSiswaOrtu() {
     }));
   };
 
-  const handleCancel = async () => {
-    await fetchProfile();
+  const handleSave = () => {
+    // nanti sambungkan ke API PUT/POST
+    console.log("Data disimpan:", formData);
     setIsEdit(false);
   };
-
-  const handleSave = async () => {
-    try {
-      const payload = {
-        NO_HP_SISWA: formData.noHp,
-        PEKERJAAN_AYAH_SISWA: formData.pekerjaanAyah,
-        PEKERJAAN_IBU_SISWA: formData.pekerjaanIbu,
-        NAMA_WALI_SISWA: formData.namaWali,
-      };
-
-      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        throw new Error(json.message || "Gagal menyimpan profile");
-      }
-
-      await fetchProfile();
-      alert("Profile berhasil disimpan");
-      setIsEdit(false);
-    } catch (error) {
-      console.error("Gagal menyimpan profile:", error);
-      alert(error.message || "Terjadi kesalahan saat menyimpan");
-    }
-  };
-
-  const avatarText = useMemo(() => {
-    return (formData.namaSiswa || "S")
-      .split(" ")
-      .map((word) => word[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  }, [formData.namaSiswa]);
-
-  if (loading) {
-    return <div className="profile-page">Loading...</div>;
-  }
 
   return (
     <div className="profile-page">
@@ -170,7 +44,7 @@ function ProfileSiswaOrtu() {
         <div className="profile-topbar">
           <button
             className="back-btn"
-            onClick={() => navigate(`/siswa-ortu/utama/${id}`)}
+            onClick={() => navigate("/siswa-ortu/utama")}
           >
             ← Kembali
           </button>
@@ -181,7 +55,7 @@ function ProfileSiswaOrtu() {
             </button>
           ) : (
             <div className="topbar-actions">
-              <button className="cancel-btn" onClick={handleCancel}>
+              <button className="cancel-btn" onClick={() => setIsEdit(false)}>
                 Batal
               </button>
               <button className="save-btn" onClick={handleSave}>
@@ -192,10 +66,10 @@ function ProfileSiswaOrtu() {
         </div>
 
         <div className="profile-card profile-header-card">
-          <div className="profile-avatar-large">{avatarText}</div>
+          <div className="profile-avatar-large">AS</div>
           <div className="profile-header-info">
-            <h1>{formData.namaSiswa || "Siswa"}</h1>
-            <p>{formData.kelas || "-"}</p>
+            <h1>{formData.namaSiswa}</h1>
+            <p>{formData.kelas}</p>
             <span className="profile-chip">Siswa / Orang Tua</span>
           </div>
         </div>
@@ -256,7 +130,7 @@ function ProfileSiswaOrtu() {
                   name="alamat"
                   value={formData.alamat}
                   onChange={handleChange}
-                  disabled
+                  disabled={!isEdit}
                   rows="3"
                 />
               </div>

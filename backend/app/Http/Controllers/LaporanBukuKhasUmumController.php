@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanBukuKhasUmumExport;
-use Illuminate\Support\Facades\Auth; // TAMBAHAN
 
 class LaporanBukuKhasUmumController extends Controller
 {
@@ -16,33 +15,12 @@ class LaporanBukuKhasUmumController extends Controller
         $start = $request->start;
         $end = $request->end;
         $type = $request->type;
+        $role = $request->role ?? 'Bendahara';
 
-        // =========================
-        // FIX: AMBIL NIP (REQUEST / LOGIN)
-        // =========================
-        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
-
-        $authRole = Auth::check() ? Auth::user()->role : null;
-
-        // =========================
-        // FIX: AMBIL ROLE DARI DB
-        // =========================
-        $dbRole = DB::table('tr_jabatan as tj')
-            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->where('tj.NIP_KARYAWAN', $nip)
-            ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->value('rj.DESKRIPSI_JABATAN');
-
-        // PRIORITAS ROLE
-        $role = $dbRole ?? $authRole;
-        $role = trim($role);
-
-        // =========================
-        // VALIDASI ROLE 
-        // =========================
-        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+        // VALIDASI BENDAHARA
+        if ($type == 'excel' && $role && $role !== 'Bendahara') {
             return response()->json([
-                'message' => 'Role tidak diizinkan generate laporan'
+                'message' => 'Hanya Bendahara yang boleh generate laporan'
             ], 403);
         }
 
@@ -70,7 +48,7 @@ class LaporanBukuKhasUmumController extends Controller
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as debit',
                 DB::raw('0 as kredit'),
-                DB::raw("'Bank' as metode")
+                DB::raw("'Bank' as metode") 
             );
 
         // =========================
@@ -84,7 +62,7 @@ class LaporanBukuKhasUmumController extends Controller
                 DB::raw("CONCAT('Pengeluaran - ', pk.PROGRAM_KERJA) as uraian"),
                 DB::raw('0 as debit'),
                 'd.TOTAL as kredit',
-                DB::raw("'Bank' as metode")
+                DB::raw("'Bank' as metode") 
             );
 
         // =========================
@@ -97,9 +75,9 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // UNION DATA
+        // UNION SEMUA DATA
         // =========================
-        $data = DB::query()
+         $data = DB::query()
             ->fromSub(
                 $pembayaran
                     ->unionAll($penerimaan)
@@ -108,7 +86,7 @@ class LaporanBukuKhasUmumController extends Controller
             )
             ->orderBy('tanggal', 'asc')
             ->get();
-
+            
         // =========================
         // HITUNG SALDO
         // =========================
@@ -134,7 +112,7 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role, $nip), 
+                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role),
                 'Laporan_BKU.xlsx'
             );
         }
@@ -142,8 +120,7 @@ class LaporanBukuKhasUmumController extends Controller
         // =========================
         // PDF
         // =========================
-        if (strtolower(trim($type)) === 'pdf') {
-
+        if ($type == 'pdf') {
             $pdf = Pdf::loadView(
                 'exports.LaporanBukuKhasUmum',
                 [
@@ -152,8 +129,7 @@ class LaporanBukuKhasUmumController extends Controller
                     'p2' => $p2,
                     'start' => $start,
                     'end' => $end,
-                    'role' => $role,
-                    'nip' => $nip 
+                    'role' => $role
                 ]
             );
 

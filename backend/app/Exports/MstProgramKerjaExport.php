@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use App\Models\MstProgramKerja;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
@@ -12,23 +12,16 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class MstProgramKerjaExport implements FromArray, WithEvents
+class MstProgramKerjaExport implements FromCollection, WithEvents
 {
     protected array $filters;
-    protected Collection $data;
 
     public function __construct(array $filters = [])
     {
         $this->filters = $filters;
-        $this->data = $this->getData();
     }
 
-    public function array(): array
-    {
-        return [];
-    }
-
-    private function getData(): Collection
+    public function collection(): Collection
     {
         $search = trim((string) ($this->filters['search'] ?? ''));
         $idTan = $this->filters['ID_TAN'] ?? null;
@@ -71,9 +64,11 @@ class MstProgramKerjaExport implements FromArray, WithEvents
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                $data = $this->data;
+                $data = $this->collection();
 
+                // =====================
                 // TITLE
+                // =====================
                 $sheet->setCellValue('A2', 'RENCANA KERJA TAHUNAN');
                 $sheet->setCellValue('A3', 'UNIT SEKOLAH SMK BOPKRI 2 YOGYAKARTA');
                 $sheet->setCellValue('A4', 'TAHUN 2026');
@@ -90,7 +85,9 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                 $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(14);
 
+                // =====================
                 // TABLE HEADER
+                // =====================
                 $headerRow = 6;
 
                 $sheet->setCellValue("A{$headerRow}", 'NO');
@@ -115,7 +112,9 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FF00FF00');
 
+                // =====================
                 // WIDTH
+                // =====================
                 $sheet->getColumnDimension('A')->setWidth(10);
                 $sheet->getColumnDimension('B')->setWidth(24);
                 $sheet->getColumnDimension('C')->setWidth(10);
@@ -129,8 +128,11 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                 $sheet->getColumnDimension('K')->setWidth(34);
                 $sheet->getColumnDimension('L')->setWidth(24);
 
+                // =====================
                 // GROUPING / NUMBERING
+                // =====================
                 $grouped = $this->groupData($data);
+
                 $row = $headerRow + 1;
 
                 foreach ($grouped as $romanIndex => $romanData) {
@@ -162,7 +164,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                             $sheet->setCellValue("I{$row}", (float) ($item->NOMINAL ?? 0));
                             $sheet->setCellValueExplicit("J{$row}", $waktu, DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("K{$row}", (string) ($item->KELUARAN_PROGKER ?? '-'), DataType::TYPE_STRING);
-                            $sheet->setCellValueExplicit("L{$row}", (string) ($item->KETERANGAN ?? '-'), DataType::TYPE_STRING);
+                            $sheet->setCellValueExplicit("L{$row}", '', DataType::TYPE_STRING);
 
                             $row++;
                             $urut++;
@@ -172,7 +174,9 @@ class MstProgramKerjaExport implements FromArray, WithEvents
 
                 $endRow = $row - 1;
 
+                // =====================
                 // STYLE DATA
+                // =====================
                 if ($endRow >= $headerRow + 1) {
                     $sheet->getStyle("A{$headerRow}:L{$endRow}")
                         ->getBorders()->getAllBorders()
@@ -215,6 +219,18 @@ class MstProgramKerjaExport implements FromArray, WithEvents
         return $map[$number] ?? (string) $number;
     }
 
+    /**
+     * Group data menjadi:
+     * [
+     *   roman_index => [
+     *     sub_code => [
+     *       'bidang_code' => ...,
+     *       'bidang_label' => ...,
+     *       'items' => [...]
+     *     ]
+     *   ]
+     * ]
+     */
     private function groupData(Collection $data): array
     {
         $grouped = [];
@@ -244,6 +260,10 @@ class MstProgramKerjaExport implements FromArray, WithEvents
         return $grouped;
     }
 
+    /**
+     * Mapping sementara.
+     * Sesuaikan nanti kalau sudah ada master bidang/sub yang jelas.
+     */
     private function mapBidang($item): array
     {
         $program = strtolower((string) ($item->PROGRAM_KERJA ?? ''));
@@ -252,6 +272,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
 
         $text = $program . ' ' . $kegiatan . ' ' . $coa;
 
+        // I - Kelulusan / Kurikulum / Pembelajaran / Penilaian
         if (str_contains($text, 'kelulusan') || str_contains($text, 'wisuda') || str_contains($text, 'ujian')) {
             return [
                 'roman_index' => 1,
@@ -294,6 +315,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
             ];
         }
 
+        // II - SDM
         if (
             str_contains($text, 'guru') ||
             str_contains($text, 'mgmp') ||
@@ -309,6 +331,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
             ];
         }
 
+        // III - Pengelolaan / Pembiayaan / Sarpras
         if (
             str_contains($text, 'ppdb') ||
             str_contains($text, 'monitoring') ||
@@ -356,6 +379,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
             ];
         }
 
+        // Default fallback
         return [
             'roman_index' => 1,
             'sub_code' => 1,

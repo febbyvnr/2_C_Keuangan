@@ -9,60 +9,24 @@ export default function MasterCOA() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
-    const [coaList, setCoaList] = useState([]);
-    const [search, setSearch] = useState("");
-    const [sortConfig, setSortConfig] = useState({
-        key: "ID_MASTER_COA",
-        direction: "asc"
-    });
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
         DESKRIPSI_COA: ""
     });
 
-    const fetchData = async (keyword = "") => {
+    const fetchData = async () => {
         try {
-            setLoading(true);
-            const url = keyword
-                ? `http://localhost:8000/api/coa?search=${keyword}`
-                : "http://localhost:8000/api/coa";
-
-            const res = await fetch(url);
+            const res = await fetch("http://localhost:8000/api/coa");
             const json = await res.json();
             setData(json.data || []);
-            setCoaList(json.data || []);
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            setCurrentPage(1);
-            fetchData(search);
         }
     };
 
     useEffect(() => {
         fetchData();
     }, []);
-
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const getIcon = (key) => {
-        if (sortConfig.key !== key) return "bi bi-funnel";
-        return sortConfig.direction === "asc"
-            ? "bi bi-funnel-fill"
-            : "bi bi-funnel-fill";
-    };
 
     const handleChange = (e) => {
         setForm({
@@ -141,25 +105,8 @@ export default function MasterCOA() {
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentData = data.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
-
-    const sortedData = [...data].sort((a, b) => {
-        let valA = a[sortConfig.key] || "";
-        let valB = b[sortConfig.key] || "";
-        if (sortConfig.key === "ID_MASTER_COA" || sortConfig.key === "MST_ID_MASTER_COA") {
-            valA = Number(valA);
-            valB = Number(valB);
-        }
-        if (typeof valA === "string") valA = valA.toLowerCase();
-        if (typeof valB === "string") valB = valB.toLowerCase();
-        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -169,67 +116,18 @@ export default function MasterCOA() {
         <div className="coa-container">
             <div className="coa-header">
                 <h2>Master COA</h2>
-                <div className="header-actions">
-                    <button
-                        className="btn-reset"
-                        onClick={() => {
-                            setSearch("");
-                            fetchData();
-                        }}
-                    >
-                        Reset
-                    </button>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <input
-                            type="text"
-                            placeholder="Cari deskripsi / kode COA..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="search-input"
-                        />
-                        <button
-                            className="search-btn"
-                            onClick={() => {
-                                setCurrentPage(1);
-                                fetchData(search);
-                            }}
-                        >
-                            Search
-                        </button>
-                    </div>
-                    <button
-                        className="btn-primary"
-                        onClick={() => {
-                            setIsEdit(false);
-                            setEditId(null);
-                            setForm({
-                                MST_ID_MASTER_COA: "",
-                                DESKRIPSI_COA: ""
-                            });
-                            setShowModal(true);
-                        }}
-                    >
-                        Tambah COA
-                    </button>
-                </div>
+                <button className="btn-primary" onClick={() => setShowModal(true)}>
+                    Tambah COA
+                </button>
             </div>
             <div className="coa-table-wrapper">
                 <table className="coa-table">
                     <thead>
                         <tr>
-                            <th onClick={() => handleSort("ID_MASTER_COA")}>
-                                ID <i className={getIcon("ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("MST_ID_MASTER_COA")}>
-                                MST ID <i className={getIcon("MST_ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("KODE_COA")}>
-                                Kode COA <i className={getIcon("KODE_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_COA")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_COA")}></i>
-                            </th>
+                            <th>ID</th>
+                            <th>MST ID</th>
+                            <th>Kode COA</th>
+                            <th>Deskripsi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -278,51 +176,38 @@ export default function MasterCOA() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination-wrapper">
-                <div className="pagination-info">
-                    Menampilkan {startData} - {endData} dari {totalData} data
-                </div>
-                <div className="pagination">
+            <div className="pagination">
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                >
+                    <i className="bi bi-chevron-left"></i>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
                     <button
-                        className="page-btn"
-                        onClick={() =>
-                            setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
+                        key={i + 1}
+                        onClick={() => changePage(i + 1)}
+                        className={`page-btn ${
+                            currentPage === i + 1 ? "active" : ""
+                        }`}
                     >
-                        <i className="bi bi-chevron-left"></i>
+                        {i + 1}
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => changePage(i + 1)}
-                            className={`page-btn ${
-                                currentPage === i + 1 ? "active" : ""
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                    <button
-                        className="page-btn"
-                        onClick={() =>
-                            setCurrentPage((prev) =>
-                                Math.min(prev + 1, totalPages)
-                            )
-                        }
-                        disabled={currentPage === totalPages}
-                    >
-                        <i className="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-                <div className="export-wrapper">
-                    <a href={`http://localhost:8000/api/coa/export/excel?search=${search}`} className="btn btn-outline-success custom-btn">
-                        <i className="bi bi-filetype-xlsx"></i>Export Excel
-                    </a>
-                    <a href={`http://localhost:8000/api/coa/export/pdf?search=${search}`} className="btn btn-outline-danger custom-btn">
-                        <i className="bi bi-file-earmark-pdf"></i>Export PDF
-                    </a>
-                </div>
+                ))}
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                        )
+                    }
+                    disabled={currentPage === totalPages}
+                >
+                    <i className="bi bi-chevron-right"></i>
+                </button>
             </div>
             {showModal && (
                 <div className="modal-overlay">
@@ -330,31 +215,27 @@ export default function MasterCOA() {
                        <h3>{isEdit ? "Edit COA" : "Tambah COA"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent COA (opsional)</label>
-                            <select
+                            <input
+                                type="number"
                                 name="MST_ID_MASTER_COA"
                                 value={form.MST_ID_MASTER_COA}
                                 onChange={handleChange}
-                            >
-                                <option value="">-- Pilih Parent --</option>
-                                {coaList.map((coa) => (
-                                    <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
-                                        {coa.KODE_COA} - {coa.DESKRIPSI_COA}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="ID Parent COA"
+                            />
                             <label>Deskripsi COA</label>
                             <input
                                 type="text"
                                 name="DESKRIPSI_COA"
                                 value={form.DESKRIPSI_COA}
                                 onChange={handleChange}
+                                required
                                 placeholder="Masukkan deskripsi"
                             />
                             <div className="modal-actions">
                                 <button
                                     type="button"
                                     className="btn-cancel"
-                                    onClick={closeModal}
+                                    onClick={() => setShowModal(false)}
                                 >
                                     Batal
                                 </button>

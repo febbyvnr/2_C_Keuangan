@@ -9,78 +9,23 @@ export default function MasterJenisTarif() {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [editId, setEditId] = useState(null); 
-    const [search, setSearch] = useState("");
-    const [sortConfig, setSortConfig] = useState({
-        key: "ID_JENIS_TARIF",
-        direction: "asc"
-    });
     const [form, setForm] = useState({
         DESKRIPSI_JENIS_TARIF: ""
     });
 
-    const fetchData = async (keyword = "") => {
+    const fetchData = async () => {
         try {
-            setLoading(true);
-            const url = keyword
-                ? `http://localhost:8000/api/jenis-tarif?search=${keyword}`
-                : "http://localhost:8000/api/jenis-tarif";
-
-            const res = await fetch(url);
+            const res = await fetch("http://localhost:8000/api/jenis-tarif");
             const json = await res.json();
             setData(json.data || json || []);
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchData();
     }, []);
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            setCurrentPage(1);
-            fetchData(search);
-        }
-    };
-
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const getIcon = (key) => {
-        if (sortConfig.key !== key) return "bi bi-funnel";
-        return "bi bi-funnel-fill";
-    };
-
-    const filteredData = data.filter((item) => {
-        const keyword = search.toLowerCase();
-        return (
-            item.ID_JENIS_TARIF?.toString().includes(keyword) ||
-            item.DESKRIPSI_JENIS_TARIF?.toLowerCase().includes(keyword)
-        );
-    });
-
-    const sortedData = [...filteredData].sort((a, b) => {
-        let valA = a[sortConfig.key] || "";
-        let valB = b[sortConfig.key] || "";
-        if (sortConfig.key === "ID_JENIS_TARIF") {
-            valA = Number(valA);
-            valB = Number(valB);
-        } else {
-            valA = valA.toString().toLowerCase();
-            valB = valB.toString().toLowerCase();
-        }
-        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
 
     const handleChange = (e) => {
         setForm({
@@ -156,11 +101,8 @@ export default function MasterJenisTarif() {
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
+    const currentData = data.slice(indexOfFirst, indexOfLast);
     const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -170,48 +112,26 @@ export default function MasterJenisTarif() {
         <div className="jenis-tarif-container">
             <div className="jenis-tarif-header">
                 <h2>Master Jenis Tarif</h2>
-                <div className="header-actions">
-                    <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
-                        Reset
-                    </button>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <input
-                            type="text"
-                            placeholder="Cari jenis tarif..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="search-input"
-                        />
-                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
-                            Search
-                        </button>
-                    </div>
-                    <button
-                        className="btn-primary"
-                        onClick={() => {
-                            setIsEdit(false);
-                            setEditId(null);
-                            setForm({
-                                DESKRIPSI_JENIS_TARIF: ""
-                            });
-                            setShowModal(true);
-                        }}
-                    >
-                        Tambah Jenis Tarif
-                    </button>
-                </div>
+                <button
+                    className="btn-primary"
+                    onClick={() => {
+                        setIsEdit(false);
+                        setEditId(null);
+                        setForm({
+                            DESKRIPSI_JENIS_TARIF: ""
+                        });
+                        setShowModal(true);
+                    }}
+                >
+                    Tambah Jenis Tarif
+                </button>
             </div>
             <div className="jenis-tarif-table-wrapper">
                 <table className="jenis-tarif-table">
                     <thead>
                         <tr>
-                            <th onClick={() => handleSort("ID_JENIS_TARIF")}>
-                                ID <i className={getIcon("ID_JENIS_TARIF")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_JENIS_TARIF")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_JENIS_TARIF")}></i>
-                            </th>
+                            <th>ID</th>
+                            <th>Deskripsi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -258,37 +178,38 @@ export default function MasterJenisTarif() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination-wrapper">
-                <div className="pagination-info">
-                    Menampilkan {startData} - {endData} dari {totalData} data
-                </div>
-                <div className="pagination">
-                    <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-                        <i className="bi bi-chevron-left"></i>
+            <div className="pagination">
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                >
+                    <i className="bi bi-chevron-left"></i>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i + 1}
+                        onClick={() => changePage(i + 1)}
+                        className={`page-btn ${
+                            currentPage === i + 1 ? "active" : ""
+                        }`}
+                    >
+                        {i + 1}
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => changePage(i + 1)}
-                            className={`page-btn ${
-                                currentPage === i + 1 ? "active" : ""
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                    <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-                        <i className="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-                <div className="export-wrapper">
-                    <a href={`http://localhost:8000/api/export/jenis-tarif`} className="btn-outline-success custom-btn">
-                        <i className="bi bi-filetype-xlsx"></i> Export Excel
-                    </a>
-                    {/* <a href={`http://localhost:8000/api/jenis-tarif/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
-                        <i className="bi bi-file-earmark-pdf"></i> Export PDF
-                    </a> */}
-                </div>
+                ))}
+                <button
+                    className="page-btn"
+                    onClick={() =>
+                        setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                        )
+                    }
+                    disabled={currentPage === totalPages}
+                >
+                    <i className="bi bi-chevron-right"></i>
+                </button>
             </div>
             {showModal && (
                 <div className="modal-overlay">

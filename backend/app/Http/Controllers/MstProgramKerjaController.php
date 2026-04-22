@@ -10,11 +10,13 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 
-use App\Exports\MstProgramKerjaExport;
-use Maatwebsite\Excel\Facades\Excel;
-
 class MstProgramKerjaController extends Controller
 {
+    /**
+     * Menampilkan daftar program kerja aktif
+     * Search berdasarkan program kerja, indikator, sasaran, keluaran, PJ
+     * Filter opsional berdasarkan ID_TAN dan ID_TA_ANGGARAN
+     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -71,6 +73,9 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    /**
+     * Menampilkan detail program kerja
+     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -109,6 +114,9 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    /**
+     * Menambahkan program kerja baru
+     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -193,6 +201,9 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    /**
+     * Mengubah program kerja
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -284,6 +295,10 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    /**
+     * Menghapus program kerja (soft delete)
+     * Tidak boleh dihapus jika sudah dipakai pada detail program kerja, FPD, atau PM
+     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -325,6 +340,9 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    /**
+     * Rules validasi
+     */
     private function rules(): array
     {
         return [
@@ -399,6 +417,9 @@ class MstProgramKerjaController extends Controller
         ];
     }
 
+    /**
+     * Messages validasi
+     */
     private function messages(): array
     {
         return [
@@ -433,20 +454,9 @@ class MstProgramKerjaController extends Controller
         ];
     }
 
-    public function exportExcel(Request $request)
-    {
-        $filters = $request->only([
-            'search',
-            'ID_TAN',
-            'ID_TA_ANGGARAN',
-        ]);
-
-        return Excel::download(
-            new MstProgramKerjaExport($filters),
-            'rkt.xlsx'
-        );
-    }
-
+    /**
+     * Helper cek apakah program kerja sudah dipakai
+     */
     private function isProgramKerjaUsed(MstProgramKerja $programKerja): bool
     {
         $hasDetail = $programKerja->detailProgramKerja()->exists();
