@@ -29,6 +29,7 @@ use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\TarifExportController;
 use App\Http\Controllers\MstUnitController;
+use App\Http\Controllers\MstKaryawanController;
 
 
 use Termwind\Components\Raw;
@@ -50,8 +51,6 @@ Route::middleware(['role:Bendahara'])->group(function () {
     Route::put('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'update']); // F83
     Route::delete('/keuangan/penerimaan/{id}', [TrPenerimaanController::class, 'destroy']); // F84
 });
-
-
 // 3. F85, F86, F87 (Read, Search, Export) & Route /me - BENDAHARA ATAU KEPALA SEKOLAH
 Route::middleware(['role:Bendahara,Kepala Sekolah'])->group(function () {
     
@@ -85,6 +84,7 @@ Route::prefix('unit')->group(function () {
     Route::get('/', [MstUnitController::class, 'index']);
 });
 
+Route::get('/karyawan/{nip}', [MstKaryawanController::class, 'show']);
 
 Route::prefix('kegiatan')->group(function () {
     Route::get('/', [MstKegiatanController::class, 'index']);
@@ -205,11 +205,11 @@ Route::prefix('ref-visi-misi')->group(function () {
 
 Route::prefix('ref-pm')->group(function () {
     Route::get('/', [RefPmController::class, 'index']);
-    Route::post('/', [RefPmController::class, 'store']);
+    Route::post('/store', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
     Route::get('/{id}', [RefPmController::class, 'show']);
-    Route::put('/{id}', [RefPmController::class, 'update']);
-    Route::delete('/{id}', [RefPmController::class, 'destroy']);
+    Route::put('/update/{id}', [RefPmController::class, 'update']);
+    Route::delete('/delete/{id}', [RefPmController::class, 'destroy']);
 });
 
 Route::prefix('jenis-tarif')->group(function () {
@@ -269,11 +269,14 @@ Route::prefix('tagihan-siswa')->group(function () {
     Route::get('/export/pdf', [TagihanSiswaController::class, 'exportPdf']);
 
     Route::get('/{id}', [TagihanSiswaController::class, 'show']);
-
     Route::post('/store', [TagihanSiswaController::class, 'store']);
     Route::put('/update/{id}', [TagihanSiswaController::class, 'update']);
     Route::delete('/delete/{id}', [TagihanSiswaController::class, 'destroy']);
 });
+
+
+    Route::get('/siswa-ortu/profile/{id}', [TagihanSiswaController::class, 'getProfileSiswa']);
+    Route::put('/siswa-ortu/profile/{id}', [TagihanSiswaController::class, 'updateProfileSiswa']);
 
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);

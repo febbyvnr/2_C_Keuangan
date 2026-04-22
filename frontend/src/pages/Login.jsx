@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/api'; 
-// TAMBAHAN: Import logo dari folder assets (sesuaikan path-nya ya!)
 import logoSekolah from '../assets/logo.png'; 
 
 export default function Login() {
@@ -39,17 +38,13 @@ export default function Login() {
         <div style={styles.container}>
             <div style={styles.card}>
                 <div style={styles.header}>
-                    {/* TAMBAHAN: Gambar Logo */}
                     <div style={{ textAlign: 'center', marginBottom: '15px' }}>
                         <img 
                             src={logoSekolah} 
-                            alt="Logo SMK Bopkri Dua" 
-                            style={{ width: '80px', height: 'auto' }} // Atur ukuran logonya di sini
+                            alt="Logo SMK Bopkri Dua"
+                            style={{ width: '80px', height: 'auto' }}
                         />
                     </div>
-                    {/* --------------------- */}
-                    
-                    {/* Aku ubah textAlign dari 'left' jadi 'center' biar teksnya ikut ke tengah di bawah logo */}
                     <div style={{ textAlign: 'center' }}>
                         <h2 style={styles.title}>Selamat Datang di SIBOKU</h2>
                         <p style={styles.subtitle}>Sistem Informasi Keuangan SMK 2 BOPKRI</p>
@@ -134,7 +129,7 @@ const styles = {
         backgroundColor: '#f8f9fa',
         padding: '20px',
         borderBottom: '1px solid #e0e0e0',
-        // textAlign: 'left' <-- Dihapus, dipindah ke div inline biar rapi sama logo
+        textAlign: 'left'
     },
     title: {
         margin: 0,

@@ -66,29 +66,11 @@
 
 .waka-rkt-main {
     padding: 28px 34px 40px;
-    background: linear-gradient(180deg, #0f172a 0, #0f172a 150px, #f3f6fb 150px, #f3f6fb 100%);
+    background: #f3f6fb;
 }
 
-.waka-rkt-header {
-    margin-bottom: 22px;
-    color: #fff;
-}
-
-.waka-rkt-header h1,
 .waka-rkt-card h2 {
     margin: 0;
-}
-
-.waka-rkt-header h1 {
-    font-size: clamp(2rem, 3vw, 3rem);
-    font-weight: 800;
-}
-
-.waka-rkt-header p {
-    max-width: 760px;
-    margin: 10px 0 0;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.65;
 }
 
 .waka-rkt-card {
@@ -133,6 +115,10 @@
     gap: 8px;
 }
 
+.waka-rkt-date-input {
+    position: relative;
+}
+
 .waka-rkt-field-full {
     grid-column: 1 / -1;
 }
@@ -168,8 +154,34 @@
 .waka-rkt-field select:focus,
 .waka-rkt-field textarea:focus,
 .waka-rkt-search input:focus {
-    border-color: #0f766e;
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    border-color: #1f4e82;
+    box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.waka-rkt-date-input input {
+    padding-right: 50px;
+}
+
+.waka-rkt-date-trigger {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 10px;
+    background: #eef3ff;
+    color: #1f4e82;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.waka-rkt-date-trigger:hover {
+    background: #dbeafe;
 }
 
 .waka-rkt-submit {
@@ -190,18 +202,18 @@
 }
 
 .waka-rkt-button.primary {
-    background: #0f766e;
+    background: #1f4e82;
     color: #fff;
 }
 
 .waka-rkt-button.secondary {
-    background: #e6f4f1;
-    color: #0f766e;
+    background: #dbeafe;
+    color: #1f4e82;
 }
 
 .waka-rkt-button.ghost {
     background: #fff;
-    color: #0f766e;
+    color: #1f4e82;
     border-color: #cfdce8;
 }
 
@@ -284,7 +296,7 @@
 
 .waka-rkt-mini-button.edit {
     background: #e6f0ff;
-    color: #215ca0;
+    color: #1f4e82;
 }
 
 .waka-rkt-mini-button.delete {
