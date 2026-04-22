@@ -700,4 +700,36 @@ class TagihanSiswaController extends Controller
             ], 500);
         }
     }
+
+    public function getSiswaOptions(Request $request): JsonResponse
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstSiswa::query();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
+                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%')
+                ->orWhere('ID_SISWA_TETAP', 'like', '%' . $search . '%');
+            });
+        }
+
+        $siswa = $query
+            ->select([
+                'ID_SISWA_TETAP',
+                'NAMA_SISWA_TETAP',
+                'NISN_SISWA',
+                'KODE_TA',
+            ])
+            ->orderBy('NAMA_SISWA_TETAP', 'asc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar siswa berhasil diambil.',
+            'data' => $siswa,
+        ]);
+    }
 }

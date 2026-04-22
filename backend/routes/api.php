@@ -256,7 +256,7 @@ Route::prefix('evaluasi-rkt')->group(function () {
 Route::prefix('tagihan-siswa')->group(function () {
     Route::get('/', [TagihanSiswaController::class, 'index']);
     Route::get('/search', [TagihanSiswaController::class, 'search']);
-
+    Route::get('/siswa-options', [TagihanSiswaController::class, 'getSiswaOptions']);
     Route::get('/export', [TagihanSiswaController::class, 'export']);
     Route::get('/export/excel', [TagihanSiswaController::class, 'exportExcel']);
     Route::get('/export/csv', [TagihanSiswaController::class, 'exportCsv']);

@@ -3,6 +3,22 @@ import axios from "axios";
 import "../../styles/bendahara/Tagihan.css";
 
 const API_BASE_URL = "http://127.0.0.1:8000/api";
+const ITEMS_PER_PAGE = 10;
+
+const BULAN_OPTIONS = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
 function Tagihan() {
   const [search, setSearch] = useState("");
@@ -20,6 +36,8 @@ function Tagihan() {
   const [showSiswaDropdown, setShowSiswaDropdown] = useState(false);
   const siswaDropdownRef = useRef(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+
   const initialForm = {
     ID_SISWA_TETAP: "",
     ID_JENIS_PEMBAYARAN: "",
@@ -27,7 +45,7 @@ function Tagihan() {
     TAHUN_TAGIHAN_SISWA: "",
     JUMLAH_TAGIHAN_SISWA: "",
     STATUS_TAGIHAN_SISWA: "Belum Bayar",
-    DUEDATE_TAGIHAN_SISWA: "",
+    DUEDATETIME_TAGIHAN_SISWA: "",
   };
 
   const [formData, setFormData] = useState(initialForm);
@@ -52,24 +70,6 @@ function Tagihan() {
       month: "long",
       year: "numeric",
     });
-  };
-
-  const getStatusClass = (status) => {
-    switch ((status || "").toLowerCase()) {
-      case "belum bayar":
-      case "belum dibayar":
-        return "belum-bayar";
-      case "mengangsur":
-      case "menunggu verifikasi":
-        return "mengangsur";
-      case "belum lunas":
-        return "belum-lunas";
-      case "lunas":
-      case "sudah bayar":
-        return "lunas";
-      default:
-        return "";
-    }
   };
 
   const normalizeSiswaOptions = (rawData) => {
@@ -112,8 +112,36 @@ function Tagihan() {
       .filter((item) => item.id !== "")
       .map((item) => ({
         ...item,
-        label: item.kelas ? `${item.nama} - ${item.kelas}` : item.nama || `Siswa #${item.id}`,
+        label: item.kelas
+          ? `${item.nama} - ${item.kelas}`
+          : item.nama || `Siswa #${item.id}`,
       }));
+  };
+
+  const getComputedStatus = (item) => {
+    const totalBayar = Number(item.TOTAL_PEMBAYARAN || 0);
+    const sisa = Number(item.SISA_TAGIHAN ?? 0);
+
+    if (sisa <= 0) return "Lunas";
+    if (totalBayar > 0) return "Belum Lunas";
+    return "Belum Bayar";
+  };
+
+  const getStatusClass = (status) => {
+    switch ((status || "").toLowerCase()) {
+      case "belum bayar":
+      case "belum dibayar":
+        return "belum-bayar";
+      case "mengangsur":
+      case "menunggu verifikasi":
+      case "belum lunas":
+        return "belum-lunas";
+      case "lunas":
+      case "sudah bayar":
+        return "lunas";
+      default:
+        return "";
+    }
   };
 
   const kelasOptions = useMemo(() => {
@@ -127,18 +155,13 @@ function Tagihan() {
     const total = tagihanList.length;
 
     const belumLunas = tagihanList.filter((item) => {
-      const status = (item.STATUS_TAGIHAN_SISWA || "").toLowerCase();
-      return (
-        status === "belum bayar" ||
-        status === "belum dibayar" ||
-        status === "mengangsur" ||
-        status === "belum lunas"
-      );
+      const computedStatus = getComputedStatus(item).toLowerCase();
+      return computedStatus === "belum bayar" || computedStatus === "belum lunas";
     }).length;
 
     const lunas = tagihanList.filter((item) => {
-      const status = (item.STATUS_TAGIHAN_SISWA || "").toLowerCase();
-      return status === "lunas" || status === "sudah bayar";
+      const computedStatus = getComputedStatus(item).toLowerCase();
+      return computedStatus === "lunas";
     }).length;
 
     const totalNominal = tagihanList.reduce(
@@ -156,7 +179,7 @@ function Tagihan() {
         item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "";
       const kode = String(item.ID_TAGIHAN_SISWA || "");
       const kelas = item.SISWA?.KELAS_SISWA || "";
-      const status = item.STATUS_TAGIHAN_SISWA || "";
+      const computedStatus = getComputedStatus(item);
 
       const keyword = search.toLowerCase();
 
@@ -169,11 +192,18 @@ function Tagihan() {
         filterKelas === "Semua" ? true : kelas === filterKelas;
 
       const matchesStatus =
-        filterStatus === "Semua" ? true : status === filterStatus;
+        filterStatus === "Semua" ? true : computedStatus === filterStatus;
 
       return matchesSearch && matchesKelas && matchesStatus;
     });
   }, [tagihanList, search, filterKelas, filterStatus]);
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
 
   const filteredSiswaOptions = useMemo(() => {
     const keyword = siswaKeyword.trim().toLowerCase();
@@ -211,6 +241,10 @@ function Tagihan() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterKelas, filterStatus]);
+
   const fetchTagihan = async () => {
     try {
       setLoading(true);
@@ -226,8 +260,11 @@ function Tagihan() {
 
   const fetchSiswaOptions = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/siswa`);
-
+      const res = await axios.get(`${API_BASE_URL}/tagihan-siswa/siswa-options`, {
+        params: {
+          search: siswaKeyword,
+        },
+      });
       const rawData =
         res.data?.data ??
         res.data?.results ??
@@ -238,7 +275,10 @@ function Tagihan() {
       const normalized = normalizeSiswaOptions(rawData);
       setSiswaOptions(normalized);
     } catch (error) {
-      console.warn("Endpoint siswa belum tersedia, dropdown siswa masih kosong.", error);
+      console.warn(
+        "Endpoint siswa belum tersedia, dropdown siswa masih kosong.",
+        error
+      );
       setSiswaOptions([]);
     }
   };
@@ -300,7 +340,7 @@ function Tagihan() {
       !formData.BULAN_TAGIHAN_SISWA ||
       !formData.TAHUN_TAGIHAN_SISWA ||
       !formData.JUMLAH_TAGIHAN_SISWA ||
-      !formData.DUEDATE_TAGIHAN_SISWA
+      !formData.DUEDATETIME_TAGIHAN_SISWA
     ) {
       alert("Semua field wajib diisi.");
       return;
@@ -319,11 +359,15 @@ function Tagihan() {
     try {
       setSubmitLoading(true);
 
+      // Sesuaikan endpoint ini kalau backend kamu sudah RESTful penuh
       if (isEdit && selectedId) {
-        await axios.put(`${API_BASE_URL}/tagihan-siswa/${selectedId}`, payload);
+        await axios.put(
+          `${API_BASE_URL}/tagihan-siswa/update/${selectedId}`,
+          payload
+        );
         alert("Tagihan berhasil diperbarui.");
       } else {
-        await axios.post(`${API_BASE_URL}/tagihan-siswa`, payload);
+        await axios.post(`${API_BASE_URL}/tagihan-siswa/store`, payload);
         alert("Tagihan berhasil ditambahkan.");
       }
 
@@ -338,18 +382,14 @@ function Tagihan() {
   };
 
   const handleEdit = (item) => {
-    const siswaId =
-      item.ID_SISWA_TETAP ||
-      item.SISWA?.ID_SISWA_TETAP ||
-      "";
+    if (Number(item.TOTAL_PEMBAYARAN || 0) > 0) {
+      alert("Tagihan yang sudah memiliki pembayaran tidak bisa diedit.");
+      return;
+    }
 
-    const siswaNama =
-      item.SISWA?.NAMA_SISWA_TETAP ||
-      "";
-
-    const siswaKelas =
-      item.SISWA?.KELAS_SISWA ||
-      "";
+    const siswaId = item.ID_SISWA_TETAP || item.SISWA?.ID_SISWA_TETAP || "";
+    const siswaNama = item.SISWA?.NAMA_SISWA_TETAP || "";
+    const siswaKelas = item.SISWA?.KELAS_SISWA || "";
 
     setIsEdit(true);
     setSelectedId(item.ID_TAGIHAN_SISWA);
@@ -359,15 +399,13 @@ function Tagihan() {
       BULAN_TAGIHAN_SISWA: item.BULAN_TAGIHAN_SISWA || "",
       TAHUN_TAGIHAN_SISWA: item.TAHUN_TAGIHAN_SISWA || "",
       JUMLAH_TAGIHAN_SISWA: item.JUMLAH_TAGIHAN_SISWA || "",
-      STATUS_TAGIHAN_SISWA: item.STATUS_TAGIHAN_SISWA || "Belum Bayar",
-      DUEDATE_TAGIHAN_SISWA: item.DUEDATE_TAGIHAN_SISWA
-        ? String(item.DUEDATE_TAGIHAN_SISWA).slice(0, 10)
+      STATUS_TAGIHAN_SISWA: "Belum Bayar",
+      DUEDATETIME_TAGIHAN_SISWA: item.DUEDATETIME_TAGIHAN_SISWA
+        ? String(item.DUEDATETIME_TAGIHAN_SISWA).slice(0, 10)
         : "",
     });
 
-    setSiswaKeyword(
-      siswaKelas ? `${siswaNama} - ${siswaKelas}` : siswaNama
-    );
+    setSiswaKeyword(siswaKelas ? `${siswaNama} - ${siswaKelas}` : siswaNama);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -387,7 +425,9 @@ function Tagihan() {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/tagihan-siswa/${item.ID_TAGIHAN_SISWA}`);
+      await axios.delete(
+        `${API_BASE_URL}/tagihan-siswa/delete/${item.ID_TAGIHAN_SISWA}`
+      );
       alert("Tagihan berhasil dihapus.");
       await fetchTagihan();
     } catch (error) {
@@ -410,7 +450,10 @@ function Tagihan() {
     <div className="tagihan-page">
       <div className="tagihan-header">
         <h1>Manajemen Tagihan Siswa</h1>
-        <p>Buat, kelola, cari, dan pantau tagihan administrasi sekolah untuk siswa.</p>
+        <p>
+          Buat, kelola, cari, dan pantau tagihan administrasi sekolah untuk
+          siswa.
+        </p>
       </div>
 
       <div className="tagihan-summary">
@@ -469,7 +512,9 @@ function Tagihan() {
                         }`}
                         onClick={() => handleSelectSiswa(item)}
                       >
-                        <span className="siswa-dropdown-name">{item.nama || `Siswa #${item.id}`}</span>
+                        <span className="siswa-dropdown-name">
+                          {item.nama || `Siswa #${item.id}`}
+                        </span>
                         <span className="siswa-dropdown-meta">
                           {item.kelas ? `${item.kelas} • ` : ""}ID: {item.id}
                         </span>
@@ -506,25 +551,31 @@ function Tagihan() {
 
             <div className="form-group">
               <label htmlFor="BULAN_TAGIHAN_SISWA">Bulan Tagihan</label>
-              <input
-                type="text"
+              <select
                 id="BULAN_TAGIHAN_SISWA"
                 name="BULAN_TAGIHAN_SISWA"
-                placeholder="Contoh: Februari"
                 value={formData.BULAN_TAGIHAN_SISWA}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Pilih bulan tagihan</option>
+                {BULAN_OPTIONS.map((bulan) => (
+                  <option key={bulan} value={bulan}>
+                    {bulan}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
               <label htmlFor="TAHUN_TAGIHAN_SISWA">Tahun Tagihan</label>
               <input
-                type="text"
+                type="number"
                 id="TAHUN_TAGIHAN_SISWA"
                 name="TAHUN_TAGIHAN_SISWA"
                 placeholder="Contoh: 2026"
                 value={formData.TAHUN_TAGIHAN_SISWA}
                 onChange={handleChange}
+                min="2000"
               />
             </div>
 
@@ -542,12 +593,12 @@ function Tagihan() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="DUEDATE_TAGIHAN_SISWA">Jatuh Tempo</label>
+              <label htmlFor="DUEDATETIME_TAGIHAN_SISWA">Jatuh Tempo</label>
               <input
                 type="date"
-                id="DUEDATE_TAGIHAN_SISWA"
-                name="DUEDATE_TAGIHAN_SISWA"
-                value={formData.DUEDATE_TAGIHAN_SISWA}
+                id="DUEDATETIME_TAGIHAN_SISWA"
+                name="DUEDATETIME_TAGIHAN_SISWA"
+                value={formData.DUEDATETIME_TAGIHAN_SISWA}
                 onChange={handleChange}
               />
             </div>
@@ -670,86 +721,101 @@ function Tagihan() {
                     <div className="empty-state">Memuat data tagihan...</div>
                   </td>
                 </tr>
-              ) : filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.ID_TAGIHAN_SISWA}>
-                    <td className="tagihan-id">#{item.ID_TAGIHAN_SISWA}</td>
+              ) : paginatedData.length > 0 ? (
+                paginatedData.map((item) => {
+                  const computedStatus = getComputedStatus(item);
+                  const hasPayment = Number(item.TOTAL_PEMBAYARAN || 0) > 0;
 
-                    <td>
-                      <div className="nama-siswa-cell">
-                        <span className="nama-siswa-text">
-                          {item.SISWA?.NAMA_SISWA_TETAP || "-"}
-                        </span>
-                        <small className="kelas-siswa-text">
-                          {item.SISWA?.KELAS_SISWA || "-"}
-                        </small>
-                      </div>
-                    </td>
+                  return (
+                    <tr key={item.ID_TAGIHAN_SISWA}>
+                      <td className="tagihan-id">#{item.ID_TAGIHAN_SISWA}</td>
 
-                    <td>
-                      {item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}
-                    </td>
+                      <td>
+                        <div className="nama-siswa-cell">
+                          <span className="nama-siswa-text">
+                            {item.SISWA?.NAMA_SISWA_TETAP || "-"}
+                          </span>
+                          <small className="kelas-siswa-text">
+                            {item.SISWA?.KELAS_SISWA || "-"}
+                          </small>
+                        </div>
+                      </td>
 
-                    <td>
-                      {item.BULAN_TAGIHAN_SISWA || "-"}{" "}
-                      {item.TAHUN_TAGIHAN_SISWA || ""}
-                    </td>
+                      <td>
+                        {item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}
+                      </td>
 
-                    <td>{formatTanggal(item.DUEDATE_TAGIHAN_SISWA)}</td>
+                      <td>
+                        {item.BULAN_TAGIHAN_SISWA || "-"}{" "}
+                        {item.TAHUN_TAGIHAN_SISWA || ""}
+                      </td>
 
-                    <td className="nominal-text">
-                      {formatRupiah(item.JUMLAH_TAGIHAN_SISWA)}
-                    </td>
+                      <td>{formatTanggal(item.DUEDATETIME_TAGIHAN_SISWA)}</td>
 
-                    <td className="nominal-text">
-                      {formatRupiah(item.TOTAL_PEMBAYARAN)}
-                    </td>
+                      <td className="nominal-text">
+                        {formatRupiah(item.JUMLAH_TAGIHAN_SISWA)}
+                      </td>
 
-                    <td className="sisa-highlight">
-                      {formatRupiah(item.SISA_TAGIHAN)}
-                    </td>
+                      <td className="nominal-text">
+                        {formatRupiah(item.TOTAL_PEMBAYARAN)}
+                      </td>
 
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusClass(
-                          item.STATUS_TAGIHAN_SISWA
-                        )}`}
-                      >
-                        {item.STATUS_TAGIHAN_SISWA}
-                      </span>
-                    </td>
+                      <td className="sisa-highlight">
+                        {formatRupiah(item.SISA_TAGIHAN)}
+                      </td>
 
-                    <td>
-                      <div className="action-group">
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleEdit(item)}
+                      <td>
+                        <span
+                          className={`status-badge ${getStatusClass(computedStatus)}`}
                         >
-                          Edit
-                        </button>
+                          {computedStatus}
+                        </span>
+                      </td>
 
-                        {Number(item.TOTAL_PEMBAYARAN || 0) > 0 ? (
-                          <button
-                            type="button"
-                            className="btn btn-muted btn-sm"
-                            disabled
-                          >
-                            Tidak Bisa Hapus
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(item)}
-                          >
-                            Hapus
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td>
+                        <div className="action-group">
+                          {hasPayment ? (
+                            <button
+                              type="button"
+                              className="btn btn-muted btn-sm"
+                              disabled
+                              title="Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
+                            >
+                              Tidak Bisa Edit
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleEdit(item)}
+                            >
+                              Edit
+                            </button>
+                          )}
+
+                          {hasPayment ? (
+                            <button
+                              type="button"
+                              className="btn btn-muted btn-sm"
+                              disabled
+                              title="Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
+                            >
+                              Tidak Bisa Hapus
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDelete(item)}
+                            >
+                              Hapus
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="10">
@@ -761,6 +827,41 @@ function Tagihan() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="table-pagination">
+          <p>
+            Menampilkan{" "}
+            {filteredData.length === 0
+              ? 0
+              : (currentPage - 1) * ITEMS_PER_PAGE + 1}
+            {" - "}
+            {Math.min(currentPage * ITEMS_PER_PAGE, filteredData.length)}
+            {" dari "}
+            {filteredData.length} data
+          </p>
+
+          <div className="pagination-actions">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Prev
+            </button>
+
+            <span className="pagination-page">{currentPage}</span>
+
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
     </div>
