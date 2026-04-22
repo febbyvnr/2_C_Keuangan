@@ -151,6 +151,7 @@ Route::prefix('ref-tan')->group(function () {
 
 Route::prefix('rkt')->group(function () {
     Route::get('/', [MstProgramKerjaController::class, 'index']);
+    Route::put('/approve/{id}', [MstProgramKerjaController::class, 'approve']);
     Route::get('/export/excel', [MstProgramKerjaController::class, 'exportExcel']);
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstProgramKerjaController::class, 'store']);

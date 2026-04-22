@@ -33,7 +33,7 @@ class MstProgramKerjaController extends Controller
                     'trPm',
                 ])
                 ->active()
-                ->orderBy('ID_PROGRAM_KERJA', 'asc');
+                ->orderBy('ID_PROGRAM_KERJA', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -458,5 +458,40 @@ class MstProgramKerjaController extends Controller
             ->exists();
 
         return $hasDetail || $hasTrPm || $hasFpd;
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        try {
+            $programKerja = MstProgramKerja::find($id);
+
+            if (!$programKerja) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+
+            $request->validate([
+                'NIP_VALIDATOR_PROGKER' => 'required|string|max:20'
+            ]);
+
+            $programKerja->update([
+                'STATUS_APPROVAL' => 'APPROVED',
+                'NIP_VALIDATOR_PROGKER' => $request->NIP_VALIDATOR_PROGKER
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Program kerja berhasil disetujui',
+                'data' => $programKerja
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error approve',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

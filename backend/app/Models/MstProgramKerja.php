@@ -30,6 +30,7 @@ class MstProgramKerja extends Model
         'KELUARAN_PROGKER',
         'PROGRAM_KERJA',
         'NIP_PENANGGUNG_JAWAB',
+        'NIP_VALIDATOR_PROGKER',
         'IS_DELETE',
     ];
 
