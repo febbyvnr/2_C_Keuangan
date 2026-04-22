@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TagihanSiswa;
+use App\Models\MstSiswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,20 +66,12 @@ class TagihanSiswaController extends Controller
             $query->where('STATUS_TAGIHAN_SISWA', $request->STATUS_TAGIHAN_SISWA);
         }
 
-        // if ($request->filled('KELAS')) {
-        //     $kelas = trim($request->KELAS);
-
-        //     $query->whereHas('siswa', function ($q) use ($kelas) {
-        //         $q->where('KELAS_SISWA', 'like', '%' . $kelas . '%');
-        //     });
-        // }
-
         if ($request->filled('search')) {
             $search = trim($request->search);
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                  ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -103,9 +96,25 @@ class TagihanSiswaController extends Controller
             }
         }
 
+        $siswa = null;
+
+        if ($request->filled('ID_SISWA_TETAP')) {
+            $siswaModel = MstSiswa::where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP)->first();
+
+            if ($siswaModel) {
+                $siswa = [
+                    'ID_SISWA_TETAP' => (int) $siswaModel->ID_SISWA_TETAP,
+                    'NAMA_SISWA_TETAP' => $siswaModel->NAMA_SISWA_TETAP,
+                    'NISN_SISWA' => $siswaModel->NISN_SISWA,
+                    'KODE_TA' => $siswaModel->KODE_TA,
+                ];
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Daftar tagihan siswa berhasil diambil.',
+            'siswa' => $siswa,
             'data' => $data,
         ]);
     }
@@ -134,7 +143,7 @@ class TagihanSiswaController extends Controller
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
                 'STATUS_TAGIHAN_SISWA' => $validated['STATUS_TAGIHAN_SISWA'],
-                'DUEDATE_TAGIHAN_SISWA' => $validated['DUEDATE_TAGIHAN_SISWA'],
+                'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
             $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
@@ -249,7 +258,7 @@ class TagihanSiswaController extends Controller
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
                 'STATUS_TAGIHAN_SISWA' => $statusFinal,
-                'DUEDATE_TAGIHAN_SISWA' => $validated['DUEDATE_TAGIHAN_SISWA'],
+                'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
             $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
@@ -335,7 +344,7 @@ class TagihanSiswaController extends Controller
                 'string',
                 Rule::in(self::ALLOWED_STATUS),
             ],
-            'DUEDATE_TAGIHAN_SISWA' => [
+            'DUEDATETIME_TAGIHAN_SISWA' => [
                 'required',
                 'date',
             ],
@@ -378,7 +387,7 @@ class TagihanSiswaController extends Controller
             'TAHUN_TAGIHAN_SISWA' => $tagihan->TAHUN_TAGIHAN_SISWA,
             'JUMLAH_TAGIHAN_SISWA' => (float) $tagihan->JUMLAH_TAGIHAN_SISWA,
             'STATUS_TAGIHAN_SISWA' => $tagihan->STATUS_TAGIHAN_SISWA,
-            'DUEDATE_TAGIHAN_SISWA' => $tagihan->DUEDATE_TAGIHAN_SISWA,
+            'DUEDATETIME_TAGIHAN_SISWA' => $tagihan->DUEDATETIME_TAGIHAN_SISWA,
 
             'SISWA' => [
                 'ID_SISWA_TETAP' => optional($tagihan->siswa)->ID_SISWA_TETAP,
@@ -499,7 +508,7 @@ class TagihanSiswaController extends Controller
                 'SISA_TAGIHAN',
                 'STATUS_TAGIHAN_SISWA',
                 'ADA_TUNGGAKAN',
-                'DUEDATE_TAGIHAN_SISWA',
+                'DUEDATETIME_TAGIHAN_SISWA',
                 'JUMLAH_TRANSAKSI_PEMBAYARAN',
             ]);
 
@@ -518,7 +527,7 @@ class TagihanSiswaController extends Controller
                     $item['SISA_TAGIHAN'],
                     $item['STATUS_TAGIHAN_SISWA'],
                     $item['ADA_TUNGGAKAN'] ? 'Ya' : 'Tidak',
-                    $item['DUEDATE_TAGIHAN_SISWA'],
+                    $item['DUEDATETIME_TAGIHAN_SISWA'],
                     $item['JUMLAH_TRANSAKSI_PEMBAYARAN'],
                 ]);
             }
@@ -632,5 +641,63 @@ class TagihanSiswaController extends Controller
             ->setPaper('a4', 'landscape');
 
         return $pdf->download('tagihan_siswa.pdf');
+    }
+
+    public function getProfileSiswa(int $id): JsonResponse
+    {
+        $siswa = MstSiswa::where('ID_SISWA_TETAP', $id)
+            ->where('IS_DELETE', 0)
+            ->first();
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data siswa tidak ditemukan.',
+                'data' => null,
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile siswa berhasil diambil.',
+            'data' => $siswa,
+        ]);
+    }
+
+    public function updateProfileSiswa(Request $request, int $id): JsonResponse
+    {
+        try {
+            $siswa = MstSiswa::where('ID_SISWA_TETAP', $id)
+                ->where('IS_DELETE', 0)
+                ->first();
+
+            if (!$siswa) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data siswa tidak ditemukan.',
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'NO_HP_SISWA' => ['nullable', 'string', 'max:20'],
+                'PEKERJAAN_AYAH_SISWA' => ['nullable', 'string', 'max:255'],
+                'PEKERJAAN_IBU_SISWA' => ['nullable', 'string', 'max:255'],
+                'NAMA_WALI_SISWA' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            $siswa->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile siswa berhasil diperbarui.',
+                'data' => $siswa,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui profile siswa.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
