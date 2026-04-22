@@ -4,27 +4,30 @@ body {
 
 .sidebar-container {
     background-color: #FFFFFF;
+    position: relative;
     border-right: 1px solid rgba(6, 8, 12, 0.1);
     display: flex;
     flex-direction: column;
     width: 220px;
     transition: transform 0.4s ease;
-    padding: 20px 16px;
+    overflow: hidden;
+    padding: 12px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    z-index: 99;
 }
 
 .sidebar-menu {
     font-size: 13px;
     font-weight: 500;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     flex: 1;
-    overflow-y: auto;
-    padding: 0;
-    margin: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    padding-right: 4px;
     list-style: none;
 }
 
@@ -49,7 +52,6 @@ body {
     font-size: 26px;
     font-weight: 700;
     color: #1A1A1A;
-    line-height: 1.2;
 }
 
 .sidebar-subtitle {
@@ -61,9 +63,8 @@ body {
 .sidebar-header{
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding: 0 8px;
+    gap: 10px;
+    padding: 12px 12px 0px 12px;
 }
 
 .header-text {
@@ -93,16 +94,16 @@ body {
 }
 
 .user-account {
-    padding: 12px;
+    padding: 12px 12px;
     font-size: 13px;
     border: 1px solid rgba(13, 110, 253, 0.1);;
     border-radius: 16px;
     background-color: rgba(143, 188, 255, 0.1);
     color: #4A4A4A;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .user-profile img {
@@ -120,7 +121,6 @@ body {
 .user-role {
     color: #1A1A1A;
     font-weight: 700;
-    font-size: 12px;
 }
 
 .user-email {
@@ -128,31 +128,12 @@ body {
 }
 
 .nav-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
+    padding: 10px 14px;
     color: #4A4A4A;
-    text-decoration: none;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.nav-link i {
-    font-size: 14px;
-    margin-right: 12px;
-    width: 20px;
-    text-align: center;
 }
 
 .nav-link:hover {
-    background-color: #f1f5f9;
-    color: #265F9C;
-}
-
-.nav-item {
-    margin-bottom: 4px;
+    background-color: #f5f5f5;
 }
 
 .nav-item i {
@@ -160,42 +141,34 @@ body {
 }
 
 .sidebar-active {
-    background-color: #eef4ff !important;
-    color: #265F9C !important;
-    font-weight: 600;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-right: 4px solid #265F9C;
+    color: #265F9C;
+    font-weight: 549;
 }
 
 .sidebar-menu .nav-link {
     border-radius: 10px;
 }
 
-.master-menu {
-    cursor: pointer;
-    justify-content: baseline;
-    align-items: center;
-}
-
 .submenu {
     list-style: none;
-    padding-left: 40px;
-    margin: 4px 0 8px 0;
+    padding-left: 30px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
     gap: 4px;
     animation: fadeIn 0.2s ease-in-out;
 }
 
 .submenu .nav-link {
-    font-size: 11px;
-    padding: 8px 11px;
+    font-size: 12px;
+    padding: 6px 10px;
     border-radius: 8px;
 }
 
 .submenu .nav-link:hover {
     background-color: #f0f4ff;
-}
-
-.submenu .nav-link.active {
-    color: #265F9C !important;
-    font-weight: 700;
 }
 
 .dropdown-toggle {
@@ -210,22 +183,29 @@ body {
 }
 
 .logout {
-    margin-top: auto;
-    padding-top: 16px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px;
+    padding-left: 0px;
     border-top: 1px solid rgba(6, 8, 12, 0.05);
+    background: white;
+    z-index: 10;
+    margin-top: auto;
 }
 
 .btn-logout {
-    width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     border: none;
-    background: transparent;
+    background: none;
+    font-size: 13px;
     color: #E7000B;
     font-weight: 500;
-    padding: 12px 16px;
     cursor: pointer;
+    padding: 12px;
+    width: 100%;
     text-align: left;
 }
 
@@ -383,17 +363,4 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.ms-auto {
-    margin-left: auto;
-}
-
-.transition-transform {
-    display: inline-flex;
-    transition: transform 0.2s ease;
-}
-
-.rotate-90 {
-    transform: rotate(90deg);
 }
