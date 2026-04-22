@@ -156,12 +156,84 @@ class FpdAnggaranController extends Controller
         }
     }
 
+    //ini gbs verif by waka
+    // public function update(Request $request, $id): JsonResponse
+    // {
+    //     try {
+    //         $id = (int) $id;
+    //         $data = FpdAnggaran::find($id);
+
+    //         if (!$data) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Data tidak ditemukan',
+    //                 'data' => null,
+    //             ], 404);
+    //         }
+
+    //         $validated = $request->validate([
+    //             'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
+    //             'TGL_FPD' => 'required|date',
+    //             'NOMINAL_ANGGARAN' => 'required|numeric|min:0',
+    //             'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
+    //         ]);
+
+    //         $totalDetail = (float) $data->detailFpd()->sum('TOTAL');
+
+    //         if ($data->detailFpd()->exists() && (int) $validated['ID_PROGRAM_KERJA'] !== (int) $data->ID_PROGRAM_KERJA) {
+    //             throw ValidationException::withMessages([
+    //                 'ID_PROGRAM_KERJA' => ['ID program kerja tidak bisa diubah karena FPD sudah punya detail.'],
+    //             ]);
+    //         }
+
+    //         if ((float) $validated['NOMINAL_ANGGARAN'] < $totalDetail) {
+    //             throw ValidationException::withMessages([
+    //                 'NOMINAL_ANGGARAN' => ['Nominal anggaran tidak boleh lebih kecil dari total detail FPD.'],
+    //             ]);
+    //         }
+
+    //         $this->validateProgramKerjaBudget(
+    //             (int) $validated['ID_PROGRAM_KERJA'],
+    //             (float) $validated['NOMINAL_ANGGARAN'],
+    //             $data->ID_FPD
+    //         );
+
+    //         $validated['NOMINAL_FPD'] = $totalDetail;
+    //         $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'] - $totalDetail;
+
+    //         $data->update($validated);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data berhasil diupdate',
+    //             'data' => $data->load([
+    //                 'programKerja',
+    //                 'programKerja.detailProgramKerja.sumberDana',
+    //                 'detailFpd.detailProgram',
+    //                 'detailFpd.detailProgram.sumberDana',
+    //             ]),
+    //         ]);
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Validasi gagal',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    //ini bisa verifikasi by waka
     public function update(Request $request, $id): JsonResponse
     {
         try {
             $id = (int) $id;
             $data = FpdAnggaran::find($id);
-
             if (!$data) {
                 return response()->json([
                     'success' => false,
@@ -169,42 +241,38 @@ class FpdAnggaranController extends Controller
                     'data' => null,
                 ], 404);
             }
-
             $validated = $request->validate([
                 'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
                 'TGL_FPD' => 'required|date',
                 'NOMINAL_ANGGARAN' => 'required|numeric|min:0',
                 'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
             ]);
-
             $totalDetail = (float) $data->detailFpd()->sum('TOTAL');
-
             if ($data->detailFpd()->exists() && (int) $validated['ID_PROGRAM_KERJA'] !== (int) $data->ID_PROGRAM_KERJA) {
                 throw ValidationException::withMessages([
-                    'ID_PROGRAM_KERJA' => ['ID program kerja tidak bisa diubah karena FPD sudah punya detail.'],
+                    'ID_PROGRAM_KERJA' => ['ID program kerja tidak bisa diubah karena FPD sudah punya rincian detail.'],
                 ]);
             }
-
             if ((float) $validated['NOMINAL_ANGGARAN'] < $totalDetail) {
                 throw ValidationException::withMessages([
-                    'NOMINAL_ANGGARAN' => ['Nominal anggaran tidak boleh lebih kecil dari total detail FPD.'],
+                    'NOMINAL_ANGGARAN' => ['Nominal anggaran tidak boleh lebih kecil dari total rincian (Rp ' . number_format($totalDetail, 0, ',', '.') . ').'],
                 ]);
             }
-
-            $this->validateProgramKerjaBudget(
-                (int) $validated['ID_PROGRAM_KERJA'],
-                (float) $validated['NOMINAL_ANGGARAN'],
-                $data->ID_FPD
-            );
-
+            $isNominalChanged = (float)$validated['NOMINAL_ANGGARAN'] !== (float)$data->NOMINAL_ANGGARAN;
+            $isProgramChanged = (int)$validated['ID_PROGRAM_KERJA'] !== (int)$data->ID_PROGRAM_KERJA;
+            if ($isNominalChanged || $isProgramChanged) {
+                $this->validateProgramKerjaBudget(
+                    (int) $validated['ID_PROGRAM_KERJA'],
+                    (float) $validated['NOMINAL_ANGGARAN'],
+                    $data->ID_FPD
+                );
+            }
             $validated['NOMINAL_FPD'] = $totalDetail;
             $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'] - $totalDetail;
-
             $data->update($validated);
-
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil diupdate',
+                'message' => 'Data berhasil diperbarui',
                 'data' => $data->load([
                     'programKerja',
                     'programKerja.detailProgramKerja.sumberDana',
@@ -221,7 +289,7 @@ class FpdAnggaranController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan',
+                'message' => 'Terjadi kesalahan sistem',
                 'error' => $e->getMessage(),
             ], 500);
         }

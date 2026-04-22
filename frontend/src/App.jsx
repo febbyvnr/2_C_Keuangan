@@ -25,6 +25,7 @@ import MasterTahunAnggaran from "./pages/bendahara/MasterTahunAnggaran";
 import MasterTahunAkademik from "./pages/bendahara/MasterTahunAkademik";
 import MasterSumberDana from "./pages/bendahara/MasterSumberDana";
 import MasterRefPenerimaan from "./pages/bendahara/MasterRefPenerimaan";
+import MasterRefPM from "./pages/bendahara/MasterRefPM";
 import MasterTarif from "./pages/bendahara/MasterTarif";
 import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
@@ -93,15 +94,16 @@ export default function App() {
                     <Route path="master/tahun-akademik" element={<MasterTahunAkademik />} />
                     <Route path="master/sumber-dana" element={<MasterSumberDana />} />
                     <Route path="master/ref-penerimaan" element={<MasterRefPenerimaan />} />
+                    <Route path="master/ref-pm" element={<MasterRefPM />} />
                     <Route path="master/tarif" element={<MasterTarif />} />
                     <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
                     <Route path="master/jenis-pembayaran" element={<MasterJenisPembayaran />} />
                 </Route>
 
                 {/* SISWA ORTU */}
-                <Route path="/siswa-ortu/utama" element={<UtamaSiswaOrtu />} />
+                <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
                 <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
-                <Route path="/siswa-ortu/profile" element={<ProfileSiswaOrtu />} />
+                <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
                 {/* PIC GURU */}
                 <Route path="/pic/guru" element={<PicGuruFPD />} />
