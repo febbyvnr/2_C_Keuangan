@@ -25,6 +25,7 @@ import MasterTahunAnggaran from "./pages/bendahara/MasterTahunAnggaran";
 import MasterTahunAkademik from "./pages/bendahara/MasterTahunAkademik";
 import MasterSumberDana from "./pages/bendahara/MasterSumberDana";
 import MasterRefPenerimaan from "./pages/bendahara/MasterRefPenerimaan";
+import MasterRefPM from "./pages/bendahara/MasterRefPM";
 import MasterTarif from "./pages/bendahara/MasterTarif";
 import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
@@ -102,6 +103,7 @@ export default function App() {
             path="master/ref-penerimaan"
             element={<MasterRefPenerimaan />}
           />
+          <Route path="master/ref-pm" element={<MasterRefPM />} />
           <Route path="master/tarif" element={<MasterTarif />} />
           <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
           <Route

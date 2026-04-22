@@ -6,11 +6,7 @@ export default function ApprovalCenter() {
     const [selected, setSelected] = useState(null);
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-
     const itemsPerPage = 10;
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-
     const [sortConfig, setSortConfig] = useState({
         key: "ID_FPD",
         direction: "desc"
@@ -33,7 +29,6 @@ export default function ApprovalCenter() {
     const handleSearch = async (value) => {
         setSearch(value);
         setCurrentPage(1);
-
         try {
             const res = await fetch(`http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`);
             const json = await res.json();
@@ -51,85 +46,144 @@ export default function ApprovalCenter() {
         setSortConfig({ key, direction });
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            setCurrentPage(1);
+            fetchData(search);
+        }
+    };
+
+    const getIcon = (key) => {
+        if (sortConfig.key !== key) return "bi bi-funnel";
+        return sortConfig.direction === "asc"
+            ? "bi bi-funnel-fill"
+            : "bi bi-funnel-fill";
+    };
+
     const sortedData = [...data].sort((a, b) => {
         let valA = a[sortConfig.key];
         let valB = b[sortConfig.key];
-
         if (sortConfig.key === "PROGRAM") {
-            valA = a.programKerja?.PROGRAM_KERJA || "";
-            valB = b.programKerja?.PROGRAM_KERJA || "";
+            valA = a.program_kerja?.INDIKATOR || "";
+            valB = b.program_kerja?.INDIKATOR || "";
         }
-
         if (sortConfig.key === "TGL_FPD") {
             valA = new Date(a.TGL_FPD);
             valB = new Date(b.TGL_FPD);
         }
-
         if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
         if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
     });
 
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
     const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     const handleApprove = async () => {
         if (!selected) return;
-
-        const user = JSON.parse(localStorage.getItem("user"));
-        const nip = user?.NIP_KARYAWAN;
-
+        const userData = localStorage.getItem("user"); 
+        if (!userData) {
+            alert("Sesi login tidak ditemukan. Silakan login kembali.");
+            return;
+        }
+        const user = JSON.parse(userData);
+        const nip = user.NIP_KARYAWAN;
+        if (!nip) {
+            alert("Data NIP tidak ditemukan pada akun Anda.");
+            return;
+        }
         try {
             const res = await fetch(`http://localhost:8000/api/fpd-anggaran/update/${selected.ID_FPD}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
                 body: JSON.stringify({
-                    ...selected,
-                    NIP_VALIDATOR_FPD: nip
+                    ID_PROGRAM_KERJA: selected.ID_PROGRAM_KERJA,
+                    TGL_FPD: selected.TGL_FPD,
+                    NOMINAL_ANGGARAN: selected.NOMINAL_ANGGARAN,
+                    NIP_VALIDATOR_FPD: nip 
                 })
             });
-
+            const result = await res.json();
             if (res.ok) {
                 alert("FPD berhasil disetujui");
                 fetchData();
                 setSelected(null);
+            } else {
+                alert("Gagal menyetujui: " + (result.message || "Terjadi kesalahan validasi"));
+                console.error("Validation Error:", result.errors);
             }
         } catch (err) {
-            console.error(err);
+            console.error("Fetch Error:", err);
+            alert("Terjadi kesalahan koneksi ke server.");
         }
+    };
+
+    const changePage = (page) => {
+        setCurrentPage(page);
     };
 
     const isApproved = selected?.NIP_VALIDATOR_FPD;
 
     return (
         <div className="container">
-            <h2>Approval FPD Anggaran</h2>
-            <div className="top-bar">
-                <input
-                    type="text"
-                    placeholder="Cari..."
-                    value={search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                />
-                <div className="export-wrapper">
-                    <a
-                        href={`http://localhost:8000/api/fpd-anggaran/export/${selected?.ID_FPD || ""}`}
-                        className="btn-outline-success custom-btn"
+            <div className="coa-header">
+                <h2>Approval FPD Anggaran</h2>
+                <div className="header-actions">
+                    <button
+                        className="btn-reset"
+                        onClick={() => {
+                            setSearch("");
+                            fetchData();
+                        }}
                     >
-                        <i className="bi bi-filetype-csv"></i> Export CSV
-                    </a>
+                        Reset
+                    </button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                            className="search-input"
+                            type="text"
+                            placeholder="Cari..."
+                            value={search}
+                            onChange={(e) => handleSearch(e.target.value)}
+                        />
+                        <button
+                            className="search-btn"
+                            onClick={() => {
+                                setCurrentPage(1);
+                                fetchData(search);
+                            }}
+                        >
+                            Search
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div className="grid">
+            <div className="grid-approval">
                 <div className="table-section">
                     <div className="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
-                                    <th onClick={() => handleSort("ID_FPD")}>ID</th>
-                                    <th onClick={() => handleSort("PROGRAM")}>Program</th>
-                                    <th onClick={() => handleSort("TGL_FPD")}>Tanggal</th>
-                                    <th onClick={() => handleSort("NOMINAL_ANGGARAN")}>Anggaran</th>
+                                    <th onClick={() => handleSort("ID_FPD")}>
+                                        ID <i className={getIcon("ID_FPD")}></i>
+                                    </th>
+                                    <th onClick={() => handleSort("PROGRAM")}>
+                                        Program <i className={getIcon("PROGRAM")}></i>
+                                    </th>
+                                    <th onClick={() => handleSort("TGL_FPD")}>
+                                        Tanggal <i className={getIcon("TGL_FPD")}></i>
+                                    </th>
+                                    <th onClick={() => handleSort("NOMINAL_ANGGARAN")}>
+                                        Anggaran <i className={getIcon("NOMINAL_ANGGARAN")}></i>
+                                    </th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -141,18 +195,16 @@ export default function ApprovalCenter() {
                                         className={selected?.ID_FPD === item.ID_FPD ? "active-row" : ""}
                                     >
                                         <td>{item.ID_FPD}</td>
-                                        <td>{item.programKerja?.PROGRAM_KERJA}</td>
-                                        <td>
-                                            {new Date(item.TGL_FPD).toLocaleDateString("id-ID")}
-                                        </td>
+                                        <td>{item.program_kerja?.INDIKATOR || "Tidak ada Indikator"}</td>
+                                        <td>{new Date(item.TGL_FPD).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}</td>
                                         <td>
                                             Rp {Number(item.NOMINAL_ANGGARAN).toLocaleString("id-ID")}
                                         </td>
                                         <td>
                                             {item.NIP_VALIDATOR_FPD ? (
-                                                <span className="status-ok"><i className="bi bi-check-circle"></i></span>
+                                                <span><i className="bi bi-check-circle icon-success"></i></span>
                                             ) : (
-                                                <span className="status-wait"><i className="bi bi-exclamation-circle"></i></span>
+                                                <span><i className="bi bi-exclamation-circle icon-danger"></i></span>
                                             )}
                                         </td>
                                     </tr>
@@ -160,16 +212,51 @@ export default function ApprovalCenter() {
                             </tbody>
                         </table>
                     </div>
-                    <div className="pagination">
-                        {Array.from({ length: totalPages }, (_, i) => (
+                    <div className="pagination-wrapper">
+                        <div className="pagination-info">
+                            Menampilkan {startData} - {endData} dari {totalData} data
+                        </div>
+                        <div className="pagination">
                             <button
-                                key={i}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className={currentPage === i + 1 ? "active" : ""}
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                }
+                                disabled={currentPage === 1}
                             >
-                                {i + 1}
+                                <i className="bi bi-chevron-left"></i>
                             </button>
-                        ))}
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => changePage(i + 1)}
+                                    className={`page-btn ${
+                                        currentPage === i + 1 ? "active" : ""
+                                    }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages)
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <i className="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div className="export-wrapper">
+                            <a href={`http://localhost:8000/api/fpd-anggaran/export/excel/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn-excel">
+                                <i className="bi bi-filetype-xlsx"></i> Export Excel
+                            </a>
+                            <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn-pdf">
+                                <i className="bi bi-filetype-pdf"></i> Export PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div className="detail-section">
@@ -185,28 +272,23 @@ export default function ApprovalCenter() {
                             </div>
                             <div className="detail-row">
                                 <span>Program</span>
-                                <span>{selected.programKerja?.PROGRAM_KERJA}</span>
+                                <span>{selected.program_kerja?.INDIKATOR}</span>
                             </div>
                             <div className="detail-row">
                                 <span>Anggaran</span>
                                 <span>Rp {Number(selected.NOMINAL_ANGGARAN).toLocaleString("id-ID")}</span>
                             </div>
                             <div className="detail-row">
-                                <span>Total FPD</span>
+                                <span>Nominal FPD</span>
                                 <span>Rp {Number(selected.NOMINAL_FPD).toLocaleString("id-ID")}</span>
                             </div>
                             <div className="detail-row">
                                 <span>Sisa</span>
                                 <span>Rp {Number(selected.NOMINAL_SISA).toLocaleString("id-ID")}</span>
                             </div>
-                            <h4>Rincian</h4>
-                            <div className="detail-list">
-                                {selected.detail_fpd?.map((d) => (
-                                    <div key={d.ID_DT_FPD} className="detail-item">
-                                        <div>{d.detail_program?.program_kerja?.PROGRAM_KERJA}</div>
-                                        <div>Rp {Number(d.TOTAL).toLocaleString("id-ID")}</div>
-                                    </div>
-                                ))}
+                            <div className="detail-row">
+                                <span>Validator</span>
+                                <span>{selected.NIP_VALIDATOR_FPD || "-"}</span>
                             </div>
                             <button
                                 className="btn-approve"

@@ -165,6 +165,7 @@ export default function SidebarBendahara() {
                                         <li><NavLink to="/bendahara/master/tahun-akademik" className="nav-link">Master Tahun Akademik</NavLink></li>
                                         <li><NavLink to="/bendahara/master/sumber-dana" className="nav-link">Master Sumber Dana</NavLink></li>
                                         <li><NavLink to="/bendahara/master/ref-penerimaan" className="nav-link">Master Ref Penerimaan</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/ref-pm" className="nav-link">Master Ref PM</NavLink></li>
                                         <li><NavLink to="/bendahara/master/tarif" className="nav-link">Master Tarif</NavLink></li>
                                         <li><NavLink to="/bendahara/master/jenis-tarif" className="nav-link">Master Jenis Tarif</NavLink></li>
                                         <li><NavLink to="/bendahara/master/jenis-pembayaran" className="nav-link">Master Jenis Pembayaran</NavLink></li>

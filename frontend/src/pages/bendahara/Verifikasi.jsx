@@ -173,7 +173,7 @@ export default function Verifikasi() {
                                         Jumlah <i className={getIcon("jumlah")}></i>
                                     </th>
                                     <th onClick={() => handleSort("aksi")}>
-                                        Aksi <i className={getIcon("aksi")}></i>
+                                        Status <i className={getIcon("aksi")}></i>
                                     </th>
                                 </tr>
                             </thead>
