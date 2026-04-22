@@ -5,10 +5,13 @@ export default function Verifikasi() {
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 11;
+    const itemsPerPage = 10;
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
     const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_PEMBAYARAN",
         direction: "asc"
@@ -103,16 +106,38 @@ export default function Verifikasi() {
 
     const handleApprove = async () => {
         if (!selected) return;
-        await fetch(`http://localhost:8000/api/tr-pembayaran/${selected.ID_PEMBAYARAN}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...selected,
-                NIP_VALIDATOR_PEMBAYARAN: "VALID"
-            })
-        });
-        fetchData();
-        setSelected(null);
+        const userData = localStorage.getItem("user"); 
+        if (!userData) {
+            alert("Sesi login tidak ditemukan. Silakan login kembali.");
+            return;
+        }
+        const user = JSON.parse(userData);
+        const nipBendahara = user.NIP_KARYAWAN;
+        if (!nipBendahara) {
+            alert("Data NIP tidak ditemukan pada akun Anda.");
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:8000/api/tr-pembayaran/update/${selected.ID_PEMBAYARAN}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...selected,
+                    NIP_VALIDATOR_PEMBAYARAN: nipBendahara 
+                })
+            });
+            if (response.ok) {
+                alert("Pembayaran berhasil diverifikasi!");
+                fetchData();
+                setSelected(null);
+            } else {
+                const errorData = await response.json();
+                alert("Gagal verifikasi: " + (errorData.message || "Terjadi kesalahan"));
+            }
+        } catch (err) {
+            console.error("Error update:", err);
+            alert("Terjadi kesalahan koneksi ke server.");
+        }
     };
 
     const isVerified = selected?.NIP_VALIDATOR_PEMBAYARAN;
@@ -148,7 +173,7 @@ export default function Verifikasi() {
                                         Jumlah <i className={getIcon("jumlah")}></i>
                                     </th>
                                     <th onClick={() => handleSort("aksi")}>
-                                        Aksi <i className={getIcon("aksi")}></i>
+                                        Status <i className={getIcon("aksi")}></i>
                                     </th>
                                 </tr>
                             </thead>
@@ -164,11 +189,15 @@ export default function Verifikasi() {
                                         <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || '-'}</td>
                                         <td>{item.tagihan?.BULAN_TAGIHAN_SISWA || "-"}</td>
                                         <td>{item.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}</td>
-                                        <td>{item.TGL_BAYAR}</td>
+                                        <td>
+                                            {new Date(item.TGL_BAYAR).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}
+                                        </td>
                                         <td>Rp {Number(item.JUMLAH_BAYAR).toLocaleString("id-ID")}</td>
                                         <td>
                                             {item.NIP_VALIDATOR_PEMBAYARAN ? (
-                                                <i className="bi bi-check-circle icon-success"></i>
+                                                <span title={`Divalidasi oleh: ${item.NIP_VALIDATOR_PEMBAYARAN}`}>
+                                                    <i className="bi bi-check-circle icon-success"></i>
+                                                </span>
                                             ) : (
                                                 <i className="bi bi-exclamation-circle-fill icon-danger"></i>
                                             )}
@@ -178,35 +207,48 @@ export default function Verifikasi() {
                             </tbody>
                         </table>
                     </div>
-                    <div className="pagination">
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <i className="bi bi-chevron-left"></i>
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => (
+                    <div className="pagination-wrapper">
+                        <div className="pagination-info">
+                            Menampilkan {startData} - {endData} dari {totalData} data
+                        </div>
+                        <div className="pagination">
                             <button
-                                key={i + 1}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className={currentPage === i + 1 ? "active" : ""}
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                }
+                                disabled={currentPage === 1}
                             >
-                                {i + 1}
+                                <i className="bi bi-chevron-left"></i>
                             </button>
-                        ))}
-                        <button
-                            onClick={() =>
-                                setCurrentPage(prev => Math.min(prev + 1, totalPages))
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            <i className="bi bi-chevron-right"></i>
-                        </button>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => setCurrentPage(i + 1)}
+                                    className={`page-btn ${
+                                        currentPage === i + 1 ? "active" : ""
+                                    }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages)
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <i className="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="detail-section">
                     {selected ? (
-                        <>
+                        <div className="detail-content">
                             <h3>Rincian Pembayaran</h3>
                             <div className={`status-pill ${isVerified ? "success" : "danger"}`}>
                                 {isVerified ? "Diverifikasi" : "Menunggu Verifikasi"}
@@ -237,7 +279,7 @@ export default function Verifikasi() {
                             </div>
                             <div className="detail-row">
                                 <span className="label">Tanggal</span>
-                                <span className="value">{selected.TGL_BAYAR}</span>
+                                <span className="value">{new Date(selected.TGL_BAYAR).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}</span>
                             </div>
                             <div className="bukti">
                                 <div className="bukti-header">
@@ -273,7 +315,7 @@ export default function Verifikasi() {
                             >
                                 <i className="check-circle"></i> Setujui
                             </button>
-                        </>
+                        </div>
                     ) : (
                         <div className="empty-state">
                             <i className="bi bi-receipt"></i>

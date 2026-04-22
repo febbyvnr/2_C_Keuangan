@@ -5,13 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\RecordsActivity;
 
 class MstCoa extends Model
 {
+
+    use RecordsActivity;
+
     protected $table = 'mst_coa';
     protected $primaryKey = 'ID_MASTER_COA';
     public $timestamps = false;
-    public $incrementing = false;
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     // protected $fillable = [
     //     'MST_ID_MASTER_COA',

@@ -15,9 +15,9 @@
         th, td { 
             border: 1px solid black; 
             padding: 6px; 
+            text-align: center;
         }
 
-        /* HEADER TABLE LEBIH SOFT */
         th { 
             background: #f5f5f5; 
         }
@@ -30,7 +30,6 @@
             text-align: center;
         }
 
-        /* JUDUL */
         .title-main {
             font-size: 18px;
             font-weight: bold;
@@ -41,7 +40,6 @@
             font-weight: bold;
         }
 
-        /* WATERMARK (LEBIH HALUS & TENGAH) */
         .watermark {
             position: absolute;
             top: 50%;
@@ -51,7 +49,6 @@
             z-index: -1;
         }
 
-        /* GARIS DOBEL */
         .double-line {
             border-top: 3px solid black;
             border-bottom: 1px solid black;
@@ -62,7 +59,6 @@
 </head>
 <body>
 
-<!-- WATERMARK LOGO -->
 <img src="{{ public_path('logo.png') }}" class="watermark" width="400">
 
 <!-- HEADER -->
@@ -70,18 +66,17 @@
     <tr class="no-border">
         <td class="header-text">
             <div class="title-main">SMK BOPKRI 2 YOGYAKARTA</div>
-            <div class="title-sub">LAPORAN PENERIMAAN (KM) </div>
+            <div class="title-sub">LAPORAN PENERIMAAN (KM)</div>
             <span>Periode: {{ $start ?? '-' }} s/d {{ $end ?? '-' }}</span>
         </td>
     </tr>
 </table>
 
-<!-- GARIS KOP -->
 <div class="double-line"></div>
 
 <br>
 
-<!-- TABLE UTAMA -->
+<!-- TABLE -->
 <table>
     <thead>
         <tr>
@@ -96,7 +91,7 @@
         <tr>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
             <td>{{ $row->jenis }}</td>
-            <td>{{ $row->uraian }}</td>
+            <td style="text-align:left;">{{ $row->uraian }}</td>
             <td>Rp {{ number_format($row->jumlah, 0, ',', '.') }}</td>
         </tr>
         @endforeach
@@ -108,19 +103,13 @@
     </tbody>
 </table>
 
-<br><br><br><br>
-
-<br><br>
-
 @php
 \Carbon\Carbon::setLocale('id');
 @endphp
 
 <p style="text-align:right; margin-top: 40px;">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-    <br><br>
-    <b>By: Bendahara</b>
-</p>
+</div>
 
 </body>
 </html>
