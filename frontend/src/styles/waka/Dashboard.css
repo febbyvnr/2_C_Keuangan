@@ -1,0 +1,86 @@
+.waka-container {
+  padding: 32px;
+  background: #f6f7f9; /* background-default */
+  min-height: 100vh;
+  width: 100%;
+}
+
+.waka-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a; /* neutral-900 */
+  margin-bottom: 24px;
+}
+
+/* GRID */
+.waka-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-left: 5px solid #265f9c; /* primary */
+}
+
+.card p {
+  font-size: 14px;
+  color: #585858;
+  margin-bottom: 6px;
+}
+
+.card h3 {
+  font-size: 20px;
+  color: #1a1a1a;
+}
+
+/* VARIAN WARNA */
+.card.primary {
+  border-left: 5px solid #265f9c;
+}
+
+.card.success {
+  border-left: 5px solid #2e7d32;
+}
+
+.card.warning {
+  border-left: 5px solid #eda60f;
+}
+
+/* TABLE */
+.waka-table {
+  margin-top: 30px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.waka-table h3 {
+  margin-bottom: 16px;
+  color: #1a1a1a;
+}
+
+.waka-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.waka-table th {
+  background: #265f9c;
+  color: white;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.waka-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
