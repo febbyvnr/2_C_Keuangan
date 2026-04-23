@@ -18,11 +18,8 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        // REVISI: Mengambil NIP dengan pengecekan kolom 'nip' atau 'NIP'
-        $user = Auth::user();
-        $nip = $request->nip ?? ($user ? ($user->nip ?? $user->NIP) : null);
-
-        $authRole = $user ? $user->role : null;
+        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+        $authRole = Auth::check() ? Auth::user()->role : null;
 
         // Mengambil Role dari database berdasarkan NIP_KARYAWAN
         $dbRole = DB::table('tr_jabatan as tj')
@@ -49,7 +46,7 @@ class LaporanPengeluaranController extends Controller
             );
         }
 
-        // QUERY UTAMA (PDF & JSON)
+        // QUERY UTAMA
         $query = DB::table('tr_pm as tp')
             ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
             ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
