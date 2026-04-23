@@ -20,7 +20,8 @@ class LaporanPengeluaranController extends Controller
 
         $userRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
-            ->where('tj.user_id', Auth::id())
+            ->join('users as u', 'tj.NIP_KARYAWAN', '=', 'u.nip') // Pastikan u.nip adalah kolom NIP di tabel users
+            ->where('u.id', Auth::id())
             ->value('rjs.DESKRIPSI_JABATAN');
 
         if ($type == 'excel' && !in_array($userRole, ['Bendahara', 'Kepala Sekolah'])) {
