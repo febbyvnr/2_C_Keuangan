@@ -34,7 +34,7 @@ class LaporanPenerimaanExport implements WithEvents
                 'rp.DESKRIPSI_REF_PENERIMAAN as jenis',
                 'p.DESKRIPSI_TR_PENERIMAAN as uraian',
                 'p.JUMLAH_TR_PENERIMAAN as jumlah'
-            )
+            ) 
             ->whereNotNull('p.NIP_PENERIMA'); 
 
         if ($this->start && $this->end) {
