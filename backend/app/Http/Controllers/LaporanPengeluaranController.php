@@ -17,21 +17,37 @@ class LaporanPengeluaranController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
-        $role = $request->role ?? null; 
 
-        if ($type == 'excel' && $role && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+        // FIX: ambil NIP dari request atau login
+        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+
+        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        $dbRole = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('tj.NIP_KARYAWAN', $nip)
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->value('rj.DESKRIPSI_JABATAN');
+
+        $role = $dbRole ?? $authRole;
+        $role = trim($role);
+
+        // VALIDASI ROLE
+        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Hanya Bendahara atau Kepala Sekolah yang boleh generate laporan'
+                'message' => 'Role tidak diizinkan generate laporan'
             ], 403);
         }
 
+        // EXCEL
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPengeluaranExport($start, $end, $sumberDana, $role),
+                new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip),
                 'Laporan_Pengeluaran.xlsx'
             );
         }
 
+        // QUERY UTAMA (PDF & JSON)
         $query = DB::table('tr_pm as tp')
             ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
             ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
@@ -57,10 +73,11 @@ class LaporanPengeluaranController extends Controller
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         $total = $data->sum('nominal');
 
-        if ($type == 'pdf') {
+        // PDF
+        if (strtolower(trim($type)) === 'pdf') {
             $pdf = Pdf::loadView(
                 'exports.LaporanPengeluaran_pdf',
-                compact('data', 'total', 'start', 'end')
+                compact('data', 'total', 'start', 'end', 'role', 'nip')
             );
 
             return $pdf->download('Laporan_Pengeluaran.pdf');
