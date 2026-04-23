@@ -18,10 +18,13 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+        // REVISI: Mengambil NIP dengan pengecekan kolom 'nip' atau 'NIP'
+        $user = Auth::user();
+        $nip = $request->nip ?? ($user ? ($user->nip ?? $user->NIP) : null);
 
-        $authRole = Auth::check() ? Auth::user()->role : null;
+        $authRole = $user ? $user->role : null;
 
+        // Mengambil Role dari database berdasarkan NIP_KARYAWAN
         $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
             ->where('tj.NIP_KARYAWAN', $nip)
@@ -72,6 +75,7 @@ class LaporanPengeluaranController extends Controller
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         $total = $data->sum('nominal');
 
+        // PDF
         if (strtolower(trim($type)) === 'pdf') {
             $pdf = Pdf::loadView(
                 'exports.LaporanPengeluaran_pdf',
