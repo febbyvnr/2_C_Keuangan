@@ -28,13 +28,15 @@ class LaporanPengeluaranController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        $role = $dbRole ?? $authRole;
-        $role = trim($role);
+        // Normalisasi role agar konsisten: "BENDAHARA " atau "bendahara" menjadi "Bendahara"
+        $roleRaw = $dbRole ?? $authRole;
+        $role = ucwords(strtolower(trim($roleRaw)));
 
         // VALIDASI ROLE
         if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Role tidak diizinkan generate laporan'
+                'message' => 'Role tidak diizinkan generate laporan',
+                'debug_role' => $role // Memudahkan pengecekan jika masih error
             ], 403);
         }
 
