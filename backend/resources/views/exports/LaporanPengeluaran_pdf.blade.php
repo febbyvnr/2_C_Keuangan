@@ -2,18 +2,84 @@
 <html>
 <head>
     <style>
-        body { font-family: sans-serif; position: relative; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 6px; }
-        th { background: #f5f5f5; }
-        .no-border td { border: none !important; }
-        .header-text { text-align: center; }
-        .title-main { font-size: 18px; font-weight: bold; }
-        .title-sub { font-size: 16px; font-weight: bold; }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; z-index: -1; }
-        .double-line { border-top: 3px solid black; border-bottom: 1px solid black; margin: 8px 0 12px 0; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        body { 
+            font-family: sans-serif; 
+            position: relative;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+
+        th, td { 
+            border: 1px solid black; 
+            padding: 6px; 
+            text-align: center;
+        }
+
+        th { 
+            background: #f5f5f5; 
+        }
+
+        .no-border td {
+            border: none !important;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        .title-main {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .title-sub {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        .double-line {
+            border-top: 3px solid black;
+            border-bottom: 1px solid black;
+            margin: 8px 0 12px 0;
+        }
+
+        .ttd-center {
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .ttd-role {
+            margin-bottom: 8px;
+        }
+
+        .ttd-nama {
+            margin-bottom: 10px;
+        }
+
+        .ttd-garis {
+            margin-top: 50px;    
+        }
+
+        .ttd-nip {
+            margin-top: 10px;
+        }
+
+        .tanggal-kanan {
+            text-align: right;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
@@ -31,62 +97,61 @@
 </table>
 
 <div class="double-line"></div>
+
 <br>
 
 <table>
     <thead>
         <tr>
-            <th width="5%">No</th>
-            <th width="15%">Tanggal</th>
-            <th width="20%">Program Kerja</th>
-            <th width="15%">Sumber Dana</th>
-            <th width="30%">Uraian</th>
-            <th width="15%">Nominal</th>
+            <th>Tanggal</th>
+            <th>Program</th>
+            <th>Sumber Dana</th>
+            <th>Uraian</th>
+            <th>Nominal</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($data as $key => $row)
+        @foreach($data as $row)
         <tr>
-            <td class="text-center">{{ $key + 1 }}</td>
-            <td class="text-center">{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
+            <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
             <td>{{ $row->program }}</td>
-            <td class="text-center">{{ $row->sumber_dana }}</td>
-            <td>{{ $row->uraian }}</td>
-            <td class="text-right">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
+            <td>{{ $row->sumber_dana }}</td>
+            <td style="text-align:left;">{{ $row->uraian }}</td>
+            <td style="text-align:right;">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
         </tr>
         @endforeach
+
         <tr>
-            <td colspan="5" class="text-right"><b>TOTAL PENGELUARAN</b></td>
-            <td class="text-right"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+            <td colspan="4"><b>TOTAL PENGELUARAN</b></td>
+            <td style="text-align:right;"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
 @php
     \Carbon\Carbon::setLocale('id');
-    // Mengambil data jabatan dan NIP secara langsung di blade
-    $userJabatan = DB::table('tr_jabatan as tj')
-        ->join('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
-        ->where('tj.user_id', Auth::id())
-        ->select('rjs.nama_jabatan', 'tj.nip')
-        ->first();
+
+    $role = $role ?? 'Bendahara';
+
+    if ($role === 'Kepala Sekolah') {
+        $nama = 'Drs. Budi Santoso';
+    } else {
+        $role = 'Bendahara';
+        $nama = 'Rina Putri, S.E.';
+    }
+
+    $nip = $nip ?? '-';
 @endphp
 
-<div style="margin-top: 50px;">
-    <table class="no-border">
-        <tr class="no-border">
-            <td width="60%"></td>
-            <td class="text-right">
-                Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-                <br><br>
-                {{ $userJabatan->nama_jabatan ?? 'Bendahara' }}
-                <br><br><br><br><br>
-                <b>{{ Auth::user()->name ?? '-' }}</b>
-                <br>
-                NIP. {{ $userJabatan->nip ?? '-' }}
-            </td>
-        </tr>
-    </table>
+<div class="ttd-center">
+    <p class="ttd-role">{{ $role }},</p>
+    <p class="ttd-nama"><b>{{ $nama }}</b></p>
+    <p class="ttd-garis">-------------------------</p>
+    <p class="ttd-nip">NIP: {{ $nip }}</p>
+</div>
+
+<div class="tanggal-kanan">
+    Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 </div>
 
 </body>
