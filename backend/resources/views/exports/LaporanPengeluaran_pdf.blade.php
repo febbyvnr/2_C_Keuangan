@@ -2,62 +2,18 @@
 <html>
 <head>
     <style>
-                body { 
-            font-family: sans-serif; 
-            position: relative;
-        }
-
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-
-        th, td { 
-            border: 1px solid black; 
-            padding: 6px; 
-        }
-
-        HEADER TABLE LEBIH SOFT
-        th { 
-            background: #f5f5f5;  
-        }
-
-        .no-border td {
-            border: none !important;
-        }
-
-        .header-text {
-            text-align: center;
-        }
-
-        /* JUDUL */
-        .title-main {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .title-sub {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        /* WATERMARK (LEBIH HALUS & TENGAH) */
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.05;
-            z-index: -1;
-        }
-
-        /* GARIS DOBEL */
-        .double-line {
-            border-top: 3px solid black;
-            border-bottom: 1px solid black;
-            margin: 8px 0 12px 0;
-        }
-
+        body { font-family: sans-serif; position: relative; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 6px; }
+        th { background: #f5f5f5; }
+        .no-border td { border: none !important; }
+        .header-text { text-align: center; }
+        .title-main { font-size: 18px; font-weight: bold; }
+        .title-sub { font-size: 16px; font-weight: bold; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; z-index: -1; }
+        .double-line { border-top: 3px solid black; border-bottom: 1px solid black; margin: 8px 0 12px 0; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
     </style>
 </head>
 <body>
@@ -75,7 +31,6 @@
 </table>
 
 <div class="double-line"></div>
-
 <br>
 
 <table>
@@ -100,7 +55,6 @@
             <td class="text-right">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
         </tr>
         @endforeach
-
         <tr>
             <td colspan="5" class="text-right"><b>TOTAL PENGELUARAN</b></td>
             <td class="text-right"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
@@ -109,7 +63,13 @@
 </table>
 
 @php
-\Carbon\Carbon::setLocale('id');
+    \Carbon\Carbon::setLocale('id');
+    // Mengambil data jabatan dan NIP secara langsung di blade
+    $userJabatan = DB::table('tr_jabatan as tj')
+        ->join('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
+        ->where('tj.user_id', Auth::id())
+        ->select('rjs.nama_jabatan', 'tj.nip')
+        ->first();
 @endphp
 
 <div style="margin-top: 50px;">
@@ -119,9 +79,11 @@
             <td class="text-right">
                 Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
                 <br><br>
-                <b>By: Bendahara</b>
+                {{ $userJabatan->nama_jabatan ?? 'Bendahara' }}
                 <br><br><br><br><br>
-                <b>{{ Auth::user()->name ?? '' }}</b>
+                <b>{{ Auth::user()->name ?? '-' }}</b>
+                <br>
+                NIP. {{ $userJabatan->nip ?? '-' }}
             </td>
         </tr>
     </table>
