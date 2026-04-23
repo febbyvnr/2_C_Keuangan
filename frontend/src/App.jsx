@@ -45,6 +45,8 @@ import LaporanYayasan from "./pages/yayasan/Laporan.jsx";
 import MonitoringYayasan from "./pages/yayasan/Monitoring.jsx";
 import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
+import RKT from "./pages/pic/guru/RKT.jsx";
+
 import "./index.css";
 
 function BendaharaLayout() {
@@ -125,6 +127,7 @@ export default function App() {
                 {/* PIC GURU */}
                 <Route path="/pic/guru" element={<PicGuruFPD />} />
                 <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
+                <Route path="/pic/guru/rkt" element={<RKT />} />
 
                 {/* WAKA */}
                 {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
