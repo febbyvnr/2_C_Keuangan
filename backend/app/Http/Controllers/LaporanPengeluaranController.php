@@ -17,14 +17,9 @@ class LaporanPengeluaranController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
+        $role = $request->role ?? null; 
 
-        $userRole = DB::table('tr_jabatan as tj')
-            ->join('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
-            ->join('users as u', 'tj.NIP_KARYAWAN', '=', 'u.nip') // Pastikan u.nip adalah kolom NIP di tabel users
-            ->where('u.id', Auth::id())
-            ->value('rjs.DESKRIPSI_JABATAN');
-
-        if ($type == 'excel' && !in_array($userRole, ['Bendahara', 'Kepala Sekolah'])) {
+        if ($type == 'excel' && $role && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
                 'message' => 'Hanya Bendahara atau Kepala Sekolah yang boleh generate laporan'
             ], 403);
@@ -32,7 +27,7 @@ class LaporanPengeluaranController extends Controller
 
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPengeluaranExport($start, $end, $sumberDana),
+                new LaporanPengeluaranExport($start, $end, $sumberDana, $role),
                 'Laporan_Pengeluaran.xlsx'
             );
         }
