@@ -18,7 +18,6 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        // FIX: ambil NIP dari request atau login
         $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
 
         $authRole = Auth::check() ? Auth::user()->role : null;
@@ -73,7 +72,6 @@ class LaporanPengeluaranController extends Controller
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         $total = $data->sum('nominal');
 
-        // PDF
         if (strtolower(trim($type)) === 'pdf') {
             $pdf = Pdf::loadView(
                 'exports.LaporanPengeluaran_pdf',
