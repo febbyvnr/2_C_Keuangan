@@ -206,7 +206,6 @@ const styles = {
     maxWidth: "400px",
     width: "90%",
     textAlign: "left",
-    fontFamily: "sans-serif",
   },
   btnTidak: {
     backgroundColor: "#dc2626",
