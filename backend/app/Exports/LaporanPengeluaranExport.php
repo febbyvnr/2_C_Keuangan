@@ -26,7 +26,7 @@ class LaporanPengeluaranExport implements WithEvents
             ->leftJoin('tr_jabatan as tj', 'u.id', '=', 'tj.user_id')
             ->leftJoin('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
             ->where('u.id', Auth::id())
-            ->select('u.name', 'tj.nip', 'rjs.nama_jabatan')
+            ->select('u.name', 'tj.nip', 'rjs.DESKRIPSI_JABATAN as nama_jabatan') 
             ->first();
     }
 
@@ -74,19 +74,13 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->getStyle('A2:A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $headerRow = 6;
-                $sheet->setCellValue("A$headerRow", 'NO');
-                $sheet->setCellValue("B$headerRow", 'TANGGAL');
-                $sheet->setCellValue("C$headerRow", 'PROGRAM KERJA');
-                $sheet->setCellValue("D$headerRow", 'SUMBER DANA');
-                $sheet->setCellValue("E$headerRow", 'URAIAN');
-                $sheet->setCellValue("F$headerRow", 'NOMINAL');
-
+                $headers = ['NO', 'TANGGAL', 'PROGRAM KERJA', 'SUMBER DANA', 'URAIAN', 'NOMINAL'];
+                $sheet->fromArray($headers, NULL, "A$headerRow");
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC00000');
                 $sheet->getStyle("A$headerRow:F$headerRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $row = 7;
-                $no = 1;
+                $row = 7; $no = 1;
                 foreach ($dataCollection as $item) {
                     $sheet->setCellValue("A$row", $no++);
                     $sheet->setCellValue("B$row", $item->tanggal);
