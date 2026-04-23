@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
@@ -18,14 +18,64 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString("id-ID");
 }
 
+function getStatusInfo(status) {
+  const normalized = String(status || "draft").toLowerCase();
+
+  switch (normalized) {
+    case "diajukan":
+      return {
+        label: "Diajukan",
+        className: "rkt-status-badge submitted",
+      };
+    case "direview":
+      return {
+        label: "Direview",
+        className: "rkt-status-badge reviewed",
+      };
+    case "revisi":
+      return {
+        label: "Perlu Revisi",
+        className: "rkt-status-badge revision",
+      };
+    case "disetujui":
+      return {
+        label: "Disetujui",
+        className: "rkt-status-badge approved",
+      };
+    case "terkunci":
+      return {
+        label: "Terkunci",
+        className: "rkt-status-badge locked",
+      };
+    default:
+      return {
+        label: "Draft",
+        className: "rkt-status-badge draft",
+      };
+  }
+}
+
 export default function RKT() {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 5,
+    total: 0,
+  });
 
-  const fetchRkt = async (customSearch = search) => {
+  const selectedItem = useMemo(() => {
+    return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
+  }, [data, selectedId]);
+
+  const selectedStatus = getStatusInfo(selectedItem?.STATUS_PROGKER);
+
+  const fetchRkt = async (customSearch = search, page = 1) => {
     try {
       setLoading(true);
 
@@ -33,10 +83,52 @@ export default function RKT() {
         params: {
           search: customSearch,
           per_page: 10,
+          page,
         },
       });
 
-      setData(response.data?.data?.data || []);
+      console.log("response.data:", response.data);
+
+      const apiData = response.data?.data ?? response.data;
+
+      let rows = [];
+      let currentPage = 1;
+      let lastPage = 1;
+      let perPage = 5;
+      let total = 0;
+
+      if (Array.isArray(apiData)) {
+        rows = apiData;
+        total = apiData.length;
+      } else if (Array.isArray(apiData?.data)) {
+        rows = apiData.data;
+        currentPage = apiData.current_page || 1;
+        lastPage = apiData.last_page || 1;
+        perPage = apiData.per_page || 5;
+        total = apiData.total || apiData.data.length;
+      } else if (Array.isArray(apiData?.data?.data)) {
+        rows = apiData.data.data;
+        currentPage = apiData.data.current_page || 1;
+        lastPage = apiData.data.last_page || 1;
+        perPage = apiData.data.per_page || 5;
+        total = apiData.data.total || apiData.data.data.length;
+      }
+
+      setData(rows);
+      setPagination({
+        currentPage,
+        lastPage,
+        perPage,
+        total,
+      });
+
+      setSelectedId((prev) => {
+        if (!rows.length) return null;
+        if (prev && rows.some((item) => item.ID_PROGRAM_KERJA === prev)) {
+          return prev;
+        }
+        return rows[0].ID_PROGRAM_KERJA;
+      });
     } catch (error) {
       console.error("Gagal ambil data RKT:", error);
     } finally {
@@ -46,17 +138,17 @@ export default function RKT() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchRkt("");
+    fetchRkt("", 1);
   }, []);
 
   const handleSearch = () => {
-    fetchRkt(search);
+    fetchRkt(search, 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleReset = () => {
     setSearch("");
-    fetchRkt("");
+    fetchRkt("", 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -66,7 +158,13 @@ export default function RKT() {
 
     try {
       await axios.delete(`http://127.0.0.1:8000/api/rkt/delete/${id}`);
-      fetchRkt();
+
+      const nextPage =
+        data.length === 1 && pagination.currentPage > 1
+          ? pagination.currentPage - 1
+          : pagination.currentPage;
+
+      await fetchRkt(search, nextPage);
     } catch (error) {
       console.error("Gagal hapus data:", error);
       alert("Data gagal dihapus");
@@ -81,6 +179,16 @@ export default function RKT() {
     );
   };
 
+  const getDisplayValue = (...values) => {
+    const found = values.find((value) => {
+      if (value === null || value === undefined) return false;
+      if (typeof value === "string") return value.trim() !== "";
+      return true;
+    });
+
+    return found ?? "-";
+  };
+
   return (
     <div className="rkt-shell">
       <SidebarPic />
@@ -90,13 +198,14 @@ export default function RKT() {
           <div className="rkt-header-card">
             <div>
               <h1 className="rkt-title">Rencana Kerja Tahunan</h1>
-              <p className="rkt-subtitle">
-                Kelola data program kerja PIC/Guru.
-              </p>
+              <p className="rkt-subtitle">Kelola data program kerja PIC/Guru.</p>
             </div>
 
             <div className="rkt-header-actions">
-              <button className="btn-light-custom" onClick={() => fetchRkt()}>
+              <button
+                className="btn-light-custom"
+                onClick={() => fetchRkt(search, pagination.currentPage)}
+              >
                 Refresh
               </button>
               <button className="btn-warning-custom" onClick={handleExport}>
@@ -113,7 +222,7 @@ export default function RKT() {
 
           <div className="rkt-filter-card">
             <div className="rkt-filter-row">
-              <div className="rkt-input-group">
+              <div className="rkt-input-group rkt-search-group">
                 <label>Search</label>
                 <input
                   type="text"
@@ -124,6 +233,19 @@ export default function RKT() {
                     if (e.key === "Enter") handleSearch();
                   }}
                 />
+              </div>
+
+              <div className="rkt-input-group rkt-filter-small">
+                <label>Status</label>
+                <select>
+                  <option value="">Semua Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="diajukan">Diajukan</option>
+                  <option value="direview">Direview</option>
+                  <option value="revisi">Revisi</option>
+                  <option value="disetujui">Disetujui</option>
+                  <option value="terkunci">Terkunci</option>
+                </select>
               </div>
 
               <div className="rkt-filter-actions">
@@ -137,87 +259,315 @@ export default function RKT() {
             </div>
           </div>
 
-          <div className="rkt-table-card">
-            {loading ? (
-              <div className="rkt-empty">Loading data...</div>
-            ) : (
-              <div className="rkt-table-wrapper">
-                <table className="rkt-table">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Program Kerja</th>
-                      <th>Indikator</th>
-                      <th>Waktu</th>
-                      <th>Anggaran</th>
-                      <th>Validator</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.length > 0 ? (
-                      data.map((item, index) => (
-                        <tr key={item.ID_PROGRAM_KERJA}>
-                          <td>{index + 1}</td>
-                          <td className="rkt-program">
-                            {item.PROGRAM_KERJA || "-"}
-                          </td>
-                          <td>{item.INDIKATOR || "-"}</td>
-                          <td>
-                            <div>{formatDate(item.WAKTU_AWAL)}</div>
-                            <div className="rkt-date-sub">
-                              s/d {formatDate(item.WAKTU_AKHIR)}
-                            </div>
-                          </td>
-                          <td className="rkt-amount">
-                            {formatRupiah(item.NOMINAL)}
-                          </td>
-                          <td>{item.NIP_VALIDATOR_PROGKER || "-"}</td>
-                          <td>
-                            <div className="rkt-action-buttons">
-                              <button
-                                className="btn-dark-sm"
-                                onClick={() =>
-                                  navigate(
-                                    `/pic/guru/rkt/detail/${item.ID_PROGRAM_KERJA}`
-                                  )
-                                }
-                              >
-                                Detail
-                              </button>
-                              <button
-                                className="btn-yellow-sm"
-                                onClick={() =>
-                                  navigate(
-                                    `/pic/guru/rkt/edit/${item.ID_PROGRAM_KERJA}`
-                                  )
-                                }
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="btn-red-sm"
-                                onClick={() =>
-                                  handleDelete(item.ID_PROGRAM_KERJA)
-                                }
-                              >
-                                Hapus
-                              </button>
-                            </div>
-                          </td>
+          <div className="rkt-content-section">
+            <div className="rkt-table-card">
+              {loading ? (
+                <div className="rkt-empty">Loading data...</div>
+              ) : (
+                <>
+                  <div className="rkt-table-wrapper">
+                    <table className="rkt-table">
+                      <thead>
+                        <tr>
+                          <th>No</th>
+                          <th>Program Kerja</th>
+                          <th>Indikator</th>
+                          <th>Waktu</th>
+                          <th>Anggaran</th>
+                          <th>Validator</th>
+                          <th>Status</th>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="rkt-empty">
-                          Tidak ada data RKT
-                        </td>
-                      </tr>
+                      </thead>
+                      <tbody>
+                        {data.length > 0 ? (
+                          data.map((item, index) => (
+                            <tr
+                              key={item.ID_PROGRAM_KERJA}
+                              className={
+                                selectedId === item.ID_PROGRAM_KERJA
+                                  ? "rkt-row-active"
+                                  : ""
+                              }
+                              onClick={() =>
+                                setSelectedId(item.ID_PROGRAM_KERJA)
+                              }
+                            >
+                              <td>
+                                {(pagination.currentPage - 1) *
+                                  pagination.perPage +
+                                  index +
+                                  1}
+                              </td>
+                              <td className="rkt-program">
+                                {item.PROGRAM_KERJA || "-"}
+                              </td>
+                              <td>{item.INDIKATOR || "-"}</td>
+                              <td>
+                                <div>{formatDate(item.WAKTU_AWAL)}</div>
+                                <div className="rkt-date-sub">
+                                  s/d {formatDate(item.WAKTU_AKHIR)}
+                                </div>
+                              </td>
+                              <td className="rkt-amount">
+                                {formatRupiah(item.NOMINAL)}
+                              </td>
+                              <td>
+                                {getDisplayValue(
+                                  item.validator?.NAMA_KARYAWAN,
+                                  item.nama_validator,
+                                  item.NAMA_VALIDATOR,
+                                  item.NIP_VALIDATOR_PROGKER
+                                )}
+                              </td>
+                              <td>
+                                <span
+                                  className={
+                                    getStatusInfo(item.STATUS_PROGKER).className
+                                  }
+                                >
+                                  {getStatusInfo(item.STATUS_PROGKER).label}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="7" className="rkt-empty">
+                              Tidak ada data RKT
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="rkt-pagination">
+                    <span className="rkt-pagination-info">
+                      Menampilkan{" "}
+                      {data.length > 0
+                        ? (pagination.currentPage - 1) * pagination.perPage + 1
+                        : 0}
+                      {" - "}
+                      {(pagination.currentPage - 1) * pagination.perPage +
+                        data.length}
+                      {" dari "}
+                      {pagination.total} data
+                    </span>
+
+                    <div className="rkt-pagination-actions">
+                      <button
+                        className="rkt-page-btn"
+                        disabled={pagination.currentPage === 1}
+                        onClick={() =>
+                          fetchRkt(search, pagination.currentPage - 1)
+                        }
+                      >
+                        ‹
+                      </button>
+
+                      <span className="rkt-page-number">
+                        {pagination.currentPage}
+                      </span>
+
+                      <button
+                        className="rkt-page-btn"
+                        disabled={
+                          pagination.currentPage === pagination.lastPage
+                        }
+                        onClick={() =>
+                          fetchRkt(search, pagination.currentPage + 1)
+                        }
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <aside className="rkt-detail-card">
+              {selectedItem ? (
+                <>
+                  <div className="rkt-detail-header">
+                    <div className="rkt-detail-header-top">
+                      <div>
+                        <h2 className="rkt-detail-title">
+                          {selectedItem.PROGRAM_KERJA || "Detail RKT"}
+                        </h2>
+                        <p className="rkt-detail-subtitle">
+                          Klik baris lain untuk melihat rincian program kerja.
+                        </p>
+                      </div>
+
+                      <span className={selectedStatus.className}>
+                        {selectedStatus.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="rkt-detail-body">
+                    <div className="rkt-detail-grid">
+                      <div className="rkt-detail-item full">
+                        <span className="rkt-detail-label">Indikator</span>
+                        <span className="rkt-detail-value">
+                          {selectedItem.INDIKATOR || "-"}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item full">
+                        <span className="rkt-detail-label">Sasaran</span>
+                        <span className="rkt-detail-value">
+                          {selectedItem.SASARAN || "-"}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item full">
+                        <span className="rkt-detail-label">Keluaran Program Kerja</span>
+                        <span className="rkt-detail-value">
+                          {selectedItem.KELUARAN_PROGKER || "-"}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Waktu Awal</span>
+                        <span className="rkt-detail-value">
+                          {formatDate(selectedItem.WAKTU_AWAL)}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Waktu Akhir</span>
+                        <span className="rkt-detail-value">
+                          {formatDate(selectedItem.WAKTU_AKHIR)}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Nominal</span>
+                        <span className="rkt-detail-value strong">
+                          {formatRupiah(selectedItem.NOMINAL)}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Validator</span>
+                        <span className="rkt-detail-value">
+                          {getDisplayValue(
+                            selectedItem.validator?.NAMA_KARYAWAN,
+                            selectedItem.nama_validator,
+                            selectedItem.NAMA_VALIDATOR,
+                            selectedItem.NIP_VALIDATOR_PROGKER
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Penanggung Jawab</span>
+                        <span className="rkt-detail-value">
+                          {getDisplayValue(
+                            selectedItem.penanggung_jawab?.NAMA_KARYAWAN,
+                            selectedItem.nama_penanggung_jawab,
+                            selectedItem.NAMA_PENANGGUNG_JAWAB,
+                            selectedItem.NIP_PENANGGUNG_JAWAB
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Unit</span>
+                        <span className="rkt-detail-value">
+                          {getDisplayValue(
+                            selectedItem.unit?.NAMA_UNIT,
+                            selectedItem.nama_unit
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Tahun Anggaran</span>
+                        <span className="rkt-detail-value">
+                          {getDisplayValue(
+                            selectedItem.tahun_anggaran?.TAHUN_ANGGARAN,
+                            selectedItem.tahunAnggaran?.TAHUN_ANGGARAN,
+                            selectedItem.nama_tahun_anggaran
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="rkt-note-box">
+                      <div className="rkt-note-title">Catatan Revisi / Review</div>
+                      <div className="rkt-note-content">
+                        {selectedItem.CATATAN_REVISI ||
+                          selectedItem.catatan_revisi ||
+                          "Belum ada catatan revisi."}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rkt-detail-actions">
+                    {(selectedItem.STATUS_PROGKER === "draft" ||
+                      selectedItem.STATUS_PROGKER === "revisi" ||
+                      !selectedItem.STATUS_PROGKER) && (
+                      <>
+                        <button
+                          className="btn-yellow-sm rkt-detail-btn"
+                          onClick={() =>
+                            navigate(
+                              `/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn-red-sm rkt-detail-btn"
+                          onClick={() =>
+                            handleDelete(selectedItem.ID_PROGRAM_KERJA)
+                          }
+                        >
+                          Hapus
+                        </button>
+
+                        <button
+                          className="btn-primary-custom rkt-detail-btn rkt-submit-btn"
+                          onClick={() =>
+                            alert("Nanti tombol ini disambungkan ke API ajukan RKT")
+                          }
+                        >
+                          Ajukan
+                        </button>
+                      </>
                     )}
-                  </tbody>
-                </table>
-              </div>
-            )}
+
+                    {selectedItem.STATUS_PROGKER === "diajukan" && (
+                      <button className="btn-light-custom rkt-detail-btn" disabled>
+                        Sedang Menunggu Review
+                      </button>
+                    )}
+
+                    {selectedItem.STATUS_PROGKER === "disetujui" && (
+                      <button className="btn-light-custom rkt-detail-btn" disabled>
+                        Sudah Disetujui
+                      </button>
+                    )}
+
+                    {selectedItem.STATUS_PROGKER === "terkunci" && (
+                      <button className="btn-light-custom rkt-detail-btn" disabled>
+                        RKT Terkunci
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="rkt-detail-empty">
+                  <div className="rkt-detail-empty-icon">📋</div>
+                  <p>Pilih salah satu data RKT untuk melihat detail.</p>
+                </div>
+              )}
+            </aside>
           </div>
         </div>
       </main>
