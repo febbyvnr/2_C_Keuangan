@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Dashboard.css";
-
 import {
   LineChart,
   Line,
@@ -21,7 +20,7 @@ export default function Dashboard() {
   const [fpd, setFpd] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/mst-program-kerja")
+    fetch("http://localhost:8000/api/rkt")
       .then((res) => res.json())
       .then((data) => setRkt(data.data || []));
 
@@ -34,29 +33,27 @@ export default function Dashboard() {
       .then((data) => setFpd(data.data || []));
   }, []);
 
-  // ===== KPI =====
+  // helper fleksibel
+  const getNominal = (d) => d.NOMINAL_FPD || d.nominal_fpd || d.nominal || 0;
+  const getSisa = (d) => d.NOMINAL_SISA || d.nominal_sisa || d.sisa || 0;
+
+  // KPI
   const totalRKT = rkt.length;
   const totalRKA = rka.length;
 
-  const totalTerpakai = fpd.reduce((sum, d) => sum + (d?.NOMINAL_FPD || 0), 0);
+  const totalTerpakai = fpd.reduce((sum, d) => sum + getNominal(d), 0);
+  const totalSisa = fpd.reduce((sum, d) => sum + getSisa(d), 0);
 
-  const totalSisa = fpd.reduce((sum, d) => sum + (d?.NOMINAL_SISA || 0), 0);
+  const formatJt = (value) =>
+    value >= 1000000 ? `${(value / 1000000).toFixed(1)} jt` : value;
 
-  // ===== FORMAT ANGKA (BIAR RAPI)
-  const formatJt = (value) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)} jt`;
-    }
-    return value;
-  };
-
-  // ===== LINE CHART DATA
+  // trend
   const trendData = fpd.map((d) => ({
-    bulan: d.BULAN || "Data",
-    nominal: d.NOMINAL_FPD || 0,
+    bulan: d.BULAN || d.bulan || "Data",
+    nominal: getNominal(d),
   }));
 
-  // ===== BAR CHART DATA
+  // bar
   const barData = [
     {
       name: "Keuangan",
@@ -66,13 +63,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className="dashboard-wrapper">
       <SidebarWaka />
 
-      <div className="waka-container">
+      <main className="waka-container">
         <h2 className="waka-title">Dashboard Waka</h2>
 
-        {/* ===== KPI ===== */}
+        {/* KPI */}
         <div className="waka-grid">
           <div className="card">
             <p>Total RKT</p>
@@ -95,88 +92,123 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ===== MAIN GRID ===== */}
+        {/* MAIN */}
         <div className="main-grid">
-          {/* LEFT SIDE (CHART) */}
+          {/* LEFT - CHART */}
           <div className="chart-section">
-            {/* LINE CHART */}
+            {/* LINE */}
             <div className="chart-card">
               <h4>Trend Penggunaan Dana</h4>
 
-              {trendData.length <= 1 ? (
-                <p style={{ fontSize: "12px", color: "#6b7280" }}>
-                  Data belum cukup untuk ditampilkan
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
+              <div className="chart-inner">
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-                    <XAxis dataKey="bulan" tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="bulan" tick={{ fontSize: 10 }} />
 
-                    <YAxis tick={{ fontSize: 12 }} tickFormatter={formatJt} />
+                    <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
 
-                    <Tooltip contentStyle={{ fontSize: "12px" }} />
+                    <Tooltip
+                      contentStyle={{
+                        fontSize: "11px",
+                        borderRadius: "8px",
+                      }}
+                    />
 
                     <Line
-                      type="monotone"
+                      type="monotone" // 🔥 smooth
                       dataKey="nominal"
                       stroke="#1e3a8a"
                       strokeWidth={2}
                       dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              )}
+              </div>
             </div>
 
-            {/* BAR CHART */}
+            {/* BAR */}
             <div className="chart-card">
               <h4>Anggaran vs Realisasi</h4>
 
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+              <div className="chart-inner">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
 
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={formatJt} />
+                    <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
 
-                  <Tooltip contentStyle={{ fontSize: "12px" }} />
-                  <Legend wrapperStyle={{ fontSize: "12px" }} />
+                    <Tooltip
+                      contentStyle={{
+                        fontSize: "11px",
+                        borderRadius: "8px",
+                      }}
+                    />
 
-                  <Bar dataKey="terpakai" fill="#1e3a8a" />
-                  <Bar dataKey="sisa" fill="#f59e0b" />
-                </BarChart>
-              </ResponsiveContainer>
+                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+
+                    <Bar
+                      dataKey="terpakai"
+                      fill="#1e3a8a"
+                      radius={[6, 6, 0, 0]}
+                      barSize={40}
+                    />
+
+                    <Bar
+                      dataKey="sisa"
+                      fill="#f59e0b"
+                      radius={[6, 6, 0, 0]}
+                      barSize={40}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE (TABLE) */}
+          {/* RIGHT - TABLE */}
           <div className="table-section">
             <h3>Program Kerja (RKT)</h3>
 
-            <table>
-              <thead>
-                <tr>
-                  <th>Program</th>
-                  <th>Indikator</th>
-                  <th>Nominal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rkt.map((item, i) => (
-                  <tr key={i}>
-                    <td>{item.PROGRAM_KERJA}</td>
-                    <td>{item.INDIKATOR}</td>
-                    <td>Rp {item.NOMINAL?.toLocaleString()}</td>
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Program</th>
+                    <th>Indikator</th>
+                    <th>Nominal</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {rkt.length > 0 ? (
+                    rkt.map((item, i) => (
+                      <tr key={i}>
+                        <td>{item.PROGRAM_KERJA || item.program_kerja}</td>
+                        <td>{item.INDIKATOR || item.indikator}</td>
+                        <td>
+                          Rp{" "}
+                          {(item.NOMINAL || item.nominal || 0).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center" }}>
+                        Tidak ada data
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
