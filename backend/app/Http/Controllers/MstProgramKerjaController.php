@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\MstProgramKerja;
+use App\Models\FpdAnggaran;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 
 use App\Exports\MstProgramKerjaExport;
@@ -18,54 +17,64 @@ class MstProgramKerjaController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $search = trim((string) $request->query('search', ''));
-            $idTan = $request->query('ID_TAN');
-            $idTaAnggaran = $request->query('ID_TA_ANGGARAN');
+            $query = MstProgramKerja::with([
+                'tahunAnggaran',
+                'unit',
+                'tan',
+                'coa',
+                'kegiatan',
+            ])->active();
 
-            $query = MstProgramKerja::query()
-                ->with([
-                    'tahunAnggaran',
-                    'unit',
-                    'tan',
-                    'coa',
-                    'kegiatan',
-                    'detailProgramKerja',
-                    'trPm',
-                ])
-                ->active()
-                ->orderBy('ID_PROGRAM_KERJA', 'desc');
+            if ($request->filled('ID_TA_ANGGARAN')) {
+                $query->where('ID_TA_ANGGARAN', $request->ID_TA_ANGGARAN);
+            }
 
-            if ($search !== '') {
+            if ($request->filled('ID_UNIT')) {
+                $query->where('ID_UNIT', $request->ID_UNIT);
+            }
+
+            if ($request->filled('ID_TAN')) {
+                $query->where('ID_TAN', $request->ID_TAN);
+            }
+
+            if ($request->filled('ID_MASTER_COA')) {
+                $query->where('ID_MASTER_COA', $request->ID_MASTER_COA);
+            }
+
+            if ($request->filled('ID_KEGIATAN')) {
+                $query->where('ID_KEGIATAN', $request->ID_KEGIATAN);
+            }
+
+            if ($request->filled('NIP_PENANGGUNG_JAWAB')) {
+                $query->where('NIP_PENANGGUNG_JAWAB', $request->NIP_PENANGGUNG_JAWAB);
+            }
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+
                 $query->where(function ($q) use ($search) {
-                    $q->where('PROGRAM_KERJA', 'like', "%{$search}%")
-                        ->orWhere('INDIKATOR', 'like', "%{$search}%")
-                        ->orWhere('SASARAN', 'like', "%{$search}%")
-                        ->orWhere('KELUARAN_PROGKER', 'like', "%{$search}%")
-                        ->orWhere('NIP_PENANGGUNG_JAWAB', 'like', "%{$search}%");
+                    $q->where('PROGRAM_KERJA', 'like', '%' . $search . '%')
+                        ->orWhere('INDIKATOR', 'like', '%' . $search . '%')
+                        ->orWhere('SASARAN', 'like', '%' . $search . '%')
+                        ->orWhere('KELUARAN_PROGKER', 'like', '%' . $search . '%');
                 });
             }
 
-            if (!is_null($idTan) && $idTan !== '') {
-                $query->where('ID_TAN', $idTan);
-            }
+            $perPage = (int) $request->get('per_page', 10);
 
-            if (!is_null($idTaAnggaran) && $idTaAnggaran !== '') {
-                $query->where('ID_TA_ANGGARAN', $idTaAnggaran);
-            }
-
-            $data = $query->get();
+            $data = $query
+                ->orderByDesc('ID_PROGRAM_KERJA')
+                ->paginate($perPage);
 
             return response()->json([
                 'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data program kerja tidak ditemukan'
-                    : 'Data program kerja berhasil diambil',
+                'message' => 'Data program kerja berhasil diambil',
                 'data' => $data,
-            ]);
+            ], 200);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data program kerja',
+                'message' => 'Gagal mengambil data program kerja',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -74,36 +83,30 @@ class MstProgramKerjaController extends Controller
     public function show(int $id): JsonResponse
     {
         try {
-            $data = MstProgramKerja::query()
-                ->with([
-                    'tahunAnggaran',
-                    'unit',
-                    'tan',
-                    'coa',
-                    'kegiatan',
-                    'detailProgramKerja',
-                    'trPm',
-                ])
-                ->active()
-                ->find($id);
-
-            if (!$data) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data program kerja tidak ditemukan',
-                    'data' => null,
-                ], 404);
-            }
+            $data = MstProgramKerja::with([
+                'tahunAnggaran',
+                'unit',
+                'tan',
+                'coa',
+                'kegiatan',
+                'detailProgramKerja',
+                'trPm',
+            ])->active()->findOrFail($id);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Detail program kerja berhasil diambil',
                 'data' => $data,
-            ]);
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Program kerja tidak ditemukan',
+            ], 404);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil detail program kerja',
+                'message' => 'Gagal mengambil detail program kerja',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -111,48 +114,95 @@ class MstProgramKerjaController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'ID_TA_ANGGARAN' => [
+                'required',
+                'integer',
+                Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
+            ],
+            'ID_UNIT' => [
+                'required',
+                'integer',
+                Rule::exists('mst_unit', 'ID_UNIT'),
+            ],
+            'ID_TAN' => [
+                'nullable',
+                'integer',
+                Rule::exists('ref_tan', 'ID_TAN'),
+            ],
+            'ID_MASTER_COA' => [
+                'required',
+                'integer',
+                Rule::exists('mst_coa', 'ID_MASTER_COA'),
+            ],
+            'ID_KEGIATAN' => [
+                'required',
+                'integer',
+                Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
+            ],
+            'NOMINAL' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+            'INDIKATOR' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'SASARAN' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'WAKTU_AWAL' => [
+                'required',
+                'date',
+            ],
+            'WAKTU_AKHIR' => [
+                'required',
+                'date',
+                'after_or_equal:WAKTU_AWAL',
+            ],
+            'KELUARAN_PROGKER' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+            'PROGRAM_KERJA' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'NIP_PENANGGUNG_JAWAB' => [
+                'required',
+                'string',
+                'max:20',
+            ],
+            'NIP_VALIDATOR_PROGKER' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+        ]);
+
         try {
-            $validated = $request->validate(
-                $this->rules(),
-                $this->messages()
-            );
-
-            $isDuplicate = MstProgramKerja::query()
-                ->active()
-                ->where('PROGRAM_KERJA', $validated['PROGRAM_KERJA'])
-                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'])
-                ->exists();
-
-            if ($isDuplicate) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => [
-                        'PROGRAM_KERJA' => [
-                            'Program kerja sudah digunakan pada tahun anggaran tersebut.',
-                        ],
-                    ],
-                ], 422);
-            }
-
             $data = DB::transaction(function () use ($validated) {
-                $nextId = ((int) MstProgramKerja::max('ID_PROGRAM_KERJA')) + 1;
-
                 $programKerja = MstProgramKerja::create([
-                    'ID_PROGRAM_KERJA' => $nextId,
                     'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
                     'ID_UNIT' => $validated['ID_UNIT'],
                     'ID_TAN' => $validated['ID_TAN'] ?? null,
                     'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
                     'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
                     'NOMINAL' => $validated['NOMINAL'],
-                    'INDIKATOR' => $validated['INDIKATOR'],
-                    'SASARAN' => $validated['SASARAN'],
+                    'INDIKATOR' => $validated['INDIKATOR'] ?? null,
+                    'SASARAN' => $validated['SASARAN'] ?? null,
                     'WAKTU_AWAL' => $validated['WAKTU_AWAL'],
                     'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'],
-                    'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'],
+                    'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'] ?? null,
                     'PROGRAM_KERJA' => $validated['PROGRAM_KERJA'],
                     'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'],
+                    'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER'] ?? null,
                     'IS_DELETE' => 0,
                 ]);
 
@@ -172,22 +222,10 @@ class MstProgramKerjaController extends Controller
                 'message' => 'Program kerja berhasil ditambahkan',
                 'data' => $data,
             ], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (QueryException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat menambahkan program kerja',
-                'error' => $e->getMessage(),
-            ], 500);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menambahkan program kerja',
+                'message' => 'Gagal menambahkan program kerja',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -195,139 +233,7 @@ class MstProgramKerjaController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        try {
-            $programKerja = MstProgramKerja::query()
-                ->active()
-                ->find($id);
-
-            if (!$programKerja) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data program kerja tidak ditemukan',
-                    'data' => null,
-                ], 404);
-            }
-
-            $validated = $request->validate(
-                $this->rules(),
-                $this->messages()
-            );
-
-            $isDuplicate = MstProgramKerja::query()
-                ->active()
-                ->where('PROGRAM_KERJA', $validated['PROGRAM_KERJA'])
-                ->where('ID_TA_ANGGARAN', $validated['ID_TA_ANGGARAN'])
-                ->where('ID_PROGRAM_KERJA', '!=', $id)
-                ->exists();
-
-            if ($isDuplicate) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
-                    'errors' => [
-                        'PROGRAM_KERJA' => [
-                            'Program kerja sudah digunakan pada tahun anggaran tersebut.',
-                        ],
-                    ],
-                ], 422);
-            }
-
-            $programKerja->update([
-                'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
-                'ID_UNIT' => $validated['ID_UNIT'],
-                'ID_TAN' => $validated['ID_TAN'] ?? null,
-                'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
-                'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
-                'NOMINAL' => $validated['NOMINAL'],
-                'INDIKATOR' => $validated['INDIKATOR'],
-                'SASARAN' => $validated['SASARAN'],
-                'WAKTU_AWAL' => $validated['WAKTU_AWAL'],
-                'WAKTU_AKHIR' => $validated['WAKTU_AKHIR'],
-                'KELUARAN_PROGKER' => $validated['KELUARAN_PROGKER'],
-                'PROGRAM_KERJA' => $validated['PROGRAM_KERJA'],
-                'NIP_PENANGGUNG_JAWAB' => $validated['NIP_PENANGGUNG_JAWAB'],
-            ]);
-
-            $programKerja->refresh();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Program kerja berhasil diperbarui',
-                'data' => $programKerja->load([
-                    'tahunAnggaran',
-                    'unit',
-                    'tan',
-                    'coa',
-                    'kegiatan',
-                    'detailProgramKerja',
-                    'trPm',
-                ]),
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (QueryException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat mengubah program kerja',
-                'error' => $e->getMessage(),
-            ], 500);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengubah program kerja',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function destroy(int $id): JsonResponse
-    {
-        try {
-            $programKerja = MstProgramKerja::query()
-                ->active()
-                ->find($id);
-
-            if (!$programKerja) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data program kerja tidak ditemukan',
-                    'data' => null,
-                ], 404);
-            }
-
-            if ($this->isProgramKerjaUsed($programKerja)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Program kerja tidak boleh dihapus karena sudah dipakai pada data terkait',
-                    'data' => null,
-                ], 422);
-            }
-
-            $programKerja->update([
-                'IS_DELETE' => 1,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Program kerja berhasil dihapus',
-                'data' => null,
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menghapus program kerja',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    private function rules(): array
-    {
-        return [
+        $validated = $request->validate([
             'ID_TA_ANGGARAN' => [
                 'required',
                 'integer',
@@ -339,23 +245,19 @@ class MstProgramKerjaController extends Controller
                 Rule::exists('mst_unit', 'ID_UNIT'),
             ],
             'ID_TAN' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('ref_tan', 'ID_TAN'),
             ],
             'ID_MASTER_COA' => [
                 'required',
                 'integer',
-                Rule::exists('mst_coa', 'ID_MASTER_COA')->where(function ($query) {
-                    $query->where('IS_DELETE', 0);
-                }),
+                Rule::exists('mst_coa', 'ID_MASTER_COA'),
             ],
             'ID_KEGIATAN' => [
                 'required',
                 'integer',
-                Rule::exists('mst_kegiatan', 'ID_KEGIATAN')->where(function ($query) {
-                    $query->where('IS_DELETE', 0);
-                }),
+                Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
             ],
             'NOMINAL' => [
                 'required',
@@ -363,12 +265,12 @@ class MstProgramKerjaController extends Controller
                 'min:0',
             ],
             'INDIKATOR' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
             ],
             'SASARAN' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
             ],
@@ -382,7 +284,7 @@ class MstProgramKerjaController extends Controller
                 'after_or_equal:WAKTU_AWAL',
             ],
             'KELUARAN_PROGKER' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
             ],
@@ -396,41 +298,138 @@ class MstProgramKerjaController extends Controller
                 'string',
                 'max:20',
             ],
-        ];
+            'NIP_VALIDATOR_PROGKER' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+        ]);
+
+        try {
+            $data = DB::transaction(function () use ($validated, $id) {
+                $programKerja = MstProgramKerja::active()->findOrFail($id);
+
+                if ($this->isProgramKerjaUsed($id)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data sudah digunakan, tidak bisa diubah'
+                    ], 422);
+                }
+
+                $programKerja->update($validated);
+
+                return $programKerja->fresh([
+                    'tahunAnggaran',
+                    'unit',
+                    'tan',
+                    'coa',
+                    'kegiatan',
+                    'detailProgramKerja',
+                    'trPm',
+                ]);
+            });
+
+            if ($data instanceof \Illuminate\Http\JsonResponse) {
+                return $data;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil update',
+                'data' => $data
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal update',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    private function messages(): array
+    public function destroy(int $id): JsonResponse
     {
-        return [
-            'ID_TA_ANGGARAN.required' => 'Tahun anggaran wajib diisi.',
-            'ID_TA_ANGGARAN.exists' => 'Tahun anggaran tidak valid.',
-            'ID_UNIT.required' => 'Unit wajib diisi.',
-            'ID_UNIT.exists' => 'Unit tidak valid.',
-            'ID_TAN.required' => 'TAN wajib diisi.',
-            'ID_TAN.exists' => 'TAN tidak valid.',
-            'ID_MASTER_COA.required' => 'COA wajib diisi.',
-            'ID_MASTER_COA.exists' => 'COA tidak valid.',
-            'ID_KEGIATAN.required' => 'Kegiatan wajib diisi.',
-            'ID_KEGIATAN.exists' => 'Kegiatan tidak valid.',
-            'NOMINAL.required' => 'Nominal wajib diisi.',
-            'NOMINAL.numeric' => 'Nominal harus berupa angka.',
-            'NOMINAL.min' => 'Nominal tidak boleh kurang dari 0.',
-            'INDIKATOR.required' => 'Indikator wajib diisi.',
-            'INDIKATOR.max' => 'Indikator maksimal 100 karakter.',
-            'SASARAN.required' => 'Sasaran wajib diisi.',
-            'SASARAN.max' => 'Sasaran maksimal 100 karakter.',
-            'WAKTU_AWAL.required' => 'Waktu awal wajib diisi.',
-            'WAKTU_AWAL.date' => 'Waktu awal harus berupa tanggal yang valid.',
-            'WAKTU_AKHIR.required' => 'Waktu akhir wajib diisi.',
-            'WAKTU_AKHIR.date' => 'Waktu akhir harus berupa tanggal yang valid.',
-            'WAKTU_AKHIR.after_or_equal' => 'Waktu akhir tidak boleh lebih awal dari waktu awal.',
-            'KELUARAN_PROGKER.required' => 'Keluaran program kerja wajib diisi.',
-            'KELUARAN_PROGKER.max' => 'Keluaran program kerja maksimal 100 karakter.',
-            'PROGRAM_KERJA.required' => 'Program kerja wajib diisi.',
-            'PROGRAM_KERJA.max' => 'Program kerja maksimal 255 karakter.',
-            'NIP_PENANGGUNG_JAWAB.required' => 'NIP penanggung jawab wajib diisi.',
-            'NIP_PENANGGUNG_JAWAB.max' => 'NIP penanggung jawab maksimal 20 karakter.',
-        ];
+        try {
+            if ($this->isProgramKerjaUsed($id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data sudah digunakan, tidak bisa dihapus'
+                ], 422);
+            }
+
+            $data = MstProgramKerja::active()->findOrFail($id);
+            $data->update([
+                'IS_DELETE' => 1
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil hapus'
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal hapus',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'NIP_VALIDATOR_PROGKER' => [
+                'required',
+                'string',
+                'max:20',
+            ],
+        ]);
+
+        try {
+            $programKerja = MstProgramKerja::active()->findOrFail($id);
+
+            $programKerja->update([
+                'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Approve berhasil',
+                'data' => $programKerja->fresh([
+                    'tahunAnggaran',
+                    'unit',
+                    'tan',
+                    'coa',
+                    'kegiatan',
+                    'detailProgramKerja',
+                    'trPm',
+                ])
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function exportExcel(Request $request)
@@ -447,51 +446,21 @@ class MstProgramKerjaController extends Controller
         );
     }
 
-    private function isProgramKerjaUsed(MstProgramKerja $programKerja): bool
+    private function isProgramKerjaUsed(int $id): bool
     {
-        $hasDetail = $programKerja->detailProgramKerja()->exists();
+        $data = MstProgramKerja::withCount([
+            'detailProgramKerja',
+            'trPm',
+        ])->find($id);
 
-        $hasTrPm = $programKerja->trPm()->exists();
-
-        $hasFpd = DB::table('fpd_anggaran')
-            ->where('ID_PROGRAM_KERJA', $programKerja->ID_PROGRAM_KERJA)
-            ->exists();
-
-        return $hasDetail || $hasTrPm || $hasFpd;
-    }
-
-    public function approve(Request $request, int $id): JsonResponse
-    {
-        try {
-            $programKerja = MstProgramKerja::find($id);
-
-            if (!$programKerja) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan'
-                ], 404);
-            }
-
-            $request->validate([
-                'NIP_VALIDATOR_PROGKER' => 'required|string|max:20'
-            ]);
-
-            $programKerja->update([
-                'STATUS_APPROVAL' => 'APPROVED',
-                'NIP_VALIDATOR_PROGKER' => $request->NIP_VALIDATOR_PROGKER
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Program kerja berhasil disetujui',
-                'data' => $programKerja
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error approve',
-                'error' => $e->getMessage()
-            ], 500);
+        if (!$data) {
+            return false;
         }
+
+        $hasFpd = FpdAnggaran::where('ID_PROGRAM_KERJA', $id)->exists();
+
+        return $data->detail_program_kerja_count > 0
+            || $data->tr_pm_count > 0
+            || $hasFpd;
     }
 }
