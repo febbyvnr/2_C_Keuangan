@@ -131,6 +131,7 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
+    // Menentukan Role dan Nama secara dinamis
     $role = $role ?? 'Bendahara';
 
     if ($role === 'Kepala Sekolah') {
@@ -140,6 +141,7 @@
         $nama = 'Rina Putri, S.E.';
     }
 
+    // Mengambil NIP dari Controller
     $nip = $nip ?? '-';
 @endphp
 
