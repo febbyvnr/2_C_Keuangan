@@ -23,10 +23,10 @@ class LaporanPengeluaranExport implements WithEvents
         $this->sumberDana = $sumberDana;
         
         $this->user = DB::table('users as u')
-            ->leftJoin('tr_jabatan as tj', 'u.id', '=', 'tj.user_id')
+            ->leftJoin('tr_jabatan as tj', 'u.nip', '=', 'tj.NIP_KARYAWAN') 
             ->leftJoin('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
             ->where('u.id', Auth::id())
-            ->select('u.name', 'tj.nip', 'rjs.DESKRIPSI_JABATAN as nama_jabatan') 
+            ->select('u.name', 'tj.NIP_KARYAWAN as nip', 'rjs.DESKRIPSI_JABATAN as nama_jabatan') 
             ->first();
     }
 
