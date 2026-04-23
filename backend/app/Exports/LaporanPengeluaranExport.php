@@ -26,7 +26,7 @@ class LaporanPengeluaranExport implements WithEvents
             ->leftJoin('tr_jabatan as tj', 'u.nip', '=', 'tj.NIP_KARYAWAN') 
             ->leftJoin('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
             ->where('u.id', Auth::id())
-            ->select('u.name', 'tj.NIP_KARYAWAN as nip', 'rjs.DESKRIPSI_JABATAN as nama_jabatan') 
+            ->select('u.name', 'tj.NIP_KARYAWAN as nip', 'rjs.DESKRIPSI_JABATAN as nama_jabatan')
             ->first();
     }
 
@@ -41,9 +41,9 @@ class LaporanPengeluaranExport implements WithEvents
             ->select(
                 'tp.TGL_PM as tanggal',
                 'mpk.PROGRAM_KERJA as program',
+                'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'tp.DESKRIPSI_TR_PM as uraian',
-                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal'),
-                'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana'
+                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal')
             );
 
         if ($this->start && $this->end) {
@@ -99,14 +99,13 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->setCellValue("E$totalRow", 'TOTAL PENGELUARAN');
                 $sheet->setCellValue("F$totalRow", $this->total);
                 $sheet->getStyle("F$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
+                $sheet->getStyle("E$totalRow:F$totalRow")->getFont()->setBold(true);
 
                 $footerRow = $totalRow + 4;
-                $sheet->setCellValue("F" . $footerRow, 'Yogyakarta, ' . date('d F Y'));
-                $sheet->setCellValue("F" . ($footerRow + 1), ($this->user->nama_jabatan ?? 'Bendahara'));
-                $sheet->setCellValue("F" . ($footerRow + 4), ($this->user->name ?? '-'));
-                $sheet->setCellValue("F" . ($footerRow + 5), 'NIP. ' . ($this->user->nip ?? '-'));
+                $sheet->setCellValue("F" . ($footerRow + 2), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->setCellValue("F" . ($footerRow + 3), 'By: ' . ($this->user->nama_jabatan ?? 'Bendahara'));
                 
-                $sheet->getStyle("F" . $footerRow . ":F" . ($footerRow + 5))
+                $sheet->getStyle("F" . ($footerRow + 2) . ":F" . ($footerRow + 3))
                       ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 $sheet->freezePane("A7");
