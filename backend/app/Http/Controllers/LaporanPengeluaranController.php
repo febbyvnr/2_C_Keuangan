@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanPengeluaranExport;
@@ -16,17 +17,21 @@ class LaporanPengeluaranController extends Controller
         $end = $request->end;
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
-        $role = $request->role ?? null; 
 
-        if ($type == 'excel' && $role && $role !== 'Bendahara') {
+        $userRole = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rjs', 'tj.id_jabatan', '=', 'rjs.id_jabatan')
+            ->where('tj.user_id', Auth::id())
+            ->value('rjs.nama_jabatan');
+
+        if ($type == 'excel' && !in_array($userRole, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Hanya Bendahara yang boleh generate laporan'
+                'message' => 'Hanya Bendahara atau Kepala Sekolah yang boleh generate laporan'
             ], 403);
         }
 
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPengeluaranExport($start, $end, $sumberDana, $role),
+                new LaporanPengeluaranExport($start, $end, $sumberDana),
                 'Laporan_Pengeluaran.xlsx'
             );
         }
@@ -54,7 +59,6 @@ class LaporanPengeluaranController extends Controller
         }
 
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
-        
         $total = $data->sum('nominal');
 
         if ($type == 'pdf') {
