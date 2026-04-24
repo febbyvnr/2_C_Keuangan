@@ -75,13 +75,18 @@ class TrPembayaranController extends Controller
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
 
-            $tagihan = \App\Models\TagihanSiswa::find($validated['ID_TAGIHAN_SISWA']);
+            $tagihan = TagihanSiswa::with('siswa')->find($validated['ID_TAGIHAN_SISWA']);
 
             if (!$tagihan) {
                 return response()->json([
                     'message' => 'Tagihan tidak ditemukan'
                 ], 404);
             }
+
+            $validated['ID_SISWA_TETAP'] = $tagihan->ID_SISWA_TETAP;
+            $validated['ID_JENIS_PEMBAYARAN'] = $tagihan->ID_JENIS_PEMBAYARAN;
+            $validated['KODE_TA'] = optional($tagihan->siswa)->KODE_TA;
+            $validated['REF_ID_JENIS_PEMBAYARAN'] = $tagihan->ID_JENIS_PEMBAYARAN;
 
             $totalTagihan = (float) $tagihan->JUMLAH_TAGIHAN_SISWA;
 
@@ -107,7 +112,22 @@ class TrPembayaranController extends Controller
             $validated['ID_PEMBAYARAN'] = $newId;
 
             $data = TrPembayaran::create($validated);
+            $totalBayarTerbaru = TrPembayaran::where('ID_TAGIHAN_SISWA', $validated['ID_TAGIHAN_SISWA'])
+    ->sum('JUMLAH_BAYAR');
 
+if ($totalBayarTerbaru >= $totalTagihan) {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Sudah Bayar'
+    ]);
+} elseif ($totalBayarTerbaru > 0) {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Cicilan'
+    ]);
+} else {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Belum Bayar'
+    ]);
+}
             return response()->json([
                 'data' => $data
             ], 201);
