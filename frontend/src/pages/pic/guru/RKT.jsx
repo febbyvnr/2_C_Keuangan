@@ -18,41 +18,32 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString("id-ID");
 }
 
-function getStatusInfo(status) {
-  const normalized = String(status || "draft").toLowerCase();
+function formatLongDate(value) {
+  if (!value) return "-";
 
-  switch (normalized) {
-    case "diajukan":
-      return {
-        label: "Diajukan",
-        className: "rkt-status-badge submitted",
-      };
-    case "direview":
-      return {
-        label: "Direview",
-        className: "rkt-status-badge reviewed",
-      };
-    case "revisi":
-      return {
-        label: "Perlu Revisi",
-        className: "rkt-status-badge revision",
-      };
-    case "disetujui":
-      return {
-        label: "Disetujui",
-        className: "rkt-status-badge approved",
-      };
-    case "terkunci":
-      return {
-        label: "Terkunci",
-        className: "rkt-status-badge locked",
-      };
-    default:
-      return {
-        label: "Draft",
-        className: "rkt-status-badge draft",
-      };
+  return new Date(value).toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getStatusInfo(item) {
+  const validator = item?.NIP_VALIDATOR_PROGKER;
+
+  if (!validator) {
+    return {
+      value: "diajukan",
+      label: "Diajukan",
+      className: "rkt-status-badge submitted",
+    };
   }
+
+  return {
+    value: "disetujui",
+    label: "Disetujui",
+    className: "rkt-status-badge approved",
+  };
 }
 
 export default function RKT() {
@@ -61,11 +52,12 @@ export default function RKT() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
-    perPage: 5,
+    perPage: 10,
     total: 0,
   });
 
@@ -73,7 +65,23 @@ export default function RKT() {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
   }, [data, selectedId]);
 
-  const selectedStatus = getStatusInfo(selectedItem?.STATUS_PROGKER);
+  const selectedStatus = getStatusInfo(selectedItem);
+
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const derivedStatus = getStatusInfo(item).value;
+
+      const matchStatus = !statusFilter || derivedStatus === statusFilter;
+
+      const keyword = search.trim().toLowerCase();
+      const matchSearch =
+        !keyword ||
+        String(item.PROGRAM_KERJA || "").toLowerCase().includes(keyword) ||
+        String(item.INDIKATOR || "").toLowerCase().includes(keyword);
+
+      return matchStatus && matchSearch;
+    });
+  }, [data, search, statusFilter]);
 
   const fetchRkt = async (customSearch = search, page = 1) => {
     try {
@@ -94,7 +102,7 @@ export default function RKT() {
       let rows = [];
       let currentPage = 1;
       let lastPage = 1;
-      let perPage = 5;
+      let perPage = 10;
       let total = 0;
 
       if (Array.isArray(apiData)) {
@@ -104,13 +112,13 @@ export default function RKT() {
         rows = apiData.data;
         currentPage = apiData.current_page || 1;
         lastPage = apiData.last_page || 1;
-        perPage = apiData.per_page || 5;
+        perPage = apiData.per_page || 10;
         total = apiData.total || apiData.data.length;
       } else if (Array.isArray(apiData?.data?.data)) {
         rows = apiData.data.data;
         currentPage = apiData.data.current_page || 1;
         lastPage = apiData.data.last_page || 1;
-        perPage = apiData.data.per_page || 5;
+        perPage = apiData.data.per_page || 10;
         total = apiData.data.total || apiData.data.data.length;
       }
 
@@ -148,6 +156,7 @@ export default function RKT() {
 
   const handleReset = () => {
     setSearch("");
+    setStatusFilter("");
     fetchRkt("", 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -231,14 +240,13 @@ export default function RKT() {
 
               <div className="rkt-input-group rkt-filter-small">
                 <label>Status</label>
-                <select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
                   <option value="">Semua Status</option>
-                  <option value="draft">Draft</option>
                   <option value="diajukan">Diajukan</option>
-                  <option value="direview">Direview</option>
-                  <option value="revisi">Revisi</option>
                   <option value="disetujui">Disetujui</option>
-                  <option value="terkunci">Terkunci</option>
                 </select>
               </div>
 
@@ -272,8 +280,8 @@ export default function RKT() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.length > 0 ? (
-                          data.map((item, index) => (
+                        {filteredData.length > 0 ? (
+                          filteredData.map((item, index) => (
                             <tr
                               key={item.ID_PROGRAM_KERJA}
                               className={
@@ -306,11 +314,9 @@ export default function RKT() {
                               </td>
                               <td>
                                 <span
-                                  className={
-                                    getStatusInfo(item.STATUS_PROGKER).className
-                                  }
+                                  className={getStatusInfo(item).className}
                                 >
-                                  {getStatusInfo(item.STATUS_PROGKER).label}
+                                  {getStatusInfo(item).label}
                                 </span>
                               </td>
                             </tr>
@@ -329,14 +335,11 @@ export default function RKT() {
                   <div className="rkt-pagination">
                     <span className="rkt-pagination-info">
                       Menampilkan{" "}
-                      {data.length > 0
-                        ? (pagination.currentPage - 1) * pagination.perPage + 1
-                        : 0}
+                      {filteredData.length > 0 ? 1 : 0}
                       {" - "}
-                      {(pagination.currentPage - 1) * pagination.perPage +
-                        data.length}
+                      {filteredData.length}
                       {" dari "}
-                      {pagination.total} data
+                      {data.length} data
                     </span>
 
                     <div className="rkt-pagination-actions">
@@ -381,7 +384,7 @@ export default function RKT() {
                           {selectedItem.PROGRAM_KERJA || "Detail RKT"}
                         </h2>
                         <p className="rkt-detail-subtitle">
-                          Klik baris lain untuk melihat rincian program kerja.
+                          Klik baris pada tabel untuk melihat detail program kerja.
                         </p>
                       </div>
 
@@ -417,14 +420,14 @@ export default function RKT() {
                       <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Waktu Awal</span>
                         <span className="rkt-detail-value">
-                          {formatDate(selectedItem.WAKTU_AWAL)}
+                          {formatLongDate(selectedItem.WAKTU_AWAL)}
                         </span>
                       </div>
 
                       <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Waktu Akhir</span>
                         <span className="rkt-detail-value">
-                          {formatDate(selectedItem.WAKTU_AKHIR)}
+                          {formatLongDate(selectedItem.WAKTU_AKHIR)}
                         </span>
                       </div>
 
@@ -438,12 +441,9 @@ export default function RKT() {
                       <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Validator</span>
                         <span className="rkt-detail-value">
-                          {getDisplayValue(
-                            selectedItem.validator?.NAMA_KARYAWAN,
-                            selectedItem.nama_validator,
-                            selectedItem.NAMA_VALIDATOR,
-                            selectedItem.NIP_VALIDATOR_PROGKER
-                          )}
+                          {selectedItem.NIP_VALIDATOR_PROGKER
+                            ? `NIP ${selectedItem.NIP_VALIDATOR_PROGKER}`
+                            : "Belum ada validator"}
                         </span>
                       </div>
 
@@ -473,9 +473,11 @@ export default function RKT() {
                         <span className="rkt-detail-label">Tahun Anggaran</span>
                         <span className="rkt-detail-value">
                           {getDisplayValue(
+                            selectedItem.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN,
+                            selectedItem.tahunAnggaran?.DESKRIPSI_TAHUN_ANGGARAN,
                             selectedItem.tahun_anggaran?.TAHUN_ANGGARAN,
                             selectedItem.tahunAnggaran?.TAHUN_ANGGARAN,
-                            selectedItem.nama_tahun_anggaran
+                            "Belum tersedia"
                           )}
                         </span>
                       </div>
@@ -492,9 +494,7 @@ export default function RKT() {
                   </div>
 
                   <div className="rkt-detail-actions">
-                    {(selectedItem.STATUS_PROGKER === "draft" ||
-                      selectedItem.STATUS_PROGKER === "revisi" ||
-                      !selectedItem.STATUS_PROGKER) && (
+                    {!selectedItem.NIP_VALIDATOR_PROGKER && (
                       <>
                         <button
                           className="btn-yellow-sm rkt-detail-btn"
@@ -516,32 +516,14 @@ export default function RKT() {
                           Hapus
                         </button>
 
-                        <button
-                          className="btn-primary-custom rkt-detail-btn rkt-submit-btn"
-                          onClick={() =>
-                            alert("Nanti tombol ini disambungkan ke API ajukan RKT")
-                          }
-                        >
-                          Ajukan
+                        <button className="btn-light-custom rkt-detail-btn" disabled>
+                          Menunggu Approval
                         </button>
                       </>
                     )}
-
-                    {selectedItem.STATUS_PROGKER === "diajukan" && (
-                      <button className="btn-light-custom rkt-detail-btn" disabled>
-                        Sedang Menunggu Review
-                      </button>
-                    )}
-
-                    {selectedItem.STATUS_PROGKER === "disetujui" && (
+                    {selectedItem.NIP_VALIDATOR_PROGKER && (
                       <button className="btn-light-custom rkt-detail-btn" disabled>
                         Sudah Disetujui
-                      </button>
-                    )}
-
-                    {selectedItem.STATUS_PROGKER === "terkunci" && (
-                      <button className="btn-light-custom rkt-detail-btn" disabled>
-                        RKT Terkunci
                       </button>
                     )}
                   </div>
@@ -549,7 +531,7 @@ export default function RKT() {
               ) : (
                 <div className="rkt-detail-empty">
                   <div className="rkt-detail-empty-icon">📋</div>
-                  <p>Pilih salah satu data RKT untuk melihat detail.</p>
+                  <p>Klik baris pada tabel untuk melihat detail program kerja..</p>
                 </div>
               )}
             </aside>
