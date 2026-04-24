@@ -52,9 +52,13 @@ const normalizeKegiatanItems = (items) => {
   const result = [];
 
   const pushItem = (item) => {
-    if (!item || result.some((current) => current.ID_KEGIATAN === item.ID_KEGIATAN)) {
+    if (
+      !item ||
+      result.some((current) => current.ID_KEGIATAN === item.ID_KEGIATAN)
+    ) {
       return;
     }
+
     result.push(item);
   };
 
@@ -100,6 +104,15 @@ export default function CreateRKT() {
   const waktuAwalRef = useRef(null);
   const waktuAkhirRef = useRef(null);
 
+  const userLogin = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const penanggungJawabLabel = [
+    userLogin.NIP_KARYAWAN,
+    userLogin.NAMA_KARYAWAN || userLogin.nama_karyawan || userLogin.name,
+    ]
+    .filter(Boolean)
+    .join(" - ");
+    
   const loadMasterData = async () => {
     setLoading(true);
     setError("");
@@ -118,7 +131,9 @@ export default function CreateRKT() {
       const nextTa = extractCollection(taJson);
       const nextTan = extractCollection(tanJson);
       const nextCoa = extractCollection(coaJson);
-      const nextKegiatan = normalizeKegiatanItems(extractCollection(kegiatanJson));
+      const nextKegiatan = normalizeKegiatanItems(
+        extractCollection(kegiatanJson)
+      );
 
       setUnitOptions(nextUnits);
       setTahunAnggaranOptions(nextTa);
@@ -223,7 +238,7 @@ export default function CreateRKT() {
         body: JSON.stringify(payload),
       });
 
-      setMessage("RKT berhasil ditambahkan.");
+      setMessage("RKT berhasil diajukan.");
       navigate("/pic/guru/rkt");
     } catch (err) {
       setError(err.message);
@@ -241,7 +256,7 @@ export default function CreateRKT() {
           <div className="create-rkt-card-head">
             <div>
               <h2>Tambah RKT</h2>
-              <p>Lengkapi data program kerja. Status otomatis menjadi diajukan.</p>
+              <p>Setelah diajukan, RKT akan direview oleh Waka.</p>
             </div>
 
             <div className="create-rkt-actions-top">
@@ -275,7 +290,7 @@ export default function CreateRKT() {
             <div className="create-rkt-empty">Memuat data form...</div>
           ) : (
             <form className="create-rkt-form" onSubmit={handleSubmit}>
-              <div className="create-rkt-grid">
+              <div className="create-rkt-master-grid">
                 <label className="create-rkt-field">
                   <span>Tahun Anggaran</span>
                   <select
@@ -348,8 +363,10 @@ export default function CreateRKT() {
                     ))}
                   </select>
                 </label>
+              </div>
 
-                <label className="create-rkt-field create-rkt-field-full">
+              <div className="create-rkt-grid">
+                <label className="create-rkt-field">
                   <span>Kegiatan</span>
                   <select
                     name="ID_KEGIATAN"
@@ -366,7 +383,7 @@ export default function CreateRKT() {
                   </select>
                 </label>
 
-                <label className="create-rkt-field create-rkt-field-full">
+                <label className="create-rkt-field">
                   <span>Program Kerja</span>
                   <input
                     type="text"
@@ -378,7 +395,7 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Nominal</span>
+                  <span>Nominal Anggaran</span>
                   <input
                     type="number"
                     min="0"
@@ -386,6 +403,15 @@ export default function CreateRKT() {
                     value={form.NOMINAL}
                     onChange={handleChange}
                     required
+                  />
+                </label>
+
+                <label className="create-rkt-field create-rkt-field-pj">
+                  <span>Penanggung Jawab</span>
+                  <input
+                    type="text"
+                    value={penanggungJawabLabel}
+                    readOnly
                   />
                 </label>
 
@@ -481,7 +507,7 @@ export default function CreateRKT() {
                   className="create-rkt-button primary"
                   disabled={submitting}
                 >
-                  {submitting ? "Menyimpan..." : "Simpan RKT"}
+                  {submitting ? "Mengajukan..." : "Ajukan RKT"}
                 </button>
               </div>
             </form>

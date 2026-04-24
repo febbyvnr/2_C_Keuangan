@@ -548,15 +548,19 @@ export default function RKT() {
                   </div>
 
                   <div className="rkt-detail-actions">
-                    {selectedStatusValue === "disetujui" ? (
+                    {selectedStatusValue === "disetujui" && (
                       <button className="btn-light-custom rkt-detail-btn" disabled>
                         Sudah Disetujui
                       </button>
-                    ) : selectedStatusValue === "ditolak" ? (
+                    )}
+
+                    {selectedStatusValue === "ditolak" && (
                       <button className="btn-light-custom rkt-detail-btn" disabled>
                         Ditolak
                       </button>
-                    ) : (
+                    )}
+
+                    {selectedStatusValue === "diajukan" && (
                       <>
                         <button
                           className="btn-yellow-sm rkt-detail-btn"
@@ -578,6 +582,24 @@ export default function RKT() {
 
                         <button className="btn-light-custom rkt-detail-btn" disabled>
                           Menunggu Approval
+                        </button>
+                      </>
+                    )}
+
+                    {selectedStatusValue === "revisi" && (
+                      <>
+                        <button
+                          className="btn-yellow-sm rkt-detail-btn"
+                          disabled={!canEdit}
+                          onClick={() =>
+                            navigate(`/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`)
+                          }
+                        >
+                          Perbaiki Revisi
+                        </button>
+
+                        <button className="btn-light-custom rkt-detail-btn" disabled>
+                          Perlu Perbaikan
                         </button>
                       </>
                     )}
