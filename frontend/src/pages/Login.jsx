@@ -26,7 +26,35 @@ export default function Login() {
             localStorage.setItem('roles', JSON.stringify(response.data.roles));
             localStorage.setItem('user', JSON.stringify(response.data.user));
 
-            navigate('/bendahara/dashboard');
+            const roles = response.data.roles || [];
+            const user = response.data.user || {};
+
+            const roleText = [
+                ...roles,
+                user.JABATAN_FUNGSIONAL,
+                user.GOLONGAN_KARYAWAN,
+                user.NAMA_KARYAWAN
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            console.log("ROLES:", roles);
+            console.log("USER:", user);
+            console.log("ROLE TEXT:", roleText);
+
+            if (roleText.includes("bendahara") || roleText.includes("keuangan")) {
+                navigate("/bendahara/dashboard");
+            } else if (roleText.includes("guru")) {
+                navigate("/pic/guru");
+            } else if (roleText.includes("waka")) {
+                navigate("/waka");
+            } else if (roleText.includes("yayasan")) {
+                navigate("/yayasan/dashboard");
+            } else {
+                console.log("Role tidak dikenali:", roleText);
+                setErrorMsg("Role akun belum dikenali.");
+            }
         } catch (error) {
             setErrorMsg(error.status === 401 ? 'NIP atau Password salah!' : (error.message || 'Gagal terhubung ke server.'));
         } finally {
