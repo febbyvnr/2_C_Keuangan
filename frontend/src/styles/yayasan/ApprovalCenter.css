@@ -1,0 +1,152 @@
+.approval-container {
+    padding: 19px 20px 20px 20px;
+    background: #f1f5f9;
+    min-height: 100vh;
+    color: #1a1a1a;
+}
+
+.approval-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+}
+
+.table-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.active-row {
+    background: #e0f2fe;
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.status.approved {
+    background: #2E7D32;
+    color: white;
+}
+
+.status.rejected {
+    background: #C62828;
+    color: white;
+}
+
+.status.pending {
+    background: #EDD15B;
+    color: #1a1a1a;
+}
+
+.detail-section {
+    background: white;
+    padding: 0 20px 20px 20px;
+    border-radius: 12px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.approve-btn {
+    flex: 1;
+    background: #2E7D32;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.reject-btn {
+    flex: 1;
+    background: #C62828;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #7d7d7e;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.pagination button {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #1a1a1a;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+    background-color: #f6f7f9;
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.pagination button.active {
+    background-color: #265f9c;
+    color: #ffffff;
+    border-color: #265f9c;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    margin-top: 50px;
+}

@@ -1,0 +1,186 @@
+/* =========================================================
+   1. RESET GLOBAL CSS (TAMENG)
+   Mematikan efek * { padding: 2rem; width: 100%; text-align: center; } 
+   khusus untuk elemen di dalam halaman ini saja.
+   ========================================================= */
+.log-page-wrapper * {
+    width: auto;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+/* =========================================================
+   2. STYLING DASHBOARD UTAMA
+   ========================================================= */
+.log-page-wrapper {
+    width: 100% !important;
+    padding: 32px 40px !important;
+    box-sizing: border-box;
+}
+
+.log-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100% !important;
+    margin-bottom: 24px !important;
+}
+
+.log-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+
+/* =========================================================
+   3. KONTROL FILTER & SEARCH
+   ========================================================= */
+.log-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px !important; /* Memaksa jarak antar elemen */
+}
+
+.log-btn-reset {
+    padding: 8px 16px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    color: #374151 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    height: 38px !important;
+}
+
+.log-btn-reset:hover {
+    background-color: #f3f4f6 !important;
+}
+
+.log-select {
+    padding: 8px 14px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    height: 38px !important;
+    outline: none !important;
+    color-scheme: light !important;
+}
+
+.log-input {
+    padding: 8px 14px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    width: 260px !important; /* Lebar box search dikunci segini */
+    height: 38px !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.log-input::placeholder {
+    color: #9ca3af !important;
+}
+
+/* =========================================================
+   4. BOX TABEL & ISI TABEL
+   ========================================================= */
+.log-content-box {
+    width: 100% !important;
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06) !important;
+    border: 1px solid #e5e7eb !important;
+    overflow-x: auto !important;
+}
+
+.log-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    min-width: 800px !important;
+}
+
+.log-table th {
+    background-color: #ffffff !important;
+    color: #374151 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 16px 24px !important;
+    text-transform: uppercase !important;
+    border-bottom: 2px solid #f3f4f6 !important;
+}
+
+.log-table td {
+    padding: 16px 24px !important;
+    font-size: 14px !important;
+    color: #111827 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+}
+
+.log-table tbody tr:hover td {
+    background-color: #f9fafb !important;
+}
+
+.username-cell {
+    font-weight: 500 !important;
+}
+
+.empty-state {
+    text-align: center !important;
+    padding: 40px !important;
+    color: #6b7280 !important;
+    width: 100% !important;
+}
+
+/* =========================================================
+   5. LABEL BADGE AKTIVITAS
+   ========================================================= */
+.badge {
+    display: inline-block !important;
+    padding: 6px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+/* =========================================================
+   6. TAB NAVIGATION
+   ========================================================= */
+.log-tabs-container {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e5e7eb !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
+}
+
+.log-tab-btn {
+    padding: 12px 24px !important;
+    background: none !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+.log-tab-btn:hover {
+    color: #111827 !important;
+}
+
+.log-tab-btn.active {
+    color: #1d4ed8 !important; /* Warna biru aktif */
+    border-bottom: 3px solid #1d4ed8 !important;
+}
+
+.badge-created { background-color: #d1fae5 !important; color: #065f46 !important; }
+.badge-updated { background-color: #fef3c7 !important; color: #92400e !important; }
+.badge-deleted { background-color: #fee2e2 !important; color: #991b1b !important; }

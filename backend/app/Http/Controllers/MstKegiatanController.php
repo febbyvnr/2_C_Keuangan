@@ -16,11 +16,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MstKegiatanController extends Controller
 {
-    /**
-     * Menampilkan daftar kegiatan aktif
-     * Search berdasarkan deskripsi kegiatan
-     * List utama hanya parent, child ada di dalam children
-     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -59,9 +54,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menampilkan detail kegiatan
-     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -92,10 +84,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menambahkan kegiatan baru
-     * Untuk kondisi sekarang: deskripsi kegiatan dibuat unik pada data aktif
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -177,10 +165,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Mengubah kegiatan
-     * Tidak boleh jika sudah dipakai pada program kerja
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -288,10 +272,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menghapus kegiatan (soft delete)
-     * Hanya boleh jika belum dipakai program kerja dan tidak punya child aktif
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -346,9 +326,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menampilkan parent kegiatan untuk dropdown
-     */
     public function parents(): JsonResponse
     {
         try {
@@ -466,10 +443,6 @@ class MstKegiatanController extends Controller
         return $pdf->download('mst_kegiatan.pdf');
     }
 
-    /**
-     * Helper cek apakah kegiatan sudah dipakai
-     * Saat ini relasi yang tersedia baru programKerja
-     */
     private function isKegiatanUsed(MstKegiatan $kegiatan): bool
     {
         return method_exists($kegiatan, 'programKerja') && $kegiatan->programKerja()->exists();

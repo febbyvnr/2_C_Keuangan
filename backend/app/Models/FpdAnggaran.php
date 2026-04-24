@@ -14,12 +14,19 @@ class FpdAnggaran extends Model
     protected $keyType = 'int';
     public $timestamps = false;
 
-    protected $guarded =[];
+    protected $fillable = [
+        'ID_PROGRAM_KERJA',
+        'TGL_FPD',
+        'NOMINAL_ANGGARAN',
+        'NOMINAL_FPD',
+        'NOMINAL_SISA',
+        'NIP_VALIDATOR_FPD',
+    ];
 
     protected $casts = [
         'ID_FPD' => 'integer',
         'ID_PROGRAM_KERJA' => 'integer',
-        'TGL_FPD' => 'date',
+        'TGL_FPD' => 'datetime',
         'NOMINAL_ANGGARAN' => 'double',
         'NOMINAL_FPD' => 'double',
         'NOMINAL_SISA' => 'double',

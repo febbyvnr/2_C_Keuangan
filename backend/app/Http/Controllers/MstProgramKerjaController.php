@@ -15,11 +15,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MstProgramKerjaController extends Controller
 {
-    /**
-     * Menampilkan daftar program kerja aktif
-     * Search berdasarkan program kerja, indikator, sasaran, keluaran, PJ
-     * Filter opsional berdasarkan ID_TAN dan ID_TA_ANGGARAN
-     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -38,7 +33,7 @@ class MstProgramKerjaController extends Controller
                     'trPm',
                 ])
                 ->active()
-                ->orderBy('ID_PROGRAM_KERJA', 'asc');
+                ->orderBy('ID_PROGRAM_KERJA', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -76,9 +71,6 @@ class MstProgramKerjaController extends Controller
         }
     }
 
-    /**
-     * Menampilkan detail program kerja
-     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -117,9 +109,6 @@ class MstProgramKerjaController extends Controller
         }
     }
 
-    /**
-     * Menambahkan program kerja baru
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -204,9 +193,6 @@ class MstProgramKerjaController extends Controller
         }
     }
 
-    /**
-     * Mengubah program kerja
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -298,10 +284,6 @@ class MstProgramKerjaController extends Controller
         }
     }
 
-    /**
-     * Menghapus program kerja (soft delete)
-     * Tidak boleh dihapus jika sudah dipakai pada detail program kerja, FPD, atau PM
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -343,9 +325,6 @@ class MstProgramKerjaController extends Controller
         }
     }
 
-    /**
-     * Rules validasi
-     */
     private function rules(): array
     {
         return [
@@ -420,9 +399,6 @@ class MstProgramKerjaController extends Controller
         ];
     }
 
-    /**
-     * Messages validasi
-     */
     private function messages(): array
     {
         return [
@@ -471,9 +447,6 @@ class MstProgramKerjaController extends Controller
         );
     }
 
-    /**
-     * Helper cek apakah program kerja sudah dipakai
-     */
     private function isProgramKerjaUsed(MstProgramKerja $programKerja): bool
     {
         $hasDetail = $programKerja->detailProgramKerja()->exists();
@@ -485,5 +458,40 @@ class MstProgramKerjaController extends Controller
             ->exists();
 
         return $hasDetail || $hasTrPm || $hasFpd;
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        try {
+            $programKerja = MstProgramKerja::find($id);
+
+            if (!$programKerja) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+
+            $request->validate([
+                'NIP_VALIDATOR_PROGKER' => 'required|string|max:20'
+            ]);
+
+            $programKerja->update([
+                'STATUS_APPROVAL' => 'APPROVED',
+                'NIP_VALIDATOR_PROGKER' => $request->NIP_VALIDATOR_PROGKER
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Program kerja berhasil disetujui',
+                'data' => $programKerja
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error approve',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

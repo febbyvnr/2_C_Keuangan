@@ -9,10 +9,22 @@ use Illuminate\Validation\ValidationException;
 
 class TrPembayaranController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = TrPembayaran::all();
+            $query = TrPembayaran::with([
+                'tahunAnggaran',
+                'jenisPembayaran',
+                'siswa',
+                'tagihan'
+            ]);
+
+            if ($request->filled('ID_SISWA_TETAP')) {
+                $query->where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP);
+            }
+
+            $data = $query->get();
+
             return response()->json([
                 'data' => $data
             ]);
@@ -20,7 +32,7 @@ class TrPembayaranController extends Controller
             return response()->json([
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage()
-            ],500);
+            ], 500);
         }
     }
 
