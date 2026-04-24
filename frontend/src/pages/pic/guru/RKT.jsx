@@ -206,7 +206,7 @@ export default function RKT() {
                 className="btn-light-custom"
                 onClick={() => fetchRkt(search, pagination.currentPage)}
               >
-                Refresh
+                Sinkronkan Data
               </button>
               <button className="btn-warning-custom" onClick={handleExport}>
                 Export Excel
@@ -274,7 +274,6 @@ export default function RKT() {
                           <th>Indikator</th>
                           <th>Waktu</th>
                           <th>Anggaran</th>
-                          <th>Validator</th>
                           <th>Status</th>
                         </tr>
                       </thead>
@@ -312,14 +311,6 @@ export default function RKT() {
                                 {formatRupiah(item.NOMINAL)}
                               </td>
                               <td>
-                                {getDisplayValue(
-                                  item.validator?.NAMA_KARYAWAN,
-                                  item.nama_validator,
-                                  item.NAMA_VALIDATOR,
-                                  item.NIP_VALIDATOR_PROGKER
-                                )}
-                              </td>
-                              <td>
                                 <span
                                   className={
                                     getStatusInfo(item.STATUS_PROGKER).className
@@ -332,7 +323,7 @@ export default function RKT() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="7" className="rkt-empty">
+                            <td colSpan="6" className="rkt-empty">
                               Tidak ada data RKT
                             </td>
                           </tr>
