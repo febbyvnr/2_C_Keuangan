@@ -22,7 +22,9 @@ export default function SidebarPic() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+const userName = user.NAMA_KARYAWAN || "PIC Guru";
+const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
@@ -130,8 +132,8 @@ export default function SidebarPic() {
                   <img src={profile} alt="profile" />
                 </div>
                 <div className="user-info">
-                  <div className="user-role">PIC Guru</div>
-                  <div className="user-email">guru@smkbopkri2.sch.id</div>
+                  <div className="user-role">{userName}</div>
+                  <div className="user-email">{userEmail}</div>
                 </div>
               </div>
             </div>
