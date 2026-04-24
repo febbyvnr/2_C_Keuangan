@@ -81,6 +81,9 @@ export default function RKT() {
     total: 0,
   });
 
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const selectedItem = useMemo(() => {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
   }, [data, selectedId]);
@@ -198,12 +201,17 @@ export default function RKT() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Yakin ingin menghapus data ini?");
-    if (!confirmDelete) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/rkt/delete/${id}`);
+      setDeleting(true);
+
+      await axios.delete(
+        `http://127.0.0.1:8000/api/rkt/delete/${deleteTarget.ID_PROGRAM_KERJA}`
+      );
+
+      setDeleteTarget(null);
 
       const nextPage =
         data.length === 1 && pagination.currentPage > 1
@@ -212,8 +220,9 @@ export default function RKT() {
 
       await fetchRkt(search, nextPage);
     } catch (error) {
-      console.error("Gagal hapus data:", error);
-      alert("Data gagal dihapus");
+      alert(error.response?.data?.message || "Data gagal dihapus");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -548,15 +557,19 @@ export default function RKT() {
                   </div>
 
                   <div className="rkt-detail-actions">
-                    {selectedStatusValue === "disetujui" ? (
+                    {selectedStatusValue === "disetujui" && (
                       <button className="btn-light-custom rkt-detail-btn" disabled>
                         Sudah Disetujui
                       </button>
-                    ) : selectedStatusValue === "ditolak" ? (
+                    )}
+
+                    {selectedStatusValue === "ditolak" && (
                       <button className="btn-light-custom rkt-detail-btn" disabled>
                         Ditolak
                       </button>
-                    ) : (
+                    )}
+
+                    {selectedStatusValue === "diajukan" && (
                       <>
                         <button
                           className="btn-yellow-sm rkt-detail-btn"
@@ -571,13 +584,31 @@ export default function RKT() {
                         <button
                           className="btn-red-sm rkt-detail-btn"
                           disabled={!canDelete}
-                          onClick={() => handleDelete(selectedItem.ID_PROGRAM_KERJA)}
+                          onClick={() => setDeleteTarget(selectedItem)}
                         >
                           Hapus
                         </button>
 
                         <button className="btn-light-custom rkt-detail-btn" disabled>
                           Menunggu Approval
+                        </button>
+                      </>
+                    )}
+
+                    {selectedStatusValue === "revisi" && (
+                      <>
+                        <button
+                          className="btn-yellow-sm rkt-detail-btn"
+                          disabled={!canEdit}
+                          onClick={() =>
+                            navigate(`/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`)
+                          }
+                        >
+                          Perbaiki Revisi
+                        </button>
+
+                        <button className="btn-light-custom rkt-detail-btn" disabled>
+                          Perlu Perbaikan
                         </button>
                       </>
                     )}
@@ -592,6 +623,53 @@ export default function RKT() {
             </aside>
           </div>
         </div>
+
+        {deleteTarget && (
+          <div className="delete-modal-overlay">
+            <div className="delete-modal-box">
+              <button
+                type="button"
+                className="delete-modal-close"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                ×
+              </button>
+
+              <div className="delete-modal-icon">!</div>
+
+              <h3>Konfirmasi Hapus</h3>
+
+              <p>
+                Yakin ingin menghapus program kerja ini?
+                <br />
+                Data yang sudah dihapus tidak dapat dikembalikan.
+              </p>
+
+              <div className="delete-modal-actions">
+                <button
+                  type="button"
+                  className="delete-cancel-btn"
+                  onClick={() => setDeleteTarget(null)}
+                  disabled={deleting}
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="button"
+                  className="delete-confirm-btn"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? "Menghapus..." : "Ya, Hapus"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
       </main>
     </div>
   );
