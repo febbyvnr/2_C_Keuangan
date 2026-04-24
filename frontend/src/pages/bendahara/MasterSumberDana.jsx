@@ -13,7 +13,7 @@ export default function MasterSumberDana() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_DANA", 
-        direction: "asc" 
+        direction: "desc" 
     });
     const [form, setForm] = useState({
         REF_ID_REF_DANA: "",
@@ -21,6 +21,7 @@ export default function MasterSumberDana() {
     });
 
     const fetchData = async () => {
+        setLoading(true);
         try {
             const res = await fetch("http://localhost:8000/api/ref-sumber-dana");
             const json = await res.json();
@@ -33,6 +34,7 @@ export default function MasterSumberDana() {
     };
 
     const fetchParent = async () => {
+        setLoading(true);
         try {
             const res = await fetch("http://localhost:8000/api/ref-sumber-dana");
             const json = await res.json();
@@ -113,39 +115,20 @@ export default function MasterSumberDana() {
         });
         const json = await res.json();
         if (res.ok) {
-            alert(isEdit ? "Berhasil update Sumber Dana" : "Berhasil tambah Sumber Dana");
-            setShowModal(false);
-            setIsEdit(false);
-            setEditId(null);
-            setForm({
-                REF_ID_REF_DANA: "",
-                DESKRIPSI_SUMBER_DANA: ""
-            });
+            closeModal();
+            setTimeout(() => {showToast(isEdit ? "update" : "add");}, 0);
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(
+                "error",
+                json.message ||
+                (json.errors ? Object.values(json.errors).flat().join(", ") : "Gagal")
+            );
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus ref-sumber-dana ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/ref-sumber-dana/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (res.ok) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -168,6 +151,44 @@ export default function MasterSumberDana() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        setVisible(false);
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/ref-sumber-dana/delete/${confirmDeleteId}`,
+                { method: "DELETE" }
+            );
+            const json = await res.json();
+            if (res.ok) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -234,20 +255,21 @@ export default function MasterSumberDana() {
                                     <td>{item.REF_ID_REF_DANA}</td>
                                     <td>{item.DESKRIPSI_SUMBER_DANA}</td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
+                                            disabled={!!item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "Sumber Dana sudah digunakan Program Kerja"
-                                                    : "Sumber Dana Anggaran"
+                                                    ? "Tidak bisa dihapus karena sudah dipakai transaksi/program kerja"
+                                                    : ""
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_REF_DANA)
-                                            }
+                                            onClick={() => handleDelete(item.ID_REF_DANA)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -296,13 +318,14 @@ export default function MasterSumberDana() {
                                     onChange={handleChange}
                                 >
                                     <option value="">-- Pilih Parent --</option>
-                                    {parentList
-                                        .filter(item => String(item.ID_REF_DANA) !== String(editId) || String(item.ID_REF_DANA) === form.REF_ID_REF_DANA) // bs pilih ga
+                                    {[...parentList]
+                                        .sort((a, b) => b.ID_REF_DANA - a.ID_REF_DANA)
+                                        .filter(item => String(item.ID_REF_DANA) !== String(editId) || String(item.ID_REF_DANA) === form.REF_ID_REF_DANA)
                                         .map((item) => (
                                             <option key={item.ID_REF_DANA} value={String(item.ID_REF_DANA)}>
-                                                [{item.ID_REF_DANA}] {item.DESKRIPSI_SUMBER_DANA}
+                                                {item.ID_REF_DANA} - {item.DESKRIPSI_SUMBER_DANA}
                                             </option>
-                                        ))}
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-group">
@@ -329,6 +352,47 @@ export default function MasterSumberDana() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Sumber Dana
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Sumber Dana?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

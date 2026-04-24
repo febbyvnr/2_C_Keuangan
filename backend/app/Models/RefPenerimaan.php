@@ -11,6 +11,7 @@ class RefPenerimaan extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'REF_ID_REF_PENERIMAAN',
         'DESKRIPSI_REF_PENERIMAAN',
     ];
 }

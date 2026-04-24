@@ -118,9 +118,7 @@ class RefPmController extends Controller
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ]);
-
             $data = RefPm::create($validated);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Ref PM berhasil ditambahkan',
@@ -146,23 +144,17 @@ class RefPmController extends Controller
         try {
             $id = (int) $id;
             $data = RefPm::find($id);
-
             if (!$data) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
             }
-
-            $validated = $request->validate([
-                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
+           $validated = $request->validate([
+                'REF_ID_REF_PM' => "nullable|integer|exists:ref_pm,ID_REF_PM|different:ID_REF_PM",
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
+            ], [
+                'REF_ID_REF_PM.different' => 'Referensi Parent tidak boleh menunjuk ke diri sendiri.'
             ]);
-
             $data->update($validated);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diupdate',
@@ -186,37 +178,24 @@ class RefPmController extends Controller
     public function destroy($id): JsonResponse
     {
         try {
-            $id = (int) $id;
-            $data = RefPm::find($id);
-
+            $data = RefPm::find((int)$id);
             if (!$data) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
+                    'message' => 'Data tidak ditemukan'
                 ], 404);
             }
-
-            $usageCount = $data->trPm()->count();
-            
-            if ($usageCount > 0) {
+            $isUsedInPm = $data->trPm()->exists();
+            if ($isUsedInPm) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Data tidak dapat dihapus karena sudah dipakai dalam RKT/evaluasi',
-                    'data' => [
-                        'id' => $data->ID_REF_PM,
-                        'nama' => $data->NAMA_PM,
-                        'usage_count' => $usageCount,
-                    ],
+                    'message' => 'Data tidak dapat dihapus karena sudah digunakan'
                 ], 422);
             }
-
             $data->delete();
-
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil dihapus',
-                'data' => null,
+                'message' => 'Data berhasil dihapus'
             ]);
         } catch (\Throwable $e) {
             return response()->json([

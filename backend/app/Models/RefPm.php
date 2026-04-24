@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TrPenerimaan;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -20,6 +21,7 @@ class RefPm extends Model
         'ID_REF_PM' => 'integer',
         'REF_ID_REF_PM' => 'integer',
     ];
+    protected $appends = ['is_used'];
 
     protected static function boot()
     {
@@ -46,5 +48,12 @@ class RefPm extends Model
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'REF_ID_REF_PM', 'ID_REF_PM');
+    }
+
+    public function getIsUsedAttribute(): bool
+    {
+        $usedInPm = $this->trPm()->exists();
+        $usedAsParent = $this->children()->exists();
+        return $usedInPm || $usedAsParent;
     }
 }

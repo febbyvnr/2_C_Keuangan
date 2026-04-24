@@ -12,14 +12,16 @@ export default function MasterTahunAkademik() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_TAN", 
-        direction: "asc" 
+        direction: "desc" 
     });
     const [form, setForm] = useState({
         TAHUN: "",
+        DESKRIPSI: "",
         IS_CURRENT: 0
     });
 
     const fetchData = async () => {
+        setLoading(true);
         try {
             const res = await fetch("http://localhost:8000/api/ref-tan");
             const json = await res.json();
@@ -68,6 +70,15 @@ export default function MasterTahunAkademik() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (form.IS_CURRENT == 1) {
+            const currentActive = data.find(d => d.IS_CURRENT == 1);
+            if (currentActive && currentActive.ID_TAN !== editId) {
+                showToast(
+                    "update",
+                    `Tahun ${currentActive.TAHUN} saat ini aktif. Akan digantikan.`
+                );
+            }
+        }
         const url = isEdit
             ? `http://localhost:8000/api/ref-tan/update/${editId}`
             : "http://localhost:8000/api/ref-tan/store";
@@ -82,43 +93,21 @@ export default function MasterTahunAkademik() {
             })
         });
         const json = await res.json();
-        if (!res.ok) {
-            console.log(json);
-            alert(
-                json.errors
-                    ? Object.values(json.errors).flat().join("\n")
-                    : json.message || "Gagal"
-            );
-            return;
-        }
         if (res.ok) {
-            alert(isEdit ? "Berhasil update Tahun Akademik" : "Berhasil tambah Tahun Akademik");
             closeModal();
+            setTimeout(() => {showToast(isEdit ? "update" : "add");}, 0);
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(
+                "error",
+                json.message ||
+                (json.errors ? Object.values(json.errors).flat().join(", ") : "Gagal")
+            );
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus tahun-akademik ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/ref-tan/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (res.ok) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -127,6 +116,7 @@ export default function MasterTahunAkademik() {
         setEditId(null);
         setForm({
             TAHUN: "",
+            DESKRIPSI: "",
             IS_CURRENT: 0
         });
     };
@@ -160,6 +150,44 @@ export default function MasterTahunAkademik() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        setVisible(false);
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/ref-tan/delete/${confirmDeleteId}`,
+                { method: "DELETE" }
+            );
+            const json = await res.json();
+            if (res.ok) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -238,20 +266,29 @@ export default function MasterTahunAkademik() {
                                         </span>
                                     </td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            disabled={!!item.is_used}
+                                            title={
+                                                item.is_used
+                                                    ? "Tidak bisa diedit karena sudah dipakai Program Kerja"
+                                                    : ""
+                                            }
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
+                                            disabled={!!item.is_used || item.IS_CURRENT == 1}
                                             title={
                                                 item.is_used
-                                                    ? "Tahun Akademik sudah digunakan Program Kerja"
-                                                    : "Hapus Tahun Akademik"
+                                                    ? "Tidak bisa dihapus karena sudah dipakai Program Kerja"
+                                                    : item.IS_CURRENT == 1
+                                                    ? "Tidak bisa dihapus karena sedang aktif"
+                                                    : ""
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_TAN)
-                                            }
+                                            onClick={() => handleDelete(item.ID_TAN)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -299,18 +336,16 @@ export default function MasterTahunAkademik() {
                                     name="TAHUN"
                                     value={form.TAHUN}
                                     onChange={handleChange}
-                                    required
                                     placeholder="Contoh: 2025"
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Deskripsi</label>
+                                <label>Deskripsi (opsional)</label>
                                 <input
                                     type="text"
                                     name="DESKRIPSI"
                                     value={form.DESKRIPSI}
                                     onChange={handleChange}
-                                    required
                                     placeholder="Contoh: Tan 2025"
                                 />
                             </div>
@@ -321,12 +356,13 @@ export default function MasterTahunAkademik() {
                                         <input
                                             type="checkbox"
                                             checked={form.IS_CURRENT == 1}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
                                                 setForm({
                                                     ...form,
-                                                    IS_CURRENT: e.target.checked ? 1 : 0
-                                                })
-                                            }
+                                                    IS_CURRENT: checked ? 1 : 0
+                                                });
+                                            }}
                                         />
                                         <span className={form.IS_CURRENT == 1 ? "text-aktif" : "text-nonaktif"}>
                                             {form.IS_CURRENT == 1 ? "Tahun Aktif" : "Tahun Tidak Aktif"}
@@ -348,6 +384,47 @@ export default function MasterTahunAkademik() {
                             </div>
 
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Tahun Akademik
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Tahun Akademik?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

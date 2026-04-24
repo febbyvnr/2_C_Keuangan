@@ -312,7 +312,6 @@ export default function MasterTahunAnggaran() {
                                     name="DESKRIPSI_TAHUN_ANGGARAN"
                                     value={form.DESKRIPSI_TAHUN_ANGGARAN}
                                     onChange={handleChange}
-                                    required
                                     placeholder="Contoh: 2025"
                                 />
                             </div>

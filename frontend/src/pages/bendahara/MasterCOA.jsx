@@ -377,11 +377,14 @@ export default function MasterCOA() {
                                 onChange={handleChange}
                             >
                                 <option value="">-- Pilih Parent --</option>
-                                {coaList.map((coa) => (
-                                    <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
-                                        {coa.KODE_COA} - {coa.DESKRIPSI_COA}
-                                    </option>
-                                ))}
+                                {coaList
+                                    .filter((coa) => coa.ID_MASTER_COA !== editId) 
+                                    .map((coa) => (
+                                        <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
+                                            {coa.KODE_COA} - {coa.DESKRIPSI_COA}
+                                        </option>
+                                    ))
+                                }
                             </select>
                             <label>Deskripsi COA</label>
                             <input

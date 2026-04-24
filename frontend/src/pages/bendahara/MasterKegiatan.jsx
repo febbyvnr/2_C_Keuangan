@@ -316,10 +316,10 @@ export default function MasterKegiatan() {
                             >
                                 <option value="">-- Pilih Parent --</option>
                                 {parentList
-                                    .filter(item => item.ID_KEGIATAN !== editId) //bisa ref ke diri sendiri kah?
+                                    .filter(item => item.ID_KEGIATAN !== editId)
                                     .map((item) => (
                                         <option key={item.ID_KEGIATAN} value={item.ID_KEGIATAN}>
-                                            [{item.ID_KEGIATAN}] {item.DESKRIPSI_KEGIATAN}
+                                            {item.ID_KEGIATAN} - {item.DESKRIPSI_KEGIATAN}
                                         </option>
                                     ))}
                             </select>
