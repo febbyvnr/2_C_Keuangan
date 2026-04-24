@@ -11,9 +11,11 @@ export default function MasterCOA() {
     const [editId, setEditId] = useState(null); 
     const [coaList, setCoaList] = useState([]);
     const [search, setSearch] = useState("");
+    const [toast, setToast] = useState(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_MASTER_COA",
-        direction: "asc"
+        direction: "desc"
     });
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
@@ -94,8 +96,12 @@ export default function MasterCOA() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update COA" : "Berhasil tambah COA");
             setShowModal(false);
+            if (isEdit) {
+                showToast("update");
+            } else {
+                showToast("add");
+            }
             setIsEdit(false);
             setEditId(null);
             setForm({
@@ -104,29 +110,41 @@ export default function MasterCOA() {
             });
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(json.message || "Gagal", "error");
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus COA ini?");
-        if (!confirmDelete) return;
+    const confirmDeleteAction = async () => {
         try {
             const res = await fetch(
-                `http://localhost:8000/api/coa/delete/${id}`,
+                `http://localhost:8000/api/coa/delete/${confirmDeleteId}`,
                 { method: "DELETE" }
             );
             const json = await res.json();
             if (json.success) {
-                alert("Berhasil hapus data");
+                showToast("delete");
                 fetchData();
             } else {
-                alert(json.message || "Gagal hapus data");
+                showToast("Gagal menghapus data", "error");
             }
         } catch (err) {
             console.error(err);
-            alert("Terjadi error saat menghapus");
+            showToast("Terjadi error saat menghapus", "error");
+        } finally {
+            setConfirmDeleteId(null);
         }
+    };
+
+    const handleDelete = (item) => {
+        if (item.is_used) {
+            showToast("error", "COA sudah digunakan");
+            return;
+        }
+        if (item.has_child) {
+            showToast("error", "COA tidak boleh dihapus karena masih memiliki sub COA");
+            return;
+        }
+        setConfirmDeleteId(item.ID_MASTER_COA);
     };
 
     const closeModal = () => {
@@ -163,6 +181,20 @@ export default function MasterCOA() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [visible, setVisible] = useState(false);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
     };
 
     return (
@@ -254,20 +286,29 @@ export default function MasterCOA() {
                                     <td>{item.KODE_COA}</td>
                                     <td>{item.DESKRIPSI_COA}</td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            disabled={item.is_used}
+                                            title={
+                                                item.is_used
+                                                    ? "COA tidak bisa diedit karena sudah dipakai Program Kerja"
+                                                    : "Edit COA"
+                                            }
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
+                                            disabled={(item.is_used ?? false) || (item.has_child ?? false)}
                                             title={
                                                 item.is_used
                                                     ? "COA sudah digunakan Program Kerja"
+                                                    : item.has_child
+                                                    ? "Memiliki Child COA"
                                                     : "Hapus COA"
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_MASTER_COA)
-                                            }
+                                            onClick={() => handleDelete(item)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -363,6 +404,49 @@ export default function MasterCOA() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    COA
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3 className="toast-modal-box-h3">Konfirmasi Hapus</h3>
+                        <p style={{ fontSize: "14px", marginBottom: "16px" }}>
+                            Yakin ingin menghapus COA ini?
+                        </p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

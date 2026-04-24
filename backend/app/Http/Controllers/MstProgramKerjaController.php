@@ -424,7 +424,6 @@ class MstProgramKerjaController extends Controller
             $programKerja->update([
                 'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER']
             ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Approve berhasil',

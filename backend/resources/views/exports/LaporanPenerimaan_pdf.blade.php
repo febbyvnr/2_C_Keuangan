@@ -1,185 +1,164 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Laporan Penerimaan</title>
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            color: #000;
-            margin: 28px 36px;
+        body { 
+            font-family: sans-serif; 
+            position: relative;
         }
 
-        .header {
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+
+        th, td { 
+            border: 1px solid black; 
+            padding: 6px; 
             text-align: center;
-            margin-bottom: 8px;
         }
 
-        .header h2,
-        .header h3,
-        .header p {
-            margin: 0;
+        th { 
+            background: #f5f5f5; 
         }
 
-        .header h2 {
+        .no-border td {
+            border: none !important;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        .title-main {
             font-size: 18px;
             font-weight: bold;
         }
 
-        .header h3 {
+        .title-sub {
             font-size: 16px;
             font-weight: bold;
         }
 
-        .header p {
-            font-size: 12px;
-            margin-top: 4px;
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+            z-index: -1;
         }
 
-        .line {
-            border-top: 2px solid #000;
-            margin: 10px 0 14px 0;
+        .double-line {
+            border-top: 3px solid black;
+            border-bottom: 1px solid black;
+            margin: 8px 0 12px 0;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        table, th, td {
-            border: 1px solid #000;
-        }
-
-        th, td {
-            padding: 7px 8px;
-        }
-
-        th {
+        .ttd-center {
             text-align: center;
-            background: #f2f2f2;
-            font-weight: bold;
-            font-size: 11px;
+            margin-top: 80px;
         }
 
-        td {
-            font-size: 11px;
+        .ttd-role {
+            margin-bottom: 8px;
         }
 
-        .text-center {
-            text-align: center;
+        .ttd-nama {
+            margin-bottom: 10px;
         }
 
-        .text-right {
+        .ttd-garis {
+            margin-top: 50px;   
+        }
+
+        .ttd-nip {
+            margin-top: 10px;
+        }
+
+        .tanggal-kanan {
             text-align: right;
-        }
-
-        .col-no { width: 42px; }
-        .col-tanggal { width: 92px; }
-        .col-debit, .col-kredit, .col-saldo { width: 90px; }
-
-        .saldo-row td {
-            font-weight: bold;
-        }
-
-        .ttd-wrapper {
-            width: 100%;
-            margin-top: 45px;
-            position: relative;
-            min-height: 180px;
-        }
-
-        .ttd-box {
-            width: 280px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .ttd-box .jabatan {
-            margin-bottom: 12px;
-            font-size: 12px;
-        }
-
-        .ttd-box .nama {
-            margin-top: 0;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .ttd-box .garis {
-            margin: 55px auto 10px auto;
-            width: 200px;
-            border-top: 1px dashed #000;
-        }
-
-        .ttd-box .nip {
-            font-size: 12px;
-        }
-
-        .tanggal-cetak {
-            width: 100%;
-            text-align: right;
-            margin-top: 55px;
-            font-size: 12px;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>SMK BOPKRI 2 YOGYAKARTA</h2>
-        <h3>LAPORAN PENERIMAAN</h3>
-        <p>Periode {{ $periode }}</p>
-    </div>
 
-    <div class="line"></div>
+<img src="{{ public_path('logo.png') }}" class="watermark" width="400">
 
-    <table>
-        <thead>
-            <tr>
-                <th class="col-no">No</th>
-                <th class="col-tanggal">Tanggal</th>
-                <th>Uraian</th>
-                <th class="col-debit">Debit</th>
-                <th class="col-kredit">Kredit</th>
-                <th class="col-saldo">Saldo</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($data as $item)
-                <tr>
-                    <td class="text-center">{{ $item->no }}</td>
-                    <td class="text-center">
-                        {{ $item->tanggal ? date('d-m-Y', strtotime($item->tanggal)) : '-' }}
-                    </td>
-                    <td>{{ $item->uraian }}</td>
-                    <td class="text-right">{{ number_format((float) $item->debit, 0, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format((float) $item->kredit, 0, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format((float) $item->saldo, 0, ',', '.') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center">Tidak ada data penerimaan</td>
-                </tr>
-            @endforelse
-            <tr class="saldo-row">
-                <td colspan="5" class="text-center">SALDO AKHIR</td>
-                <td class="text-right">{{ number_format((float) $saldoAkhir, 0, ',', '.') }}</td>
-            </tr>
-        </tbody>
-    </table>
+<!-- HEADER -->
+<table class="no-border">
+    <tr class="no-border">
+        <td class="header-text">
+            <div class="title-main">SMK BOPKRI 2 YOGYAKARTA</div>
+            <div class="title-sub">LAPORAN PENERIMAAN (KM)</div>
+            <span>Periode: {{ $start ?? '-' }} s/d {{ $end ?? '-' }}</span>
+        </td>
+    </tr>
+</table>
 
-    <div class="ttd-wrapper">
-        <div class="ttd-box">
-            <div class="jabatan">Bendahara,</div>
-            <div class="nama">Rina Putri, S.E.</div>
-            <div class="garis"></div>
-            <div class="nip">NIP: 19800101</div>
-        </div>
+<div class="double-line"></div>
 
-        <div class="tanggal-cetak">
-            Yogyakarta, {{ $tanggalCetak }}
-        </div>
-    </div>
+<br>
+
+<!-- TABLE -->
+<table>
+    <thead>
+        <tr>
+            <th>Tanggal</th>
+            <th>Jenis</th>
+            <th>Uraian</th>
+            <th>Jumlah</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($data as $row)
+        <tr>
+            <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
+            <td>{{ $row->jenis }}</td>
+            <td style="text-align:left;">{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->jumlah, 0, ',', '.') }}</td>
+        </tr>
+        @endforeach
+
+        <tr>
+            <td colspan="3"><b>TOTAL</b></td>
+            <td><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+        </tr>
+    </tbody>
+</table>
+
+@php
+    \Carbon\Carbon::setLocale('id');
+
+    $role = $role ?? 'Bendahara';
+
+    if ($role === 'Kepala Sekolah') {
+        $nama = 'Drs. Budi Santoso';
+    } else {
+        $role = 'Bendahara';
+        $nama = 'Rina Putri, S.E.';
+    }
+
+    //  NIP dari controller (DB)
+    $nip = $nip ?? '-';
+@endphp
+
+<!-- ===================== -->
+<!-- TTD -->
+<!-- ===================== -->
+<div class="ttd-center">
+    <p class="ttd-role">{{ $role }},</p>
+
+    <p class="ttd-nama"><b>{{ $nama }}</b></p>
+
+    <p class="ttd-garis">-------------------------</p>
+    <p class="ttd-nip">NIP: {{ $nip }}</p>
+</div>
+
+<div class="tanggal-kanan">
+    Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+</div>
+
 </body>
 </html>
