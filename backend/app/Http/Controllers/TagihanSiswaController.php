@@ -20,6 +20,7 @@ class TagihanSiswaController extends Controller
 {
     private const ALLOWED_STATUS = [
         'Belum Bayar',
+        'Cicilan',
         'Sudah Bayar',
     ];
 
@@ -248,7 +249,7 @@ class TagihanSiswaController extends Controller
             if ($totalPembayaran >= (float) $validated['JUMLAH_TAGIHAN_SISWA'] && (float) $validated['JUMLAH_TAGIHAN_SISWA'] > 0) {
                 $statusFinal = 'Sudah Bayar';
             } elseif ($totalPembayaran > 0 && $totalPembayaran < (float) $validated['JUMLAH_TAGIHAN_SISWA']) {
-                $statusFinal = 'Belum Bayar';
+                $statusFinal = 'Cicilan';
             }
 
             $tagihan->update([

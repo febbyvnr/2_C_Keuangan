@@ -12,11 +12,10 @@ class MstProgramKerja extends Model
     protected $table = 'mst_program_kerja';
     protected $primaryKey = 'ID_PROGRAM_KERJA';
     public $timestamps = false;
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'ID_PROGRAM_KERJA',
         'ID_TA_ANGGARAN',
         'ID_UNIT',
         'ID_TAN',
@@ -42,8 +41,8 @@ class MstProgramKerja extends Model
         'ID_MASTER_COA' => 'integer',
         'ID_KEGIATAN' => 'integer',
         'NOMINAL' => 'float',
-        'WAKTU_AWAL' => 'date',
-        'WAKTU_AKHIR' => 'date',
+        'WAKTU_AWAL' => 'datetime',
+        'WAKTU_AKHIR' => 'datetime',
         'IS_DELETE' => 'boolean',
     ];
 
