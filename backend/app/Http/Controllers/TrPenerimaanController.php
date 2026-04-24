@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TrPenerimaan;
-use App\Exports\LaporanPenerimaanExport;
+use App\Exports\PenerimaanExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
@@ -136,14 +136,14 @@ class TrPenerimaanController extends Controller
         $tanggalCetak = now()->format('d F Y');
 
         if ($type === 'excel') {
-            return Excel::download(
-                new LaporanPenerimaanExport($data, $periode, $saldoAkhir, $tanggalCetak),
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\PenerimaanExport($data, $periode, $saldoAkhir, $tanggalCetak),
                 'laporan_penerimaan.xlsx'
             );
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('exports.LaporanPenerimaan_pdf', [
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.penerimaan_pdf', [
                 'data' => $data,
                 'saldoAkhir' => $saldoAkhir,
                 'periode' => $periode,
