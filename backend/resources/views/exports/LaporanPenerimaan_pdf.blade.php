@@ -156,9 +156,6 @@
     <p class="ttd-nip">NIP: {{ $nip }}</p>
 </div>
 
-<!-- ===================== -->
-<!-- TANGGAL -->
-<!-- ===================== -->
 <div class="tanggal-kanan">
     Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 </div>
