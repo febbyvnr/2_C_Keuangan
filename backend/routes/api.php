@@ -223,21 +223,23 @@ Route::prefix('jenis-tarif')->group(function () {
     Route::delete('/delete/{id}', [RefJenisTarifController::class, 'destroy']);
 });
 
+// Route::prefix('tarif')->group(function () {
+//     Route::get('/', [RefTarifController::class, 'index']);
+//     Route::get('/search', [RefTarifController::class, 'search']);
+//     Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
+//     Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
+//     Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
+//     Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
+//     Route::post('/store', [RefTarifController::class, 'store']);
+//     Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+//     Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
+// });
+
 Route::prefix('tarif')->group(function () {
     Route::get('/', [RefTarifController::class, 'index']);
-    Route::get('/search', [RefTarifController::class, 'search']);
-    Route::get('/by-jenis/{idJenis}', [RefTarifController::class, 'byJenis']);
-    Route::get('/by-tahun/{idTahun}', [RefTarifController::class, 'byTahun']);
-    Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
-    Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
     Route::post('/store', [RefTarifController::class, 'store']);
-    Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
-    Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
-
-    Route::get('/tarif', [RefTarifController::class, 'index']);
-    Route::post('/tarif/store', [RefTarifController::class, 'store']);
-    Route::put('/tarif/update/{id}', [RefTarifController::class, 'update']);
-    Route::delete('/tarif/delete/{id}', [RefTarifController::class, 'destroy']);
+    Route::put('/update/{id}', [RefTarifController::class, 'update']);
+    Route::delete('/delete/{id}', [RefTarifController::class, 'destroy']);
 });
 
 Route::prefix('evaluasi-rkt/export')->group(function () {

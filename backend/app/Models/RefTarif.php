@@ -17,6 +17,7 @@ class RefTarif extends Model
     protected $fillable = [
         'ID_JENIS_TARIF',
         'ID_TA_ANGGARAN',
+        'DESKRIPSI_TARIF',
         'NOMINAL',
         'TGL_PENETAPAN',
     ];
