@@ -31,18 +31,38 @@ function formatLongDate(value) {
 function getStatusInfo(item) {
   const validator = item?.NIP_VALIDATOR_PROGKER;
 
-  if (!validator) {
+  const trPmList = item?.trPm || item?.tr_pm || [];
+  const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
+  const note = lastNote.toLowerCase();
+
+  if (validator) {
     return {
-      value: "diajukan",
-      label: "Diajukan",
-      className: "rkt-status-badge submitted",
+      value: "disetujui",
+      label: "Disetujui",
+      className: "rkt-status-badge approved",
+    };
+  }
+
+  if (note.startsWith("ditolak")) {
+    return {
+      value: "ditolak",
+      label: "Ditolak",
+      className: "rkt-status-badge rejected",
+    };
+  }
+
+  if (note.startsWith("revisi")) {
+    return {
+      value: "revisi",
+      label: "Revisi",
+      className: "rkt-status-badge revision",
     };
   }
 
   return {
-    value: "disetujui",
-    label: "Disetujui",
-    className: "rkt-status-badge approved",
+    value: "diajukan",
+    label: "Diajukan",
+    className: "rkt-status-badge submitted",
   };
 }
 
@@ -143,6 +163,23 @@ export default function RKT() {
       setLoading(false);
     }
   };
+
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const nipLogin = String(user.NIP_KARYAWAN || "");
+
+  const isOwner = selectedItem
+    ? String(selectedItem.NIP_PENANGGUNG_JAWAB || "") === nipLogin
+    : false;
+
+  const selectedStatusValue = selectedStatus.value;
+
+  const canEdit =
+    isOwner &&
+    (selectedStatusValue === "diajukan" || selectedStatusValue === "revisi");
+
+  const canDelete =
+    isOwner && selectedStatusValue === "diajukan";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -250,6 +287,8 @@ export default function RKT() {
                   <option value="">Semua Status</option>
                   <option value="diajukan">Diajukan</option>
                   <option value="disetujui">Disetujui</option>
+                  <option value="ditolak">Ditolak</option>
+                  <option value="revisi">Revisi</option>
                 </select>
               </div>
 
@@ -284,46 +323,47 @@ export default function RKT() {
                       </thead>
                       <tbody>
                         {filteredData.length > 0 ? (
-                          filteredData.map((item, index) => (
-                            <tr
-                              key={item.ID_PROGRAM_KERJA}
-                              className={
-                                selectedId === item.ID_PROGRAM_KERJA
-                                  ? "rkt-row-active"
-                                  : ""
-                              }
-                              onClick={() =>
-                                setSelectedId(item.ID_PROGRAM_KERJA)
-                              }
-                            >
-                              <td>
-                                {(pagination.currentPage - 1) *
-                                  pagination.perPage +
-                                  index +
-                                  1}
-                              </td>
-                              <td className="rkt-program">
-                                {item.PROGRAM_KERJA || "-"}
-                              </td>
-                              <td>{item.INDIKATOR || "-"}</td>
-                              <td>
-                                <div>{formatDate(item.WAKTU_AWAL)}</div>
-                                <div className="rkt-date-sub">
-                                  s.d {formatDate(item.WAKTU_AKHIR)}
-                                </div>
-                              </td>
-                              <td className="rkt-amount">
-                                {formatRupiah(item.NOMINAL)}
-                              </td>
-                              <td>
-                                <span
-                                  className={getStatusInfo(item).className}
-                                >
-                                  {getStatusInfo(item).label}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
+                          filteredData.map((item, index) => {
+
+                            return (
+                              <tr
+                                key={item.ID_PROGRAM_KERJA}
+                                className={
+                                  selectedId === item.ID_PROGRAM_KERJA
+                                    ? "rkt-row-active"
+                                    : ""
+                                }
+                                onClick={() => setSelectedId(item.ID_PROGRAM_KERJA)}
+                              >
+                                <td>
+                                  {(pagination.currentPage - 1) * pagination.perPage + index + 1}
+                                </td>
+
+                                <td className="rkt-program">
+                                  {item.PROGRAM_KERJA || "-"}
+                                </td>
+
+                                <td>{item.INDIKATOR || "-"}</td>
+
+                                <td>
+                                  <div>{formatDate(item.WAKTU_AWAL)}</div>
+                                  <div className="rkt-date-sub">
+                                    s.d {formatDate(item.WAKTU_AKHIR)}
+                                  </div>
+                                </td>
+
+                                <td className="rkt-amount">
+                                  {formatRupiah(item.NOMINAL)}
+                                </td>
+
+                                <td>
+                                  <span className={getStatusInfo(item).className}>
+                                    {getStatusInfo(item).label}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
                         ) : (
                           <tr>
                             <td colSpan="6" className="rkt-empty">
@@ -451,6 +491,15 @@ export default function RKT() {
                       </div>
 
                       <div className="rkt-detail-item">
+                        <span className="rkt-detail-label">Pemberi Catatan</span>
+                        <span className="rkt-detail-value">
+                          {selectedItem.tr_pm?.[selectedItem.tr_pm.length - 1]?.NIP_VALIDATOR_PM ||
+                            selectedItem.trPm?.[selectedItem.trPm.length - 1]?.NIP_VALIDATOR_PM ||
+                            "-"}
+                        </span>
+                      </div>
+
+                      <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Penanggung Jawab</span>
                         <span className="rkt-detail-value">
                           {getDisplayValue(
@@ -489,7 +538,9 @@ export default function RKT() {
                     <div className="rkt-note-box">
                       <div className="rkt-note-title">Catatan Revisi / Review</div>
                       <div className="rkt-note-content">
-                        {selectedItem.CATATAN_REVISI ||
+                        {selectedItem.tr_pm?.[selectedItem.tr_pm.length - 1]?.DESKRIPSI_TR_PM ||
+                          selectedItem.trPm?.[selectedItem.trPm.length - 1]?.DESKRIPSI_TR_PM ||
+                          selectedItem.CATATAN_REVISI ||
                           selectedItem.catatan_revisi ||
                           "Belum ada catatan revisi."}
                       </div>
@@ -497,14 +548,21 @@ export default function RKT() {
                   </div>
 
                   <div className="rkt-detail-actions">
-                    {!selectedItem.NIP_VALIDATOR_PROGKER && (
+                    {selectedStatusValue === "disetujui" ? (
+                      <button className="btn-light-custom rkt-detail-btn" disabled>
+                        Sudah Disetujui
+                      </button>
+                    ) : selectedStatusValue === "ditolak" ? (
+                      <button className="btn-light-custom rkt-detail-btn" disabled>
+                        Ditolak
+                      </button>
+                    ) : (
                       <>
                         <button
                           className="btn-yellow-sm rkt-detail-btn"
+                          disabled={!canEdit}
                           onClick={() =>
-                            navigate(
-                              `/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`
-                            )
+                            navigate(`/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`)
                           }
                         >
                           Edit
@@ -512,9 +570,8 @@ export default function RKT() {
 
                         <button
                           className="btn-red-sm rkt-detail-btn"
-                          onClick={() =>
-                            handleDelete(selectedItem.ID_PROGRAM_KERJA)
-                          }
+                          disabled={!canDelete}
+                          onClick={() => handleDelete(selectedItem.ID_PROGRAM_KERJA)}
                         >
                           Hapus
                         </button>
@@ -523,11 +580,6 @@ export default function RKT() {
                           Menunggu Approval
                         </button>
                       </>
-                    )}
-                    {selectedItem.NIP_VALIDATOR_PROGKER && (
-                      <button className="btn-light-custom rkt-detail-btn" disabled>
-                        Sudah Disetujui
-                      </button>
                     )}
                   </div>
                 </>

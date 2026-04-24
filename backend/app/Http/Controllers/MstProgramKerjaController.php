@@ -23,6 +23,7 @@ class MstProgramKerjaController extends Controller
                 'tan',
                 'coa',
                 'kegiatan',
+                'trPm',
             ])->active();
 
             if ($request->filled('ID_TA_ANGGARAN')) {
@@ -399,6 +400,26 @@ class MstProgramKerjaController extends Controller
 
         try {
             $programKerja = MstProgramKerja::active()->findOrFail($id);
+
+            if ($programKerja->NIP_VALIDATOR_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Program kerja sudah disetujui, tidak bisa di-approve lagi.',
+                ], 422);
+            }
+
+            $lastPm = \App\Models\TrPm::where('ID_PROGRAM_KERJA', $id)
+                ->orderByDesc('ID_PM')
+                ->first();
+
+            $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+
+            if (str_starts_with($lastNote, 'ditolak')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Program kerja sudah ditolak, tidak bisa di-approve.',
+                ], 422);
+            }
 
             $programKerja->update([
                 'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER']

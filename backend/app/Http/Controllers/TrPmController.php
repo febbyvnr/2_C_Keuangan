@@ -98,9 +98,32 @@ class TrPmController extends Controller
                 'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
                 'TGL_PM' => 'required|date',
                 'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
+                'NIP_VALIDATOR_PM' => 'nullable|string|max:20',
                 'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
                 'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
             ]);
+            $programKerja = \App\Models\MstProgramKerja::find($validated['ID_PROGRAM_KERJA']);
+
+            if ($programKerja && $programKerja->NIP_VALIDATOR_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Program kerja sudah disetujui, tidak bisa diberi revisi atau ditolak.',
+                ], 422);
+            }
+
+            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $validated['ID_PROGRAM_KERJA'])
+                ->orderByDesc('ID_PM')
+                ->first();
+
+            $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+
+            if (str_starts_with($lastNote, 'ditolak')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Program kerja sudah ditolak, tidak bisa diproses lagi.',
+                ], 422);
+            }
+
 
             $data = TrPm::create($validated);
 
