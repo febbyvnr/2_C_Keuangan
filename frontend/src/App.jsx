@@ -46,6 +46,7 @@ import MonitoringYayasan from "./pages/yayasan/Monitoring.jsx";
 import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
 import RKT from "./pages/pic/guru/RKT.jsx";
+import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 
 import "./index.css";
 
@@ -128,6 +129,7 @@ export default function App() {
                 <Route path="/pic/guru" element={<PicGuruFPD />} />
                 <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
                 <Route path="/pic/guru/rkt" element={<RKT />} />
+                <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
 
                 {/* WAKA */}
                 {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
