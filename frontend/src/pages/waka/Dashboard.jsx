@@ -19,6 +19,9 @@ export default function Dashboard() {
   const [rka, setRka] = useState([]);
   const [fpd, setFpd] = useState([]);
 
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState("all");
+
   useEffect(() => {
     fetch("http://localhost:8000/api/rkt")
       .then((res) => res.json())
@@ -33,27 +36,65 @@ export default function Dashboard() {
       .then((data) => setFpd(data.data || []));
   }, []);
 
-  // helper fleksibel
+  // FILTER
+  const filteredFpd = fpd.filter((d) => {
+    if (!d.TGL_FPD) return true;
+
+    const date = new Date(d.TGL_FPD);
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    return (
+      (selectedYear === "all" || year === Number(selectedYear)) &&
+      (selectedMonth === "all" || month === Number(selectedMonth))
+    );
+  });
+
+  // SORT
+  const sortedFpd = [...filteredFpd].sort(
+    (a, b) => new Date(a.TGL_FPD) - new Date(b.TGL_FPD),
+  );
+
+  // HELPER
   const getNominal = (d) => d.NOMINAL_FPD || d.nominal_fpd || d.nominal || 0;
   const getSisa = (d) => d.NOMINAL_SISA || d.nominal_sisa || d.sisa || 0;
+
+  const monthName = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString("id-ID", { month: "short" });
+  };
 
   // KPI
   const totalRKT = rkt.length;
   const totalRKA = rka.length;
 
-  const totalTerpakai = fpd.reduce((sum, d) => sum + getNominal(d), 0);
-  const totalSisa = fpd.reduce((sum, d) => sum + getSisa(d), 0);
+  const totalTerpakai = sortedFpd.reduce((sum, d) => sum + getNominal(d), 0);
+  const totalSisa = sortedFpd.reduce((sum, d) => sum + getSisa(d), 0);
 
   const formatJt = (value) =>
     value >= 1000000 ? `${(value / 1000000).toFixed(1)} jt` : value;
 
-  // trend
-  const trendData = fpd.map((d) => ({
-    bulan: d.BULAN || d.bulan || "Data",
-    nominal: getNominal(d),
+  // 🔥 FIX UTAMA: GROUP PER BULAN
+  const grouped = {};
+
+  sortedFpd.forEach((d) => {
+    if (!d.TGL_FPD) return;
+
+    const bulan = monthName(d.TGL_FPD);
+
+    if (!grouped[bulan]) {
+      grouped[bulan] = 0;
+    }
+
+    grouped[bulan] += getNominal(d);
+  });
+
+  const trendData = Object.keys(grouped).map((bulan) => ({
+    bulan,
+    nominal: grouped[bulan],
   }));
 
-  // bar
+  // BAR
   const barData = [
     {
       name: "Keuangan",
@@ -67,7 +108,39 @@ export default function Dashboard() {
       <SidebarWaka />
 
       <main className="waka-container">
-        <h2 className="waka-title">Dashboard Waka</h2>
+        <div className="header-bar">
+          <h2 className="waka-title">Dashboard Waka</h2>
+
+          <div className="filter-bar">
+            <div className="filter-item">
+              <span>Tahun</span>
+              <select onChange={(e) => setSelectedYear(e.target.value)}>
+                <option value="all">Tahun</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
+
+            <div className="filter-item">
+              <span>Bulan</span>
+              <select onChange={(e) => setSelectedMonth(e.target.value)}>
+                <option value="all">Bulan</option>
+                <option value="1">Jan</option>
+                <option value="2">Feb</option>
+                <option value="3">Mar</option>
+                <option value="4">Apr</option>
+                <option value="5">Mei</option>
+                <option value="6">Jun</option>
+                <option value="7">Jul</option>
+                <option value="8">Agu</option>
+                <option value="9">Sep</option>
+                <option value="10">Okt</option>
+                <option value="11">Nov</option>
+                <option value="12">Des</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* KPI */}
         <div className="waka-grid">
@@ -94,42 +167,37 @@ export default function Dashboard() {
 
         {/* MAIN */}
         <div className="main-grid">
-          {/* LEFT - CHART */}
+          {/* LEFT */}
           <div className="chart-section">
-            {/* LINE */}
             <div className="chart-card">
               <h4>Trend Penggunaan Dana</h4>
 
               <div className="chart-inner">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
-                    <XAxis dataKey="bulan" tick={{ fontSize: 10 }} />
-
-                    <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
-
-                    <Tooltip
-                      contentStyle={{
-                        fontSize: "11px",
-                        borderRadius: "8px",
-                      }}
-                    />
-
-                    <Line
-                      type="monotone" // 🔥 smooth
-                      dataKey="nominal"
-                      stroke="#1e3a8a"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {trendData.length === 0 ? (
+                  <p className="no-data">Tidak ada data</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trendData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="bulan" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
+                      <Tooltip
+                        formatter={(value) => `Rp ${value.toLocaleString()}`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="nominal"
+                        stroke="#1e3a8a"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
-            {/* BAR */}
             <div className="chart-card">
               <h4>Anggaran vs Realisasi</h4>
 
@@ -137,18 +205,11 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-
                     <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
-
                     <Tooltip
-                      contentStyle={{
-                        fontSize: "11px",
-                        borderRadius: "8px",
-                      }}
+                      formatter={(value) => `Rp ${value.toLocaleString()}`}
                     />
-
                     <Legend wrapperStyle={{ fontSize: "11px" }} />
 
                     <Bar
@@ -170,7 +231,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT - TABLE */}
+          {/* RIGHT */}
           <div className="table-section">
             <h3>Program Kerja (RKT)</h3>
 
