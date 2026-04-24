@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/SidebarPic.css";
 import "../../../styles/pic/guru/RKT.css";
-
+import { Plus, Download } from "lucide-react";
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -212,12 +212,15 @@ export default function RKT() {
 
             <div className="rkt-header-actions">
               <button className="btn-warning-custom" onClick={handleExport}>
+                <Download size={16} />
                 Export Excel
               </button>
+
               <button
                 className="btn-primary-custom"
                 onClick={() => navigate("/pic/guru/rkt/create")}
               >
+                <Plus size={16} />
                 Tambah RKT
               </button>
             </div>
@@ -306,7 +309,7 @@ export default function RKT() {
                               <td>
                                 <div>{formatDate(item.WAKTU_AWAL)}</div>
                                 <div className="rkt-date-sub">
-                                  s/d {formatDate(item.WAKTU_AKHIR)}
+                                  s.d {formatDate(item.WAKTU_AKHIR)}
                                 </div>
                               </td>
                               <td className="rkt-amount">
@@ -531,7 +534,7 @@ export default function RKT() {
               ) : (
                 <div className="rkt-detail-empty">
                   <div className="rkt-detail-empty-icon">📋</div>
-                  <p>Klik baris pada tabel untuk melihat detail program kerja..</p>
+                  <p>Klik baris pada tabel untuk melihat detail program kerja.</p>
                 </div>
               )}
             </aside>
