@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/CreateRKT.css";
 
@@ -28,6 +28,17 @@ const extractCollection = (payload) => {
   return [];
 };
 
+const extractObject = (payload) => {
+  if (payload?.data?.data) return payload.data.data;
+  if (payload?.data) return payload.data;
+  return payload;
+};
+
+const normalizeDate = (value) => {
+  if (!value) return "";
+  return String(value).slice(0, 10);
+};
+
 const normalizeUnitLabel = (item) =>
   item?.NAMA_UNIT ??
   item?.DESKRIPSI_UNIT ??
@@ -39,6 +50,7 @@ const normalizeUnitLabel = (item) =>
 const normalizeTahunAnggaranLabel = (item) =>
   item?.DESKRIPSI_TAHUN_ANGGARAN ??
   item?.label ??
+  item?.TAHUN_ANGGARAN ??
   `TA ${item?.ID_TA_ANGGARAN ?? ""}`.trim();
 
 const normalizeTanLabel = (item) =>
@@ -88,6 +100,9 @@ async function fetchJson(url, options = {}) {
 
 export default function CreateRKT() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const isEditMode = Boolean(id);
 
   const [unitOptions, setUnitOptions] = useState([]);
   const [tahunAnggaranOptions, setTahunAnggaranOptions] = useState([]);
@@ -100,6 +115,7 @@ export default function CreateRKT() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [catatanReview, setCatatanReview] = useState("");
 
   const waktuAwalRef = useRef(null);
   const waktuAkhirRef = useRef(null);
@@ -109,37 +125,83 @@ export default function CreateRKT() {
   const penanggungJawabLabel = [
     userLogin.NIP_KARYAWAN,
     userLogin.NAMA_KARYAWAN || userLogin.nama_karyawan || userLogin.name,
-    ]
+  ]
     .filter(Boolean)
     .join(" - ");
-    
+
   const loadMasterData = async () => {
+    const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
+      await Promise.all([
+        fetchJson(`${API_BASE_URL}/unit`),
+        fetchJson(`${API_BASE_URL}/tahun-anggaran`),
+        fetchJson(`${API_BASE_URL}/ref-tan`),
+        fetchJson(`${API_BASE_URL}/coa`),
+        fetchJson(`${API_BASE_URL}/kegiatan`),
+      ]);
+
+    const nextUnits = extractCollection(unitJson);
+    const nextTa = extractCollection(taJson);
+    const nextTan = extractCollection(tanJson);
+    const nextCoa = extractCollection(coaJson);
+    const nextKegiatan = normalizeKegiatanItems(extractCollection(kegiatanJson));
+
+    setUnitOptions(nextUnits);
+    setTahunAnggaranOptions(nextTa);
+    setTanOptions(nextTan);
+    setCoaOptions(nextCoa);
+    setKegiatanOptions(nextKegiatan);
+
+    return {
+      nextUnits,
+      nextTa,
+      nextTan,
+      nextCoa,
+      nextKegiatan,
+    };
+  };
+
+  const loadRktDetail = async () => {
+    const json = await fetchJson(`${API_BASE_URL}/rkt/${id}`);
+    const data = extractObject(json);
+
+    const trPmList = data?.trPm || data?.tr_pm || [];
+    const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
+
+    setCatatanReview(
+      lastNote ||
+        data?.CATATAN_REVISI ||
+        data?.catatan_revisi ||
+        ""
+    );
+
+    setForm({
+      ID_TA_ANGGARAN: String(data?.ID_TA_ANGGARAN ?? ""),
+      ID_UNIT: String(data?.ID_UNIT ?? ""),
+      ID_TAN: data?.ID_TAN ? String(data.ID_TAN) : "",
+      ID_MASTER_COA: String(data?.ID_MASTER_COA ?? ""),
+      ID_KEGIATAN: String(data?.ID_KEGIATAN ?? ""),
+      NOMINAL: String(data?.NOMINAL ?? ""),
+      INDIKATOR: data?.INDIKATOR ?? "",
+      SASARAN: data?.SASARAN ?? "",
+      WAKTU_AWAL: normalizeDate(data?.WAKTU_AWAL),
+      WAKTU_AKHIR: normalizeDate(data?.WAKTU_AKHIR),
+      KELUARAN_PROGKER: data?.KELUARAN_PROGKER ?? "",
+      PROGRAM_KERJA: data?.PROGRAM_KERJA ?? "",
+    });
+  };
+
+  const initializePage = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
-        await Promise.all([
-          fetchJson(`${API_BASE_URL}/unit`),
-          fetchJson(`${API_BASE_URL}/tahun-anggaran`),
-          fetchJson(`${API_BASE_URL}/ref-tan`),
-          fetchJson(`${API_BASE_URL}/coa`),
-          fetchJson(`${API_BASE_URL}/kegiatan`),
-        ]);
+      const { nextUnits, nextTa, nextTan, nextCoa, nextKegiatan } =
+        await loadMasterData();
 
-      const nextUnits = extractCollection(unitJson);
-      const nextTa = extractCollection(taJson);
-      const nextTan = extractCollection(tanJson);
-      const nextCoa = extractCollection(coaJson);
-      const nextKegiatan = normalizeKegiatanItems(
-        extractCollection(kegiatanJson)
-      );
-
-      setUnitOptions(nextUnits);
-      setTahunAnggaranOptions(nextTa);
-      setTanOptions(nextTan);
-      setCoaOptions(nextCoa);
-      setKegiatanOptions(nextKegiatan);
+      if (isEditMode) {
+        await loadRktDetail();
+        return;
+      }
 
       setForm((current) => ({
         ...current,
@@ -171,12 +233,17 @@ export default function CreateRKT() {
   };
 
   useEffect(() => {
-    loadMasterData();
-  }, []);
+    initializePage();
+  }, [id]);
 
   const resetForm = () => {
     setMessage("");
     setError("");
+
+    if (isEditMode) {
+      loadRktDetail();
+      return;
+    }
 
     setForm((current) => ({
       ...createEmptyForm(),
@@ -232,13 +299,19 @@ export default function CreateRKT() {
     };
 
     try {
-      await fetchJson(`${API_BASE_URL}/rkt/store`, {
-        method: "POST",
+      const url = isEditMode
+        ? `${API_BASE_URL}/rkt/update/${id}`
+        : `${API_BASE_URL}/rkt/store`;
+
+      const method = isEditMode ? "PUT" : "POST";
+
+      await fetchJson(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      setMessage("RKT berhasil diajukan.");
+      setMessage(isEditMode ? "RKT berhasil diperbarui." : "RKT berhasil diajukan.");
       navigate("/pic/guru/rkt");
     } catch (err) {
       setError(err.message);
@@ -255,8 +328,12 @@ export default function CreateRKT() {
         <section className="create-rkt-card">
           <div className="create-rkt-card-head">
             <div>
-              <h2>Tambah RKT</h2>
-              <p>Setelah diajukan, RKT akan direview oleh Waka.</p>
+              <h2>{isEditMode ? "Edit RKT" : "Tambah RKT"}</h2>
+              <p>
+                {isEditMode
+                  ? "Perbarui data RKT sesuai catatan review."
+                  : "Setelah diajukan, RKT akan direview oleh Waka."}
+              </p>
             </div>
 
             <div className="create-rkt-actions-top">
@@ -271,12 +348,18 @@ export default function CreateRKT() {
               <button
                 type="button"
                 className="create-rkt-button secondary"
-                onClick={loadMasterData}
+                onClick={initializePage}
               >
                 Refresh
               </button>
             </div>
           </div>
+
+          {isEditMode && catatanReview ? (
+            <div className="create-rkt-feedback error">
+              <strong>Catatan Review:</strong> {catatanReview}
+            </div>
+          ) : null}
 
           {message ? (
             <div className="create-rkt-feedback success">{message}</div>
@@ -408,11 +491,7 @@ export default function CreateRKT() {
 
                 <label className="create-rkt-field create-rkt-field-pj">
                   <span>Penanggung Jawab</span>
-                  <input
-                    type="text"
-                    value={penanggungJawabLabel}
-                    readOnly
-                  />
+                  <input type="text" value={penanggungJawabLabel} readOnly />
                 </label>
 
                 <label className="create-rkt-field">
@@ -507,7 +586,13 @@ export default function CreateRKT() {
                   className="create-rkt-button primary"
                   disabled={submitting}
                 >
-                  {submitting ? "Mengajukan..." : "Ajukan RKT"}
+                  {submitting
+                    ? isEditMode
+                      ? "Menyimpan..."
+                      : "Mengajukan..."
+                    : isEditMode
+                    ? "Simpan Perbaikan"
+                    : "Ajukan RKT"}
                 </button>
               </div>
             </form>

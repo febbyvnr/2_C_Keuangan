@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MstProgramKerja;
 use App\Models\FpdAnggaran;
+use App\Models\TrPm;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -308,17 +309,46 @@ class MstProgramKerjaController extends Controller
 
         try {
             $data = DB::transaction(function () use ($validated, $id) {
-                $programKerja = MstProgramKerja::active()->findOrFail($id);
+                $programKerja = MstProgramKerja::with(['trPm'])
+                    ->active()
+                    ->findOrFail($id);
 
-                if ($this->isProgramKerjaUsed($id)) {
+                $lastPm = $programKerja->trPm
+                    ->sortByDesc('ID_PM')
+                    ->first();
+
+                $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+
+                if ($programKerja->NIP_VALIDATOR_PROGKER) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Data sudah digunakan, tidak bisa diubah'
+                        'message' => 'Program kerja sudah disetujui, tidak bisa diubah.'
+                    ], 422);
+                }
+
+                if (str_starts_with($lastNote, 'ditolak')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Program kerja sudah ditolak, tidak bisa diubah.'
+                    ], 422);
+                }
+
+
+                if ($this->isProgramKerjaUsedForUpdate($id)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data sudah digunakan, tidak bisa diubah.'
                     ], 422);
                 }
 
                 $programKerja->update($validated);
 
+                TrPm::create([
+                    'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
+                    'NIP_VALIDATOR_PM' => null,
+                    'DESKRIPSI_TR_PM' => 'Diajukan: Perbaikan RKT telah dikirim ulang',
+                ]);
+                
                 return $programKerja->fresh([
                     'tahunAnggaran',
                     'unit',
@@ -482,5 +512,20 @@ class MstProgramKerjaController extends Controller
         return $data->detail_program_kerja_count > 0
             || $data->tr_pm_count > 0
             || $hasFpd;
+    }
+
+    private function isProgramKerjaUsedForUpdate(int $id): bool
+    {
+        $data = MstProgramKerja::withCount([
+            'detailProgramKerja',
+        ])->find($id);
+
+        if (!$data) {
+            return false;
+        }
+
+        $hasFpd = FpdAnggaran::where('ID_PROGRAM_KERJA', $id)->exists();
+
+        return $data->detail_program_kerja_count > 0 || $hasFpd;
     }
 }
