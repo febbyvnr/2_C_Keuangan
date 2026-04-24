@@ -12,7 +12,7 @@ export default function MasterTahunAnggaran() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_TA_ANGGARAN", 
-        direction: "asc" 
+        direction: "desc" 
     });
 
     const [form, setForm] = useState({
@@ -108,30 +108,25 @@ export default function MasterTahunAnggaran() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 ...form,
-                IS_CURRENT: form.IS_CURRENT === 1
+                IS_CURRENT: form.IS_CURRENT
             })
         });
+        const json = await res.json();
         if (res.ok) {
-            alert(isEdit ? "Berhasil update Tahun Anggaran" : "Berhasil tambah Tahun Anggaran");
             closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
+        } else {
+            showToast(
+                "error",
+                json.message || 
+                (json.errors ? Object.values(json.errors).flat().join(", ") : "Gagal")
+            );
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm("Yakin mau hapus tahun-anggaran ini?")) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/tahun-anggaran/delete/${id}`,
-                { method: "DELETE" }
-            );
-            if (res.ok) {
-                alert("Berhasil hapus data");
-                fetchData();
-            }
-        } catch (err) {
-            console.error(err);
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -142,6 +137,45 @@ export default function MasterTahunAnggaran() {
             DESKRIPSI_TAHUN_ANGGARAN: "",
             IS_CURRENT: 0
         });
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/tahun-anggaran/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (res.ok) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast(
+                    "error",
+                    json.message || "Gagal menghapus data"
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -208,13 +242,29 @@ export default function MasterTahunAnggaran() {
                                         </span>
                                     </td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            disabled={item.is_used}
+                                            title={
+                                                item.is_used
+                                                    ? "Tidak bisa diedit karena sudah dipakai Program Kerja"
+                                                    : ""
+                                            }
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
                                             disabled={item.is_used}
-                                            onClick={() => handleDelete(item.ID_TA_ANGGARAN)}
+                                            title={
+                                                item.is_used
+                                                    ? "Tidak bisa dihapus karena sudah dipakai Program Kerja"
+                                                    : item.IS_CURRENT == 1
+                                                    ? "Tidak bisa dihapus karena sedang aktif"
+                                                    : ""
+                                            }
+                                            onClick={() => setConfirmDeleteId(item.ID_TA_ANGGARAN)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -293,6 +343,47 @@ export default function MasterTahunAnggaran() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Tahun Anggaran
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Tahun Anggaran?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -23,9 +23,15 @@ class MstKegiatanController extends Controller
 
             $query = MstKegiatan::query()
                 ->with(['children'])
+                ->withCount([
+                    'children as has_child' => function ($q) {
+                        $q->where('IS_DELETE', 0);
+                    },
+                    'programKerja as is_used'
+                ])
                 ->where('IS_DELETE', 0)
-                ->whereNull('MST_ID_KEGIATAN')
-                ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+                // ->whereNull('MST_ID_KEGIATAN') //kl null ga ditampilin, child ga ketampil
+                ->orderBy('ID_KEGIATAN', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -332,7 +338,7 @@ class MstKegiatanController extends Controller
             $data = MstKegiatan::query()
                 ->where('IS_DELETE', 0)
                 ->whereNull('MST_ID_KEGIATAN')
-                ->orderBy('DESKRIPSI_KEGIATAN', 'asc')
+                ->orderBy('ID_KEGIATAN', 'desc')
                 ->get();
 
             return response()->json([

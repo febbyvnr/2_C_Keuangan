@@ -464,23 +464,19 @@ class MstProgramKerjaController extends Controller
     {
         try {
             $programKerja = MstProgramKerja::find($id);
-
             if (!$programKerja) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Data tidak ditemukan'
                 ], 404);
             }
-
             $request->validate([
                 'NIP_VALIDATOR_PROGKER' => 'required|string|max:20'
             ]);
-
             $programKerja->update([
-                'STATUS_APPROVAL' => 'APPROVED',
+                'STATUS_APPROVAL' => 'Disetujui',
                 'NIP_VALIDATOR_PROGKER' => $request->NIP_VALIDATOR_PROGKER
             ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Program kerja berhasil disetujui',
@@ -493,5 +489,24 @@ class MstProgramKerjaController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function reject(Request $request, int $id)
+    {
+        $programKerja = MstProgramKerja::find($id);
+        if (!$programKerja) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+        $programKerja->update([
+            'STATUS_APPROVAL' => 'Ditolak'
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Program kerja ditolak',
+            'data' => $programKerja
+        ]);
     }
 }

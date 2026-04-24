@@ -24,12 +24,12 @@ class MstCoaController extends Controller
             $query = MstCoa::query()
                 ->with([
                     'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'desc');
+                        $q->active()->orderBy('ID_MASTER_COA', 'desc');
                     }
                 ])
                 ->active()
                 // ->whereNull('MST_ID_MASTER_COA')
-                ->orderBy('KODE_COA', 'desc');
+                ->orderBy('ID_MASTER_COA', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -45,6 +45,7 @@ class MstCoaController extends Controller
                     'KODE_COA' => $item->KODE_COA,
                     'DESKRIPSI_COA' => $item->DESKRIPSI_COA,
                     'is_used' => $this->isCoaUsed($item),
+                    'has_child' => $item->children()->active()->exists(),
                 ];
             });
 
@@ -71,7 +72,7 @@ class MstCoaController extends Controller
                 ->with([
                     'parent',
                     'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'desc');
+                        $q->active()->orderBy('ID_MASTER_COA', 'desc');
                     },
                     'programKerja',
                 ])
@@ -310,7 +311,7 @@ class MstCoaController extends Controller
         try {
             $data = MstCoa::query()
                 ->active()
-                ->orderBy('KODE_COA', 'asc')
+                ->orderBy('ID_MASTER_COA', 'desc')
                 ->get([
                     'ID_MASTER_COA',
                     'KODE_COA',
@@ -345,7 +346,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'desc');
+            ->orderBy('ID_MASTER_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -409,7 +410,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'desc');
+            ->orderBy('ID_MASTER_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
