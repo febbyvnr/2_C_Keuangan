@@ -182,7 +182,7 @@ class LaporanPenerimaanExport implements WithEvents
                 $sheet->setCellValue("B" . ($footerRow+1), $role . ',');
                 $sheet->setCellValue("B" . ($footerRow+3), $nama);
                 $sheet->setCellValue("B" . ($footerRow+7), '-------------------------');
-                $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
+             $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
 
                 $sheet->getStyle("B" . ($footerRow+1) . ":D" . ($footerRow+8))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
