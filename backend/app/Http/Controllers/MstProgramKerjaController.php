@@ -348,7 +348,7 @@ class MstProgramKerjaController extends Controller
                     'NIP_VALIDATOR_PM' => null,
                     'DESKRIPSI_TR_PM' => 'Diajukan: Perbaikan RKT telah dikirim ulang',
                 ]);
-                
+
                 return $programKerja->fresh([
                     'tahunAnggaran',
                     'unit',
@@ -385,38 +385,68 @@ class MstProgramKerjaController extends Controller
     }
 
     public function destroy(int $id): JsonResponse
-    {
-        try {
-            if ($this->isProgramKerjaUsed($id)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data sudah digunakan, tidak bisa dihapus'
-                ], 422);
-            }
+{
+    try {
+        $data = MstProgramKerja::with(['trPm'])
+            ->active()
+            ->findOrFail($id);
 
-            $data = MstProgramKerja::active()->findOrFail($id);
-            $data->update([
-                'IS_DELETE' => 1
-            ]);
+        $lastPm = $data->trPm
+            ->sortByDesc('ID_PM')
+            ->first();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Berhasil hapus'
-            ], 200);
+        $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        if ($data->NIP_VALIDATOR_PROGKER) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ], 404);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal hapus',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Program kerja sudah disetujui, tidak bisa dihapus.'
+            ], 422);
         }
+
+        if (str_starts_with($lastNote, 'ditolak')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Program kerja sudah ditolak, tidak bisa dihapus.'
+            ], 422);
+        }
+
+        if (str_starts_with($lastNote, 'revisi')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Program kerja masih revisi, tidak bisa dihapus.'
+            ], 422);
+        }
+
+        if ($this->isProgramKerjaUsedForDelete($id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data sudah digunakan, tidak bisa dihapus.'
+            ], 422);
+        }
+
+        $data->update([
+            'IS_DELETE' => 1
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil hapus'
+        ], 200);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ], 404);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal hapus',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function approve(Request $request, int $id): JsonResponse
     {
@@ -515,6 +545,21 @@ class MstProgramKerjaController extends Controller
     }
 
     private function isProgramKerjaUsedForUpdate(int $id): bool
+    {
+        $data = MstProgramKerja::withCount([
+            'detailProgramKerja',
+        ])->find($id);
+
+        if (!$data) {
+            return false;
+        }
+
+        $hasFpd = FpdAnggaran::where('ID_PROGRAM_KERJA', $id)->exists();
+
+        return $data->detail_program_kerja_count > 0 || $hasFpd;
+    }
+
+    private function isProgramKerjaUsedForDelete(int $id): bool
     {
         $data = MstProgramKerja::withCount([
             'detailProgramKerja',
