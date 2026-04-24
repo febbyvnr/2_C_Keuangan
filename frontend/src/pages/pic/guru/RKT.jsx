@@ -202,12 +202,6 @@ export default function RKT() {
             </div>
 
             <div className="rkt-header-actions">
-              <button
-                className="btn-light-custom"
-                onClick={() => fetchRkt(search, pagination.currentPage)}
-              >
-                Sinkronkan Data
-              </button>
               <button className="btn-warning-custom" onClick={handleExport}>
                 Export Excel
               </button>
