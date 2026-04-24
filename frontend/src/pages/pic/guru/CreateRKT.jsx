@@ -203,28 +203,8 @@ export default function CreateRKT() {
         return;
       }
 
-      setForm((current) => ({
-        ...current,
-        ID_TA_ANGGARAN:
-          current.ID_TA_ANGGARAN ||
-          String(
-            nextTa.find((item) => item.IS_CURRENT)?.ID_TA_ANGGARAN ??
-              nextTa[0]?.ID_TA_ANGGARAN ??
-              ""
-          ),
-        ID_TAN:
-          current.ID_TAN ||
-          String(
-            nextTan.find((item) => item.IS_CURRENT)?.ID_TAN ??
-              nextTan[0]?.ID_TAN ??
-              ""
-          ),
-        ID_UNIT: current.ID_UNIT || String(nextUnits[0]?.ID_UNIT ?? ""),
-        ID_MASTER_COA:
-          current.ID_MASTER_COA || String(nextCoa[0]?.ID_MASTER_COA ?? ""),
-        ID_KEGIATAN:
-          current.ID_KEGIATAN || String(nextKegiatan[0]?.ID_KEGIATAN ?? ""),
-      }));
+      setForm(createEmptyForm());
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -412,19 +392,20 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>TAN</span>
-                  <select
-                    name="ID_TAN"
-                    value={form.ID_TAN}
-                    onChange={handleChange}
-                  >
-                    <option value="">Pilih TAN</option>
-                    {tanOptions.map((item) => (
-                      <option key={item.ID_TAN} value={item.ID_TAN}>
-                        {normalizeTanLabel(item)}
-                      </option>
-                    ))}
-                  </select>
+                    <span>TAN</span>
+                    <select
+                        name="ID_TAN"
+                        value={form.ID_TAN}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Pilih TAN</option>
+                        {tanOptions.map((item) => (
+                        <option key={item.ID_TAN} value={item.ID_TAN}>
+                            {normalizeTanLabel(item)}
+                        </option>
+                        ))}
+                    </select>
                 </label>
 
                 <label className="create-rkt-field">

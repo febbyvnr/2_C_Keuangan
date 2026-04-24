@@ -117,6 +117,14 @@
   box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
 }
 
+.create-rkt-field select:invalid {
+  color: #9ca3af;
+}
+
+.create-rkt-field select option {
+  color: #111827;
+}
+
 .create-rkt-date-input {
   position: relative;
 }
