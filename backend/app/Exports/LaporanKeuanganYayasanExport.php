@@ -14,10 +14,16 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class LaporanKeuanganYayasanExport implements WithEvents
 {
     protected $filters;
+    protected $role;
+    protected $nip;
+    protected $nama;
 
     public function __construct($filters)
     {
         $this->filters = $filters;
+        $this->role = $filters['role'] ?? (Auth::user()->role ?? 'Bendahara');
+        $this->nip = $filters['nip'] ?? (Auth::user()->nip ?? null);
+        $this->nama = $filters['nama'] ?? (Auth::user()->name ?? '-');
     }
 
     public function registerEvents(): array
@@ -104,12 +110,25 @@ class LaporanKeuanganYayasanExport implements WithEvents
                 }
 
                 // FOOTER
-                $footerRow = $totalRow + 2;
-                $sheet->setCellValue('E' . ($footerRow + 2), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->setCellValue('E' . ($footerRow + 3), 'By: ' . (Auth::user()->role ?? 'Bendahara'));
+                $footerRow = $totalRow + 4;
+                $role = $this->role ?: 'Bendahara';
+                $nama = $this->nama ?: '-';
+                $nip = $this->nip ?: '-';
 
-                $sheet->getStyle('E' . ($footerRow + 2) . ':E' . ($footerRow + 3))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->mergeCells("D" . ($footerRow + 1) . ":E" . ($footerRow + 1));
+                $sheet->mergeCells("D" . ($footerRow + 2) . ":E" . ($footerRow + 2));
+                $sheet->mergeCells("D" . ($footerRow + 4) . ":E" . ($footerRow + 4));
+                $sheet->mergeCells("D" . ($footerRow + 8) . ":E" . ($footerRow + 8));
+                $sheet->mergeCells("D" . ($footerRow + 9) . ":E" . ($footerRow + 9));
+
+                $sheet->setCellValue("D" . ($footerRow + 1), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->setCellValue("D" . ($footerRow + 2), $role . ',');
+                $sheet->setCellValue("D" . ($footerRow + 4), $nama);
+                $sheet->setCellValue("D" . ($footerRow + 8), '-------------------------');
+                $sheet->setCellValue("D" . ($footerRow + 9), 'NIP: ' . $nip);
+
+                $sheet->getStyle("D" . ($footerRow + 1) . ":E" . ($footerRow + 9))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // PDF SETUP
                 $sheet->getPageSetup()->setOrientation(

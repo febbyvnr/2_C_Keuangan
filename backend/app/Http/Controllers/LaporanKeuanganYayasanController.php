@@ -6,18 +6,24 @@ use App\Models\RefTahunAnggaran;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanKeuanganYayasanExport;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LaporanKeuanganYayasanController extends Controller
 {
     public function exportExcel(Request $request)
     {
         $idTaAnggaran = $this->resolveTahunAnggaranId($request);
+        $signer = $this->resolveSigner($request);
 
         $filters = [
             'tahun' => $this->resolvePeriodeTahun($request),
             'id_ta_anggaran' => $idTaAnggaran,
             'tahun_angka' => $this->resolveTahunAngka($request, $idTaAnggaran),
             'format' => 'excel',
+            'role' => $signer['role'],
+            'nama' => $signer['nama'],
+            'nip' => $signer['nip'],
         ];
 
         return Excel::download(new LaporanKeuanganYayasanExport($filters), 'Laporan_Keuangan_Yayasan.xlsx');
@@ -26,12 +32,16 @@ class LaporanKeuanganYayasanController extends Controller
     public function exportPdf(Request $request)
     {
         $idTaAnggaran = $this->resolveTahunAnggaranId($request);
+        $signer = $this->resolveSigner($request);
 
         $filters = [
             'tahun' => $this->resolvePeriodeTahun($request),
             'id_ta_anggaran' => $idTaAnggaran,
             'tahun_angka' => $this->resolveTahunAngka($request, $idTaAnggaran),
             'format' => 'pdf',
+            'role' => $signer['role'],
+            'nama' => $signer['nama'],
+            'nip' => $signer['nip'],
         ];
 
         return Excel::download(
@@ -104,5 +114,43 @@ class LaporanKeuanganYayasanController extends Controller
         }
 
         return null;
+    }
+
+    private function resolveSigner(Request $request): array
+    {
+        $nip = $request->input('nip')
+            ?? $request->input('NIP_KARYAWAN')
+            ?? (Auth::check() ? Auth::user()->nip : null);
+
+        $nama = $request->input('nama')
+            ?? (Auth::check() ? Auth::user()->name : null)
+            ?? '-';
+
+        $authRole = Auth::check() ? Auth::user()->role : null;
+        $dbRole = null;
+
+        if ($nip) {
+            $dbRole = DB::table('tr_jabatan as tj')
+                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                ->where('tj.NIP_KARYAWAN', $nip)
+                ->whereNull('tj.TGL_SELESAI_JABATAN')
+                ->value('rj.DESKRIPSI_JABATAN');
+        }
+
+        $role = trim($dbRole ?? $request->input('role') ?? $authRole ?? 'Bendahara');
+
+        if (!$nip) {
+            $nip = DB::table('tr_jabatan as tj')
+                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                ->whereNull('tj.TGL_SELESAI_JABATAN')
+                ->where('rj.DESKRIPSI_JABATAN', $role)
+                ->value('tj.NIP_KARYAWAN');
+        }
+
+        return [
+            'role' => $role,
+            'nama' => $nama,
+            'nip' => $nip,
+        ];
     }
 }

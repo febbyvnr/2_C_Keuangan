@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RkasExport;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LaporanRkasController extends Controller
 {
@@ -31,14 +32,36 @@ class LaporanRkasController extends Controller
     private function processExport(Request $request, $type)
     {
         try {
-            // Ambil role dari request atau dari user yang login
-            $role = $request->role ?? (Auth::user()->role ?? 'Bendahara');
+            $nip = $request->nip
+                ?? $request->NIP_KARYAWAN
+                ?? (Auth::check() ? Auth::user()->nip : null);
+            $nama = $request->nama ?? (Auth::check() ? Auth::user()->name : null);
+            $authRole = Auth::check() ? Auth::user()->role : null;
+
+            $dbRole = null;
+            if ($nip) {
+                $dbRole = DB::table('tr_jabatan as tj')
+                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                    ->where('tj.NIP_KARYAWAN', $nip)
+                    ->whereNull('tj.TGL_SELESAI_JABATAN')
+                    ->value('rj.DESKRIPSI_JABATAN');
+            }
+
+            $role = trim($dbRole ?? $request->role ?? $authRole ?? 'Bendahara');
+
+            if (!$nip) {
+                $nip = DB::table('tr_jabatan as tj')
+                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                    ->whereNull('tj.TGL_SELESAI_JABATAN')
+                    ->where('rj.DESKRIPSI_JABATAN', $role)
+                    ->value('tj.NIP_KARYAWAN');
+            }
 
             // VALIDASI ROLE
-            if ($role !== 'Bendahara') {
+            if (!in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Hanya Bendahara yang boleh generate laporan RKAS'
+                    'message' => 'Role tidak diizinkan generate laporan RKAS'
                 ], 403);
             }
 
@@ -58,7 +81,7 @@ class LaporanRkasController extends Controller
             if ($type === 'pdf') {
                 // Proses Download PDF
                 return Excel::download(
-                    new RkasExport($filters, $role),
+                    new RkasExport($filters, $role, $nip, $nama),
                     $fileName . '.pdf',
                     \Maatwebsite\Excel\Excel::DOMPDF
                 );
@@ -66,7 +89,7 @@ class LaporanRkasController extends Controller
 
             // Proses Download Excel
             return Excel::download(
-                new RkasExport($filters, $role),
+                new RkasExport($filters, $role, $nip, $nama),
                 $fileName . '.xlsx'
             );
 

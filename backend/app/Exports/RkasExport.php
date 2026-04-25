@@ -14,12 +14,16 @@ use Illuminate\Support\Facades\Auth;
 class RkasExport implements WithEvents
 {
     protected $role;
+    protected $nip;
+    protected $nama;
     protected $filters;
 
-    public function __construct($filters = [], $role = null)
+    public function __construct($filters = [], $role = null, $nip = null, $nama = null)
     {
         $this->filters = $filters;
         $this->role = $role ?? (Auth::user()->role ?? 'Bendahara');
+        $this->nip = $nip ?? (Auth::user()->nip ?? null);
+        $this->nama = $nama ?? (Auth::user()->name ?? '-');
     }
 
     public function registerEvents(): array
@@ -147,10 +151,24 @@ class RkasExport implements WithEvents
                 // FOOTER
                 // =====================
                 $footerRow = $totalRow + 3;
-                $sheet->setCellValue("H$footerRow", 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("H$footerRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $sheet->setCellValue("H" . ($footerRow + 1), 'By: ' . $this->role);
-                $sheet->getStyle("H" . ($footerRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $role = $this->role ?: 'Bendahara';
+                $nama = $this->nama ?: '-';
+                $nip = $this->nip ?: '-';
+
+                $sheet->mergeCells("G" . ($footerRow + 1) . ":H" . ($footerRow + 1));
+                $sheet->mergeCells("G" . ($footerRow + 2) . ":H" . ($footerRow + 2));
+                $sheet->mergeCells("G" . ($footerRow + 4) . ":H" . ($footerRow + 4));
+                $sheet->mergeCells("G" . ($footerRow + 8) . ":H" . ($footerRow + 8));
+                $sheet->mergeCells("G" . ($footerRow + 9) . ":H" . ($footerRow + 9));
+
+                $sheet->setCellValue("G" . ($footerRow + 1), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->setCellValue("G" . ($footerRow + 2), $role . ',');
+                $sheet->setCellValue("G" . ($footerRow + 4), $nama);
+                $sheet->setCellValue("G" . ($footerRow + 8), '-------------------------');
+                $sheet->setCellValue("G" . ($footerRow + 9), 'NIP: ' . $nip);
+
+                $sheet->getStyle("G" . ($footerRow + 1) . ":H" . ($footerRow + 9))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // =====================
                 // PDF SETUP (Agar tidak terpotong)

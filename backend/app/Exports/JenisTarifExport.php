@@ -13,11 +13,15 @@ use Illuminate\Support\Facades\Auth;
 class JenisTarifExport implements WithEvents
 {
     protected $role;
+    protected $nip;
+    protected $nama;
 
-    public function __construct($role = null)
+    public function __construct($role = null, $nip = null, $nama = null)
     {
         // Mengambil role dari Auth jika tidak dilempar dari controller
         $this->role = $role ?? (Auth::user()->role ?? 'Bendahara');
+        $this->nip = $nip ?? (Auth::user()->nip ?? null);
+        $this->nama = $nama ?? (Auth::user()->name ?? '-');
     }
 
     public function registerEvents(): array
@@ -115,15 +119,23 @@ class JenisTarifExport implements WithEvents
                 // =====================
                 $footerRow = $endData + 3;
 
+                $role = $this->role ?: 'Bendahara';
+                $nama = $this->nama ?: '-';
+                $nip = $this->nip ?: '-';
+
                 // TANGGAL
                 $sheet->setCellValue("B" . ($footerRow), 'Yogyakarta, ' . date('d F Y'));
                 $sheet->getStyle("B" . ($footerRow))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                // ROLE
-                $sheet->setCellValue("B" . ($footerRow + 1), 'By: ' . $this->role);
-                $sheet->getStyle("B" . ($footerRow + 1))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                // TTD
+                $sheet->setCellValue("B" . ($footerRow + 2), $role . ',');
+                $sheet->setCellValue("B" . ($footerRow + 4), $nama);
+                $sheet->setCellValue("B" . ($footerRow + 8), '-------------------------');
+                $sheet->setCellValue("B" . ($footerRow + 9), 'NIP: ' . $nip);
+
+                $sheet->getStyle("B" . ($footerRow + 2) . ":B" . ($footerRow + 9))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // FREEZE PANE
                 $sheet->freezePane("A7");
