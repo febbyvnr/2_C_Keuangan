@@ -18,27 +18,24 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
+        // Ambil NIP bersih dari request atau session
         $nip = trim($request->nip ?? (Auth::check() ? Auth::user()->nip : ''));
 
-        $nipQuery = !empty($nip) ? $nip : 'UNKNOWN';
-
-        $authRole = Auth::check() ? Auth::user()->role : null;
-
-        $dbRole = DB::table('tr_jabatan as tj')
+        // Query ke database untuk mendapatkan jabatan berdasarkan NIP
+        $jabatan = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->where('tj.NIP_KARYAWAN', $nipQuery)
+            ->where('tj.NIP_KARYAWAN', $nip)
             ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->value('rj.DESKRIPSI_JABATAN');
+            ->select('rj.DESKRIPSI_JABATAN')
+            ->first();
 
-        $roleRaw = $dbRole ?? $authRole;
+        // Normalisasi role
+        $roleRaw = $jabatan ? $jabatan->DESKRIPSI_JABATAN : (Auth::check() ? Auth::user()->role : 'Bendahara');
         $role = ucwords(strtolower(trim($roleRaw)));
 
+        // VALIDASI ROLE
         if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
-            return response()->json([
-                'message' => 'Role tidak diizinkan generate laporan',
-                'debug_role' => $role,
-                'debug_nip' => $nip 
-            ], 403);
+            return response()->json(['message' => 'Role tidak diizinkan generate laporan'], 403);
         }
 
         // EXCEL
