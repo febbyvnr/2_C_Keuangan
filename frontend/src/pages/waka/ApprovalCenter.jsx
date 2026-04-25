@@ -1,309 +1,58 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "../../styles/waka/ApprovalCenter.css";
 
+import FPDPage from "./approve/FPDPengajuanDanaPage";
+import RKTPage from "./approve/RKTPage";
+import RKAPage from "./approve/RKAPage";
+import EvaluasiLPJPage from "./approve/EvaluasiLPJPage";
+import PencairanDanaPage from "./approve/PencairanDanaPage";
+
 export default function ApprovalCenter() {
-    const [data, setData] = useState([]);
-    const [selected, setSelected] = useState(null);
-    const [search, setSearch] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-    const [sortConfig, setSortConfig] = useState({
-        key: "ID_FPD",
-        direction: "desc"
-    });
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        try {
-            const res = await fetch(`http://localhost:8000/api/fpd-anggaran`);
-            const json = await res.json();
-            setData(json.data || []);
-        } catch (err) {
-            console.error(err);
+    const [activeTab, setActiveTab] = useState("rkt");
+    const [fpdHasPending, setFpdHasPending] = useState(false);
+    const [evalHasPending, setEvalHasPending] = useState(false);
+    const [rktHasPending, setRktHasPending] = useState(false);
+    const [rkaHasPending, setRkaHasPending] = useState(false);
+    const [cairHasPending, setCairHasPending] = useState(false);
+    const renderContent = () => {
+        switch (activeTab) {
+            case "rkt":
+                return <RKTPage setHasPending={setRktHasPending} />;
+            case "fpd":
+                return <FPDPage setHasPending={setFpdHasPending} />;
+            case "rka":
+                return <RKAPage setHasPending={setRkaHasPending} />;
+            case "lpj":
+                return <EvaluasiLPJPage setHasPending={setEvalHasPending} />;
+            case "pencairan":
+                return <PencairanDanaPage setHasPending={setCairHasPending} />;
+            default:
+                return <RKTPage setHasPending={setRktHasPending} />;
         }
     };
-
-    const handleSearch = async (value) => {
-        setSearch(value);
-        setCurrentPage(1);
-        try {
-            const res = await fetch(`http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`);
-            const json = await res.json();
-            setData(json.data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            setCurrentPage(1);
-            fetchData(search);
-        }
-    };
-
-    const getIcon = (key) => {
-        if (sortConfig.key !== key) return "bi bi-funnel";
-        return sortConfig.direction === "asc"
-            ? "bi bi-funnel-fill"
-            : "bi bi-funnel-fill";
-    };
-
-    const sortedData = [...data].sort((a, b) => {
-        let valA = a[sortConfig.key];
-        let valB = b[sortConfig.key];
-        if (sortConfig.key === "PROGRAM") {
-            valA = a.program_kerja?.INDIKATOR || "";
-            valB = b.program_kerja?.INDIKATOR || "";
-        }
-        if (sortConfig.key === "TGL_FPD") {
-            valA = new Date(a.TGL_FPD);
-            valB = new Date(b.TGL_FPD);
-        }
-        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
-
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-
-    const handleApprove = async () => {
-        if (!selected) return;
-        const userData = localStorage.getItem("user"); 
-        if (!userData) {
-            alert("Sesi login tidak ditemukan. Silakan login kembali.");
-            return;
-        }
-        const user = JSON.parse(userData);
-        const nip = user.NIP_KARYAWAN;
-        if (!nip) {
-            alert("Data NIP tidak ditemukan pada akun Anda.");
-            return;
-        }
-        try {
-            const res = await fetch(`http://localhost:8000/api/fpd-anggaran/update/${selected.ID_FPD}`, {
-                method: "PUT",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                    ID_PROGRAM_KERJA: selected.ID_PROGRAM_KERJA,
-                    TGL_FPD: selected.TGL_FPD,
-                    NOMINAL_ANGGARAN: selected.NOMINAL_ANGGARAN,
-                    NIP_VALIDATOR_FPD: nip 
-                })
-            });
-            const result = await res.json();
-            if (res.ok) {
-                alert("FPD berhasil disetujui");
-                fetchData();
-                setSelected(null);
-            } else {
-                alert("Gagal menyetujui: " + (result.message || "Terjadi kesalahan validasi"));
-                console.error("Validation Error:", result.errors);
-            }
-        } catch (err) {
-            console.error("Fetch Error:", err);
-            alert("Terjadi kesalahan koneksi ke server.");
-        }
-    };
-
-    const changePage = (page) => {
-        setCurrentPage(page);
-    };
-
-    const isApproved = selected?.NIP_VALIDATOR_FPD;
 
     return (
-        <div className="container">
-            <div className="coa-header">
-                <h2>Approval FPD Anggaran</h2>
-                <div className="header-actions">
-                    <button
-                        className="btn-reset"
-                        onClick={() => {
-                            setSearch("");
-                            fetchData();
-                        }}
-                    >
-                        Reset
-                    </button>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <input
-                            className="search-input"
-                            type="text"
-                            placeholder="Cari..."
-                            value={search}
-                            onChange={(e) => handleSearch(e.target.value)}
-                        />
-                        <button
-                            className="search-btn"
-                            onClick={() => {
-                                setCurrentPage(1);
-                                fetchData(search);
-                            }}
-                        >
-                            Search
-                        </button>
-                    </div>
-                </div>
+        <div className="app-container">
+            <h2>Approval Center</h2>
+            <div className="tab-header">
+                <button className={activeTab === "rkt" ? "active" : ""} onClick={() => setActiveTab("rkt")} >
+                    RKT{rktHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
+                </button>
+                <button className={activeTab === "rka" ? "active" : ""} onClick={() => setActiveTab("rka")} >
+                    RKA{rkaHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
+                </button>
+                <button className={activeTab === "fpd" ? "active" : ""} onClick={() => setActiveTab("fpd")}>
+                    FPD Pengajuan Dana{fpdHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
+                </button>
+                <button className={activeTab === "pencairan" ? "active" : ""} onClick={() => setActiveTab("pencairan")} >
+                    Pencairan Dana{cairHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
+                </button>
+                <button className={activeTab === "lpj" ? "active" : ""} onClick={() => setActiveTab("lpj")} >
+                    Evaluasi LPJ{evalHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
+                </button>
             </div>
-            <div className="grid-approval">
-                <div className="table-section">
-                    <div className="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th onClick={() => handleSort("ID_FPD")}>
-                                        ID <i className={getIcon("ID_FPD")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("PROGRAM")}>
-                                        Program <i className={getIcon("PROGRAM")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("TGL_FPD")}>
-                                        Tanggal <i className={getIcon("TGL_FPD")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("NOMINAL_ANGGARAN")}>
-                                        Anggaran <i className={getIcon("NOMINAL_ANGGARAN")}></i>
-                                    </th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentData.map((item) => (
-                                    <tr
-                                        key={item.ID_FPD}
-                                        onClick={() => setSelected(item)}
-                                        className={selected?.ID_FPD === item.ID_FPD ? "active-row" : ""}
-                                    >
-                                        <td>{item.ID_FPD}</td>
-                                        <td>{item.program_kerja?.INDIKATOR || "Tidak ada Indikator"}</td>
-                                        <td>{new Date(item.TGL_FPD).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}</td>
-                                        <td>
-                                            Rp {Number(item.NOMINAL_ANGGARAN).toLocaleString("id-ID")}
-                                        </td>
-                                        <td>
-                                            {item.NIP_VALIDATOR_FPD ? (
-                                                <span><i className="bi bi-check-circle icon-success"></i></span>
-                                            ) : (
-                                                <span><i className="bi bi-exclamation-circle icon-danger"></i></span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="pagination-wrapper">
-                        <div className="pagination-info">
-                            Menampilkan {startData} - {endData} dari {totalData} data
-                        </div>
-                        <div className="pagination">
-                            <button
-                                className="page-btn"
-                                onClick={() =>
-                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                                }
-                                disabled={currentPage === 1}
-                            >
-                                <i className="bi bi-chevron-left"></i>
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button
-                                    key={i + 1}
-                                    onClick={() => changePage(i + 1)}
-                                    className={`page-btn ${
-                                        currentPage === i + 1 ? "active" : ""
-                                    }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                className="page-btn"
-                                onClick={() =>
-                                    setCurrentPage((prev) =>
-                                        Math.min(prev + 1, totalPages)
-                                    )
-                                }
-                                disabled={currentPage === totalPages}
-                            >
-                                <i className="bi bi-chevron-right"></i>
-                            </button>
-                        </div>
-                        <div className="export-wrapper">
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/excel/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn-excel">
-                                <i className="bi bi-filetype-xlsx"></i> Export Excel
-                            </a>
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn-pdf">
-                                <i className="bi bi-filetype-pdf"></i> Export PDF
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div className="detail-section">
-                    {selected ? (
-                        <div className="detail-content">
-                            <h3>Detail FPD</h3>
-                            <div className={`status-pill ${isApproved ? "success" : "danger"}`}>
-                                {isApproved ? "Disetujui" : "Menunggu"}
-                            </div>
-                            <div className="detail-row">
-                                <span>ID</span>
-                                <span>{selected.ID_FPD}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Program</span>
-                                <span>{selected.program_kerja?.INDIKATOR}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Anggaran</span>
-                                <span>Rp {Number(selected.NOMINAL_ANGGARAN).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Nominal FPD</span>
-                                <span>Rp {Number(selected.NOMINAL_FPD).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Sisa</span>
-                                <span>Rp {Number(selected.NOMINAL_SISA).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Validator</span>
-                                <span>{selected.NIP_VALIDATOR_FPD || "-"}</span>
-                            </div>
-                            <button
-                                className="btn-approve"
-                                onClick={handleApprove}
-                                disabled={isApproved}
-                            >
-                                Setujui
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="empty-state">
-                            <p>Pilih data untuk melihat detail</p>
-                        </div>
-                    )}
-                </div>
+            <div className="tab-content">
+                {renderContent()}
             </div>
         </div>
     );
