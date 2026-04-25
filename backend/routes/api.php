@@ -155,7 +155,8 @@ Route::prefix('rkt')->group(function () {
     Route::post('/store', [MstProgramKerjaController::class, 'store']);
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update'])->whereNumber('id');
     Route::put('/approve/{id}', [MstProgramKerjaController::class, 'approve'])->whereNumber('id');
-    Route::put('/action/reject/{id}', [MstProgramKerjaController::class, 'reject'])->whereNumber('id');
+    Route::put('/reject/{id}', [MstProgramKerjaController::class, 'reject'])->whereNumber('id');
+    Route::put('/revisi/{id}', [MstProgramKerjaController::class, 'revisi'])->whereNumber('id');
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
 });

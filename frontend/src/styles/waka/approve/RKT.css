@@ -84,6 +84,11 @@ tr:hover {
     color: #1a1a1a;
 }
 
+.status.revisi {
+    background: #EDA60F;
+    color: #1a1a1a;
+}
+
 .detail-header {
     position: sticky;
     top: 0;
@@ -99,13 +104,15 @@ tr:hover {
     flex: 1;
 }
 
-.detail-footer {
+.rkt-detail-footer {
     position: sticky;
     bottom: 0;
     background: white;
     padding: 15px 20px;
     border-top: 1px solid #eee;
     display: flex;
+    gap: 10px;
+    flex-direction: column;
     gap: 10px;
 }
 
@@ -140,7 +147,31 @@ tr:hover {
     gap: 10px;
 }
 
-.approve-btn {
+.revisi-input-wrapper {
+    width: 100%;
+}
+
+.revisi-textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: none;
+    font-size: 14px;
+    outline: none;
+    background-color: transparent;
+    color: #585858;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.approve-btn,
+.reject-btn,
+.revisi-btn {
     flex: 1;
     background: #2E7D32;
     color: white;
@@ -148,11 +179,20 @@ tr:hover {
     padding: 10px;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .reject-btn {
-    flex: 1;
     background: #C62828;
+}
+
+.revisi-btn {
+    background: #EDA60F;
+}
+
+.revisi-submit-btn {
+    width: 100%;
+    background: #265F9C;
     color: white;
     border: none;
     padding: 10px;

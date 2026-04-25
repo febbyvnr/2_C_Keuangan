@@ -13,6 +13,8 @@ export default function RKTPage({ setHasPending }) {
     });
     const [toast, setToast] = useState(null);
     const [visible, setVisible] = useState(false);
+    const [revisiText, setRevisiText] = useState("");
+    const [showRevisiInput, setShowRevisiInput] = useState(false);
 
     const showToast = (type = "success", message = "") => {
         setToast({ type, message });
@@ -25,11 +27,14 @@ export default function RKTPage({ setHasPending }) {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (searchValue = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/rkt");
+            const url = searchValue
+                ? `http://localhost:8000/api/rkt?search=${searchValue}`
+                : "http://localhost:8000/api/rkt";
+            const res = await fetch(url);
             const json = await res.json();
-            const result = json.data?.data || []; 
+            const result = json.data || [];
             setData(result);
             const hasPending = result.some(item => !item.NIP_VALIDATOR_PROGKER);
             setHasPending && setHasPending(hasPending);
@@ -53,16 +58,8 @@ export default function RKTPage({ setHasPending }) {
         }
     };
 
-    const handleSearch = async (value) => {
+    const handleSearch = (value) => {
         setSearch(value);
-        setCurrentPage(1);
-        try {
-            const res = await fetch(`http://localhost:8000/api/rkt?search=${value}`);
-            const json = await res.json();
-            setData(json.data?.data || []);
-        } catch (err) {
-            console.error(err);
-        }
     };
 
     const getIcon = (key) => {
@@ -72,16 +69,49 @@ export default function RKTPage({ setHasPending }) {
             : "bi bi-funnel-fill";
     };
 
+    const statusOrder = {
+        "Disetujui": 1,
+        "Revisi": 2,
+        "Pending": 3,
+        "Ditolak": 4
+    };
+
+    const getStatus = (item) => {
+        const lastPm = item.tr_pm?.length
+            ? item.tr_pm[item.tr_pm.length - 1]
+            : null;
+        const note = lastPm?.DESKRIPSI_TR_PM?.toLowerCase() || "";
+        if (note.includes("ditolak")) {
+            return { label: "Ditolak", className: "rejected" };
+        }
+        if (note.includes("revisi")) {
+            return { label: "Revisi", className: "revisi" };
+        }
+        if (item.NIP_VALIDATOR_PROGKER) {
+            return { label: "Disetujui", className: "approved" };
+        }
+        return { label: "Pending", className: "pending" };
+    };
+
     const sortedData = [...data].sort((a, b) => {
-        let valA = a[sortConfig.key];
-        let valB = b[sortConfig.key];
-        if (sortConfig.key === "tahun_anggaran") {
+        let valA, valB;
+        if (sortConfig.key === "status") {
+            const statusA = getStatus(a).label;
+            const statusB = getStatus(b).label;
+            valA = statusOrder[statusA] || 99;
+            valB = statusOrder[statusB] || 99;
+        } 
+        else if (sortConfig.key === "tahun_anggaran") {
             valA = a.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
             valB = b.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
-        }
-        if (sortConfig.key === "NOMINAL") {
-            valA = Number(valA || 0);
-            valB = Number(valB || 0);
+        } 
+        else if (sortConfig.key === "NOMINAL") {
+            valA = Number(a.NOMINAL || 0);
+            valB = Number(b.NOMINAL || 0);
+        } 
+        else {
+            valA = a[sortConfig.key] ?? "";
+            valB = b[sortConfig.key] ?? "";
         }
         if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
         if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
@@ -95,7 +125,6 @@ export default function RKTPage({ setHasPending }) {
     const startData = totalData === 0 ? 0 : indexOfFirst + 1;
     const endData = Math.min(indexOfLast, totalData);
     const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-
 
     const handleApprove = async () => {
         if (!selected) return;
@@ -130,19 +159,78 @@ export default function RKTPage({ setHasPending }) {
         }
     };
 
+    const isDisabled = (item) => {
+        const status = getStatus(item).label;
+        return status === "Disetujui" || status === "Ditolak" || status === "Revisi";
+    };
+
     const handleReject = async () => {
         if (!selected) return;
+        const userData = localStorage.getItem("user");
+        if (!userData) {
+            showToast("error", "Sesi login tidak ditemukan");
+            return;
+        }
+        const user = JSON.parse(userData);
         try {
             const res = await fetch(
-                `http://localhost:8000/api/rkt/action/reject/${selected.ID_PROGRAM_KERJA}`,
-                { method: "PUT" }
+                `http://localhost:8000/api/rkt/reject/${selected.ID_PROGRAM_KERJA}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        NIP_VALIDATOR_PM: user.NIP_KARYAWAN,
+                        DESKRIPSI: "Ditolak"
+                    })
+                }
             );
+            const json = await res.json();
             if (res.ok) {
                 showToast("success", "Program Kerja Ditolak");
                 fetchData();
                 setSelected(null);
             } else {
-                showToast("error", "Gagal menolak");
+                showToast("error", json.message || "Gagal menolak");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Koneksi gagal");
+        }
+    };
+
+    const handleRevisi = async () => {
+        if (!selected) return;
+        const userData = localStorage.getItem("user");
+        if (!userData) {
+            showToast("error", "Sesi login tidak ditemukan");
+            return;
+        }
+        const user = JSON.parse(userData);
+        if (!revisiText.trim()) {
+            showToast("error", "Alasan revisi wajib diisi");
+            return;
+        }
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/rkt/revisi/${selected.ID_PROGRAM_KERJA}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        NIP_VALIDATOR_PM: user.NIP_KARYAWAN,
+                        DESKRIPSI: `Revisi: ${revisiText}`
+                    })
+                }
+            );
+            const json = await res.json();
+            if (res.ok) {
+                showToast("success", "Berhasil mengajukan revisi");
+                fetchData();
+                setSelected(null);
+                setRevisiText("");
+                setShowRevisiInput(false);
+            } else {
+                showToast("error", json.message || "Gagal revisi");
             }
         } catch (err) {
             console.error(err);
@@ -163,7 +251,7 @@ export default function RKTPage({ setHasPending }) {
                         className="btn-reset"
                         onClick={() => {
                             setSearch("");
-                            fetchData();
+                            fetchData("");
                         }}
                     >
                         Reset
@@ -174,6 +262,7 @@ export default function RKTPage({ setHasPending }) {
                             type="text"
                             placeholder="Cari..."
                             value={search}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => handleSearch(e.target.value)}
                         />
                         <button
@@ -206,7 +295,9 @@ export default function RKTPage({ setHasPending }) {
                                     <th onClick={() => handleSort("NOMINAL")}>
                                         Anggaran <i className={getIcon("NOMINAL")}></i>
                                     </th>
-                                    <th>Status</th>
+                                    <th onClick={() => handleSort("status")}>
+                                        Status <i className={getIcon("status")}></i>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -227,13 +318,7 @@ export default function RKTPage({ setHasPending }) {
                                             Rp {Number(item.NOMINAL || 0).toLocaleString("id-ID")}
                                         </td>
                                         <td>
-                                            {item.STATUS_APPROVAL === "Ditolak" ? (
-                                                <span className="status rejected">Ditolak</span>
-                                            ) : item.STATUS_APPROVAL === "Disetujui" ? (
-                                                <span className="status approved">Disetujui</span>
-                                            ) : (
-                                                <span className="status pending">Pending</span>
-                                            )}
+                                            {(() => {const status = getStatus(item);return (<span className={`status ${status.className}`}>{status.label}</span>);})()}
                                         </td>
                                     </tr>
                                 ))}
@@ -351,21 +436,49 @@ export default function RKTPage({ setHasPending }) {
                                     <span>{selected.NIP_VALIDATOR_PROGKER || "-"}</span>
                                 </div>
                             </div>
-                            <div className="detail-footer">
-                                <button
-                                    className="approve-btn"
-                                    onClick={handleApprove}
-                                    disabled={!selected || selected.NIP_VALIDATOR_PROGKER || selected.STATUS_APPROVAL === "Ditolak"}
-                                >
-                                    Setujui
-                                </button>
-                                <button
-                                    className="reject-btn"
-                                    onClick={handleReject}
-                                    disabled={!selected || selected.NIP_VALIDATOR_PROGKER || selected.STATUS_APPROVAL === "Ditolak"}
-                                >
-                                    Tolak
-                                </button>
+                            <div className="rkt-detail-footer">
+                                {showRevisiInput && (
+                                    <div className="revisi-input-wrapper">
+                                        <textarea
+                                            placeholder="Masukkan alasan revisi..."
+                                            value={revisiText}
+                                            onChange={(e) => setRevisiText(e.target.value)}
+                                            className="revisi-textarea"
+                                        />
+                                    </div>
+                                )}
+                                <div className="button-group">
+                                    <button
+                                        className="approve-btn"
+                                        onClick={handleApprove}
+                                        disabled={!selected || isDisabled(selected)}
+                                    >
+                                        Setujui
+                                    </button>
+                                    <button
+                                        className="revisi-btn"
+                                        onClick={() => setShowRevisiInput(!showRevisiInput)}
+                                        disabled={!selected || isDisabled(selected)}
+                                    >
+                                        Ajukan Revisi
+                                    </button>
+                                    <button
+                                        className="reject-btn"
+                                        onClick={handleReject}
+                                        disabled={!selected || isDisabled(selected)}
+                                    >
+                                        Tolak
+                                    </button>
+                                </div>
+                                {showRevisiInput && (
+                                    <button
+                                        className="revisi-submit-btn"
+                                        onClick={handleRevisi}
+                                        disabled={!revisiText.trim()}
+                                    >
+                                        Kirim Revisi
+                                    </button>
+                                )}
                             </div>
                         </>
                     ) : (
