@@ -363,6 +363,11 @@
   gap: 12px;
 }
 
+.rkt-detail-header-top .rkt-status-badge {
+  display: inline-flex;
+  margin-top: 10px;
+}
+
 .rkt-detail-title {
   margin: 0;
   font-size: 18px;
