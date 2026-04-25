@@ -177,6 +177,7 @@ Route::prefix('fpd-anggaran')->group(function () {
     Route::get('/{id}', [FpdAnggaranController::class, 'show']);
     Route::post('/store', [FpdAnggaranController::class, 'store']);
     Route::put('/update/{id}', [FpdAnggaranController::class, 'update']);
+    Route::put('/reject/{id}', [FpdAnggaranController::class, 'reject']);
     Route::delete('/delete/{id}', [FpdAnggaranController::class, 'destroy']);
 });
 

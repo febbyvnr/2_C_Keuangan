@@ -69,26 +69,39 @@
 
 .grid-approval {
     display: grid;
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 1fr 420px;
     gap: 20px;
     margin-top: -20px;
 }
 
-.table-section {
+.fpd-table-section {
     background: white;
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    min-height: 650px;
 }
 
-.table-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+.fpd-table-wrapper {
+    max-height: 580px;
     overflow-y: auto;
+}
+
+.fpd-table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+}
+
+.fpd-table-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.fpd-table-wrapper {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 table {
@@ -138,7 +151,7 @@ tr:hover {
 }
 
 .icon-danger {
-    color: #C62828;
+    color: #EDA60F;
     font-size: 16px !important;
     display: flex;
     justify-content: center;
@@ -153,46 +166,91 @@ tr:hover {
 
 .status-pill.success {
     background: #2E7D32;
+    color: white;
 }
 
 .status-pill.danger {
     background: #C62828;
+    color: white;
+}
+
+.status-pill.warning {
+    background: #EDA60F;
+    color: black;
 }
 
 .active-row {
     background: #e0f2fe;
 }
 
-.detail-section {
+.fpd-detail-section {
     background: white;
     padding: 0 20px 20px 20px;
     border-radius: 12px;
-    color: #1a1a1a;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    max-height: 620px;
 }
 
-.detail-header {
+.fpd-detail-header {
     position: sticky;
     top: 0;
     background: white;
-    padding: 5px 15px 0px 15px;
-    z-index: 2;
+    z-index: 10;
+    padding: 12px 0;
     border-bottom: 1px solid #eee;
 }
 
-.detail-content {
-    overflow-y: auto;
-    padding: 10px 20px;
+.detail-body {
     flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
 }
 
-.detail-footer {
+.fpd-detail-content {
+    overflow-y: auto;
+    padding: 0px 15px 0px 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.fpd-detail-content h3 {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.fpd-detail-footer {
     position: sticky;
     bottom: 0;
     background: white;
-    padding: 15px 20px;
+    padding: 12px 0;
     border-top: 1px solid #eee;
+    z-index: 10;
+}
+
+.button-group {
     display: flex;
     gap: 10px;
+}
+
+.approve-btn,
+.reject-btn {
+    flex: 1;
+    width: 100% !important;
+    background: #2E7D32;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.reject-btn {
+    background: #C62828;
 }
 
 .detail-row {
@@ -207,7 +265,7 @@ tr:hover {
 }
 
 .status-wait {
-    columns: red;
+    columns: #C62828;
 }
 
 .status-pill {
@@ -215,15 +273,15 @@ tr:hover {
     border-radius: 999px;
     color: white;
     display: inline-block;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .status-pill.success {
-    background: green;
+    background: #2E7D32;
 }
 
 .status-pill.danger {
-    background: red;
+    background: #C62828;
 }
 
 .btn-approve {
@@ -385,4 +443,25 @@ tr:hover {
     margin-left: 6px;
     font-size: 14px;
     animation: pulseWarning 1s infinite;
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.status.approved {
+    background: #2E7D32;
+    color: white;
+}
+
+.status.rejected {
+    background: #C62828;
+    color: white;
+}
+
+.status.pending {
+    background: #f59e0b;
+    color: white;
 }

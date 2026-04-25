@@ -63,9 +63,40 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             : "bi bi-funnel-fill";
     };
 
+    const statusOrder = {
+        "approved": 1,
+        "pending": 3,
+        "rejected": 2
+    };
+    
+    const getStatus = (item) => {
+        if (!item.NIP_VALIDATOR_FPD) {
+            return {
+                type: "pending",
+                icon: "bi bi-exclamation-circle-fill icon-danger icon-warning-animate"
+            };
+        }
+        if (item.NIP_VALIDATOR_FPD === "Ditolak") {
+            return {
+                type: "rejected",
+                label: "Ditolak"
+            };
+        }
+        return {
+            type: "approved",
+            label: "Disetujui"
+        };
+    };
+
     const sortedData = [...data].sort((a, b) => {
         let valA = a[sortConfig.key];
         let valB = b[sortConfig.key];
+        if (sortConfig.key === "status") {
+            const typeA = getStatus(a).type; 
+            const typeB = getStatus(b).type;
+            valA = statusOrder[typeA] || 99;
+            valB = statusOrder[typeB] || 99;
+        }
         if (sortConfig.key === "PROGRAM") {
             valA = a.program_kerja?.INDIKATOR || "";
             valB = b.program_kerja?.INDIKATOR || "";
@@ -116,7 +147,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             });
             const result = await res.json();
             if (res.ok) {
-                showToast("update");
+                showToast("success", "Program Kerja Disetujui");
                 fetchData();
                 setSelected(null);
             } else {
@@ -132,8 +163,9 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
     const handleReject = async () => {
         if (!selected) return;
         try {
+            console.log("Reject ID:", selected);
             const res = await fetch(
-                `http://localhost:8000/api/fpd-anggaran/action/reject/${selected.ID_PROGRAM_KERJA}`,
+                `http://localhost:8000/api/fpd-anggaran/reject/${selected.ID_FPD}`,
                 { method: "PUT" }
             );
             if (res.ok) {
@@ -148,6 +180,26 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             showToast("error", "Koneksi gagal");
         }
     };
+
+    const getDetailStatus = (item) => {
+        if (!item?.NIP_VALIDATOR_FPD) {
+            return {
+                label: "Menunggu Verifikasi",
+                className: "warning"
+            };
+        }
+        if (item.NIP_VALIDATOR_FPD === "Ditolak") {
+            return {
+                label: "Ditolak",
+                className: "danger"
+            };
+        }
+        return {
+            label: "Disetujui",
+            className: "success"
+        };
+    };
+    const status = getDetailStatus(selected);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -200,8 +252,8 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                 </div>
             </div>
             <div className="grid-approval">
-                <div className="table-section">
-                    <div className="table-wrapper">
+                <div className="fpd-table-section">
+                    <div className="fpd-table-wrapper">
                         <table>
                             <thead>
                                 <tr>
@@ -217,7 +269,9 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                                     <th onClick={() => handleSort("NOMINAL_ANGGARAN")}>
                                         Anggaran <i className={getIcon("NOMINAL_ANGGARAN")}></i>
                                     </th>
-                                    <th>Status</th>
+                                    <th onClick={() => handleSort("status")}>
+                                        Status <i className={getIcon("status")}></i>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -234,11 +288,29 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                                             Rp {Number(item.NOMINAL_ANGGARAN).toLocaleString("id-ID")}
                                         </td>
                                         <td>
-                                            {item.NIP_VALIDATOR_FPD ? (
-                                                <span><i className="bi bi-check-circle icon-success"></i></span>
-                                            ) : (
-                                                <span><i className="bi bi-exclamation-circle-fill icon-danger icon-warning-animate"></i></span>
-                                            )}
+                                            {(() => {
+                                                const status = getStatus(item);
+                                                if (status.type === "pending") {
+                                                    return (
+                                                        <i className="bi bi-exclamation-circle-fill icon-danger icon-warning-animate"></i>
+                                                    );
+                                                }
+                                                if (status.type === "rejected") {
+                                                    return (
+                                                        <span className="status rejected">
+                                                            Ditolak
+                                                        </span>
+                                                    );
+                                                }
+                                                if (status.type === "approved") {
+                                                    return (
+                                                        <span className="status approved">
+                                                            Disetujui
+                                                        </span>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                         </td>
                                     </tr>
                                 ))}
@@ -292,57 +364,70 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                         </div>
                     </div>
                 </div>
-                <div className="detail-section">
+                <div className="fpd-detail-section">
                     {selected ? (
-                        <div className="detail-content">
-                            <h3>Detail FPD</h3>
-                            <div className={`status-pill ${isApproved ? "success" : "danger"}`}>
-                                {isApproved ? "Disetujui" : "Menunggu Verifikasi"}
+                        <div className="fpd-detail-content">
+                            <div className="fpd-detail-header">
+                                <h3>Detail FPD</h3>
+                                <div className={`status-pill ${status.className}`}>
+                                    {status.label}
+                                </div>
                             </div>
-                            <div className="detail-row">
-                                <span>ID</span>
-                                <span>{selected.ID_FPD}</span>
+                            <div className="detail-body">
+                                <div className="detail-row">
+                                    <span>ID</span>
+                                    <span>{selected.ID_FPD}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Program</span>
+                                    <span>{selected.program_kerja?.INDIKATOR}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Tanggal</span>
+                                    <span>
+                                        {selected.TGL_FPD
+                                            ? new Date(selected.TGL_FPD).toLocaleDateString("id-ID", {
+                                                day: "numeric",
+                                                month: "long",
+                                                year: "numeric",
+                                            })
+                                            : "-"}
+                                    </span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Anggaran</span>
+                                    <span>Rp {Number(selected.NOMINAL_ANGGARAN).toLocaleString("id-ID")}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Nominal FPD</span>
+                                    <span>Rp {Number(selected.NOMINAL_FPD).toLocaleString("id-ID")}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Sisa</span>
+                                    <span>Rp {Number(selected.NOMINAL_SISA).toLocaleString("id-ID")}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Validator</span>
+                                    <span>{selected.NIP_VALIDATOR_FPD || "-"}</span>
+                                </div>
                             </div>
-                            <div className="detail-row">
-                                <span>Program</span>
-                                <span>{selected.program_kerja?.INDIKATOR}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Tanggal</span>
-                                <span>{selected.TGL_FPD ? new Date(selected.TGL_FPD).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric", }) : "-"}
-                                </span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Anggaran</span>
-                                <span>Rp {Number(selected.NOMINAL_ANGGARAN).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Nominal FPD</span>
-                                <span>Rp {Number(selected.NOMINAL_FPD).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Sisa</span>
-                                <span>Rp {Number(selected.NOMINAL_SISA).toLocaleString("id-ID")}</span>
-                            </div>
-                            <div className="detail-row">
-                                <span>Validator</span>
-                                <span>{selected.NIP_VALIDATOR_FPD || "-"}</span>
-                            </div>
-                            <div className="detail-footer">
-                                <button
-                                    className="btn-approve"
-                                    onClick={handleApprove}
-                                    disabled={isApproved}
-                                >
-                                    Setujui
-                                </button>
-                                <button
-                                    className="reject-btn"
-                                    onClick={handleReject}
-                                    disabled={!selected || selected.NIP_VALIDATOR_PROGKER || selected.STATUS_APPROVAL === "Ditolak"}
-                                >
-                                    Tolak
-                                </button>
+                            <div className="fpd-detail-footer">
+                                <div className="button-group">
+                                    <button
+                                        className="approve-btn"
+                                        onClick={handleApprove}
+                                        disabled={selected.NIP_VALIDATOR_FPD}
+                                    >
+                                        Setujui
+                                    </button>
+                                    <button
+                                        className="reject-btn"
+                                        onClick={handleReject}
+                                        disabled={selected.NIP_VALIDATOR_FPD}
+                                    >
+                                        Tolak
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -354,11 +439,19 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                         <div className={`toast-container ${visible ? "show" : "hide"}`}>
                             <div className="toast-box">
                                 <span className="toast-text">
-                                    <span className="toast-text">
-                                        {toast.type === "error"
-                                            ? toast.message
-                                            : "FPD berhasil disetujui"}
-                                    </span>
+                                    {toast.type === "error" ? (
+                                        <>
+                                            <span className="highlight danger">
+                                                {toast.message}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="highlight success">
+                                                {toast.message}
+                                            </span>
+                                        </>
+                                    )}
                                 </span>
                             </div>
                         </div>

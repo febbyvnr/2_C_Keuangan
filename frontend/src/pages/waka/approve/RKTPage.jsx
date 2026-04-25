@@ -318,7 +318,19 @@ export default function RKTPage({ setHasPending }) {
                                             Rp {Number(item.NOMINAL || 0).toLocaleString("id-ID")}
                                         </td>
                                         <td>
-                                            {(() => {const status = getStatus(item);return (<span className={`status ${status.className}`}>{status.label}</span>);})()}
+                                            {(() => {
+                                                const status = getStatus(item);
+                                                if (status.label === "Pending") {
+                                                    return (
+                                                        <i className="bi bi-exclamation-circle-fill icon-danger icon-warning-animate"></i>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={`status ${status.className}`}>
+                                                        {status.label}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                     </tr>
                                 ))}
