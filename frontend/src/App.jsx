@@ -47,7 +47,7 @@ import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
 import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
-
+import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import "./index.css";
 
 function BendaharaLayout() {
@@ -131,7 +131,7 @@ export default function App() {
                 <Route path="/pic/guru/rkt" element={<RKT />} />
                 <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
                 <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-                <Route path="/pic/guru/rka" element={<RKA />} />
+                <Route path="/pic/guru/rka" element={<RKAPicGuru />} />
 
                 {/* WAKA */}
                 {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
