@@ -279,7 +279,7 @@ export default function RKTPage({ setHasPending }) {
             </div>
             <div className="rkt-approval-grid">
                 <div className="rkt-table-section">
-                    <div className="table-wrapper">
+                    <div className="rkt-table-wrapper">
                         <table>
                             <thead>
                                 <tr>

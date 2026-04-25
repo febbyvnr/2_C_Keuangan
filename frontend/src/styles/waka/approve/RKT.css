@@ -24,7 +24,7 @@
     border-radius: 12px;
 }
 
-.table-wrapper {
+.rkt-table-wrapper {
     max-height: 580px;
     overflow-y: auto;
 }
