@@ -4,7 +4,10 @@ namespace PhpOffice\PhpSpreadsheet\Cell;
 
 use PhpOffice\PhpSpreadsheet\Calculation\Calculation;
 use PhpOffice\PhpSpreadsheet\Calculation\Engine\FormattedNumber;
+<<<<<<< HEAD
+=======
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
@@ -16,10 +19,15 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
      *
      * @param Cell $cell Cell to bind value to
      * @param mixed $value Value to bind in cell
+<<<<<<< HEAD
+     */
+    public function bindValue(Cell $cell, mixed $value = null): bool
+=======
      *
      * @return bool
      */
     public function bindValue(Cell $cell, $value = null)
+>>>>>>> main
     {
         if ($value === null) {
             return parent::bindValue($cell, $value);
@@ -32,7 +40,11 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
         $dataType = parent::dataTypeForValue($value);
 
         // Style logic - strings
+<<<<<<< HEAD
+        if ($dataType === DataType::TYPE_STRING && is_string($value)) {
+=======
         if ($dataType === DataType::TYPE_STRING && !$value instanceof RichText) {
+>>>>>>> main
             //    Test for booleans using locale-setting
             if (StringHelper::strToUpper($value) === Calculation::getTRUE()) {
                 $cell->setValueExplicit(true, DataType::TYPE_BOOL);
@@ -45,9 +57,15 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
             }
 
             // Check for fractions
+<<<<<<< HEAD
+            if (preg_match('~^([+-]?)\s*(\d+)\s*/\s*(\d+)$~', $value, $matches)) {
+                return $this->setProperFraction($matches, $cell);
+            } elseif (preg_match('~^([+-]?)(\d+)\s+(\d+)\s*/\s*(\d+)$~', $value, $matches)) {
+=======
             if (preg_match('/^([+-]?)\s*(\d+)\s?\/\s*(\d+)$/', $value, $matches)) {
                 return $this->setProperFraction($matches, $cell);
             } elseif (preg_match('/^([+-]?)(\d*) +(\d*)\s?\/\s*(\d*)$/', $value, $matches)) {
+>>>>>>> main
                 return $this->setImproperFraction($matches, $cell);
             }
 
@@ -56,6 +74,22 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
             $thousandsSeparator = preg_quote(StringHelper::getThousandsSeparator(), '/');
 
             // Check for percentage
+<<<<<<< HEAD
+            if (preg_match('/^\-?\d*' . $decimalSeparator . '?\d*\s?\%$/', (string) preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value))) {
+                return $this->setPercentage((string) preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value), $cell);
+            }
+
+            // Check for currency
+            if (preg_match(FormattedNumber::currencyMatcherRegexp(), (string) preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value), $matches, PREG_UNMATCHED_AS_NULL)) {
+                // Convert value to number
+                $sign = ($matches['PrefixedSign'] ?? $matches['PrefixedSign2'] ?? $matches['PostfixedSign']) ?? null;
+                $currencyCode = $matches['PrefixedCurrency'] ?? $matches['PostfixedCurrency'] ?? '';
+                /** @var string */
+                $temp = str_replace([$decimalSeparatorNoPreg, $currencyCode, ' ', '-'], ['.', '', '', ''], (string) preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value));
+                $value = (float) ($sign . trim($temp));
+
+                return $this->setCurrency($value, $cell, $currencyCode);
+=======
             if (preg_match('/^\-?\d*' . $decimalSeparator . '?\d*\s?\%$/', preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value))) {
                 return $this->setPercentage(preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value), $cell);
             }
@@ -68,6 +102,7 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
                 $value = (float) ($sign . trim(str_replace([$decimalSeparatorNoPreg, $currencyCode, ' ', '-'], ['.', '', '', ''], preg_replace('/(\d)' . $thousandsSeparator . '(\d)/u', '$1$2', $value)))); // @phpstan-ignore-line
 
                 return $this->setCurrency($value, $cell, $currencyCode); // @phpstan-ignore-line
+>>>>>>> main
             }
 
             // Check for time without seconds e.g. '9:45', '09:45'
@@ -85,7 +120,11 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
                 // Convert value to number
                 $cell->setValueExplicit($d, DataType::TYPE_NUMERIC);
                 // Determine style. Either there is a time part or not. Look for ':'
+<<<<<<< HEAD
+                if (str_contains($value, ':')) {
+=======
                 if (strpos($value, ':') !== false) {
+>>>>>>> main
                     $formatCode = 'yyyy-mm-dd h:mm';
                 } else {
                     $formatCode = 'yyyy-mm-dd';
@@ -97,7 +136,11 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
             }
 
             // Check for newline character "\n"
+<<<<<<< HEAD
+            if (str_contains($value, "\n")) {
+=======
             if (strpos($value, "\n") !== false) {
+>>>>>>> main
                 $cell->setValueExplicit($value, DataType::TYPE_STRING);
                 // Set style
                 $cell->getWorksheet()->getStyle($cell->getCoordinate())
@@ -111,6 +154,10 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
         return parent::bindValue($cell, $value);
     }
 
+<<<<<<< HEAD
+    /** @param array{0: string, 1: ?string, 2: numeric-string, 3: numeric-string, 4: numeric-string} $matches */
+=======
+>>>>>>> main
     protected function setImproperFraction(array $matches, Cell $cell): bool
     {
         // Convert value to number
@@ -131,6 +178,10 @@ class AdvancedValueBinder extends DefaultValueBinder implements IValueBinder
         return true;
     }
 
+<<<<<<< HEAD
+    /** @param array{0: string, 1: ?string, 2: numeric-string, 3: numeric-string} $matches */
+=======
+>>>>>>> main
     protected function setProperFraction(array $matches, Cell $cell): bool
     {
         // Convert value to number

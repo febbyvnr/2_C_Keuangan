@@ -31,6 +31,20 @@ class Xls extends BaseWriter
 {
     /**
      * PhpSpreadsheet object.
+<<<<<<< HEAD
+     */
+    private Spreadsheet $spreadsheet;
+
+    /**
+     * Total number of shared strings in workbook.
+     */
+    private int $strTotal = 0;
+
+    /**
+     * Number of unique shared strings in workbook.
+     */
+    private int $strUnique = 0;
+=======
      *
      * @var Spreadsheet
      */
@@ -49,17 +63,34 @@ class Xls extends BaseWriter
      * @var int
      */
     private $strUnique = 0;
+>>>>>>> main
 
     /**
      * Array of unique shared strings in workbook.
      *
+<<<<<<< HEAD
+     * @var array<string, int>
+     */
+    private array $strTable = [];
+=======
      * @var array
      */
     private $strTable = [];
+>>>>>>> main
 
     /**
      * Color cache. Mapping between RGB value and color index.
      *
+<<<<<<< HEAD
+     * @var mixed[]
+     */
+    private array $colors;
+
+    /**
+     * Formula parser.
+     */
+    private Parser $parser;
+=======
      * @var array
      */
     private $colors;
@@ -70,10 +101,28 @@ class Xls extends BaseWriter
      * @var Parser
      */
     private $parser;
+>>>>>>> main
 
     /**
      * Identifier clusters for drawings. Used in MSODRAWINGGROUP record.
      *
+<<<<<<< HEAD
+     * @var mixed[]
+     */
+    private array $IDCLs;
+
+    /**
+     * Basic OLE object summary information.
+     */
+    private string $summaryInformation;
+
+    /**
+     * Extended OLE object document summary information.
+     */
+    private string $documentSummaryInformation;
+
+    private Workbook $writerWorkbook;
+=======
      * @var array
      */
     private $IDCLs;
@@ -96,11 +145,16 @@ class Xls extends BaseWriter
      * @var Workbook
      */
     private $writerWorkbook;
+>>>>>>> main
 
     /**
      * @var Worksheet[]
      */
+<<<<<<< HEAD
+    private array $writerWorksheets;
+=======
     private $writerWorksheets;
+>>>>>>> main
 
     /**
      * Create a new Xls Writer.
@@ -111,7 +165,11 @@ class Xls extends BaseWriter
     {
         $this->spreadsheet = $spreadsheet;
 
+<<<<<<< HEAD
+        $this->parser = new Parser($spreadsheet);
+=======
         $this->parser = new Xls\Parser($spreadsheet);
+>>>>>>> main
     }
 
     /**
@@ -135,15 +193,26 @@ class Xls extends BaseWriter
         $this->colors = [];
 
         // Initialise workbook writer
+<<<<<<< HEAD
+        $this->writerWorkbook = new Workbook($this->spreadsheet, $this->strTotal, $this->strUnique, $this->strTable, $this->colors, $this->parser);
+=======
         $this->writerWorkbook = new Xls\Workbook($this->spreadsheet, $this->strTotal, $this->strUnique, $this->strTable, $this->colors, $this->parser);
+>>>>>>> main
 
         // Initialise worksheet writers
         $countSheets = $this->spreadsheet->getSheetCount();
         for ($i = 0; $i < $countSheets; ++$i) {
+<<<<<<< HEAD
+            $this->writerWorksheets[$i] = new Worksheet($this->strTotal, $this->strUnique, $this->strTable, $this->colors, $this->parser, $this->preCalculateFormulas, $this->spreadsheet->getSheet($i), $this->writerWorkbook);
+        }
+
+        // build Escher objects. Escher objects for worksheets need to be built before Escher object for workbook.
+=======
             $this->writerWorksheets[$i] = new Xls\Worksheet($this->strTotal, $this->strUnique, $this->strTable, $this->colors, $this->parser, $this->preCalculateFormulas, $this->spreadsheet->getSheet($i));
         }
 
         // build Escher objects. Escher objects for workbooks needs to be build before Escher object for workbook.
+>>>>>>> main
         $this->buildWorksheetEschers();
         $this->buildWorkbookEscher();
 
@@ -159,19 +228,48 @@ class Xls extends BaseWriter
             $this->writerWorkbook->addXfWriter($style, false);
         }
 
+<<<<<<< HEAD
+        // add fonts from rich text elements
+=======
         // add fonts from rich text eleemnts
+>>>>>>> main
         for ($i = 0; $i < $countSheets; ++$i) {
             foreach ($this->writerWorksheets[$i]->phpSheet->getCellCollection()->getCoordinates() as $coordinate) {
                 /** @var Cell $cell */
                 $cell = $this->writerWorksheets[$i]->phpSheet->getCellCollection()->get($coordinate);
                 $cVal = $cell->getValue();
+<<<<<<< HEAD
+                if ($cVal instanceof RichText && (string) $cVal === '') {
+                    $cVal = '';
+                }
                 if ($cVal instanceof RichText) {
+                    $active = $this->spreadsheet->getActiveSheetIndex();
+                    $sheet = $cell->getWorksheet();
+                    $selected = $sheet->getSelectedCells();
+                    $font = $cell->getStyle()->getFont();
+                    $this->writerWorksheets[$i]
+                        ->fontHashIndex[$font->getHashCode()] = $this->writerWorkbook->addFont($font);
+                    $sheet->setSelectedCells($selected);
+                    if ($active > -1) {
+                        $this->spreadsheet
+                            ->setActiveSheetIndex($active);
+                    }
+=======
+                if ($cVal instanceof RichText) {
+>>>>>>> main
                     $elements = $cVal->getRichTextElements();
                     foreach ($elements as $element) {
                         if ($element instanceof Run) {
                             $font = $element->getFont();
                             if ($font !== null) {
+<<<<<<< HEAD
+                                $this->writerWorksheets[$i]
+                                    ->fontHashIndex[
+                                        $font->getHashCode()
+                                    ] = $this->writerWorkbook->addFont($font);
+=======
                                 $this->writerWorksheets[$i]->fontHashIndex[$font->getHashCode()] = $this->writerWorkbook->addFont($font);
+>>>>>>> main
                             }
                         }
                     }
@@ -318,6 +416,10 @@ class Xls extends BaseWriter
                 $twoAnchor = \PhpOffice\PhpSpreadsheet\Shared\Xls::oneAnchor2twoAnchor($sheet, $coordinates, $offsetX, $offsetY, $width, $height);
 
                 if (is_array($twoAnchor)) {
+<<<<<<< HEAD
+                    /** @var array{startCoordinates: string, startOffsetX: float|int, startOffsetY: float|int, endCoordinates: string, endOffsetX: float|int, endOffsetY: float|int} $twoAnchor */
+=======
+>>>>>>> main
                     $spContainer->setStartCoordinates($twoAnchor['startCoordinates']);
                     $spContainer->setStartOffsetX($twoAnchor['startOffsetX']);
                     $spContainer->setStartOffsetY($twoAnchor['startOffsetY']);
@@ -339,7 +441,11 @@ class Xls extends BaseWriter
                 while ($iInc <= $iNumColEnd) {
                     ++$countShapes[$sheetIndex];
 
+<<<<<<< HEAD
+                    // create a Drawing Object for the dropdown
+=======
                     // create an Drawing Object for the dropdown
+>>>>>>> main
                     $oDrawing = new BaseDrawing();
                     // get the coordinates of drawing
                     $cDrawing = Coordinate::stringFromColumnIndex($iInc) . $rangeBounds[0][1];
@@ -413,7 +519,11 @@ class Xls extends BaseWriter
         }
 
         ob_start();
+<<<<<<< HEAD
+        call_user_func($renderingFunction, $drawing->getImageResource()); // @phpstan-ignore-line
+=======
         call_user_func($renderingFunction, $drawing->getImageResource());
+>>>>>>> main
         $blipData = ob_get_contents();
         ob_end_clean();
 
@@ -427,6 +537,11 @@ class Xls extends BaseWriter
         $bstoreContainer->addBSE($BSE);
     }
 
+<<<<<<< HEAD
+    private static int $two = 2; // phpstan silliness
+
+=======
+>>>>>>> main
     private function processDrawing(BstoreContainer &$bstoreContainer, Drawing $drawing): void
     {
         $blipType = 0;
@@ -434,7 +549,11 @@ class Xls extends BaseWriter
         $filename = $drawing->getPath();
 
         $imageSize = getimagesize($filename);
+<<<<<<< HEAD
+        $imageFormat = empty($imageSize) ? 0 : ($imageSize[self::$two] ?? 0);
+=======
         $imageFormat = empty($imageSize) ? 0 : ($imageSize[2] ?? 0);
+>>>>>>> main
 
         switch ($imageFormat) {
             case 1: // GIF, not supported by BIFF8, we convert to PNG
@@ -569,10 +688,15 @@ class Xls extends BaseWriter
 
     /**
      * Build the OLE Part for DocumentSummary Information.
+<<<<<<< HEAD
+     */
+    private function writeDocumentSummaryInformation(): string
+=======
      *
      * @return string
      */
     private function writeDocumentSummaryInformation()
+>>>>>>> main
     {
         // offset: 0; size: 2; must be 0xFE 0xFF (UTF-16 LE byte order mark)
         $data = pack('v', 0xFFFE);
@@ -698,7 +822,11 @@ class Xls extends BaseWriter
         // value
         $dataProp .= 'Feuilles de calcul';
         // vtUnalignedString - headingParts
+<<<<<<< HEAD
+        // wType : 0x0003 = 32-bit signed integer
+=======
         // wType : 0x0003 = 32 bit signed integer
+>>>>>>> main
         $dataProp .= pack('v', 0x0300);
         // padding
         $dataProp .= pack('v', 0x0000);
@@ -751,12 +879,15 @@ class Xls extends BaseWriter
                 $dataSection_Content .= $dataProp['data']['data'];
 
                 $dataSection_Content_Offset += 4 + 4 + strlen($dataProp['data']['data']);
+<<<<<<< HEAD
+=======
                 /* Condition below can never be true
                 } elseif ($dataProp['type']['data'] == 0x40) { // Filetime (64-bit value representing the number of 100-nanosecond intervals since January 1, 1601)
                     $dataSection_Content .= $dataProp['data']['data'];
 
                     $dataSection_Content_Offset += 4 + 8;
                 */
+>>>>>>> main
             } else {
                 $dataSection_Content .= $dataProp['data']['data'];
 
@@ -779,10 +910,15 @@ class Xls extends BaseWriter
         return $data;
     }
 
+<<<<<<< HEAD
+    /** @param array<int, array{summary: array{pack: string, data: mixed}, offset: array{pack: string}, type: array{pack: string, data: int}, data: array{data: mixed}}> $dataSection */
+    private function writeSummaryPropOle(float|int $dataProp, int &$dataSection_NumProps, array &$dataSection, int $sumdata, int $typdata): void
+=======
     /**
      * @param float|int $dataProp
      */
     private function writeSummaryPropOle($dataProp, int &$dataSection_NumProps, array &$dataSection, int $sumdata, int $typdata): void
+>>>>>>> main
     {
         if ($dataProp) {
             $dataSection[] = [
@@ -795,6 +931,10 @@ class Xls extends BaseWriter
         }
     }
 
+<<<<<<< HEAD
+    /** @param array<int, array{summary: array{pack: string, data: mixed}, offset: array{pack: string}, type: array{pack: string, data: int}, data: array{data: mixed}}> $dataSection */
+=======
+>>>>>>> main
     private function writeSummaryProp(string $dataProp, int &$dataSection_NumProps, array &$dataSection, int $sumdata, int $typdata): void
     {
         if ($dataProp) {
@@ -810,10 +950,15 @@ class Xls extends BaseWriter
 
     /**
      * Build the OLE Part for Summary Information.
+<<<<<<< HEAD
+     */
+    private function writeSummaryInformation(): string
+=======
      *
      * @return string
      */
     private function writeSummaryInformation()
+>>>>>>> main
     {
         // offset: 0; size: 2; must be 0xFE 0xFF (UTF-16 LE byte order mark)
         $data = pack('v', 0xFFFE);
@@ -849,6 +994,16 @@ class Xls extends BaseWriter
         ++$dataSection_NumProps;
 
         $props = $this->spreadsheet->getProperties();
+<<<<<<< HEAD
+        $this->writeSummaryProp($props->getTitle(), $dataSection_NumProps, $dataSection, 0x02, 0x1E);
+        $this->writeSummaryProp($props->getSubject(), $dataSection_NumProps, $dataSection, 0x03, 0x1E);
+        $this->writeSummaryProp($props->getCreator(), $dataSection_NumProps, $dataSection, 0x04, 0x1E);
+        $this->writeSummaryProp($props->getKeywords(), $dataSection_NumProps, $dataSection, 0x05, 0x1E);
+        $this->writeSummaryProp($props->getDescription(), $dataSection_NumProps, $dataSection, 0x06, 0x1E);
+        $this->writeSummaryProp($props->getLastModifiedBy(), $dataSection_NumProps, $dataSection, 0x08, 0x1E);
+        $this->writeSummaryPropOle($props->getCreated(), $dataSection_NumProps, $dataSection, 0x0C, 0x40);
+        $this->writeSummaryPropOle($props->getModified(), $dataSection_NumProps, $dataSection, 0x0D, 0x40);
+=======
         $this->writeSummaryProp($props->getTitle(), $dataSection_NumProps, $dataSection, 0x02, 0x1e);
         $this->writeSummaryProp($props->getSubject(), $dataSection_NumProps, $dataSection, 0x03, 0x1e);
         $this->writeSummaryProp($props->getCreator(), $dataSection_NumProps, $dataSection, 0x04, 0x1e);
@@ -857,6 +1012,7 @@ class Xls extends BaseWriter
         $this->writeSummaryProp($props->getLastModifiedBy(), $dataSection_NumProps, $dataSection, 0x08, 0x1e);
         $this->writeSummaryPropOle($props->getCreated(), $dataSection_NumProps, $dataSection, 0x0c, 0x40);
         $this->writeSummaryPropOle($props->getModified(), $dataSection_NumProps, $dataSection, 0x0d, 0x40);
+>>>>>>> main
 
         //    Security
         $dataSection[] = [
@@ -872,6 +1028,10 @@ class Xls extends BaseWriter
         //        8 * $dataSection_NumProps (8 =  ID (4) + OffSet(4))
         $dataSection_Content_Offset = 8 + $dataSection_NumProps * 8;
         foreach ($dataSection as $dataProp) {
+<<<<<<< HEAD
+            /** @var array{data: array{data: string, length: int}, summary: array{pack: string, data: string}, offset: array{pack: string}, type: array{data: int, pack: string}} $dataProp */
+=======
+>>>>>>> main
             // Summary
             $dataSection_Summary .= pack($dataProp['summary']['pack'], $dataProp['summary']['data']);
             // Offset

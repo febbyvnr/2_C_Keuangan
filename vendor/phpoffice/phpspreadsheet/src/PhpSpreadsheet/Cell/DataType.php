@@ -17,13 +17,21 @@ class DataType
     const TYPE_INLINE = 'inlineStr';
     const TYPE_ERROR = 'e';
     const TYPE_ISO_DATE = 'd';
+<<<<<<< HEAD
+    const TYPE_DRAWING_IN_CELL = 'drawingCell';
+=======
+>>>>>>> main
 
     /**
      * List of error codes.
      *
      * @var array<string, int>
      */
+<<<<<<< HEAD
+    private static array $errorCodes = [
+=======
     private static $errorCodes = [
+>>>>>>> main
         '#NULL!' => 0,
         '#DIV/0!' => 1,
         '#VALUE!' => 2,
@@ -41,7 +49,11 @@ class DataType
      *
      * @return array<string, int>
      */
+<<<<<<< HEAD
+    public static function getErrorCodes(): array
+=======
     public static function getErrorCodes()
+>>>>>>> main
     {
         return self::$errorCodes;
     }
@@ -53,7 +65,11 @@ class DataType
      *
      * @return RichText|string Sanitized value
      */
+<<<<<<< HEAD
+    public static function checkString(null|RichText|string $textValue, bool $preserveCr = false): RichText|string
+=======
     public static function checkString($textValue)
+>>>>>>> main
     {
         if ($textValue instanceof RichText) {
             // TODO: Sanitize Rich-Text string (max. character count is 32,767)
@@ -64,7 +80,13 @@ class DataType
         $textValue = StringHelper::substring((string) $textValue, 0, self::MAX_STRING_LENGTH);
 
         // we require that newline is represented as "\n" in core, not as "\r\n" or "\r"
+<<<<<<< HEAD
+        if (!$preserveCr) {
+            $textValue = str_replace(["\r\n", "\r"], "\n", $textValue);
+        }
+=======
         $textValue = str_replace(["\r\n", "\r"], "\n", $textValue);
+>>>>>>> main
 
         return $textValue;
     }
@@ -76,12 +98,22 @@ class DataType
      *
      * @return string Sanitized value
      */
+<<<<<<< HEAD
+    public static function checkErrorCode(mixed $value): string
+    {
+        $default = '#NULL!';
+        $value = ($value === null) ? $default : StringHelper::convertToString($value, false, $default);
+
+        if (!isset(self::$errorCodes[$value])) {
+            $value = $default;
+=======
     public static function checkErrorCode($value)
     {
         $value = (string) $value;
 
         if (!isset(self::$errorCodes[$value])) {
             $value = '#NULL!';
+>>>>>>> main
         }
 
         return $value;

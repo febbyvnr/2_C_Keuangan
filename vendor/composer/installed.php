@@ -3,7 +3,11 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
+<<<<<<< HEAD
+        'reference' => '7df925ebb79ea19973d33379619f70543695c1c9',
+=======
         'reference' => 'de3a8d1251e64c58b1935beb01cdb21aa4e556d6',
+>>>>>>> main
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +17,11 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
+<<<<<<< HEAD
+            'reference' => '7df925ebb79ea19973d33379619f70543695c1c9',
+=======
             'reference' => 'de3a8d1251e64c58b1935beb01cdb21aa4e556d6',
+>>>>>>> main
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -46,6 +54,8 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+<<<<<<< HEAD
+=======
         'composer/semver' => array(
             'pretty_version' => '3.4.4',
             'version' => '3.4.4.0',
@@ -55,6 +65,7 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+>>>>>>> main
         'doctrine/inflector' => array(
             'pretty_version' => '2.1.0',
             'version' => '2.1.0.0',
@@ -226,6 +237,8 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+<<<<<<< HEAD
+=======
         'maatwebsite/excel' => array(
             'pretty_version' => '3.1.68',
             'version' => '3.1.68.0',
@@ -235,6 +248,7 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+>>>>>>> main
         'maennchen/zipstream-php' => array(
             'pretty_version' => '3.1.2',
             'version' => '3.1.2.0',
@@ -281,9 +295,15 @@
             'dev_requirement' => false,
         ),
         'phpoffice/phpspreadsheet' => array(
+<<<<<<< HEAD
+            'pretty_version' => '5.5.0',
+            'version' => '5.5.0.0',
+            'reference' => 'eecd31b885a1c8192f12738130f85bbc6e8906ba',
+=======
             'pretty_version' => '1.30.3',
             'version' => '1.30.3.0',
             'reference' => 'd28d4827f934469e7ca4de940ab0abd0788d1e65',
+>>>>>>> main
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpoffice/phpspreadsheet',
             'aliases' => array(),

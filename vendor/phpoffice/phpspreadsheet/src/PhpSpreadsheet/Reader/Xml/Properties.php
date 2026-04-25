@@ -8,16 +8,24 @@ use SimpleXMLElement;
 
 class Properties
 {
+<<<<<<< HEAD
+    protected Spreadsheet $spreadsheet;
+=======
     /**
      * @var Spreadsheet
      */
     protected $spreadsheet;
+>>>>>>> main
 
     public function __construct(Spreadsheet $spreadsheet)
     {
         $this->spreadsheet = $spreadsheet;
     }
 
+<<<<<<< HEAD
+    /** @param string[] $namespaces */
+=======
+>>>>>>> main
     public function readProperties(SimpleXMLElement $xml, array $namespaces): void
     {
         $this->readStandardProperties($xml);
@@ -37,6 +45,10 @@ class Properties
         }
     }
 
+<<<<<<< HEAD
+    /** @param string[] $namespaces */
+=======
+>>>>>>> main
     protected function readCustomProperties(SimpleXMLElement $xml, array $namespaces): void
     {
         if (isset($xml->CustomDocumentProperties) && is_iterable($xml->CustomDocumentProperties[0])) {
@@ -146,6 +158,10 @@ class Properties
         $docProps->setCustomProperty($propertyName, $propertyValue, $propertyType);
     }
 
+<<<<<<< HEAD
+    /** @param string[] $hex */
+=======
+>>>>>>> main
     protected function hex2str(array $hex): string
     {
         return mb_chr((int) hexdec($hex[1]), 'UTF-8');

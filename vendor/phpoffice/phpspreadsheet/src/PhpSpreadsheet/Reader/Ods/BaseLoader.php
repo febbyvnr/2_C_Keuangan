@@ -7,6 +7,11 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 abstract class BaseLoader
 {
+<<<<<<< HEAD
+    protected Spreadsheet $spreadsheet;
+
+    protected string $tableNs;
+=======
     /**
      * @var Spreadsheet
      */
@@ -16,6 +21,7 @@ abstract class BaseLoader
      * @var string
      */
     protected $tableNs;
+>>>>>>> main
 
     public function __construct(Spreadsheet $spreadsheet, string $tableNs)
     {

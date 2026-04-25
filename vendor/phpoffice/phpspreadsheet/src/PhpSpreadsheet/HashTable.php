@@ -12,21 +12,33 @@ class HashTable
      *
      * @var array<string, T>
      */
+<<<<<<< HEAD
+    protected array $items = [];
+=======
     protected $items = [];
+>>>>>>> main
 
     /**
      * HashTable key map.
      *
      * @var array<int, string>
      */
+<<<<<<< HEAD
+    protected array $keyMap = [];
+=======
     protected $keyMap = [];
+>>>>>>> main
 
     /**
      * Create a new HashTable.
      *
      * @param T[] $source Optional source array to create HashTable from
      */
+<<<<<<< HEAD
+    public function __construct(?array $source = [])
+=======
     public function __construct($source = null)
+>>>>>>> main
     {
         if ($source !== null) {
             // Create HashTable
@@ -101,22 +113,33 @@ class HashTable
 
     /**
      * Count.
+<<<<<<< HEAD
+     */
+    public function count(): int
+=======
      *
      * @return int
      */
     public function count()
+>>>>>>> main
     {
         return count($this->items);
     }
 
     /**
      * Get index for hash code.
+<<<<<<< HEAD
+     */
+    public function getIndexForHashCode(string $hashCode): false|int
+    {
+=======
      *
      * @return false|int Index
      */
     public function getIndexForHashCode(string $hashCode)
     {
         // Scrutinizer thinks the following could return string. It is wrong.
+>>>>>>> main
         return array_search($hashCode, $this->keyMap, true);
     }
 
@@ -125,7 +148,11 @@ class HashTable
      *
      * @return null|T
      */
+<<<<<<< HEAD
+    public function getByIndex(int $index): ?IComparable
+=======
     public function getByIndex(int $index)
+>>>>>>> main
     {
         if (isset($this->keyMap[$index])) {
             return $this->getByHashCode($this->keyMap[$index]);
@@ -139,7 +166,11 @@ class HashTable
      *
      * @return null|T
      */
+<<<<<<< HEAD
+    public function getByHashCode(string $hashCode): ?IComparable
+=======
     public function getByHashCode(string $hashCode)
+>>>>>>> main
     {
         if (isset($this->items[$hashCode])) {
             return $this->items[$hashCode];
@@ -153,7 +184,11 @@ class HashTable
      *
      * @return T[]
      */
+<<<<<<< HEAD
+    public function toArray(): array
+=======
     public function toArray()
+>>>>>>> main
     {
         return $this->items;
     }

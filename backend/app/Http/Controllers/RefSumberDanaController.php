@@ -12,7 +12,14 @@ class RefSumberDanaController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = RefSumberDana::all();
+            $data = RefSumberDana::withCount(['dtlProgramKerja', 'trPenerimaan'])->get();
+            $data->map(function ($item) {
+                $item->is_used =
+                    ($item->dtl_program_kerja_count > 0 ||
+                    $item->tr_penerimaan_count > 0) ||
+                $item->children()->exists();
+                return $item;
+            });
             return response()->json([
                 'data' => $data,
             ]);
@@ -90,7 +97,6 @@ class RefSumberDanaController extends Controller
             $lastId = RefSumberDana::max('ID_REF_DANA');
             $newId = $lastId ? $lastId + 1 : 1;
             $data = RefSumberDana::create([
-                'ID_REF_DANA' => $newId,
                 'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA'],
                 'DESKRIPSI_SUMBER_DANA' => $validated['DESKRIPSI_SUMBER_DANA'],
             ]);
@@ -121,12 +127,6 @@ class RefSumberDanaController extends Controller
             $validated = $request->validate([
                 'REF_ID_REF_DANA' => 'nullable|integer|exists:ref_sumber_dana,ID_REF_DANA',
                 'DESKRIPSI_SUMBER_DANA' => 'required|string|max:255',
-            ],
-            [
-                // 'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
-                'DESKRIPSI_SUMBER_DANA.required' => 'Deskripsi wajib diisi.',
             ]);
             $data->update($validated);
             return response()->json([
@@ -155,9 +155,13 @@ class RefSumberDanaController extends Controller
                     'message' => 'Data tidak ditemukan'
                 ], 404);
             }
-            if ($data->dtlProgramKerja()->exists() || $data->trPenerimaan()->exists()) {
+            if (
+                $data->dtlProgramKerja()->exists() ||
+                $data->trPenerimaan()->exists() ||
+                $data->children()->exists()
+            ) {
                 return response()->json([
-                    'message' => 'Data tidak bisa dihapus karena masih digunakan',
+                    'message' => 'Tidak bisa dihapus karena masih digunakan atau punya child'
                 ], 400);
             }
             $data->delete();

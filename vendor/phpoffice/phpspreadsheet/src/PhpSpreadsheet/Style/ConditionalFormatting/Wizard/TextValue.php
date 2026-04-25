@@ -40,6 +40,13 @@ class TextValue extends WizardAbstract implements WizardInterface
         Conditional::OPERATOR_ENDSWITH => 'RIGHT(%s,LEN(%s))=%s',
     ];
 
+<<<<<<< HEAD
+    protected string $operator;
+
+    protected string $operand;
+
+    protected string $operandValueType;
+=======
     /** @var string */
     protected $operator;
 
@@ -50,6 +57,7 @@ class TextValue extends WizardAbstract implements WizardInterface
      * @var string
      */
     protected $operandValueType;
+>>>>>>> main
 
     public function __construct(string $cellRange)
     {
@@ -85,8 +93,13 @@ class TextValue extends WizardAbstract implements WizardInterface
             : $this->cellConditionCheck($this->operand);
 
         if (
+<<<<<<< HEAD
+            $this->operator === Conditional::OPERATOR_CONTAINSTEXT
+            || $this->operator === Conditional::OPERATOR_NOTCONTAINS
+=======
             $this->operator === Conditional::OPERATOR_CONTAINSTEXT ||
             $this->operator === Conditional::OPERATOR_NOTCONTAINS
+>>>>>>> main
         ) {
             $this->expression = sprintf(self::EXPRESSIONS[$this->operator], $operand, $this->referenceCell);
         } else {
@@ -131,8 +144,13 @@ class TextValue extends WizardAbstract implements WizardInterface
             $wizard->operandValueType = Wizard::VALUE_TYPE_CELL;
             $condition = self::reverseAdjustCellRef($condition, $cellRange);
         } elseif (
+<<<<<<< HEAD
+            preg_match('/\(\)/', $condition)
+            || preg_match('/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/i', $condition)
+=======
             preg_match('/\(\)/', $condition) ||
             preg_match('/' . Calculation::CALCULATION_REGEXP_CELLREF_RELATIVE . '/i', $condition)
+>>>>>>> main
         ) {
             $wizard->operandValueType = Wizard::VALUE_TYPE_FORMULA;
         }
@@ -142,10 +160,16 @@ class TextValue extends WizardAbstract implements WizardInterface
     }
 
     /**
+<<<<<<< HEAD
+     * @param mixed[] $arguments
+     */
+    public function __call(string $methodName, array $arguments): self
+=======
      * @param string $methodName
      * @param mixed[] $arguments
      */
     public function __call($methodName, $arguments): self
+>>>>>>> main
     {
         if (!isset(self::MAGIC_OPERATIONS[$methodName])) {
             throw new Exception('Invalid Operation for Text Value CF Rule Wizard');
@@ -154,9 +178,21 @@ class TextValue extends WizardAbstract implements WizardInterface
         $this->operator(self::MAGIC_OPERATIONS[$methodName]);
         //$this->operand(...$arguments);
         if (count($arguments) < 2) {
+<<<<<<< HEAD
+            /** @var string */
+            $arg0 = $arguments[0];
+            $this->operand($arg0);
+        } else {
+            /** @var string */
+            $arg0 = $arguments[0];
+            /** @var string */
+            $arg1 = $arguments[1];
+            $this->operand($arg0, $arg1);
+=======
             $this->operand($arguments[0]);
         } else {
             $this->operand($arguments[0], $arguments[1]);
+>>>>>>> main
         }
 
         return $this;

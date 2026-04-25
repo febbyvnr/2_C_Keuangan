@@ -46,11 +46,19 @@ class Conditional
      *
      * @return mixed The value of returnIfTrue or returnIfFalse determined by condition
      */
+<<<<<<< HEAD
+    public static function statementIf(mixed $condition = true, mixed $returnIfTrue = 0, mixed $returnIfFalse = false): mixed
+    {
+        $condition = ($condition === null) ? true : Functions::flattenSingleValue($condition);
+
+        if (ErrorValue::isError($condition, true)) {
+=======
     public static function statementIf($condition = true, $returnIfTrue = 0, $returnIfFalse = false)
     {
         $condition = ($condition === null) ? true : Functions::flattenSingleValue($condition);
 
         if (ErrorValue::isError($condition)) {
+>>>>>>> main
             return $condition;
         }
 
@@ -86,7 +94,11 @@ class Conditional
      *
      * @return mixed The value of matched expression
      */
+<<<<<<< HEAD
+    public static function statementSwitch(mixed ...$arguments): mixed
+=======
     public static function statementSwitch(...$arguments)
+>>>>>>> main
     {
         $result = ExcelError::VALUE();
 
@@ -132,7 +144,11 @@ class Conditional
      *         If an array of values is passed as the $testValue argument, then the returned result will also be
      *            an array with the same dimensions
      */
+<<<<<<< HEAD
+    public static function IFERROR(mixed $testValue = '', mixed $errorpart = ''): mixed
+=======
     public static function IFERROR($testValue = '', $errorpart = '')
+>>>>>>> main
     {
         if (is_array($testValue)) {
             return self::evaluateArrayArgumentsSubset([self::class, __FUNCTION__], 1, $testValue, $errorpart);
@@ -159,7 +175,11 @@ class Conditional
      *         If an array of values is passed as the $testValue argument, then the returned result will also be
      *            an array with the same dimensions
      */
+<<<<<<< HEAD
+    public static function IFNA(mixed $testValue = '', mixed $napart = ''): mixed
+=======
     public static function IFNA($testValue = '', $napart = '')
+>>>>>>> main
     {
         if (is_array($testValue)) {
             return self::evaluateArrayArgumentsSubset([self::class, __FUNCTION__], 1, $testValue, $napart);
@@ -187,7 +207,11 @@ class Conditional
      *
      * @return mixed|string The value of returnIfTrue_n, if testValue_n was true. #N/A if none of testValues was true
      */
+<<<<<<< HEAD
+    public static function IFS(mixed ...$arguments)
+=======
     public static function IFS(...$arguments)
+>>>>>>> main
     {
         $argumentCount = count($arguments);
 

@@ -14,6 +14,20 @@ class Settings
      * Class name of the chart renderer used for rendering charts
      * eg: PhpOffice\PhpSpreadsheet\Chart\Renderer\JpGraph.
      *
+<<<<<<< HEAD
+     * @var null|class-string<IRenderer>
+     */
+    private static ?string $chartRenderer = null;
+
+    /**
+     * The cache implementation to be used for cell collection.
+     */
+    private static ?CacheInterface $cache = null;
+
+    private static mixed $httpClient = null;
+
+    private static mixed $requestFactory = null;
+=======
      * @var ?string
      */
     private static $chartRenderer;
@@ -43,6 +57,7 @@ class Settings
      * @var mixed
      */
     private static $requestFactory;
+>>>>>>> main
 
     /**
      * Set the locale code to use for formula translations and any special formatting.
@@ -51,7 +66,11 @@ class Settings
      *
      * @return bool Success or failure
      */
+<<<<<<< HEAD
+    public static function setLocale(string $locale): bool
+=======
     public static function setLocale(string $locale)
+>>>>>>> main
     {
         return Calculation::getInstance()->setLocale($locale);
     }
@@ -64,22 +83,43 @@ class Settings
     /**
      * Identify to PhpSpreadsheet the external library to use for rendering charts.
      *
+<<<<<<< HEAD
+     * @param class-string<IRenderer> $rendererClassName Class name of the chart renderer
+=======
      * @param string $rendererClassName Class name of the chart renderer
+>>>>>>> main
      *    eg: PhpOffice\PhpSpreadsheet\Chart\Renderer\JpGraph
      */
     public static function setChartRenderer(string $rendererClassName): void
     {
+<<<<<<< HEAD
+        // We want phpstan to validate caller, but still need this test
+        if (!is_a($rendererClassName, IRenderer::class, true)) { //* @phpstan-ignore-line
+=======
         if (!is_a($rendererClassName, IRenderer::class, true)) {
+>>>>>>> main
             throw new Exception('Chart renderer must implement ' . IRenderer::class);
         }
 
         self::$chartRenderer = $rendererClassName;
     }
 
+<<<<<<< HEAD
+    public static function unsetChartRenderer(): void
+    {
+        self::$chartRenderer = null;
+    }
+
+    /**
+     * Return the Chart Rendering Library that PhpSpreadsheet is currently configured to use.
+     *
+     * @return null|class-string<IRenderer> Class name of the chart renderer
+=======
     /**
      * Return the Chart Rendering Library that PhpSpreadsheet is currently configured to use.
      *
      * @return null|string Class name of the chart renderer
+>>>>>>> main
      *    eg: PhpOffice\PhpSpreadsheet\Chart\Renderer\JpGraph
      */
     public static function getChartRenderer(): ?string
@@ -89,6 +129,9 @@ class Settings
 
     public static function htmlEntityFlags(): int
     {
+<<<<<<< HEAD
+        return ENT_COMPAT;
+=======
         return \ENT_COMPAT;
     }
 
@@ -148,6 +191,7 @@ class Settings
     public static function getLibXmlDisableEntityLoader(): bool
     {
         return true;
+>>>>>>> main
     }
 
     /**
@@ -172,20 +216,32 @@ class Settings
 
     public static function useSimpleCacheVersion3(): bool
     {
+<<<<<<< HEAD
+        return (new ReflectionClass(CacheInterface::class))->getMethod('get')->getReturnType() !== null;
+=======
         return
             PHP_MAJOR_VERSION === 8 &&
             (new ReflectionClass(CacheInterface::class))->getMethod('get')->getReturnType() !== null;
+>>>>>>> main
     }
 
     /**
      * Set the HTTP client implementation to be used for network request.
      *
+<<<<<<< HEAD
+     * @deprecated 5.4.0 No replacement.
+     *
+     * @codeCoverageIgnore
+     */
+    public static function setHttpClient(mixed $httpClient, mixed $requestFactory): void
+=======
      * @param mixed $httpClient
      * @param mixed $requestFactory
      *
      * @deprecated 1.30.2 No replacement.
      */
     public static function setHttpClient($httpClient, $requestFactory): void
+>>>>>>> main
     {
         self::$httpClient = $httpClient;
         self::$requestFactory = $requestFactory;
@@ -194,7 +250,13 @@ class Settings
     /**
      * Unset the HTTP client configuration.
      *
+<<<<<<< HEAD
+     * @deprecated 5.4.0 No replacement.
+     *
+     * @codeCoverageIgnore
+=======
      * @deprecated 1.30.2 No replacement.
+>>>>>>> main
      */
     public static function unsetHttpClient(): void
     {
@@ -205,11 +267,19 @@ class Settings
     /**
      * Get the HTTP client implementation to be used for network request.
      *
+<<<<<<< HEAD
+     * @deprecated 5.4.0 No replacement.
+     *
+     * @codeCoverageIgnore
+     */
+    public static function getHttpClient(): mixed
+=======
      * @return mixed
      *
      * @deprecated 1.30.2 No replacement.
      */
     public static function getHttpClient()
+>>>>>>> main
     {
         return self::$httpClient;
     }
@@ -217,11 +287,19 @@ class Settings
     /**
      * Get the HTTP request factory.
      *
+<<<<<<< HEAD
+     * @deprecated 5.4.0 No replacement.
+     *
+     * @codeCoverageIgnore
+     */
+    public static function getRequestFactory(): mixed
+=======
      * @return mixed
      *
      * @deprecated 1.30.2 No replacement.
      */
     public static function getRequestFactory()
+>>>>>>> main
     {
         return self::$requestFactory;
     }

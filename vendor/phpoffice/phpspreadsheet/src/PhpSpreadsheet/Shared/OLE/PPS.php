@@ -29,6 +29,64 @@ use PhpOffice\PhpSpreadsheet\Shared\OLE;
  */
 class PPS
 {
+<<<<<<< HEAD
+    private const ALL_ONE_BITS = (PHP_INT_SIZE > 4) ? 0xFFFFFFFF : -1;
+
+    /**
+     * The PPS index.
+     */
+    public int $No;
+
+    /**
+     * The PPS name (in Unicode).
+     */
+    public string $Name;
+
+    /**
+     * The PPS type. Dir, Root or File.
+     */
+    public int $Type;
+
+    /**
+     * The index of the previous PPS.
+     */
+    public int $PrevPps;
+
+    /**
+     * The index of the next PPS.
+     */
+    public int $NextPps;
+
+    /**
+     * The index of it's first child if this is a Dir or Root PPS.
+     */
+    public int $DirPps;
+
+    /**
+     * A timestamp.
+     */
+    public float|int $Time1st;
+
+    /**
+     * A timestamp.
+     */
+    public float|int $Time2nd;
+
+    /**
+     * Starting block (small or big) for this PPS's data  inside the container.
+     */
+    public ?int $startBlock = null;
+
+    /**
+     * The size of the PPS's data (in bytes).
+     */
+    public int $Size;
+
+    /**
+     * The PPS's data (only used if it's not using a temporary file).
+     */
+    public string $_data = '';
+=======
     /**
      * The PPS index.
      *
@@ -105,10 +163,21 @@ class PPS
      * @var string
      */
     public $_data = '';
+>>>>>>> main
 
     /**
      * Array of child PPS's (only used by Root and Dir PPS's).
      *
+<<<<<<< HEAD
+     * @var mixed[]
+     */
+    public array $children = [];
+
+    /**
+     * Pointer to OLE container.
+     */
+    public OLE $ole;
+=======
      * @var array
      */
     public $children = [];
@@ -119,6 +188,7 @@ class PPS
      * @var OLE
      */
     public $ole;
+>>>>>>> main
 
     /**
      * The constructor.
@@ -132,9 +202,15 @@ class PPS
      * @param null|float|int $time_1st A timestamp
      * @param null|float|int $time_2nd A timestamp
      * @param ?string $data The (usually binary) source data of the PPS
+<<<<<<< HEAD
+     * @param mixed[] $children Array containing children PPS for this PPS
+     */
+    public function __construct(?int $No, ?string $name, ?int $type, ?int $prev, ?int $next, ?int $dir, $time_1st, $time_2nd, ?string $data, array $children)
+=======
      * @param array $children Array containing children PPS for this PPS
      */
     public function __construct($No, $name, $type, $prev, $next, $dir, $time_1st, $time_2nd, $data, $children)
+>>>>>>> main
     {
         $this->No = (int) $No;
         $this->Name = (string) $name;
@@ -154,7 +230,11 @@ class PPS
      *
      * @return int The amount of data (in bytes)
      */
+<<<<<<< HEAD
+    public function getDataLen(): int
+=======
     public function getDataLen()
+>>>>>>> main
     {
         //if (!isset($this->_data)) {
         //    return 0;
@@ -168,7 +248,11 @@ class PPS
      *
      * @return string The binary string
      */
+<<<<<<< HEAD
+    public function getPpsWk(): string
+=======
     public function getPpsWk()
+>>>>>>> main
     {
         $ret = str_pad($this->Name, 64, "\x00");
 
@@ -196,6 +280,20 @@ class PPS
      * Updates index and pointers to previous, next and children PPS's for this
      * PPS. I don't think it'll work with Dir PPS's.
      *
+<<<<<<< HEAD
+     * @param self[] $raList Reference to the array of PPS's for the whole OLE
+     *                          container
+     *
+     * @return int The index for this PPS
+     */
+    public static function savePpsSetPnt(array &$raList, mixed $to_save, int $depth = 0): int
+    {
+        if (!is_array($to_save) || (empty($to_save))) {
+            return self::ALL_ONE_BITS;
+        }
+        /** @var self[] $to_save */
+        if (count($to_save) == 1) {
+=======
      * @param array $raList Reference to the array of PPS's for the whole OLE
      *                          container
      * @param mixed $to_save
@@ -208,12 +306,18 @@ class PPS
         if (!is_array($to_save) || (empty($to_save))) {
             return 0xFFFFFFFF;
         } elseif (count($to_save) == 1) {
+>>>>>>> main
             $cnt = count($raList);
             // If the first entry, it's the root... Don't clone it!
             $raList[$cnt] = ($depth == 0) ? $to_save[0] : clone $to_save[0];
             $raList[$cnt]->No = $cnt;
+<<<<<<< HEAD
+            $raList[$cnt]->PrevPps = self::ALL_ONE_BITS;
+            $raList[$cnt]->NextPps = self::ALL_ONE_BITS;
+=======
             $raList[$cnt]->PrevPps = 0xFFFFFFFF;
             $raList[$cnt]->NextPps = 0xFFFFFFFF;
+>>>>>>> main
             $raList[$cnt]->DirPps = self::savePpsSetPnt($raList, @$raList[$cnt]->children, $depth++);
         } else {
             $iPos = (int) floor(count($to_save) / 2);

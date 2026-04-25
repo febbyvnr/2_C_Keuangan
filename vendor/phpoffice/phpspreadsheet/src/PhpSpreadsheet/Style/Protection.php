@@ -11,6 +11,15 @@ class Protection extends Supervisor
 
     /**
      * Locked.
+<<<<<<< HEAD
+     */
+    protected ?string $locked = null;
+
+    /**
+     * Hidden.
+     */
+    protected ?string $hidden = null;
+=======
      *
      * @var string
      */
@@ -22,6 +31,7 @@ class Protection extends Supervisor
      * @var string
      */
     protected $hidden;
+>>>>>>> main
 
     /**
      * Create a new Protection.
@@ -33,7 +43,11 @@ class Protection extends Supervisor
      *                                    Leave this value at default unless you understand exactly what
      *                                        its ramifications are
      */
+<<<<<<< HEAD
+    public function __construct(bool $isSupervisor = false, bool $isConditional = false)
+=======
     public function __construct($isSupervisor = false, $isConditional = false)
+>>>>>>> main
     {
         // Supervisor?
         parent::__construct($isSupervisor);
@@ -48,12 +62,19 @@ class Protection extends Supervisor
     /**
      * Get the shared style component for the currently active cell in currently active sheet.
      * Only used for style supervisor.
+<<<<<<< HEAD
+     */
+    public function getSharedComponent(): self
+    {
+        /** @var Style $parent */
+=======
      *
      * @return Protection
      */
     public function getSharedComponent()
     {
         /** @var Style */
+>>>>>>> main
         $parent = $this->parent;
 
         return $parent->getSharedComponent()->getProtection();
@@ -62,11 +83,19 @@ class Protection extends Supervisor
     /**
      * Build style array from subcomponents.
      *
+<<<<<<< HEAD
+     * @param mixed[] $array
+     *
+     * @return array{protection: mixed[]}
+     */
+    public function getStyleArray(array $array): array
+=======
      * @param array $array
      *
      * @return array
      */
     public function getStyleArray($array)
+>>>>>>> main
     {
         return ['protection' => $array];
     }
@@ -83,11 +112,19 @@ class Protection extends Supervisor
      * );
      * </code>
      *
+<<<<<<< HEAD
+     * @param array{locked?: string, hidden?: string} $styleArray Array containing style information
+     *
+     * @return $this
+     */
+    public function applyFromArray(array $styleArray): static
+=======
      * @param array $styleArray Array containing style information
      *
      * @return $this
      */
     public function applyFromArray(array $styleArray)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $this->getActiveSheet()->getStyle($this->getSelectedCells())->applyFromArray($this->getStyleArray($styleArray));
@@ -105,10 +142,15 @@ class Protection extends Supervisor
 
     /**
      * Get locked.
+<<<<<<< HEAD
+     */
+    public function getLocked(): ?string
+=======
      *
      * @return string
      */
     public function getLocked()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getLocked();
@@ -124,7 +166,11 @@ class Protection extends Supervisor
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setLocked(string $lockType): static
+=======
     public function setLocked($lockType)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $styleArray = $this->getStyleArray(['locked' => $lockType]);
@@ -138,10 +184,15 @@ class Protection extends Supervisor
 
     /**
      * Get hidden.
+<<<<<<< HEAD
+     */
+    public function getHidden(): ?string
+=======
      *
      * @return string
      */
     public function getHidden()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getHidden();
@@ -157,7 +208,11 @@ class Protection extends Supervisor
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setHidden(string $hiddenType): static
+=======
     public function setHidden($hiddenType)
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             $styleArray = $this->getStyleArray(['hidden' => $hiddenType]);
@@ -174,19 +229,33 @@ class Protection extends Supervisor
      *
      * @return string Hash code
      */
+<<<<<<< HEAD
+    public function getHashCode(): string
+=======
     public function getHashCode()
+>>>>>>> main
     {
         if ($this->isSupervisor) {
             return $this->getSharedComponent()->getHashCode();
         }
 
         return md5(
+<<<<<<< HEAD
+            $this->locked
+            . $this->hidden
+            . __CLASS__
+        );
+    }
+
+    /** @return mixed[] */
+=======
             $this->locked .
             $this->hidden .
             __CLASS__
         );
     }
 
+>>>>>>> main
     protected function exportArray1(): array
     {
         $exportedArray = [];

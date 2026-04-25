@@ -7,6 +7,22 @@ use PhpOffice\PhpSpreadsheet\Calculation\Engine\ArrayArgumentProcessor;
 
 trait ArrayEnabled
 {
+<<<<<<< HEAD
+    private static bool $initializationNeeded = true;
+
+    private static ArrayArgumentHelper $arrayArgumentHelper;
+
+    /**
+     * @param mixed[] $arguments
+     */
+    private static function initialiseHelper(array $arguments): void
+    {
+        if (self::$initializationNeeded === true) {
+            self::$arrayArgumentHelper = new ArrayArgumentHelper();
+            self::$initializationNeeded = false;
+        }
+        self::$arrayArgumentHelper->initialise($arguments);
+=======
     /**
      * @var ArrayArgumentHelper
      */
@@ -21,12 +37,20 @@ trait ArrayEnabled
             self::$arrayArgumentHelper = new ArrayArgumentHelper();
         }
         self::$arrayArgumentHelper->initialise(($arguments === false) ? [] : $arguments);
+>>>>>>> main
     }
 
     /**
      * Handles array argument processing when the function accepts a single argument that can be an array argument.
      * Example use for:
      *         DAYOFMONTH() or FACT().
+<<<<<<< HEAD
+     *
+     * @param mixed[] $values
+     *
+     * @return mixed[]
+=======
+>>>>>>> main
      */
     protected static function evaluateSingleArgumentArray(callable $method, array $values): array
     {
@@ -44,9 +68,15 @@ trait ArrayEnabled
      * Example use for:
      *         ROUND() or DATE().
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    protected static function evaluateArrayArguments(callable $method, mixed ...$arguments): array
+=======
      * @param mixed ...$arguments
      */
     protected static function evaluateArrayArguments(callable $method, ...$arguments): array
+>>>>>>> main
     {
         self::initialiseHelper($arguments);
         $arguments = self::$arrayArgumentHelper->arguments();
@@ -61,9 +91,15 @@ trait ArrayEnabled
      *         NETWORKDAYS() or CONCATENATE(), where the last argument is a matrix (or a series of values) that need
      *                                         to be treated as a such rather than as an array arguments.
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    protected static function evaluateArrayArgumentsSubset(callable $method, int $limit, mixed ...$arguments): array
+=======
      * @param mixed ...$arguments
      */
     protected static function evaluateArrayArgumentsSubset(callable $method, int $limit, ...$arguments): array
+>>>>>>> main
     {
         self::initialiseHelper(array_slice($arguments, 0, $limit));
         $trailingArguments = array_slice($arguments, $limit);
@@ -73,10 +109,14 @@ trait ArrayEnabled
         return ArrayArgumentProcessor::processArguments(self::$arrayArgumentHelper, $method, ...$arguments);
     }
 
+<<<<<<< HEAD
+    private static function testFalse(mixed $value): bool
+=======
     /**
      * @param mixed $value
      */
     private static function testFalse($value): bool
+>>>>>>> main
     {
         return $value === false;
     }
@@ -88,9 +128,15 @@ trait ArrayEnabled
      *         Z.TEST() or INDEX(), where the first argument 1 is a matrix that needs to be treated as a dataset
      *                   rather than as an array argument.
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    protected static function evaluateArrayArgumentsSubsetFrom(callable $method, int $start, mixed ...$arguments): array
+=======
      * @param mixed ...$arguments
      */
     protected static function evaluateArrayArgumentsSubsetFrom(callable $method, int $start, ...$arguments): array
+>>>>>>> main
     {
         $arrayArgumentsSubset = array_combine(
             range($start, count($arguments) - $start),
@@ -115,9 +161,15 @@ trait ArrayEnabled
      *         HLOOKUP() and VLOOKUP(), where argument 1 is a matrix that needs to be treated as a database
      *                                  rather than as an array argument.
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    protected static function evaluateArrayArgumentsIgnore(callable $method, int $ignore, mixed ...$arguments): array
+=======
      * @param mixed ...$arguments
      */
     protected static function evaluateArrayArgumentsIgnore(callable $method, int $ignore, ...$arguments): array
+>>>>>>> main
     {
         $leadingArguments = array_slice($arguments, 0, $ignore);
         $ignoreArgument = array_slice($arguments, $ignore, 1);

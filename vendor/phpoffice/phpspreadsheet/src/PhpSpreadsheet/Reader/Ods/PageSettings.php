@@ -5,6 +5,19 @@ namespace PhpOffice\PhpSpreadsheet\Reader\Ods;
 use DOMDocument;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+<<<<<<< HEAD
+use stdClass;
+
+class PageSettings
+{
+    private string $officeNs = '';
+
+    private string $stylesNs = '';
+
+    private string $stylesFo = '';
+
+    private string $tableNs = '';
+=======
 
 class PageSettings
 {
@@ -27,24 +40,40 @@ class PageSettings
      * @var string
      */
     private $tableNs;
+>>>>>>> main
 
     /**
      * @var string[]
      */
+<<<<<<< HEAD
+    private array $tableStylesCrossReference = [];
+
+    /** @var mixed[] */
+    private array $pageLayoutStyles = [];
+=======
     private $tableStylesCrossReference = [];
 
     /** @var array */
     private $pageLayoutStyles = [];
+>>>>>>> main
 
     /**
      * @var string[]
      */
+<<<<<<< HEAD
+    private array $masterStylesCrossReference = [];
+=======
     private $masterStylesCrossReference = [];
+>>>>>>> main
 
     /**
      * @var string[]
      */
+<<<<<<< HEAD
+    private array $masterPrintStylesCrossReference = [];
+=======
     private $masterPrintStylesCrossReference = [];
+>>>>>>> main
 
     public function __construct(DOMDocument $styleDom)
     {
@@ -55,10 +84,17 @@ class PageSettings
 
     private function setDomNameSpaces(DOMDocument $styleDom): void
     {
+<<<<<<< HEAD
+        $this->officeNs = (string) $styleDom->lookupNamespaceUri('office');
+        $this->stylesNs = (string) $styleDom->lookupNamespaceUri('style');
+        $this->stylesFo = (string) $styleDom->lookupNamespaceUri('fo');
+        $this->tableNs = (string) $styleDom->lookupNamespaceUri('table');
+=======
         $this->officeNs = $styleDom->lookupNamespaceUri('office');
         $this->stylesNs = $styleDom->lookupNamespaceUri('style');
         $this->stylesFo = $styleDom->lookupNamespaceUri('fo');
         $this->tableNs = $styleDom->lookupNamespaceUri('table');
+>>>>>>> main
     }
 
     private function readPageSettingStyles(DOMDocument $styleDom): void
@@ -68,6 +104,24 @@ class PageSettings
 
         foreach ($styles as $styleSet) {
             $styleName = $styleSet->getAttributeNS($this->stylesNs, 'name');
+<<<<<<< HEAD
+            $pageLayoutProperties = $styleSet->getElementsByTagNameNS($this->stylesNs, 'page-layout-properties')->item(0);
+            $styleOrientation = $pageLayoutProperties?->getAttributeNS($this->stylesNs, 'print-orientation');
+            $styleScale = $pageLayoutProperties?->getAttributeNS($this->stylesNs, 'scale-to');
+            $stylePrintOrder = $pageLayoutProperties?->getAttributeNS($this->stylesNs, 'print-page-order');
+            $centered = $pageLayoutProperties?->getAttributeNS($this->stylesNs, 'table-centering');
+
+            $marginLeft = $pageLayoutProperties?->getAttributeNS($this->stylesFo, 'margin-left');
+            $marginRight = $pageLayoutProperties?->getAttributeNS($this->stylesFo, 'margin-right');
+            $marginTop = $pageLayoutProperties?->getAttributeNS($this->stylesFo, 'margin-top');
+            $marginBottom = $pageLayoutProperties?->getAttributeNS($this->stylesFo, 'margin-bottom');
+            $header = $styleSet->getElementsByTagNameNS($this->stylesNs, 'header-style')->item(0);
+            $headerProperties = $header?->getElementsByTagNameNS($this->stylesNs, 'header-footer-properties')?->item(0);
+            $marginHeader = $headerProperties?->getAttributeNS($this->stylesFo, 'min-height');
+            $footer = $styleSet->getElementsByTagNameNS($this->stylesNs, 'footer-style')->item(0);
+            $footerProperties = $footer?->getElementsByTagNameNS($this->stylesNs, 'header-footer-properties')?->item(0);
+            $marginFooter = $footerProperties?->getAttributeNS($this->stylesFo, 'min-height');
+=======
             $pageLayoutProperties = $styleSet->getElementsByTagNameNS($this->stylesNs, 'page-layout-properties')[0];
             $styleOrientation = $pageLayoutProperties->getAttributeNS($this->stylesNs, 'print-orientation');
             $styleScale = $pageLayoutProperties->getAttributeNS($this->stylesNs, 'scale-to');
@@ -84,6 +138,7 @@ class PageSettings
             $footer = $styleSet->getElementsByTagNameNS($this->stylesNs, 'footer-style')[0];
             $footerProperties = $footer->getElementsByTagNameNS($this->stylesNs, 'header-footer-properties')[0];
             $marginFooter = isset($footerProperties) ? $footerProperties->getAttributeNS($this->stylesFo, 'min-height') : null;
+>>>>>>> main
 
             $this->pageLayoutStyles[$styleName] = (object) [
                 'orientation' => $styleOrientation ?: PageSetup::ORIENTATION_DEFAULT,
@@ -164,12 +219,22 @@ class PageSettings
         if (!array_key_exists($printSettingsIndex, $this->pageLayoutStyles)) {
             return;
         }
+<<<<<<< HEAD
+        /** @var (object{orientation: string, scale: int|string, printOrder: ?string,
+         * horizontalCentered: bool, verticalCentered: bool, marginLeft: float, marginRight: float, marginTop: float,
+         * marginBottom: float, marginHeader: float, marginFooter: float}&stdClass) */
+=======
+>>>>>>> main
         $printSettings = $this->pageLayoutStyles[$printSettingsIndex];
 
         $worksheet->getPageSetup()
             ->setOrientation($printSettings->orientation ?? PageSetup::ORIENTATION_DEFAULT)
             ->setPageOrder($printSettings->printOrder === 'ltr' ? PageSetup::PAGEORDER_OVER_THEN_DOWN : PageSetup::PAGEORDER_DOWN_THEN_OVER)
+<<<<<<< HEAD
+            ->setScale((int) trim((string) $printSettings->scale, '%'))
+=======
             ->setScale((int) trim($printSettings->scale, '%'))
+>>>>>>> main
             ->setHorizontalCentered($printSettings->horizontalCentered)
             ->setVerticalCentered($printSettings->verticalCentered);
 

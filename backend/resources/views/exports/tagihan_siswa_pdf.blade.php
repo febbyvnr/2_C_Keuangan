@@ -59,7 +59,7 @@
                     <td>{{ $item['TAHUN_TAGIHAN_SISWA'] }}</td>
                     <td>Rp {{ number_format($item['JUMLAH_TAGIHAN_SISWA'], 0, ',', '.') }}</td>
                     <td>{{ $item['STATUS_TAGIHAN_SISWA'] }}</td>
-                    <td>{{ $item['DUEDATE_TAGIHAN_SISWA'] }}</td>
+                    <td>{{ $item['DUEDATETIME_TAGIHAN_SISWA'] }}</td>
                 </tr>
             @empty
                 <tr>

@@ -8,33 +8,101 @@ export default function MasterKegiatan() {
     const itemsPerPage = 10;
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
-    const [editId, setEditId] = useState(null); 
+    const [editId, setEditId] = useState(null);
+    const [parentList, setParentList] = useState([]);
+    const [search, setSearch] = useState("");
+    const [sortConfig, setSortConfig] = useState({
+        key: "ID_KEGIATAN",
+        direction: "desc"
+    });
     const [form, setForm] = useState({
         MST_ID_KEGIATAN: "",
         DESKRIPSI_KEGIATAN: ""
     });
 
-    const fetchData = async () => {
+    const fetchData = async (keyword = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/kegiatan");
+            setLoading(true);
+            const url = keyword
+                ? `http://localhost:8000/api/kegiatan?search=${keyword}`
+                : "http://localhost:8000/api/kegiatan";
+
+            const res = await fetch(url);
             const json = await res.json();
             setData(json.data || []);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchData();
+        fetchParent();
     }, []);
 
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
+    const fetchParent = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/kegiatan");
+            const json = await res.json();
+            setParentList(json.data || []);
+        } catch (err) {
+            console.error(err);
+        }
     };
-    
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            setCurrentPage(1);
+            fetchData(search);
+        }
+    };
+
+    const handleSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getIcon = (key) => {
+        if (sortConfig.key !== key) return "bi bi-funnel";
+        return "bi bi-funnel-fill";
+    };
+
+    const sortedData = [...data].sort((a, b) => {
+        let valA = a[sortConfig.key] || "";
+        let valB = b[sortConfig.key] || "";
+        if (sortConfig.key === "ID_KEGIATAN" || sortConfig.key === "MST_ID_KEGIATAN") {
+            valA = Number(valA);
+            valB = Number(valB);
+        } else {
+            valA = valA.toString().toLowerCase();
+            valB = valB.toString().toLowerCase();
+        }
+        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const totalData = data.length;
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const changePage = (page) => {
+        setCurrentPage(page);
+    };
+
     const handleEdit = (item) => {
         setIsEdit(true);
         setEditId(item.ID_KEGIATAN);
@@ -58,91 +126,108 @@ export default function MasterKegiatan() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update Kegiatan" : "Berhasil tambah Kegiatan");
-            setShowModal(false);
-            setIsEdit(false);
-            setEditId(null);
-            setForm({
-                MST_ID_KEGIATAN: "",
-                DESKRIPSI_KEGIATAN: ""
-            });
+            closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast("error", json.message || "Gagal");
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus Kegiatan ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/kegiatan/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (json.success) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
         setShowModal(false);
         setIsEdit(false);
         setEditId(null);
-        setForm({
-            MST_ID_KEGIATAN: "",
-            DESKRIPSI_KEGIATAN: ""
-        });
+        setForm({ MST_ID_KEGIATAN: "", DESKRIPSI_KEGIATAN: "" });
     };
 
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = data.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-    const changePage = (page) => {
-        setCurrentPage(page);
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/kegiatan/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
-        <div className="coa-container">
-            <div className="coa-header">
+        <div className="kegiatan-container">
+            <div className="kegiatan-header">
                 <h2>Master Kegiatan</h2>
-                <button className="btn-primary" onClick={() => setShowModal(true)}>
-                    Tambah Kegiatan
-                </button>
+                <div className="header-actions">
+                    <button className="btn-reset" onClick={() => { setSearch(""); fetchData(); }}>
+                        Reset
+                    </button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                            type="text"
+                            placeholder="Cari kegiatan..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="search-input"
+                        />
+                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
+                            Search
+                        </button>
+                    </div>
+                    <button className="btn-primary" onClick={() => setShowModal(true)}>
+                        Tambah Kegiatan
+                    </button>
+                </div>
             </div>
-            <div className="coa-table-wrapper">
-                <table className="coa-table">
+            <div className="kegiatan-table-wrapper">
+                <table className="kegiatan-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>MST ID</th>
-                            <th>Deskripsi</th>
+                            <th onClick={() => handleSort("ID_KEGIATAN")}>
+                                ID <i className={getIcon("ID_KEGIATAN")}></i>
+                            </th>
+                            <th onClick={() => handleSort("MST_ID_KEGIATAN")}>
+                                MST ID <i className={getIcon("MST_ID_KEGIATAN")}></i>
+                            </th>
+                            <th onClick={() => handleSort("DESKRIPSI_KEGIATAN")}>
+                                Deskripsi <i className={getIcon("DESKRIPSI_KEGIATAN")}></i>
+                            </th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Loading...
-                                </td>
-                            </tr>
+                            <tr><td colSpan="4" className="text-center">Loading...</td></tr>
                         ) : currentData.length === 0 ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Tidak ada data
-                                </td>
-                            </tr>
+                            <tr><td colSpan="4" className="text-center">Tidak ada data</td></tr>
                         ) : (
                             currentData.map((item) => (
                                 <tr key={item.ID_KEGIATAN}>
@@ -150,20 +235,29 @@ export default function MasterKegiatan() {
                                     <td>{item.MST_ID_KEGIATAN}</td>
                                     <td>{item.DESKRIPSI_KEGIATAN}</td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            disabled={item.is_used > 0}
+                                            title={
+                                                item.is_used > 0
+                                                    ? "Tidak bisa diedit karena sudah dipakai program kerja"
+                                                    : ""
+                                            }
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
+                                            disabled={item.is_used > 0 || item.has_child > 0}
                                             title={
-                                                item.is_used
-                                                    ? "COA sudah digunakan Program Kerja"
-                                                    : "Hapus COA"
+                                                item.is_used > 0
+                                                    ? "Tidak bisa dihapus karena sudah dipakai program kerja"
+                                                    : item.has_child > 0
+                                                    ? "Tidak bisa dihapus karena punya sub kegiatan"
+                                                    : ""
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_KEGIATAN)
-                                            }
+                                            onClick={() => setConfirmDeleteId(item.ID_KEGIATAN)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -174,74 +268,109 @@ export default function MasterKegiatan() {
                     </tbody>
                 </table>
             </div>
-            <div className="pagination">
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                >
-                    <i className="bi bi-chevron-left"></i>
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i + 1}
-                        onClick={() => changePage(i + 1)}
-                        className={`page-btn ${
-                            currentPage === i + 1 ? "active" : ""
-                        }`}
-                    >
-                        {i + 1}
+            <div className="pagination-wrapper">
+                <div className="pagination-info">
+                    Menampilkan {startData} - {endData} dari {totalData} data
+                </div>
+                <div className="pagination">
+                    <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+                        <i className="bi bi-chevron-left"></i>
                     </button>
-                ))}
-                <button
-                    className="page-btn"
-                    onClick={() =>
-                        setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                        )
-                    }
-                    disabled={currentPage === totalPages}
-                >
-                    <i className="bi bi-chevron-right"></i>
-                </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i + 1}
+                            onClick={() => changePage(i + 1)}
+                            className={`page-btn ${
+                                currentPage === i + 1 ? "active" : ""
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+                        <i className="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div className="export-wrapper">
+                    <a href={`http://localhost:8000/api/kegiatan/export/excel?search=${search}`} className="btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-xlsx"></i> Export Excel
+                    </a>
+                    {/* <a href={`http://localhost:8000/api/kegiatan/export/csv?search=${search}`} className="btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-csv"></i> Export CSV
+                    </a> */}
+                    <a href={`http://localhost:8000/api/kegiatan/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                        <i className="bi bi-file-earmark-pdf"></i> Export PDF
+                    </a>
+                </div>
             </div>
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
-                       <h3>{isEdit ? "Edit Kegiatan" : "Tambah Kegiatan"}</h3>
+                        <h3>{isEdit ? "Edit Kegiatan" : "Tambah Kegiatan"}</h3>
                         <form onSubmit={handleSubmit}>
                             <label>Parent Kegiatan (opsional)</label>
-                            <input
-                                type="number"
+                            <select
                                 name="MST_ID_KEGIATAN"
                                 value={form.MST_ID_KEGIATAN}
                                 onChange={handleChange}
-                                placeholder="ID Parent Kegiatan"
-                            />
+                            >
+                                <option value="">-- Pilih Parent --</option>
+                                {parentList
+                                    .filter(item => item.ID_KEGIATAN !== editId)
+                                    .map((item) => (
+                                        <option key={item.ID_KEGIATAN} value={item.ID_KEGIATAN}>
+                                            {item.ID_KEGIATAN} - {item.DESKRIPSI_KEGIATAN}
+                                        </option>
+                                    ))}
+                            </select>
                             <label>Deskripsi Kegiatan</label>
-                            <input
-                                type="text"
-                                name="DESKRIPSI_KEGIATAN"
-                                value={form.DESKRIPSI_KEGIATAN}
-                                onChange={handleChange}
-                                required
-                                placeholder="Masukkan deskripsi"
-                            />
+                            <input type="text" name="DESKRIPSI_KEGIATAN" value={form.DESKRIPSI_KEGIATAN} onChange={handleChange} required />
                             <div className="modal-actions">
-                                <button
-                                    type="button"
-                                    className="btn-cancel"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    Batal
-                                </button>
-                                <button type="submit" className="btn-submit">
-                                    {isEdit ? "Perbarui" : "Tambah"}
-                                </button>
+                                <button type="button" className="btn-cancel" onClick={closeModal}>Batal</button>
+                                <button type="submit" className="btn-submit">{isEdit ? "Perbarui" : "Tambah"}</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Kegiatan
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus kegiatan ini?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

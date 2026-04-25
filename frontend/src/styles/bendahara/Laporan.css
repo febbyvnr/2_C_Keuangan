@@ -29,9 +29,10 @@
 /* TAB */
 .laporan-tabs {
   display: flex;
-  gap: 24px;
+  gap: 70px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .laporan-tab {
@@ -57,7 +58,7 @@
 }
 
 /* ========================= */
-/* 🔥 FILTER */
+/* FILTER */
 /* ========================= */
 
 .laporan-filter {
@@ -108,7 +109,7 @@
   outline: none;
 }
 
-/* 🔥 BUTTON FIX */
+/* BUTTON FIX */
 .laporan-filter button {
   width: auto;
 }
@@ -176,12 +177,6 @@
   background: #fafafa;
 }
 
-/* ⚠️ DIHAPUS BIAR WARNA NORMAL */
-/* .laporan-table * {
-  color: rgb(103, 100, 100) !important;
-  background-color: transparent;
-} */
-
 /* ========================= */
 /* TOTAL */
 /* ========================= */
@@ -226,7 +221,7 @@
 }
 
 /* ========================= */
-/* 🔥 RANGE DATE */
+/*  RANGE DATE */
 /* ========================= */
 
 .range-input {
@@ -247,7 +242,7 @@
 }
 
 /* ========================= */
-/* 🔥 DROPDOWN SUMBER DANA */
+/* DROPDOWN SUMBER DANA */
 /* ========================= */
 
 .laporan-filter select {
@@ -288,7 +283,7 @@
 }
 
 .laporan-table {
-  max-height: calc(110vh - 220px);
+  max-height: calc(106vh - 220px);
   overflow-y: auto;
 }
 
@@ -337,4 +332,75 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--primary);
+}
+
+/* ========================================= */
+/* FIX BKU SWITCH (NAVIGASI) */
+/* ========================================= */
+
+.bku-switch {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  width: 100%;
+  margin: 10px 0 16px 0;
+}
+
+/* BUTTON PANAH */
+.bku-switch button {
+  background: #e5e7eb !important; /* abu soft */
+  color: var(--text-main) !important;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+/* HOVER */
+.bku-switch button:hover {
+  background: var(--primary) !important;
+  color: white !important;
+}
+
+.bku-switch span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary) !important;
+  letter-spacing: 0.3px;
+}
+
+/* ========================================= */
+/* 🔥 FIX CARD TOTAL (PENERIMAAN & BKU) */
+/* ========================================= */
+
+.laporan-total-card {
+  background: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px; /* 🔥 biar ga nempel */
+}
+
+/* 🔥 LABEL (Saldo Akhir / Total Penerimaan) */
+.laporan-total-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* 🔥 VALUE ANGKA */
+.laporan-total-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+
+  white-space: nowrap; /* 🔥 biar ga turun */
 }

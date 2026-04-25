@@ -2,10 +2,23 @@
 
 namespace PhpOffice\PhpSpreadsheet\Calculation\Engine;
 
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Calculation\Exception;
+=======
+>>>>>>> main
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 
 class ArrayArgumentProcessor
 {
+<<<<<<< HEAD
+    private static ArrayArgumentHelper $arrayArgumentHelper;
+
+    /** @return mixed[] */
+    public static function processArguments(
+        ArrayArgumentHelper $arrayArgumentHelper,
+        callable $method,
+        mixed ...$arguments
+=======
     /**
      * @var ArrayArgumentHelper
      */
@@ -18,6 +31,7 @@ class ArrayArgumentProcessor
         ArrayArgumentHelper $arrayArgumentHelper,
         callable $method,
         ...$arguments
+>>>>>>> main
     ): array {
         self::$arrayArgumentHelper = $arrayArgumentHelper;
 
@@ -42,14 +56,25 @@ class ArrayArgumentProcessor
         $matrixPair = self::$arrayArgumentHelper->getMatrixPair();
         if ($matrixPair !== []) {
             if (
+<<<<<<< HEAD
+                (self::$arrayArgumentHelper->isVector($matrixPair[0]) === true
+                    && self::$arrayArgumentHelper->isVector($matrixPair[1]) === false)
+                || (self::$arrayArgumentHelper->isVector($matrixPair[0]) === false
+                    && self::$arrayArgumentHelper->isVector($matrixPair[1]) === true)
+=======
                 (self::$arrayArgumentHelper->isVector($matrixPair[0]) === true &&
                     self::$arrayArgumentHelper->isVector($matrixPair[1]) === false) ||
                 (self::$arrayArgumentHelper->isVector($matrixPair[0]) === false &&
                     self::$arrayArgumentHelper->isVector($matrixPair[1]) === true)
+>>>>>>> main
             ) {
                 // Logic for a matrix and a vector (row or column)
                 return self::evaluateVectorMatrixPair($method, $matrixPair, ...$arguments);
             }
+<<<<<<< HEAD
+
+=======
+>>>>>>> main
             // Logic for matrix/matrix, column vector/column vector or row vector/row vector
             return self::evaluateMatrixPair($method, $matrixPair, ...$arguments);
         }
@@ -60,6 +85,31 @@ class ArrayArgumentProcessor
     }
 
     /**
+<<<<<<< HEAD
+     * @param int[] $matrixIndexes
+     *
+     * @return mixed[]
+     */
+    private static function evaluateVectorMatrixPair(callable $method, array $matrixIndexes, mixed ...$arguments): array
+    {
+        $matrix2 = array_pop($matrixIndexes) ?? throw new Exception('empty array 2');
+        /** @var mixed[][] $matrixValues2 */
+        $matrixValues2 = $arguments[$matrix2];
+        $matrix1 = array_pop($matrixIndexes) ?? throw new Exception('empty array 1');
+        /** @var mixed[][] $matrixValues1 */
+        $matrixValues1 = $arguments[$matrix1];
+
+        /** @var non-empty-array<int> */
+        $matrix12 = [$matrix1, $matrix2];
+        $rows = min(array_map(self::$arrayArgumentHelper->rowCount(...), $matrix12));
+        $columns = min(array_map(self::$arrayArgumentHelper->columnCount(...), $matrix12));
+
+        if ($rows === 1) {
+            $rows = max(array_map(self::$arrayArgumentHelper->rowCount(...), $matrix12));
+        }
+        if ($columns === 1) {
+            $columns = max(array_map(self::$arrayArgumentHelper->columnCount(...), $matrix12));
+=======
      * @param mixed ...$arguments
      */
     private static function evaluateVectorMatrixPair(callable $method, array $matrixIndexes, ...$arguments): array
@@ -79,6 +129,7 @@ class ArrayArgumentProcessor
         }
         if ($columns === 1) {
             $columns = max(array_map([self::$arrayArgumentHelper, 'columnCount'], [$matrix1, $matrix2]));
+>>>>>>> main
         }
 
         $result = [];
@@ -101,6 +152,19 @@ class ArrayArgumentProcessor
     }
 
     /**
+<<<<<<< HEAD
+     * @param array<int|string> $matrixIndexes
+     *
+     * @return mixed[]
+     */
+    private static function evaluateMatrixPair(callable $method, array $matrixIndexes, mixed ...$arguments): array
+    {
+        $matrix2 = array_pop($matrixIndexes);
+        /** @var mixed[][] $matrixValues2 */
+        $matrixValues2 = $arguments[$matrix2];
+        $matrix1 = array_pop($matrixIndexes);
+        /** @var mixed[][] $matrixValues1 */
+=======
      * @param mixed ...$arguments
      */
     private static function evaluateMatrixPair(callable $method, array $matrixIndexes, ...$arguments): array
@@ -110,6 +174,7 @@ class ArrayArgumentProcessor
         $matrixValues2 = $arguments[$matrix2];
         $matrix1 = array_pop($matrixIndexes);
         /** @var array $matrixValues1 */
+>>>>>>> main
         $matrixValues1 = $arguments[$matrix1];
 
         $result = [];
@@ -130,10 +195,15 @@ class ArrayArgumentProcessor
         return $result;
     }
 
+<<<<<<< HEAD
+    /** @return mixed[] */
+    private static function evaluateVectorPair(callable $method, int $rowIndex, int $columnIndex, mixed ...$arguments): array
+=======
     /**
      * @param mixed ...$arguments
      */
     private static function evaluateVectorPair(callable $method, int $rowIndex, int $columnIndex, ...$arguments): array
+>>>>>>> main
     {
         $rowVector = Functions::flattenArray($arguments[$rowIndex]);
         $columnVector = Functions::flattenArray($arguments[$columnIndex]);
@@ -156,12 +226,21 @@ class ArrayArgumentProcessor
     /**
      * Note, offset is from 1 (for the first argument) rather than from 0.
      *
+<<<<<<< HEAD
+     * @return mixed[]
+     */
+    private static function evaluateNthArgumentAsArray(callable $method, int $nthArgument, mixed ...$arguments): array
+    {
+        $values = array_slice($arguments, $nthArgument - 1, 1);
+        /** @var mixed[] $values */
+=======
      * @param mixed ...$arguments
      */
     private static function evaluateNthArgumentAsArray(callable $method, int $nthArgument, ...$arguments): array
     {
         $values = array_slice($arguments, $nthArgument - 1, 1);
         /** @var array $values */
+>>>>>>> main
         $values = array_pop($values);
 
         $result = [];

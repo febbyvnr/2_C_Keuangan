@@ -12,7 +12,11 @@ class RelsVBA extends WriterPart
      *
      * @return string XML Output
      */
+<<<<<<< HEAD
+    public function writeVBARelationships(): string
+=======
     public function writeVBARelationships()
+>>>>>>> main
     {
         // Create XML writer
         $objWriter = null;

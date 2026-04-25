@@ -15,7 +15,11 @@ class ConvertOctal extends ConvertBase
      * Excel Function:
      *        OCT2BIN(x[,places])
      *
+<<<<<<< HEAD
+     * @param array<mixed>|bool|float|int|string $value The octal number you want to convert. Number may not
+=======
      * @param array|string $value The octal number you want to convert. Number may not
+>>>>>>> main
      *                          contain more than 10 characters. The most significant
      *                          bit of number is the sign bit. The remaining 29 bits
      *                          are magnitude bits. Negative numbers are represented
@@ -29,7 +33,11 @@ class ConvertOctal extends ConvertBase
      *                      If OCT2BIN requires more than places characters, it
      *                          returns the #NUM! error value.
      *                      Or can be an array of values
+<<<<<<< HEAD
+     * @param array<mixed>|int $places The number of characters to use. If places is omitted,
+=======
      * @param array|int $places The number of characters to use. If places is omitted,
+>>>>>>> main
      *                          OCT2BIN uses the minimum number of characters necessary.
      *                          Places is useful for padding the return value with
      *                          leading 0s (zeros).
@@ -40,11 +48,19 @@ class ConvertOctal extends ConvertBase
      *                          value.
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string Result, or an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function toBinary($value, $places = null): array|string
+=======
      * @return array|string Result, or an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function toBinary($value, $places = null)
+>>>>>>> main
     {
         if (is_array($value) || is_array($places)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $places);
@@ -69,7 +85,11 @@ class ConvertOctal extends ConvertBase
      * Excel Function:
      *        OCT2DEC(x)
      *
+<<<<<<< HEAD
+     * @param array<mixed>|bool|float|int|string $value The octal number you want to convert. Number may not contain
+=======
      * @param array|string $value The octal number you want to convert. Number may not contain
+>>>>>>> main
      *                          more than 10 octal characters (30 bits). The most significant
      *                          bit of number is the sign bit. The remaining 29 bits are
      *                          magnitude bits. Negative numbers are represented using
@@ -78,7 +98,11 @@ class ConvertOctal extends ConvertBase
      *                          #NUM! error value.
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|int|string Result, or an error
+=======
      * @return array|string Result, or an error
+>>>>>>> main
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -96,7 +120,11 @@ class ConvertOctal extends ConvertBase
         }
 
         $binX = '';
+<<<<<<< HEAD
+        foreach (mb_str_split($value, 1, 'UTF-8') as $char) {
+=======
         foreach (str_split($value) as $char) {
+>>>>>>> main
             $binX .= str_pad(decbin((int) $char), 3, '0', STR_PAD_LEFT);
         }
         if (strlen($binX) == 30 && $binX[0] == '1') {
@@ -104,10 +132,17 @@ class ConvertOctal extends ConvertBase
                 $binX[$i] = ($binX[$i] == '1' ? '0' : '1');
             }
 
+<<<<<<< HEAD
+            return (bindec($binX) + 1) * -1;
+        }
+
+        return bindec($binX);
+=======
             return (string) ((bindec($binX) + 1) * -1);
         }
 
         return (string) bindec($binX);
+>>>>>>> main
     }
 
     /**
@@ -118,7 +153,11 @@ class ConvertOctal extends ConvertBase
      * Excel Function:
      *        OCT2HEX(x[,places])
      *
+<<<<<<< HEAD
+     * @param array<mixed>|bool|float|int|string $value The octal number you want to convert. Number may not contain
+=======
      * @param array|string $value The octal number you want to convert. Number may not contain
+>>>>>>> main
      *                          more than 10 octal characters (30 bits). The most significant
      *                          bit of number is the sign bit. The remaining 29 bits are
      *                          magnitude bits. Negative numbers are represented using
@@ -130,7 +169,11 @@ class ConvertOctal extends ConvertBase
      *                      If OCT2HEX requires more than places characters, it returns
      *                          the #NUM! error value.
      *                      Or can be an array of values
+<<<<<<< HEAD
+     * @param array<mixed>|int $places The number of characters to use. If places is omitted, OCT2HEX
+=======
      * @param array|int $places The number of characters to use. If places is omitted, OCT2HEX
+>>>>>>> main
      *                          uses the minimum number of characters necessary. Places is useful
      *                          for padding the return value with leading 0s (zeros).
      *                      If places is not an integer, it is truncated.
@@ -138,11 +181,19 @@ class ConvertOctal extends ConvertBase
      *                      If places is negative, OCT2HEX returns the #NUM! error value.
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string Result, or an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function toHex($value, $places = null): array|string
+=======
      * @return array|string Result, or an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function toHex($value, $places = null)
+>>>>>>> main
     {
         if (is_array($value) || is_array($places)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $places);

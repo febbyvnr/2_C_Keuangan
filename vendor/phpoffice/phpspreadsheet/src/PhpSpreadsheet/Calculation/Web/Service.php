@@ -5,6 +5,10 @@ namespace PhpOffice\PhpSpreadsheet\Calculation\Web;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
+<<<<<<< HEAD
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
+=======
+>>>>>>> main
 
 class Service
 {
@@ -16,19 +20,29 @@ class Service
      * Excel Function:
      *        Webservice(url)
      *
+<<<<<<< HEAD
+     * @return string the output resulting from a call to the webservice
+     */
+    public static function webService(mixed $url, ?Cell $cell = null): ?string
+=======
      * @param mixed $url
      *
      * @return ?string the output resulting from a call to the webservice
      */
     public static function webService($url, ?Cell $cell = null)
+>>>>>>> main
     {
         if (is_array($url)) {
             $url = Functions::flattenSingleValue($url);
         }
+<<<<<<< HEAD
+        $url = trim(StringHelper::convertToString($url, false));
+=======
         if (!is_string($url)) {
             return ExcelError::VALUE(); // Invalid URL length
         }
         $url = trim($url);
+>>>>>>> main
         if (mb_strlen($url) > 2048) {
             return ExcelError::VALUE(); // Invalid URL length
         }
@@ -37,6 +51,12 @@ class Service
         if ($scheme !== 'http' && $scheme !== 'https') {
             return ExcelError::VALUE(); // Invalid protocol
         }
+<<<<<<< HEAD
+        $domainWhiteList = $cell?->getWorksheet()->getParent()?->getDomainWhiteList() ?? [];
+        $host = $parsed['host'] ?? '';
+        if (!in_array($host, $domainWhiteList, true)) {
+            return ($cell === null) ? null : Functions::NOT_YET_IMPLEMENTED; // will be converted to oldCalculatedValue or null
+=======
         $domainWhiteList = [];
         if ($cell !== null) {
             $parent = $cell->getWorksheet()->getParent();
@@ -47,6 +67,7 @@ class Service
         $host = $parsed['host'] ?? '';
         if (!in_array($host, $domainWhiteList, true)) {
             return ($cell === null) ? null : '#Not Yet Implemented'; // will be converted to oldCalculatedValue or null
+>>>>>>> main
         }
 
         // Get results from the webservice
@@ -75,11 +96,17 @@ class Service
      * Excel Function:
      *        urlEncode(text)
      *
+<<<<<<< HEAD
+     * @return string the url encoded output
+     */
+    public static function urlEncode(mixed $text): string
+=======
      * @param mixed $text
      *
      * @return string the url encoded output
      */
     public static function urlEncode($text)
+>>>>>>> main
     {
         if (!is_string($text)) {
             return ExcelError::VALUE();
