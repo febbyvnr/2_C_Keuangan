@@ -18,25 +18,26 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+        $nip = trim($request->nip ?? (Auth::check() ? Auth::user()->nip : ''));
+
+        $nipQuery = !empty($nip) ? $nip : 'UNKNOWN';
+
         $authRole = Auth::check() ? Auth::user()->role : null;
 
-        // Mengambil Role dari database berdasarkan NIP_KARYAWAN
         $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->where('tj.NIP_KARYAWAN', $nip)
+            ->where('tj.NIP_KARYAWAN', $nipQuery)
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        // Normalisasi role agar konsisten: "BENDAHARA " atau "bendahara" menjadi "Bendahara"
         $roleRaw = $dbRole ?? $authRole;
         $role = ucwords(strtolower(trim($roleRaw)));
 
-        // VALIDASI ROLE
         if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
                 'message' => 'Role tidak diizinkan generate laporan',
-                'debug_role' => $role // Memudahkan pengecekan jika masih error
+                'debug_role' => $role,
+                'debug_nip' => $nip 
             ], 403);
         }
 
