@@ -25,7 +25,19 @@ class MstProgramKerjaController extends Controller
                 'coa',
                 'kegiatan',
                 'trPm',
-            ])->active();
+            ])
+            ->leftJoin(
+                'mst_karyawan as validator',
+                'mst_program_kerja.NIP_VALIDATOR_PROGKER',
+                '=',
+                'validator.NIP_KARYAWAN'
+            )
+            ->select(
+                'mst_program_kerja.*',
+                'validator.NAMA_KARYAWAN as NAMA_VALIDATOR',
+                'validator.JABATAN_FUNGSIONAL as JABATAN_VALIDATOR'
+            )
+            ->where('mst_program_kerja.IS_DELETE', 0);
 
             if ($request->filled('ID_TA_ANGGARAN')) {
                 $query->where('ID_TA_ANGGARAN', $request->ID_TA_ANGGARAN);
@@ -55,17 +67,18 @@ class MstProgramKerjaController extends Controller
                 $search = $request->search;
 
                 $query->where(function ($q) use ($search) {
-                    $q->where('PROGRAM_KERJA', 'like', '%' . $search . '%')
-                        ->orWhere('INDIKATOR', 'like', '%' . $search . '%')
-                        ->orWhere('SASARAN', 'like', '%' . $search . '%')
-                        ->orWhere('KELUARAN_PROGKER', 'like', '%' . $search . '%');
+                    $q->where('mst_program_kerja.PROGRAM_KERJA', 'like', '%' . $search . '%')
+                        ->orWhere('mst_program_kerja.INDIKATOR', 'like', '%' . $search . '%')
+                        ->orWhere('mst_program_kerja.SASARAN', 'like', '%' . $search . '%')
+                        ->orWhere('mst_program_kerja.KELUARAN_PROGKER', 'like', '%' . $search . '%');
                 });
             }
+
 
             $perPage = (int) $request->get('per_page', 10);
 
             $data = $query
-                ->orderByDesc('ID_PROGRAM_KERJA')
+                ->orderByDesc('mst_program_kerja.ID_PROGRAM_KERJA')
                 ->paginate($perPage);
 
             return response()->json([

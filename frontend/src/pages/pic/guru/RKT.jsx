@@ -35,10 +35,32 @@ function getStatusInfo(item) {
   const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
   const note = lastNote.toLowerCase();
 
+  const jabatanValidator =
+  item?.JABATAN_VALIDATOR?.toLowerCase() || "";
+
+  if (validator && jabatanValidator.includes("kepala sekolah")) {
+    return {
+      value: "disetujui",
+      label: "Disetujui",
+      detailLabel: "Disetujui Kepala Sekolah (Final)",
+      className: "rkt-status-badge approved",
+    };
+  }
+
+  if (validator && jabatanValidator.includes("waka")) {
+    return {
+      value: "disetujui",
+      label: "Disetujui",
+      detailLabel: "Disetujui Wakil Kepala Sekolah",
+      className: "rkt-status-badge approved",
+    };
+  }
+
   if (validator) {
     return {
       value: "disetujui",
       label: "Disetujui",
+      detailLabel: "Disetujui",
       className: "rkt-status-badge approved",
     };
   }
@@ -47,6 +69,7 @@ function getStatusInfo(item) {
     return {
       value: "ditolak",
       label: "Ditolak",
+      detailLabel: "Ditolak",
       className: "rkt-status-badge rejected",
     };
   }
@@ -55,6 +78,7 @@ function getStatusInfo(item) {
     return {
       value: "revisi",
       label: "Revisi",
+      detailLabel: "Revisi",
       className: "rkt-status-badge revision",
     };
   }
@@ -62,6 +86,7 @@ function getStatusInfo(item) {
   return {
     value: "diajukan",
     label: "Diajukan",
+    detailLabel: "Diajukan",
     className: "rkt-status-badge submitted",
   };
 }
@@ -435,14 +460,15 @@ export default function RKT() {
                         <h2 className="rkt-detail-title">
                           {selectedItem.PROGRAM_KERJA || "Detail RKT"}
                         </h2>
+
                         <p className="rkt-detail-subtitle">
                           Klik baris pada tabel untuk melihat detail program kerja.
                         </p>
-                      </div>
 
-                      <span className={selectedStatus.className}>
-                        {selectedStatus.label}
-                      </span>
+                        <span className={selectedStatus.className}>
+                          {selectedStatus.detailLabel || selectedStatus.label}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -494,7 +520,9 @@ export default function RKT() {
                         <span className="rkt-detail-label">Validator</span>
                         <span className="rkt-detail-value">
                           {selectedItem.NIP_VALIDATOR_PROGKER
-                            ? `NIP ${selectedItem.NIP_VALIDATOR_PROGKER}`
+                            ? `${selectedItem.NIP_VALIDATOR_PROGKER} - ${
+                                selectedItem.NAMA_VALIDATOR || "Validator"
+                              }`
                             : "Belum ada validator"}
                         </span>
                       </div>
