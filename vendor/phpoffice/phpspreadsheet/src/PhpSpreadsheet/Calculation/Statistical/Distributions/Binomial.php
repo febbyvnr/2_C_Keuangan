@@ -30,11 +30,18 @@ class Binomial
      * @param mixed $cumulative Boolean value indicating if we want the cdf (true) or the pdf (false)
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function distribution(mixed $value, mixed $trials, mixed $probability, mixed $cumulative)
+=======
      * @return array|float|string
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function distribution($value, $trials, $probability, $cumulative)
+>>>>>>> main
     {
         if (is_array($value) || is_array($trials) || is_array($probability) || is_array($cumulative)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $trials, $probability, $cumulative);
@@ -56,7 +63,11 @@ class Binomial
         if ($cumulative) {
             return self::calculateCumulativeBinomial($value, $trials, $probability);
         }
+<<<<<<< HEAD
+        /** @var float $comb */
+=======
         /** @var float */
+>>>>>>> main
         $comb = Combinations::withoutRepetition($trials, $value);
 
         return $comb * $probability ** $value
@@ -66,7 +77,11 @@ class Binomial
     /**
      * BINOM.DIST.RANGE.
      *
+<<<<<<< HEAD
+     * Returns the Binomial Distribution probability for the number of successes from a specified number
+=======
      * Returns returns the Binomial Distribution probability for the number of successes from a specified number
+>>>>>>> main
      *     of trials falling into a specified range.
      *
      * @param mixed $trials Integer number of trials
@@ -79,11 +94,18 @@ class Binomial
      *                           If null, then this will indicate the same as the number of Successes
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|int|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function range(mixed $trials, mixed $probability, mixed $successes, mixed $limit = null): array|string|float|int
+=======
      * @return array|float|string
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function range($trials, $probability, $successes, $limit = null)
+>>>>>>> main
     {
         if (is_array($trials) || is_array($probability) || is_array($successes) || is_array($limit)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $trials, $probability, $successes, $limit);
@@ -109,7 +131,11 @@ class Binomial
 
         $summer = 0;
         for ($i = $successes; $i <= $limit; ++$i) {
+<<<<<<< HEAD
+            /** @var float $comb */
+=======
             /** @var float */
+>>>>>>> main
             $comb = Combinations::withoutRepetition($trials, $i);
             $summer += $comb * $probability ** $i
                 * (1 - $probability) ** ($trials - $i);
@@ -134,14 +160,22 @@ class Binomial
      * @param mixed $probability Probability of success on each trial as a float
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string The result, or a string containing an error
+=======
      * @return array|float|string The result, or a string containing an error
+>>>>>>> main
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      *
      * TODO Add support for the cumulative flag not present for NEGBINOMDIST, but introduced for NEGBINOM.DIST
      *      The cumulative default should be false to reflect the behaviour of NEGBINOMDIST
      */
+<<<<<<< HEAD
+    public static function negative(mixed $failures, mixed $successes, mixed $probability): array|string|float
+=======
     public static function negative($failures, $successes, $probability)
+>>>>>>> main
     {
         if (is_array($failures) || is_array($successes) || is_array($probability)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $failures, $successes, $probability);
@@ -163,7 +197,11 @@ class Binomial
                 return ExcelError::NAN();
             }
         }
+<<<<<<< HEAD
+        /** @var float $comb */
+=======
         /** @var float */
+>>>>>>> main
         $comb = Combinations::withoutRepetition($failures + $successes - 1, $successes - 1);
 
         return $comb
@@ -183,11 +221,18 @@ class Binomial
      * @param mixed $alpha criterion value as a float
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|int|string If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function inverse(mixed $trials, mixed $probability, mixed $alpha): array|string|int
+=======
      * @return array|int|string
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function inverse($trials, $probability, $alpha)
+>>>>>>> main
     {
         if (is_array($trials) || is_array($probability) || is_array($alpha)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $trials, $probability, $alpha);
@@ -219,6 +264,13 @@ class Binomial
         return $successes;
     }
 
+<<<<<<< HEAD
+    private static function calculateCumulativeBinomial(int $value, int $trials, float $probability): float|int
+    {
+        $summer = 0;
+        for ($i = 0; $i <= $value; ++$i) {
+            /** @var float $comb */
+=======
     /**
      * @return float|int
      */
@@ -227,6 +279,7 @@ class Binomial
         $summer = 0;
         for ($i = 0; $i <= $value; ++$i) {
             /** @var float */
+>>>>>>> main
             $comb = Combinations::withoutRepetition($trials, $i);
             $summer += $comb * $probability ** $i
                 * (1 - $probability) ** ($trials - $i);

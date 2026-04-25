@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RefJenisPembayaran;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 use App\Exports\RefJenisPembayaranExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,19 +16,17 @@ class RefJenisPembayaranController extends Controller
     
     public function index()
     {
-        try {
-            $data = RefJenisPembayaran::all();
-            return response()->json([
-                'success' => true,
-                'message' => 'Data ditemukan',
-                'data' => $data
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: '.$e->getMessage()
-            ], 500);
-        }
+        $data = RefJenisPembayaran::all();
+        $data->transform(function ($item) {
+            $item->is_used = DB::table('tr_pembayaran')
+                ->where('ID_JENIS_PEMBAYARAN', $item->ID_JENIS_PEMBAYARAN)
+                ->exists();
+            return $item;
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 
     
@@ -35,21 +34,16 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'ID_JENIS_PEMBAYARAN' => 'required|integer|unique:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
-                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 'nullable|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN'
             ]);
-
-            $jenis = RefJenisPembayaran::create($request->only([
-                'ID_JENIS_PEMBAYARAN',
-                'DESKRIPSI_JENIS_PEMBAYARAN'
-            ]));
-
+            $jenis = RefJenisPembayaran::create([
+                'DESKRIPSI_JENIS_PEMBAYARAN' => $request->DESKRIPSI_JENIS_PEMBAYARAN
+            ]);
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil ditambahkan',
                 'data' => $jenis
             ], 201);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -63,14 +57,13 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $request->validate([
-                'DESKRIPSI_JENIS_PEMBAYARAN' => 'required|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,
-                '.$id.',ID_JENIS_PEMBAYARAN'
+                'DESKRIPSI_JENIS_PEMBAYARAN' => 
+                    'nullable|string|unique:ref_jenis_pembayaran,DESKRIPSI_JENIS_PEMBAYARAN,' 
+                    . $id . ',ID_JENIS_PEMBAYARAN'
             ]);
-
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->DESKRIPSI_JENIS_PEMBAYARAN = $request->DESKRIPSI_JENIS_PEMBAYARAN;
             $jenis->save();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diupdate',
@@ -91,7 +84,6 @@ class RefJenisPembayaranController extends Controller
         try {
             $jenis = RefJenisPembayaran::findOrFail($id);
             $jenis->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil dihapus'
@@ -109,15 +101,12 @@ class RefJenisPembayaranController extends Controller
     {
         try {
             $keyword = $request->input('q');
-
             $data = RefJenisPembayaran::where('DESKRIPSI_JENIS_PEMBAYARAN', 'like', '%'.$keyword.'%')->get();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Hasil pencarian',
                 'data' => $data
             ], 200);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,

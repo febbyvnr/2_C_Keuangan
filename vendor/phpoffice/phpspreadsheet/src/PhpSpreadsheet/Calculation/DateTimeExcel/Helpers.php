@@ -7,6 +7,10 @@ use PhpOffice\PhpSpreadsheet\Calculation\Exception;
 use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 use PhpOffice\PhpSpreadsheet\Calculation\Information\ExcelError;
 use PhpOffice\PhpSpreadsheet\Shared\Date as SharedDateHelper;
+<<<<<<< HEAD
+use Throwable;
+=======
+>>>>>>> main
 
 class Helpers
 {
@@ -17,19 +21,32 @@ class Helpers
      *
      * @return bool TRUE if the year is a leap year, otherwise FALSE
      */
+<<<<<<< HEAD
+    public static function isLeapYear(int|string $year): bool
+    {
+        $year = (int) $year;
+
+=======
     public static function isLeapYear($year): bool
     {
+>>>>>>> main
         return (($year % 4) === 0) && (($year % 100) !== 0) || (($year % 400) === 0);
     }
 
     /**
      * getDateValue.
      *
+<<<<<<< HEAD
+     * @return float Excel date/time serial value
+     */
+    public static function getDateValue(mixed $dateValue, bool $allowBool = true): float
+=======
      * @param mixed $dateValue
      *
      * @return float Excel date/time serial value
      */
     public static function getDateValue($dateValue, bool $allowBool = true): float
+>>>>>>> main
     {
         if (is_object($dateValue)) {
             $retval = SharedDateHelper::PHPToExcel($dateValue);
@@ -44,7 +61,13 @@ class Helpers
         if (!is_numeric($dateValue)) {
             $saveReturnDateType = Functions::getReturnDateType();
             Functions::setReturnDateType(Functions::RETURNDATE_EXCEL);
+<<<<<<< HEAD
+            if (is_string($dateValue)) {
+                $dateValue = DateValue::fromString($dateValue);
+            }
+=======
             $dateValue = DateValue::fromString($dateValue);
+>>>>>>> main
             Functions::setReturnDateType($saveReturnDateType);
             if (!is_numeric($dateValue)) {
                 throw new Exception(ExcelError::VALUE());
@@ -54,12 +77,30 @@ class Helpers
             throw new Exception(ExcelError::NAN());
         }
 
+<<<<<<< HEAD
+        try {
+            SharedDateHelper::excelToDateTimeObject((float) $dateValue);
+        } catch (Throwable) {
+            throw new Exception(ExcelError::NAN());
+        }
+
+=======
+>>>>>>> main
         return (float) $dateValue;
     }
 
     /**
      * getTimeValue.
      *
+<<<<<<< HEAD
+     * @return float|string Excel date/time serial value, or string if error
+     */
+    public static function getTimeValue(string $timeValue): string|float
+    {
+        $saveReturnDateType = Functions::getReturnDateType();
+        Functions::setReturnDateType(Functions::RETURNDATE_EXCEL);
+        /** @var float|string $timeValue */
+=======
      * @param string $timeValue
      *
      * @return mixed Excel date/time serial value, or string if error
@@ -68,6 +109,7 @@ class Helpers
     {
         $saveReturnDateType = Functions::getReturnDateType();
         Functions::setReturnDateType(Functions::RETURNDATE_EXCEL);
+>>>>>>> main
         $timeValue = TimeValue::fromString($timeValue);
         Functions::setReturnDateType($saveReturnDateType);
 
@@ -77,7 +119,11 @@ class Helpers
     /**
      * Adjust date by given months.
      *
+<<<<<<< HEAD
+     * @param float|int $dateValue date to be adjusted
+=======
      * @param mixed $dateValue
+>>>>>>> main
      */
     public static function adjustDateByMonths($dateValue = 0, float $adjustmentMonths = 0): DateTime
     {
@@ -108,11 +154,16 @@ class Helpers
 
     /**
      * Help reduce perceived complexity of some tests.
+<<<<<<< HEAD
+     */
+    public static function replaceIfEmpty(mixed &$value, mixed $altValue): void
+=======
      *
      * @param mixed $value
      * @param mixed $altValue
      */
     public static function replaceIfEmpty(&$value, $altValue): void
+>>>>>>> main
     {
         $value = $value ?: $altValue;
     }
@@ -125,7 +176,11 @@ class Helpers
         if (!is_numeric($testVal1) || $testVal1 < 31) {
             if (!is_numeric($testVal2) || $testVal2 < 12) {
                 if (is_numeric($testVal3) && $testVal3 < 12) {
+<<<<<<< HEAD
+                    $testVal3 = (string) ($testVal3 + 2000);
+=======
                     $testVal3 += 2000;
+>>>>>>> main
                 }
             }
         }
@@ -134,9 +189,15 @@ class Helpers
     /**
      * Return result in one of three formats.
      *
+<<<<<<< HEAD
+     * @param array{year: int, month: int, day: int, hour: int, minute: int, second: int} $dateArray
+     */
+    public static function returnIn3FormatsArray(array $dateArray, bool $noFrac = false): DateTime|float|int
+=======
      * @return mixed
      */
     public static function returnIn3FormatsArray(array $dateArray, bool $noFrac = false)
+>>>>>>> main
     {
         $retType = Functions::getReturnDateType();
         if ($retType === Functions::RETURNDATE_PHP_DATETIME_OBJECT) {
@@ -149,8 +210,13 @@ class Helpers
                 . ':' . $dateArray['second']
             );
         }
+<<<<<<< HEAD
+        $excelDateValue
+            = SharedDateHelper::formattedPHPToExcel(
+=======
         $excelDateValue =
             SharedDateHelper::formattedPHPToExcel(
+>>>>>>> main
                 $dateArray['year'],
                 $dateArray['month'],
                 $dateArray['day'],
@@ -159,26 +225,43 @@ class Helpers
                 $dateArray['second']
             );
         if ($retType === Functions::RETURNDATE_EXCEL) {
+<<<<<<< HEAD
+            return $noFrac ? floor($excelDateValue) : $excelDateValue;
+        }
+        // RETURNDATE_UNIX_TIMESTAMP)
+
+        return SharedDateHelper::excelToTimestamp($excelDateValue);
+=======
             return $noFrac ? floor($excelDateValue) : (float) $excelDateValue;
         }
         // RETURNDATE_UNIX_TIMESTAMP)
 
         return (int) SharedDateHelper::excelToTimestamp($excelDateValue);
+>>>>>>> main
     }
 
     /**
      * Return result in one of three formats.
+<<<<<<< HEAD
+     */
+    public static function returnIn3FormatsFloat(float $excelDateValue): float|int|DateTime
+=======
      *
      * @return mixed
      */
     public static function returnIn3FormatsFloat(float $excelDateValue)
+>>>>>>> main
     {
         $retType = Functions::getReturnDateType();
         if ($retType === Functions::RETURNDATE_EXCEL) {
             return $excelDateValue;
         }
         if ($retType === Functions::RETURNDATE_UNIX_TIMESTAMP) {
+<<<<<<< HEAD
+            return SharedDateHelper::excelToTimestamp($excelDateValue);
+=======
             return (int) SharedDateHelper::excelToTimestamp($excelDateValue);
+>>>>>>> main
         }
         // RETURNDATE_PHP_DATETIME_OBJECT
 
@@ -187,10 +270,15 @@ class Helpers
 
     /**
      * Return result in one of three formats.
+<<<<<<< HEAD
+     */
+    public static function returnIn3FormatsObject(DateTime $PHPDateObject): DateTime|float|int
+=======
      *
      * @return mixed
      */
     public static function returnIn3FormatsObject(DateTime $PHPDateObject)
+>>>>>>> main
     {
         $retType = Functions::getReturnDateType();
         if ($retType === Functions::RETURNDATE_PHP_DATETIME_OBJECT) {
@@ -203,7 +291,11 @@ class Helpers
         $stamp = SharedDateHelper::PHPToExcel($PHPDateObject);
         $stamp = is_bool($stamp) ? ((int) $stamp) : $stamp;
 
+<<<<<<< HEAD
+        return SharedDateHelper::excelToTimestamp($stamp);
+=======
         return (int) SharedDateHelper::excelToTimestamp($stamp);
+>>>>>>> main
     }
 
     private static function baseDate(): int
@@ -220,10 +312,15 @@ class Helpers
 
     /**
      * Many functions accept null/false/true argument treated as 0/0/1.
+<<<<<<< HEAD
+     */
+    public static function nullFalseTrueToNumber(mixed &$number, bool $allowBool = true): void
+=======
      *
      * @param mixed $number
      */
     public static function nullFalseTrueToNumber(&$number, bool $allowBool = true): void
+>>>>>>> main
     {
         $number = Functions::flattenSingleValue($number);
         $nullVal = self::baseDate();
@@ -236,12 +333,17 @@ class Helpers
 
     /**
      * Many functions accept null argument treated as 0.
+<<<<<<< HEAD
+     */
+    public static function validateNumericNull(mixed $number): int|float
+=======
      *
      * @param mixed $number
      *
      * @return float|int
      */
     public static function validateNumericNull($number)
+>>>>>>> main
     {
         $number = Functions::flattenSingleValue($number);
         if ($number === null) {
@@ -260,11 +362,17 @@ class Helpers
     /**
      * Many functions accept null/false/true argument treated as 0/0/1.
      *
+<<<<<<< HEAD
+     * @phpstan-assert float $number
+     */
+    public static function validateNotNegative(mixed $number): float
+=======
      * @param mixed $number
      *
      * @return float
      */
     public static function validateNotNegative($number)
+>>>>>>> main
     {
         if (!is_numeric($number)) {
             throw new Exception(ExcelError::VALUE());
@@ -284,11 +392,24 @@ class Helpers
         }
     }
 
+<<<<<<< HEAD
+    /** @return array{year: int, month: int, day: int, hour: int, minute: int, second: int} */
+    public static function dateParse(string $string): array
+    {
+        /** @var array{year: int, month: int, day: int, hour: int, minute: int, second: int} */
+        $temp = self::forceArray(date_parse($string));
+
+        return $temp;
+    }
+
+    /** @param mixed[] $dateArray */
+=======
     public static function dateParse(string $string): array
     {
         return self::forceArray(date_parse($string));
     }
 
+>>>>>>> main
     public static function dateParseSucceeded(array $dateArray): bool
     {
         return $dateArray['error_count'] === 0;
@@ -298,10 +419,28 @@ class Helpers
      * Despite documentation, date_parse probably never returns false.
      * Just in case, this routine helps guarantee it.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|false $dateArray
+     *
+     * @return mixed[]
+     */
+    private static function forceArray(array|bool $dateArray): array
+    {
+        return is_array($dateArray) ? $dateArray : ['error_count' => 1];
+    }
+
+    public static function floatOrInt(mixed $value): float|int
+    {
+        $result = Functions::scalar($value);
+
+        return is_numeric($result) ? ($result + 0) : 0;
+    }
+=======
      * @param array|false $dateArray
      */
     private static function forceArray($dateArray): array
     {
         return is_array($dateArray) ? $dateArray : ['error_count' => 1];
     }
+>>>>>>> main
 }

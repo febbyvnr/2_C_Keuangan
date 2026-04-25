@@ -25,11 +25,19 @@ class Poisson
      * @param mixed $cumulative Boolean value indicating if we want the cdf (true) or the pdf (false)
      *                      Or can be an array of values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string The result, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function distribution(mixed $value, mixed $mean, mixed $cumulative): array|string|float
+=======
      * @return array|float|string The result, or a string containing an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function distribution($value, $mean, $cumulative)
+>>>>>>> main
     {
         if (is_array($value) || is_array($mean) || is_array($cumulative)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $value, $mean, $cumulative);
@@ -51,14 +59,22 @@ class Poisson
             $summer = 0;
             $floor = floor($value);
             for ($i = 0; $i <= $floor; ++$i) {
+<<<<<<< HEAD
+                /** @var float $fact */
+=======
                 /** @var float */
+>>>>>>> main
                 $fact = MathTrig\Factorial::fact($i);
                 $summer += $mean ** $i / $fact;
             }
 
             return exp(0 - $mean) * $summer;
         }
+<<<<<<< HEAD
+        /** @var float $fact */
+=======
         /** @var float */
+>>>>>>> main
         $fact = MathTrig\Factorial::fact($value);
 
         return (exp(0 - $mean) * $mean ** $value) / $fact;

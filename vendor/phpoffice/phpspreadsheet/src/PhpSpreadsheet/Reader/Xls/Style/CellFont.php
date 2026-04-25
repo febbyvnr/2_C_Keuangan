@@ -23,7 +23,11 @@ class CellFont
     /**
      * @var array<int, string>
      */
+<<<<<<< HEAD
+    protected static array $underlineMap = [
+=======
     protected static $underlineMap = [
+>>>>>>> main
         0x01 => Font::UNDERLINE_SINGLE,
         0x02 => Font::UNDERLINE_DOUBLE,
         0x21 => Font::UNDERLINE_SINGLEACCOUNTING,

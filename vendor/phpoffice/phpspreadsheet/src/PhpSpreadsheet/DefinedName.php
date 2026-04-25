@@ -10,6 +10,35 @@ abstract class DefinedName
 
     /**
      * Name.
+<<<<<<< HEAD
+     */
+    protected string $name;
+
+    /**
+     * Worksheet on which the defined name can be resolved.
+     */
+    protected ?Worksheet $worksheet;
+
+    /**
+     * Value of the named object.
+     */
+    protected string $value;
+
+    /**
+     * Is the defined named local? (i.e. can only be used on $this->worksheet).
+     */
+    protected bool $localOnly;
+
+    /**
+     * Scope.
+     */
+    protected ?Worksheet $scope;
+
+    /**
+     * Whether this is a named range or a named formula.
+     */
+    protected bool $isFormula;
+=======
      *
      * @var string
      */
@@ -49,6 +78,7 @@ abstract class DefinedName
      * @var bool
      */
     protected $isFormula;
+>>>>>>> main
 
     /**
      * Create a new Defined Name.
@@ -78,6 +108,15 @@ abstract class DefinedName
         $this->isFormula = self::testIfFormula($this->value);
     }
 
+<<<<<<< HEAD
+    public function __destruct()
+    {
+        $this->worksheet = null;
+        $this->scope = null;
+    }
+
+=======
+>>>>>>> main
     /**
      * Create a new defined name, either a range or a formula.
      */
@@ -99,7 +138,11 @@ abstract class DefinedName
 
     public static function testIfFormula(string $value): bool
     {
+<<<<<<< HEAD
+        if (str_starts_with($value, '=')) {
+=======
         if (substr($value, 0, 1) === '=') {
+>>>>>>> main
             $value = substr($value, 1);
         }
 
@@ -112,8 +155,13 @@ abstract class DefinedName
             //    Only test in alternate array entries (the non-quoted blocks)
             $segMatcher = $segMatcher === false;
             if (
+<<<<<<< HEAD
+                $segMatcher
+                && (preg_match('/' . self::REGEXP_IDENTIFY_FORMULA . '/miu', $subVal))
+=======
                 $segMatcher &&
                 (preg_match('/' . self::REGEXP_IDENTIFY_FORMULA . '/miu', $subVal))
+>>>>>>> main
             ) {
                 return true;
             }

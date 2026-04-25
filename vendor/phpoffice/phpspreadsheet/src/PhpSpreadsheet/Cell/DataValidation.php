@@ -28,6 +28,79 @@ class DataValidation
     const OPERATOR_LESSTHANOREQUAL = 'lessThanOrEqual';
     const OPERATOR_NOTBETWEEN = 'notBetween';
     const OPERATOR_NOTEQUAL = 'notEqual';
+<<<<<<< HEAD
+    private const DEFAULT_OPERATOR = self::OPERATOR_BETWEEN;
+
+    /**
+     * Formula 1.
+     */
+    private string $formula1 = '';
+
+    /**
+     * Formula 2.
+     */
+    private string $formula2 = '';
+
+    /**
+     * Type.
+     */
+    private string $type = self::TYPE_NONE;
+
+    /**
+     * Error style.
+     */
+    private string $errorStyle = self::STYLE_STOP;
+
+    /**
+     * Operator.
+     */
+    private string $operator = self::DEFAULT_OPERATOR;
+
+    /**
+     * Allow Blank.
+     */
+    private bool $allowBlank = false;
+
+    /**
+     * Show DropDown.
+     */
+    private bool $showDropDown = false;
+
+    /**
+     * Show InputMessage.
+     */
+    private bool $showInputMessage = false;
+
+    /**
+     * Show ErrorMessage.
+     */
+    private bool $showErrorMessage = false;
+
+    /**
+     * Error title.
+     */
+    private string $errorTitle = '';
+
+    /**
+     * Error.
+     */
+    private string $error = '';
+
+    /**
+     * Prompt title.
+     */
+    private string $promptTitle = '';
+
+    /**
+     * Prompt.
+     */
+    private string $prompt = '';
+
+    /**
+     * Get Formula 1.
+     */
+    public function getFormula1(): string
+=======
 
     /**
      * Formula 1.
@@ -133,6 +206,7 @@ class DataValidation
      * @return string
      */
     public function getFormula1()
+>>>>>>> main
     {
         return $this->formula1;
     }
@@ -140,11 +214,17 @@ class DataValidation
     /**
      * Set Formula 1.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setFormula1(string $formula): static
+=======
      * @param string $formula
      *
      * @return $this
      */
     public function setFormula1($formula)
+>>>>>>> main
     {
         $this->formula1 = $formula;
 
@@ -153,10 +233,15 @@ class DataValidation
 
     /**
      * Get Formula 2.
+<<<<<<< HEAD
+     */
+    public function getFormula2(): string
+=======
      *
      * @return string
      */
     public function getFormula2()
+>>>>>>> main
     {
         return $this->formula2;
     }
@@ -164,11 +249,17 @@ class DataValidation
     /**
      * Set Formula 2.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setFormula2(string $formula): static
+=======
      * @param string $formula
      *
      * @return $this
      */
     public function setFormula2($formula)
+>>>>>>> main
     {
         $this->formula2 = $formula;
 
@@ -177,10 +268,15 @@ class DataValidation
 
     /**
      * Get Type.
+<<<<<<< HEAD
+     */
+    public function getType(): string
+=======
      *
      * @return string
      */
     public function getType()
+>>>>>>> main
     {
         return $this->type;
     }
@@ -188,11 +284,17 @@ class DataValidation
     /**
      * Set Type.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setType(string $type): static
+=======
      * @param string $type
      *
      * @return $this
      */
     public function setType($type)
+>>>>>>> main
     {
         $this->type = $type;
 
@@ -201,10 +303,15 @@ class DataValidation
 
     /**
      * Get Error style.
+<<<<<<< HEAD
+     */
+    public function getErrorStyle(): string
+=======
      *
      * @return string
      */
     public function getErrorStyle()
+>>>>>>> main
     {
         return $this->errorStyle;
     }
@@ -216,7 +323,11 @@ class DataValidation
      *
      * @return $this
      */
+<<<<<<< HEAD
+    public function setErrorStyle(string $errorStyle): static
+=======
     public function setErrorStyle($errorStyle)
+>>>>>>> main
     {
         $this->errorStyle = $errorStyle;
 
@@ -225,10 +336,15 @@ class DataValidation
 
     /**
      * Get Operator.
+<<<<<<< HEAD
+     */
+    public function getOperator(): string
+=======
      *
      * @return string
      */
     public function getOperator()
+>>>>>>> main
     {
         return $this->operator;
     }
@@ -236,6 +352,13 @@ class DataValidation
     /**
      * Set Operator.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setOperator(string $operator): static
+    {
+        $this->operator = ($operator === '') ? self::DEFAULT_OPERATOR : $operator;
+=======
      * @param string $operator
      *
      * @return $this
@@ -243,16 +366,22 @@ class DataValidation
     public function setOperator($operator)
     {
         $this->operator = $operator;
+>>>>>>> main
 
         return $this;
     }
 
     /**
      * Get Allow Blank.
+<<<<<<< HEAD
+     */
+    public function getAllowBlank(): bool
+=======
      *
      * @return bool
      */
     public function getAllowBlank()
+>>>>>>> main
     {
         return $this->allowBlank;
     }
@@ -260,11 +389,17 @@ class DataValidation
     /**
      * Set Allow Blank.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setAllowBlank(bool $allowBlank): static
+=======
      * @param bool $allowBlank
      *
      * @return $this
      */
     public function setAllowBlank($allowBlank)
+>>>>>>> main
     {
         $this->allowBlank = $allowBlank;
 
@@ -273,10 +408,15 @@ class DataValidation
 
     /**
      * Get Show DropDown.
+<<<<<<< HEAD
+     */
+    public function getShowDropDown(): bool
+=======
      *
      * @return bool
      */
     public function getShowDropDown()
+>>>>>>> main
     {
         return $this->showDropDown;
     }
@@ -284,11 +424,17 @@ class DataValidation
     /**
      * Set Show DropDown.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setShowDropDown(bool $showDropDown): static
+=======
      * @param bool $showDropDown
      *
      * @return $this
      */
     public function setShowDropDown($showDropDown)
+>>>>>>> main
     {
         $this->showDropDown = $showDropDown;
 
@@ -297,10 +443,15 @@ class DataValidation
 
     /**
      * Get Show InputMessage.
+<<<<<<< HEAD
+     */
+    public function getShowInputMessage(): bool
+=======
      *
      * @return bool
      */
     public function getShowInputMessage()
+>>>>>>> main
     {
         return $this->showInputMessage;
     }
@@ -308,11 +459,17 @@ class DataValidation
     /**
      * Set Show InputMessage.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setShowInputMessage(bool $showInputMessage): static
+=======
      * @param bool $showInputMessage
      *
      * @return $this
      */
     public function setShowInputMessage($showInputMessage)
+>>>>>>> main
     {
         $this->showInputMessage = $showInputMessage;
 
@@ -321,10 +478,15 @@ class DataValidation
 
     /**
      * Get Show ErrorMessage.
+<<<<<<< HEAD
+     */
+    public function getShowErrorMessage(): bool
+=======
      *
      * @return bool
      */
     public function getShowErrorMessage()
+>>>>>>> main
     {
         return $this->showErrorMessage;
     }
@@ -332,11 +494,17 @@ class DataValidation
     /**
      * Set Show ErrorMessage.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setShowErrorMessage(bool $showErrorMessage): static
+=======
      * @param bool $showErrorMessage
      *
      * @return $this
      */
     public function setShowErrorMessage($showErrorMessage)
+>>>>>>> main
     {
         $this->showErrorMessage = $showErrorMessage;
 
@@ -345,10 +513,15 @@ class DataValidation
 
     /**
      * Get Error title.
+<<<<<<< HEAD
+     */
+    public function getErrorTitle(): string
+=======
      *
      * @return string
      */
     public function getErrorTitle()
+>>>>>>> main
     {
         return $this->errorTitle;
     }
@@ -356,11 +529,17 @@ class DataValidation
     /**
      * Set Error title.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setErrorTitle(string $errorTitle): static
+=======
      * @param string $errorTitle
      *
      * @return $this
      */
     public function setErrorTitle($errorTitle)
+>>>>>>> main
     {
         $this->errorTitle = $errorTitle;
 
@@ -369,10 +548,15 @@ class DataValidation
 
     /**
      * Get Error.
+<<<<<<< HEAD
+     */
+    public function getError(): string
+=======
      *
      * @return string
      */
     public function getError()
+>>>>>>> main
     {
         return $this->error;
     }
@@ -380,11 +564,17 @@ class DataValidation
     /**
      * Set Error.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setError(string $error): static
+=======
      * @param string $error
      *
      * @return $this
      */
     public function setError($error)
+>>>>>>> main
     {
         $this->error = $error;
 
@@ -393,10 +583,15 @@ class DataValidation
 
     /**
      * Get Prompt title.
+<<<<<<< HEAD
+     */
+    public function getPromptTitle(): string
+=======
      *
      * @return string
      */
     public function getPromptTitle()
+>>>>>>> main
     {
         return $this->promptTitle;
     }
@@ -404,11 +599,17 @@ class DataValidation
     /**
      * Set Prompt title.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setPromptTitle(string $promptTitle): static
+=======
      * @param string $promptTitle
      *
      * @return $this
      */
     public function setPromptTitle($promptTitle)
+>>>>>>> main
     {
         $this->promptTitle = $promptTitle;
 
@@ -417,10 +618,15 @@ class DataValidation
 
     /**
      * Get Prompt.
+<<<<<<< HEAD
+     */
+    public function getPrompt(): string
+=======
      *
      * @return string
      */
     public function getPrompt()
+>>>>>>> main
     {
         return $this->prompt;
     }
@@ -428,11 +634,17 @@ class DataValidation
     /**
      * Set Prompt.
      *
+<<<<<<< HEAD
+     * @return $this
+     */
+    public function setPrompt(string $prompt): static
+=======
      * @param string $prompt
      *
      * @return $this
      */
     public function setPrompt($prompt)
+>>>>>>> main
     {
         $this->prompt = $prompt;
 
@@ -444,6 +656,30 @@ class DataValidation
      *
      * @return string Hash code
      */
+<<<<<<< HEAD
+    public function getHashCode(): string
+    {
+        return md5(
+            $this->formula1
+            . $this->formula2
+            . $this->type
+            . $this->errorStyle
+            . $this->operator
+            . ($this->allowBlank ? 't' : 'f')
+            . ($this->showDropDown ? 't' : 'f')
+            . ($this->showInputMessage ? 't' : 'f')
+            . ($this->showErrorMessage ? 't' : 'f')
+            . $this->errorTitle
+            . $this->error
+            . $this->promptTitle
+            . $this->prompt
+            . $this->sqref
+            . __CLASS__
+        );
+    }
+
+    private ?string $sqref = null;
+=======
     public function getHashCode()
     {
         return md5(
@@ -482,6 +718,7 @@ class DataValidation
 
     /** @var ?string */
     private $sqref;
+>>>>>>> main
 
     public function getSqref(): ?string
     {

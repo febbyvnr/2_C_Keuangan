@@ -12,7 +12,13 @@ class RefTahunAnggaranController extends Controller
      */
     public function index()
     {
-        return RefTahunAnggaran::orderBy('ID_TA_ANGGARAN', 'desc')->get();
+        return RefTahunAnggaran::withCount(['programKerja', 'tarif'])
+            ->orderBy('ID_TA_ANGGARAN', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->is_used = ($item->program_kerja_count > 0 || $item->tarif_count > 0);
+                return $item;
+            });
     }
 
     /**
@@ -82,7 +88,9 @@ class RefTahunAnggaranController extends Controller
     }
 
     if ($request->IS_CURRENT == 1) {
-        RefTahunAnggaran::where('IS_CURRENT', 1)->update(['IS_CURRENT' => 0]);
+        RefTahunAnggaran::where('IS_CURRENT', 1)
+            ->where('ID_TA_ANGGARAN', '!=', $id)
+            ->update(['IS_CURRENT' => 0]);
     }
 
     $data->update($request->all());

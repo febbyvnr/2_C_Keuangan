@@ -17,11 +17,19 @@ class Sine
      *
      * @param mixed $angle Should be numeric, or can be an array of numbers
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string sine
+     *         If an array of numbers is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function sin(mixed $angle): array|string|float
+=======
      * @return array|float|string sine
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function sin($angle)
+>>>>>>> main
     {
         if (is_array($angle)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $angle);
@@ -43,11 +51,19 @@ class Sine
      *
      * @param mixed $angle Should be numeric, or can be an array of numbers
      *
+<<<<<<< HEAD
+     * @return array<mixed>|float|string hyperbolic sine
+     *         If an array of numbers is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function sinh(mixed $angle): array|string|float
+=======
      * @return array|float|string hyperbolic sine
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function sinh($angle)
+>>>>>>> main
     {
         if (is_array($angle)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $angle);
@@ -67,9 +83,15 @@ class Sine
      *
      * Returns the arcsine of a number.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $number Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The arcsine of the number
+=======
      * @param array|float $number Number, or can be an array of numbers
      *
      * @return array|float|string The arcsine of the number
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
@@ -93,9 +115,15 @@ class Sine
      *
      * Returns the inverse hyperbolic sine of a number.
      *
+<<<<<<< HEAD
+     * @param array<mixed>|float $number Number, or can be an array of numbers
+     *
+     * @return array<mixed>|float|string The inverse hyperbolic sine of the number
+=======
      * @param array|float $number Number, or can be an array of numbers
      *
      * @return array|float|string The inverse hyperbolic sine of the number
+>>>>>>> main
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */

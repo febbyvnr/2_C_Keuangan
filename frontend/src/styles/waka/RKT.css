@@ -1,0 +1,343 @@
+.waka-rkt-shell {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    min-height: 100vh;
+    background: #f3f6fb;
+    color: #1f2937;
+}
+
+.waka-rkt-sidebar {
+    padding: 24px 14px;
+    background: #ffffff;
+    border-right: 1px solid #e5edf5;
+}
+
+.waka-rkt-brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 6px 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #e8edf4;
+}
+
+.waka-rkt-badge {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #0f766e;
+    color: #fff;
+    font-weight: 700;
+}
+
+.waka-rkt-brand strong,
+.waka-rkt-brand span {
+    display: block;
+}
+
+.waka-rkt-brand span {
+    color: #6b7280;
+    font-size: 0.88rem;
+}
+
+.waka-rkt-nav {
+    display: grid;
+    gap: 8px;
+}
+
+.waka-rkt-nav-item {
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #334155;
+    text-align: left;
+}
+
+.waka-rkt-nav-item.active {
+    background: #dbf5ef;
+    color: #0f766e;
+    font-weight: 700;
+    box-shadow: inset -4px 0 0 #0f766e;
+}
+
+.waka-rkt-main {
+    padding: 28px 34px 40px;
+    background: #f3f6fb;
+}
+
+.waka-rkt-card h2 {
+    margin: 0;
+}
+
+.waka-rkt-card {
+    padding: 24px;
+    margin-bottom: 22px;
+    background: #fff;
+    border: 1px solid #dfe7f1;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.waka-rkt-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.waka-rkt-card-head p {
+    margin: 10px 0 0;
+    color: #6b7280;
+}
+
+.waka-rkt-actions-top,
+.waka-rkt-submit,
+.waka-rkt-row-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.waka-rkt-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.waka-rkt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.waka-rkt-date-input {
+    position: relative;
+}
+
+.waka-rkt-field-full {
+    grid-column: 1 / -1;
+}
+
+.waka-rkt-field span,
+.waka-rkt-search span {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.waka-rkt-field input,
+.waka-rkt-field select,
+.waka-rkt-field textarea,
+.waka-rkt-search input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d5deea;
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    outline: none;
+    font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.waka-rkt-field textarea {
+    min-height: 96px;
+    resize: vertical;
+}
+
+.waka-rkt-field input:focus,
+.waka-rkt-field select:focus,
+.waka-rkt-field textarea:focus,
+.waka-rkt-search input:focus {
+    border-color: #1f4e82;
+    box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.waka-rkt-date-input input {
+    padding-right: 50px;
+}
+
+.waka-rkt-date-trigger {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 10px;
+    background: #eef3ff;
+    color: #1f4e82;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.waka-rkt-date-trigger:hover {
+    background: #dbeafe;
+}
+
+.waka-rkt-submit {
+    justify-content: flex-end;
+    margin-top: 22px;
+}
+
+.waka-rkt-button,
+.waka-rkt-mini-button {
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-weight: 700;
+}
+
+.waka-rkt-button {
+    min-height: 48px;
+    padding: 0 18px;
+}
+
+.waka-rkt-button.primary {
+    background: #1f4e82;
+    color: #fff;
+}
+
+.waka-rkt-button.secondary {
+    background: #dbeafe;
+    color: #1f4e82;
+}
+
+.waka-rkt-button.ghost {
+    background: #fff;
+    color: #1f4e82;
+    border-color: #cfdce8;
+}
+
+.waka-rkt-feedback,
+.waka-rkt-empty {
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+}
+
+.waka-rkt-feedback.success {
+    background: #eefaf1;
+    border: 1px solid #b7e2c5;
+    color: #2b7c4b;
+}
+
+.waka-rkt-feedback.error {
+    background: #fff1f3;
+    border: 1px solid #f2c7cd;
+    color: #b54555;
+}
+
+.waka-rkt-empty {
+    text-align: center;
+    color: #64748b;
+    background: #f8fbfd;
+    border: 1px dashed #cfdce8;
+}
+
+.waka-rkt-search {
+    display: grid;
+    gap: 8px;
+    min-width: 280px;
+}
+
+.waka-rkt-table-wrap {
+    overflow-x: auto;
+}
+
+.waka-rkt-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+.waka-rkt-table th,
+.waka-rkt-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e6edf5;
+    text-align: left;
+    vertical-align: top;
+}
+
+.waka-rkt-table th {
+    color: #64748b;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+}
+
+.waka-rkt-table td strong,
+.waka-rkt-table td small {
+    display: block;
+}
+
+.waka-rkt-table td small {
+    margin-top: 5px;
+    color: #64748b;
+}
+
+.waka-rkt-empty-cell {
+    text-align: center;
+    color: #64748b;
+}
+
+.waka-rkt-mini-button {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 0.88rem;
+}
+
+.waka-rkt-mini-button.edit {
+    background: #e6f0ff;
+    color: #1f4e82;
+}
+
+.waka-rkt-mini-button.delete {
+    background: #fff0f2;
+    color: #be4257;
+}
+
+@media (max-width: 1080px) {
+    .waka-rkt-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .waka-rkt-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid #e5edf5;
+    }
+}
+
+@media (max-width: 720px) {
+    .waka-rkt-main {
+        padding: 22px 16px 30px;
+    }
+
+    .waka-rkt-card {
+        padding: 18px;
+    }
+
+    .waka-rkt-card-head {
+        flex-direction: column;
+    }
+
+    .waka-rkt-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .waka-rkt-submit {
+        flex-direction: column;
+    }
+
+    .waka-rkt-button,
+    .waka-rkt-search {
+        width: 100%;
+    }
+}

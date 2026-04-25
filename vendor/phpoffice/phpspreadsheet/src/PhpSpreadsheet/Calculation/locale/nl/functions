@@ -38,6 +38,10 @@ DVARP = DBVARP
 ## Datum- en tijdfuncties (Date & Time Functions)
 ##
 DATE = DATUM
+<<<<<<< HEAD
+DATEDIF = DATUMVERSCHIL
+=======
+>>>>>>> main
 DATESTRING = DATUMNOTATIE
 DATEVALUE = DATUMWAARDE
 DAY = DAG

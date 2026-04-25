@@ -9,6 +9,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class AutoFilters
 {
+<<<<<<< HEAD
+    private XMLWriter $objWriter;
+
+    private Spreadsheet $spreadsheet;
+=======
     /**
      * @var XMLWriter
      */
@@ -18,6 +23,7 @@ class AutoFilters
      * @var Spreadsheet
      */
     private $spreadsheet;
+>>>>>>> main
 
     public function __construct(XMLWriter $objWriter, Spreadsheet $spreadsheet)
     {
@@ -25,17 +31,27 @@ class AutoFilters
         $this->spreadsheet = $spreadsheet;
     }
 
+<<<<<<< HEAD
+    public function write(): void
+    {
+        $wrapperWritten = false;
+=======
     /** @var mixed */
     private static $scrutinizerFalse = false;
 
     public function write(): void
     {
         $wrapperWritten = self::$scrutinizerFalse;
+>>>>>>> main
         $sheetCount = $this->spreadsheet->getSheetCount();
         for ($i = 0; $i < $sheetCount; ++$i) {
             $worksheet = $this->spreadsheet->getSheet($i);
             $autofilter = $worksheet->getAutoFilter();
+<<<<<<< HEAD
+            if (!empty($autofilter->getRange())) {
+=======
             if ($autofilter !== null && !empty($autofilter->getRange())) {
+>>>>>>> main
                 if ($wrapperWritten === false) {
                     $this->objWriter->startElement('table:database-ranges');
                     $wrapperWritten = true;
@@ -56,7 +72,11 @@ class AutoFilters
         }
     }
 
+<<<<<<< HEAD
+    protected function formatRange(Worksheet $worksheet, AutoFilter $autofilter): string
+=======
     protected function formatRange(Worksheet $worksheet, Autofilter $autofilter): string
+>>>>>>> main
     {
         $title = $worksheet->getTitle();
         $range = $autofilter->getRange();

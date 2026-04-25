@@ -821,11 +821,19 @@ class Roman
      * @param mixed $style Number indicating one of five possible forms
      *                      Or can be an array of styles
      *
+<<<<<<< HEAD
+     * @return array<mixed>|string Roman numeral, or a string containing an error
+     *         If an array of numbers is passed as an argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function evaluate(mixed $aValue, mixed $style = 0): array|string
+=======
      * @return array|string Roman numeral, or a string containing an error
      *         If an array of numbers is passed as an argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function evaluate($aValue, $style = 0)
+>>>>>>> main
     {
         if (is_array($aValue) || is_array($style)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $aValue, $style);

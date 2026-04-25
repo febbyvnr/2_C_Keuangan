@@ -1,0 +1,406 @@
+:root {
+  --primary: #265f9c;
+  --secondary: #eda60f;
+  --accent: #edd15b;
+  --bg: #f6f7f9;
+
+  --text-main: #1a1a1a;
+  --text-secondary: #585858;
+  --text-disabled: #7d7d7e;
+
+  --success: #2e7d32;
+  --error: #c62828;
+}
+
+.laporan-container {
+  padding: 24px;
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* TITLE */
+.laporan-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-main);
+}
+
+/* TAB */
+.laporan-tabs {
+  display: flex;
+  gap: 70px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.laporan-tab {
+  padding-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.laporan-tab.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+/* ========================= */
+/* LAYOUT */
+/* ========================= */
+
+.laporan-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ========================= */
+/* FILTER */
+/* ========================= */
+
+.laporan-filter {
+  width: 100%;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 11px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 16px;
+
+  height: fit-content;
+}
+
+.filter-range {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.laporan-filter label {
+  margin-bottom: 0;
+  margin-right: 8px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* INPUT NORMAL */
+.laporan-filter input {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: white;
+  color: var(--text-main);
+  font-size: 13px;
+}
+
+.laporan-filter input:focus,
+.laporan-filter select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* BUTTON FIX */
+.laporan-filter button {
+  width: auto;
+}
+
+/* ========================= */
+/* BUTTON */
+/* ========================= */
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  height: 38px;
+}
+
+.btn-primary:hover {
+  background: #1e4f82;
+}
+
+/* ========================= */
+/* TABLE */
+/* ========================= */
+
+.laporan-table {
+  background: white;
+  color: black;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.laporan-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.laporan-table th {
+  background: #ffffff;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.laporan-table td {
+  padding: 12px;
+  font-size: 13px;
+  border-top: 1px solid #eee;
+  color: var(--text-secondary);
+}
+
+.laporan-table tr:hover {
+  background: #f1f5f9;
+}
+
+.laporan-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ========================= */
+/* TOTAL */
+/* ========================= */
+
+.laporan-total {
+  margin-top: 16px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ========================= */
+/* EXPORT */
+/* ========================= */
+
+.laporan-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 1px;
+}
+
+.btn-export {
+  padding: 8px 14px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-export.excel {
+  background: var(--success);
+}
+
+.btn-export.pdf {
+  background: var(--error);
+}
+
+.btn-export:hover {
+  opacity: 0.9;
+}
+
+/* ========================= */
+/*  RANGE DATE */
+/* ========================= */
+
+.range-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.range-input input {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.range-separator {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* ========================= */
+/* DROPDOWN SUMBER DANA */
+/* ========================= */
+
+.laporan-filter select {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  background: white;
+  color: var(--text-main);
+  flex-shrink: 0;
+  width: 150px;
+}
+
+/* FIX RANGE */
+.range-input {
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-sumber {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.filter-sumber label {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* SIDE */
+.laporan-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.laporan-table {
+  max-height: calc(106vh - 220px);
+  overflow-y: auto;
+}
+
+.laporan-table thead th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+.laporan-table::-webkit-scrollbar {
+  width: 6px;
+}
+
+.laporan-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.laporan-table::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.laporan-table::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.laporan-total-card {
+  background: white;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.laporan-total-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.laporan-total-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ========================================= */
+/* FIX BKU SWITCH (NAVIGASI) */
+/* ========================================= */
+
+.bku-switch {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  width: 100%;
+  margin: 10px 0 16px 0;
+}
+
+/* BUTTON PANAH */
+.bku-switch button {
+  background: #e5e7eb !important; /* abu soft */
+  color: var(--text-main) !important;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+/* HOVER */
+.bku-switch button:hover {
+  background: var(--primary) !important;
+  color: white !important;
+}
+
+.bku-switch span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary) !important;
+  letter-spacing: 0.3px;
+}
+
+/* ========================================= */
+/* 🔥 FIX CARD TOTAL (PENERIMAAN & BKU) */
+/* ========================================= */
+
+.laporan-total-card {
+  background: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px; /* 🔥 biar ga nempel */
+}
+
+/* 🔥 LABEL (Saldo Akhir / Total Penerimaan) */
+.laporan-total-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* 🔥 VALUE ANGKA */
+.laporan-total-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+
+  white-space: nowrap; /* 🔥 biar ga turun */
+}

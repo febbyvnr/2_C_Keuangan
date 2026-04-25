@@ -6,13 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\TrPembayaran;
 use Illuminate\Validation\ValidationException;
-
+use App\Models\TagihanSiswa;
 class TrPembayaranController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = TrPembayaran::all();
+            $query = TrPembayaran::with([
+                'tahunAnggaran',
+                'jenisPembayaran',
+                'siswa',
+                'tagihan'
+            ]);
+
+            if ($request->filled('ID_SISWA_TETAP')) {
+                $query->where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP);
+            }
+
+            $data = $query->get();
+
             return response()->json([
                 'data' => $data
             ]);
@@ -20,7 +32,7 @@ class TrPembayaranController extends Controller
             return response()->json([
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage()
-            ],500);
+            ], 500);
         }
     }
 
@@ -52,20 +64,74 @@ class TrPembayaranController extends Controller
                 'ID_SISWA_TETAP' => 'nullable|integer',
                 'KODE_TA' => 'nullable|integer',
                 'ID_JENIS_PEMBAYARAN' => 'nullable|integer',
-                'ID_TAGIHAN_SISWA' => 'nullable|integer',
+                'ID_TAGIHAN_SISWA' => 'required|integer',
+
                 'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
                 'TGL_BAYAR' => 'nullable|date',
-                'JUMLAH_BAYAR' => 'nullable|numeric',
+
+                'JUMLAH_BAYAR' => 'required|numeric|min:1',
+
                 'LINK_BUKTI_BAYAR' => 'required|string|max:255',
                 'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20'
             ]);
+
+            $tagihan = TagihanSiswa::with('siswa')->find($validated['ID_TAGIHAN_SISWA']);
+
+            if (!$tagihan) {
+                return response()->json([
+                    'message' => 'Tagihan tidak ditemukan'
+                ], 404);
+            }
+
+            $validated['ID_SISWA_TETAP'] = $tagihan->ID_SISWA_TETAP;
+            $validated['ID_JENIS_PEMBAYARAN'] = $tagihan->ID_JENIS_PEMBAYARAN;
+            $validated['KODE_TA'] = optional($tagihan->siswa)->KODE_TA;
+            $validated['REF_ID_JENIS_PEMBAYARAN'] = $tagihan->ID_JENIS_PEMBAYARAN;
+
+            $totalTagihan = (float) $tagihan->JUMLAH_TAGIHAN_SISWA;
+
+            $totalSudahBayar = (float) TrPembayaran::where('ID_TAGIHAN_SISWA', $validated['ID_TAGIHAN_SISWA'])
+                ->sum('JUMLAH_BAYAR');
+
+            $jumlahBayarBaru = (float) $validated['JUMLAH_BAYAR'];
+            $sisaTagihan = $totalTagihan - $totalSudahBayar;
+
+            if ($jumlahBayarBaru > $sisaTagihan) {
+                return response()->json([
+                    'message' => 'Pembayaran melebihi sisa tagihan!',
+                    'data' => [
+                        'total_tagihan' => $totalTagihan,
+                        'sudah_bayar' => $totalSudahBayar,
+                        'sisa_tagihan' => max(0, $sisaTagihan),
+                    ]
+                ], 422);
+            }
+
             $lastId = TrPembayaran::max('ID_PEMBAYARAN');
             $newId = $lastId ? $lastId + 1 : 1;
             $validated['ID_PEMBAYARAN'] = $newId;
+
             $data = TrPembayaran::create($validated);
+            $totalBayarTerbaru = TrPembayaran::where('ID_TAGIHAN_SISWA', $validated['ID_TAGIHAN_SISWA'])
+    ->sum('JUMLAH_BAYAR');
+
+if ($totalBayarTerbaru >= $totalTagihan) {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Sudah Bayar'
+    ]);
+} elseif ($totalBayarTerbaru > 0) {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Cicilan'
+    ]);
+} else {
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => 'Belum Bayar'
+    ]);
+}
             return response()->json([
-                'data'=>$data
-            ],201);
+                'data' => $data
+            ], 201);
+
         } catch (ValidationException $e){
             return response()->json([
                 'errors'=>$e->errors()

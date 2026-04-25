@@ -2,6 +2,11 @@
 
 namespace PhpOffice\PhpSpreadsheet\Chart\Renderer;
 
+<<<<<<< HEAD
+use mitoteam\jpgraph\MtJpGraph;
+
+=======
+>>>>>>> main
 /**
  * Jpgraph is not officially maintained by Composer at packagist.org.
  *
@@ -19,7 +24,11 @@ class MtJpGraphRenderer extends JpGraphRendererBase
             return;
         }
 
+<<<<<<< HEAD
+        MtJpGraph::load([
+=======
         \mitoteam\jpgraph\MtJpGraph::load([
+>>>>>>> main
             'bar',
             'contour',
             'line',

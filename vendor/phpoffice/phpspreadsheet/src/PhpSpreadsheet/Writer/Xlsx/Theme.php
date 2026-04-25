@@ -14,7 +14,11 @@ class Theme extends WriterPart
      *
      * @return string XML Output
      */
+<<<<<<< HEAD
+    public function writeTheme(Spreadsheet $spreadsheet): string
+=======
     public function writeTheme(Spreadsheet $spreadsheet)
+>>>>>>> main
     {
         // Create XML writer
         $objWriter = null;

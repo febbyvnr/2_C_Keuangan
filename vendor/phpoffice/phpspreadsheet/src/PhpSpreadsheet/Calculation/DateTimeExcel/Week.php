@@ -28,7 +28,11 @@ class Week
      * @param mixed $dateValue Excel date serial value (float), PHP date timestamp (integer),
      *                                    PHP DateTime object, or a standard date string
      *                         Or can be an array of date values
+<<<<<<< HEAD
+     * @param array<mixed>|int $method Week begins on Sunday or Monday
+=======
      * @param array|int $method Week begins on Sunday or Monday
+>>>>>>> main
      *                                        1 or omitted    Week begins on Sunday.
      *                                        2                Week begins on Monday.
      *                                        11               Week begins on Monday.
@@ -41,11 +45,19 @@ class Week
      *                                        21               ISO (Jan. 4 is week 1, begins on Monday).
      *                         Or can be an array of methods
      *
+<<<<<<< HEAD
+     * @return array<mixed>|int|string Week Number
+     *         If an array of values is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function number(mixed $dateValue, array|int|string|null $method = Constants::STARTWEEK_SUNDAY): array|int|string
+=======
      * @return array|int|string Week Number
      *         If an array of values is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function number($dateValue, $method = Constants::STARTWEEK_SUNDAY)
+>>>>>>> main
     {
         if (is_array($dateValue) || is_array($method)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $dateValue, $method);
@@ -101,11 +113,19 @@ class Week
      *                                    PHP DateTime object, or a standard date string
      *                         Or can be an array of date values
      *
+<<<<<<< HEAD
+     * @return array<mixed>|int|string Week Number
+     *         If an array of numbers is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function isoWeekNumber(mixed $dateValue): array|int|string
+=======
      * @return array|int|string Week Number
      *         If an array of numbers is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function isoWeekNumber($dateValue)
+>>>>>>> main
     {
         if (is_array($dateValue)) {
             return self::evaluateSingleArgumentArray([self::class, __FUNCTION__], $dateValue);
@@ -137,7 +157,11 @@ class Week
      * Excel Function:
      *        WEEKDAY(dateValue[,style])
      *
+<<<<<<< HEAD
+     * @param null|array<mixed>|bool|float|int|string $dateValue Excel date serial value (float), PHP date timestamp (integer),
+=======
      * @param null|array|float|int|string $dateValue Excel date serial value (float), PHP date timestamp (integer),
+>>>>>>> main
      *                                    PHP DateTime object, or a standard date string
      *                         Or can be an array of date values
      * @param mixed $style A number that determines the type of return value
@@ -146,11 +170,19 @@ class Week
      *                                        3                Numbers 0 (Monday) through 6 (Sunday).
      *                         Or can be an array of styles
      *
+<<<<<<< HEAD
+     * @return array<mixed>|int|string Day of the week value
+     *         If an array of values is passed as the argument, then the returned result will also be an array
+     *            with the same dimensions
+     */
+    public static function day(null|array|float|int|string|bool $dateValue, mixed $style = 1): array|string|int
+=======
      * @return array|int|string Day of the week value
      *         If an array of values is passed as the argument, then the returned result will also be an array
      *            with the same dimensions
      */
     public static function day($dateValue, $style = 1)
+>>>>>>> main
     {
         if (is_array($dateValue) || is_array($style)) {
             return self::evaluateArrayArguments([self::class, __FUNCTION__], $dateValue, $style);
@@ -189,7 +221,11 @@ class Week
     /**
      * @param mixed $style expect int
      */
+<<<<<<< HEAD
+    private static function validateStyle(mixed $style): int
+=======
     private static function validateStyle($style): int
+>>>>>>> main
     {
         if (!is_numeric($style)) {
             throw new Exception(ExcelError::VALUE());
@@ -211,7 +247,11 @@ class Week
      * @param mixed $dateValue Excel date serial value (float), PHP date timestamp (integer),
      *                                    PHP DateTime object, or a standard date string
      */
+<<<<<<< HEAD
+    private static function apparentBug(mixed $dateValue): bool
+=======
     private static function apparentBug($dateValue): bool
+>>>>>>> main
     {
         if (SharedDateHelper::getExcelCalendar() !== SharedDateHelper::CALENDAR_MAC_1904) {
             if (is_bool($dateValue)) {
@@ -227,10 +267,15 @@ class Week
 
     /**
      * Validate dateValue parameter.
+<<<<<<< HEAD
+     */
+    private static function validateDateValue(mixed $dateValue): float
+=======
      *
      * @param mixed $dateValue
      */
     private static function validateDateValue($dateValue): float
+>>>>>>> main
     {
         if (is_bool($dateValue)) {
             throw new Exception(ExcelError::VALUE());
@@ -241,10 +286,15 @@ class Week
 
     /**
      * Validate method parameter.
+<<<<<<< HEAD
+     */
+    private static function validateMethod(mixed $method): int
+=======
      *
      * @param mixed $method
      */
     private static function validateMethod($method): int
+>>>>>>> main
     {
         if ($method === null) {
             $method = Constants::STARTWEEK_SUNDAY;
@@ -272,7 +322,12 @@ class Week
     {
         // This appears to be another Excel bug.
 
+<<<<<<< HEAD
+        return $method === Constants::DOW_SUNDAY && SharedDateHelper::getExcelCalendar() === SharedDateHelper::CALENDAR_MAC_1904
+            && !$origNull && $dateObject->format('Y-m-d') === '1904-01-01';
+=======
         return $method === Constants::DOW_SUNDAY && SharedDateHelper::getExcelCalendar() === SharedDateHelper::CALENDAR_MAC_1904 &&
             !$origNull && $dateObject->format('Y-m-d') === '1904-01-01';
+>>>>>>> main
     }
 }
