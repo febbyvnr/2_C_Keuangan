@@ -3,13 +3,14 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\FromCollection; 
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class LaporanPengeluaranExport implements WithEvents
+class LaporanPengeluaranExport implements FromCollection, WithEvents 
 {
     protected $start, $end, $sumberDana, $role, $nip;
     protected $total = 0;
@@ -47,20 +48,17 @@ class LaporanPengeluaranExport implements WithEvents
             $query->where('dpk.ID_REF_DANA', $this->sumberDana);
         }
 
-        $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
-        $this->total = $data->sum('nominal');
-
-        return $data;
+        return $query->orderBy('tp.TGL_PM', 'asc')->get();
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function ($event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
-                $dataCollection = $this->collection();
+                $data = $this->collection(); 
 
-                // WIDTH (Disesuaikan agar rapi)
+                // Width
                 $sheet->getColumnDimension('A')->setWidth(6);
                 $sheet->getColumnDimension('B')->setWidth(15);
                 $sheet->getColumnDimension('C')->setWidth(25);
@@ -68,32 +66,26 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->getColumnDimension('E')->setWidth(35);
                 $sheet->getColumnDimension('F')->setWidth(22);
 
-                // TITLE
+                // Title
                 $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
                 $sheet->setCellValue('A3', 'LAPORAN PENGELUARAN (KK)');
                 $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
-                
                 $sheet->mergeCells('A2:F2');
                 $sheet->mergeCells('A3:F3');
                 $sheet->mergeCells('A4:F4');
-                
                 $sheet->getStyle('A2:F4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
 
-                // HEADER
+                // Header
                 $headerRow = 6;
                 $headers = ['NO', 'TANGGAL', 'PROGRAM KERJA', 'SUMBER DANA', 'URAIAN', 'NOMINAL'];
                 $sheet->fromArray($headers, NULL, "A$headerRow");
-                
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF2E75B6');
-                $sheet->getStyle("A$headerRow:F$headerRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->setAutoFilter("A$headerRow:F$headerRow");
 
-                // DATA
+                // Data
                 $row = $headerRow + 1; $no = 1;
-                foreach ($dataCollection as $item) {
+                foreach ($data as $item) {
                     $sheet->setCellValue("A$row", $no++);
                     $sheet->setCellValue("B$row", $item->tanggal);
                     $sheet->setCellValue("C$row", $item->program);
@@ -104,38 +96,25 @@ class LaporanPengeluaranExport implements WithEvents
                 }
 
                 $endData = $row - 1;
-                $sheet->getStyle("A$headerRow:F$endData")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle("F" . ($headerRow + 1) . ":F$endData")->getNumberFormat()->setFormatCode('"Rp" #,##0');
 
-                // TOTAL
+                // Total
+                $total = $data->sum('nominal');
                 $totalRow = $endData + 2;
                 $sheet->setCellValue("E$totalRow", 'TOTAL PENGELUARAN');
-                $sheet->setCellValue("F$totalRow", $this->total);
-                $sheet->getStyle("E$totalRow:F$totalRow")->getFont()->setBold(true);
+                $sheet->setCellValue("F$totalRow", $total);
                 $sheet->getStyle("F$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
-                $sheet->getStyle("E$totalRow:F$totalRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFE699');
-
-                // FOOTER & TTD (Sinkron dengan Referensi)
+                
+                
                 $footerRow = $totalRow + 4;
                 $role = $this->role;
                 $nama = ($role === 'Kepala Sekolah') ? 'Drs. Budi Santoso' : 'Rina Putri, S.E.';
-                $nip = $this->nip ?: '-';
                 
                 $sheet->mergeCells("C" . ($footerRow+1) . ":E" . ($footerRow+1));
-                $sheet->mergeCells("C" . ($footerRow+3) . ":E" . ($footerRow+3));
-                $sheet->mergeCells("C" . ($footerRow+7) . ":E" . ($footerRow+7));
-                $sheet->mergeCells("C" . ($footerRow+8) . ":E" . ($footerRow+8));
-
-                $sheet->setCellValue("C" . ($footerRow+1), $role . ',');
+                $sheet->setCellValue("C" . ($footerRow+1), ($role === 'Kepala Sekolah' ? 'Kepala Sekolah,' : 'Bendahara,'));
                 $sheet->setCellValue("C" . ($footerRow+3), $nama);
-                $sheet->setCellValue("C" . ($footerRow+7), '-------------------------');
-                $sheet->setCellValue("C" . ($footerRow+8), 'NIP: ' . $nip);
-
-                $sheet->getStyle("C" . ($footerRow+1) . ":E" . ($footerRow+8))
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->setCellValue("F" . ($footerRow + 10), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("F" . ($footerRow + 10))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->setCellValue("C" . ($footerRow+8), 'NIP: ' . ($this->nip ?: '-'));
+                $sheet->getStyle("C" . ($footerRow+1) . ":E" . ($footerRow+8))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 $sheet->freezePane("A7");
             },
