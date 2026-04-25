@@ -74,12 +74,9 @@ class MstProgramKerjaController extends Controller
                 });
             }
 
-
-            $perPage = (int) $request->get('per_page', 10);
-
             $data = $query
                 ->orderByDesc('mst_program_kerja.ID_PROGRAM_KERJA')
-                ->paginate($perPage);
+                ->get();
 
             return response()->json([
                 'success' => true,
