@@ -250,7 +250,7 @@ export default function Dashboard() {
                       <XAxis dataKey="bulan" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                       <Tooltip
-                        contentStyle={{ fontSize: "11px" }}
+                        contentStyle={{ fontSize: "12px" }}
                         formatter={(v) => `Rp ${v.toLocaleString()}`}
                       />
 
@@ -277,6 +277,7 @@ export default function Dashboard() {
                     <XAxis dataKey="name" tick={{ fontSize: 13 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                     <Tooltip
+                      shared={false}
                       contentStyle={{ fontSize: "12px" }}
                       formatter={(v) => `Rp ${v.toLocaleString()}`}
                     />

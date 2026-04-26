@@ -305,7 +305,6 @@
 /* ========================= */
 /* PROGRESS BAR */
 /* ========================= */
-
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -325,8 +324,6 @@
 /* ========================= */
 /* 🔥 INSIGHT PROGRAM (NEW) */
 /* ========================= */
-
-/* judul insight → tengah & hitam */
 .insight-main-title {
   text-align: center;
   color: #1a1a1a !important;
@@ -397,7 +394,7 @@
 }
 
 .insight-icon.up {
-  color: #eda60f;
+  color: #16a34a;
 }
 
 .insight-icon.down {
