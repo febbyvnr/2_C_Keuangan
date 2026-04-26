@@ -133,11 +133,24 @@ export default function Dashboard() {
 
       <main className="waka-container">
         {/* HEADER */}
-        <div className="header-card">
-          <div className="header-top">
-            <h2 className="waka-title">Dashboard</h2>
+        {/* 🔥 HEADER (DIGANTI JADI WELCOME) */}
+        <div className="header-card welcome-card">
+          <div className="welcome-left">
+            <h2 className="welcome-title">Selamat Datang</h2>
+
+            <p className="welcome-sub">Wakil Kepala Sekolah</p>
+
+            <p className="welcome-date">
+              {new Date().toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
           </div>
 
+          {/* 🔥 FILTER TETAP ADA */}
           <div className="header-filter">
             <div className="filter-item">
               <span>Tahun</span>
