@@ -269,12 +269,12 @@ export default function Dashboard() {
 
             <p className="summary-sub">
               {totalAnggaranRKT > 0
-                ? `${((totalTerpakai / totalAnggaranRKT) * 100).toFixed(
-                    0,
-                  )}% terpakai`
+                ? `${Math.min(
+                    (totalTerpakai / totalAnggaranRKT) * 100,
+                    100,
+                  ).toFixed(0)}% terpakai`
                 : "0%"}
             </p>
-
             <div className="summary-footer">
               <span>Rata-rata: Rp {Math.round(rataRata).toLocaleString()}</span>
               <span>Total Program: {totalRKT}</span>
