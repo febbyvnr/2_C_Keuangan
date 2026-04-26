@@ -285,19 +285,17 @@ tr:hover {
   min-width: 110px;
 }
 
-/* 🔥 label jadi bold */
 .filter-item span {
   margin-bottom: 4px;
   font-weight: 600;
   color: #334155;
 }
 
-/* 🔥 dropdown lebih clean & tipis */
 .filter-item select {
-  padding: 8px 32px 8px 10px;
+  padding: 3px 24px 3px 6px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
-  font-size: 13px;
+  font-size: 12px;
   background: #ffffff;
   color: #0f172a;
   cursor: pointer;
