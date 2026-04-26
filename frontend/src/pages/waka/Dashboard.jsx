@@ -250,7 +250,8 @@ export default function Dashboard() {
                       <XAxis dataKey="bulan" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                       <Tooltip
-                        contentStyle={{ fontSize: "12px" }}
+                        contentStyle={{ fontSize: "12px", textAlign: "center" }}
+                        itemStyle={{ textAlign: "center" }}
                         formatter={(v) => `Rp ${v.toLocaleString()}`}
                       />
 
@@ -304,7 +305,7 @@ export default function Dashboard() {
                 ? `${Math.min(
                     (totalTerpakai / totalAnggaranRKT) * 100,
                     100,
-                  ).toFixed(0)}% terpakai`
+                  ).toFixed(0)}%`
                 : "0%"}
             </p>
 
