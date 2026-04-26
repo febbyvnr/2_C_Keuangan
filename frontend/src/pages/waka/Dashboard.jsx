@@ -276,7 +276,10 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 13 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
-                    <Tooltip formatter={(v) => `Rp ${v.toLocaleString()}`} />
+                    <Tooltip
+                      contentStyle={{ fontSize: "12px" }}
+                      formatter={(v) => `Rp ${v.toLocaleString()}`}
+                    />
                     <Legend wrapperStyle={{ fontSize: "11px" }} />
 
                     <Bar dataKey="terpakai" fill="#265f9c" />
