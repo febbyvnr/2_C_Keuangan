@@ -74,8 +74,6 @@ export default function Dashboard() {
     0,
   );
 
-  const rataRata = rkt.length > 0 ? totalAnggaranRKT / rkt.length : 0;
-
   const maxProgram = rkt.reduce(
     (max, d) => ((d.NOMINAL || 0) > (max?.NOMINAL || 0) ? d : max),
     null,
@@ -249,25 +247,8 @@ export default function Dashboard() {
           <div className="summary-card">
             <h4>Ringkasan Anggaran</h4>
 
-            <h2 className="summary-big">
-              Rp {totalAnggaranRKT.toLocaleString()}
-            </h2>
-            <p className="summary-label">Total Anggaran</p>
-
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${
-                    totalAnggaranRKT > 0
-                      ? (totalTerpakai / totalAnggaranRKT) * 100
-                      : 0
-                  }%`,
-                }}
-              ></div>
-            </div>
-
             <p className="summary-sub">
+              Total Anggaran:{" "}
               {totalAnggaranRKT > 0
                 ? `${Math.min(
                     (totalTerpakai / totalAnggaranRKT) * 100,
@@ -275,29 +256,55 @@ export default function Dashboard() {
                   ).toFixed(0)}% terpakai`
                 : "0%"}
             </p>
+
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${
+                    totalAnggaranRKT > 0
+                      ? Math.min((totalTerpakai / totalAnggaranRKT) * 100, 100)
+                      : 0
+                  }%`,
+                }}
+              ></div>
+            </div>
+
             <div className="summary-footer">
-              <span>Rata-rata: Rp {Math.round(rataRata).toLocaleString()}</span>
               <span>Total Program: {totalRKT}</span>
             </div>
           </div>
 
           {/* CARD 2 */}
           <div className="summary-card">
-            <h4>Insight Program</h4>
+            <h4 className="insight-main-title">Insight Program</h4>
 
-            <h3 className="summary-highlight">
-              {maxProgram?.PROGRAM_KERJA || "-"}
-            </h3>
-            <p className="summary-label">Program Tertinggi</p>
+            <div className="insight-grid">
+              <div className="insight-item">
+                <p className="insight-label">Program Tertinggi</p>
 
-            <div className="summary-footer">
-              <span>
-                ⬆ Selisih: Rp{" "}
-                {(
-                  (maxProgram?.NOMINAL || 0) - (minProgram?.NOMINAL || 0)
-                ).toLocaleString()}
-              </span>
-              <span>⬇ Terendah: {minProgram?.PROGRAM_KERJA || "-"}</span>
+                <h3 className="insight-title">
+                  <span className="insight-icon up">↑</span>{" "}
+                  {maxProgram?.PROGRAM_KERJA || "-"}
+                </h3>
+
+                <p className="insight-value">
+                  Rp {(maxProgram?.NOMINAL || 0).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="insight-item">
+                <p className="insight-label">Program Terendah</p>
+
+                <h3 className="insight-title">
+                  <span className="insight-icon down">↓</span>{" "}
+                  {minProgram?.PROGRAM_KERJA || "-"}
+                </h3>
+
+                <p className="insight-value">
+                  Rp {(minProgram?.NOMINAL || 0).toLocaleString()}
+                </p>
+              </div>
             </div>
           </div>
         </div>

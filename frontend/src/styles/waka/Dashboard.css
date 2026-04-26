@@ -92,7 +92,7 @@
 /* FIX CHART */
 .chart-inner {
   width: 100%;
-  height: 260px; /* 🔥 sedikit lebih tinggi biar ga gepeng */
+  height: 260px;
 }
 
 .chart-container {
@@ -103,7 +103,7 @@
 .chart-card h4 {
   margin: 0 0 15px 0;
   font-size: 14px;
-  color: #265f9c;
+  color: #1a1a1a;
 }
 
 /* Responsive KPI */
@@ -217,7 +217,7 @@
 .summary-card h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #265f9c;
+  color: #1a1a1a;
 }
 
 .summary-card p {
@@ -290,7 +290,125 @@
 
 .progress-fill {
   height: 100%;
-  background: #2e7d32;
+  background: #265f9c;
   border-radius: 10px;
   transition: width 0.3s ease;
+}
+
+/* ========================= */
+/* 🔥 INSIGHT PROGRAM (NEW) */
+/* ========================= */
+
+/* judul insight → tengah & hitam */
+.insight-main-title {
+  text-align: center;
+  color: #1a1a1a !important;
+  margin-bottom: 16px;
+}
+
+/* grid kiri kanan */
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* tiap item */
+.insight-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* label (garis kuning bawah) */
+.insight-label {
+  font-size: 12px;
+  color: #265f9c !important;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #facc15; /* kuning */
+  width: fit-content;
+}
+
+/* judul program */
+.insight-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* ========================= */
+/* 🔥 IMPROVE SUMMARY */
+/* ========================= */
+
+/* biar lebih lega */
+.summary-sub {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+/* progress lebih halus */
+.progress-bar {
+  height: 8px; /* dari 6 → lebih keliatan */
+  background: #e2e8f0;
+}
+
+.progress-fill {
+  background: #265f9c;
+  border-radius: 999px;
+}
+
+/* ========================= */
+/* 🔥 RESPONSIVE FIX */
+/* ========================= */
+
+@media (max-width: 768px) {
+  .insight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* value nominal */
+.insight-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+}
+
+/* icon panah */
+.insight-icon {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* hijau (tertinggi) */
+.insight-icon.up {
+  color: #2e7d32;
+}
+
+/* merah (terendah) */
+.insight-icon.down {
+  color: #c62828;
+}
+
+/* item kanan → dorong ke kanan */
+.insight-item:last-child {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 🔥 bikin sejajar */
+  width: 100%;
+}
+
+.insight-title {
+  margin: 0; /* 🔥 hilangin efek turun */
+}
+
+.insight-value {
+  margin: 0;
 }
