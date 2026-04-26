@@ -186,7 +186,7 @@ export default function Dashboard() {
               <h4>Penggunaan Dana (FPD)</h4>
 
               <div className="chart-inner">
-                {filteredFpd.length === 0 ? (
+                {trendData.length === 0 ? (
                   <p className="no-data">Belum ada data untuk periode ini</p>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -200,7 +200,7 @@ export default function Dashboard() {
                       <Line
                         type="monotone"
                         dataKey="nominal"
-                        stroke="#1e3a8a"
+                        stroke="#265f9c"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                         activeDot={{ r: 5 }}
@@ -227,14 +227,14 @@ export default function Dashboard() {
 
                     <Bar
                       dataKey="terpakai"
-                      fill="#1e3a8a"
+                      fill="#265f9c"
                       radius={[6, 6, 0, 0]}
                       barSize={40}
                     />
 
                     <Bar
                       dataKey="sisa"
-                      fill="#f59e0b"
+                      fill="#EDA60F"
                       radius={[6, 6, 0, 0]}
                       barSize={40}
                     />
