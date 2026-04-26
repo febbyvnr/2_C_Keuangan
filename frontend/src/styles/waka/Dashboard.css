@@ -16,10 +16,10 @@
 }
 
 .waka-title {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #1e3a8a;
+  color: #265f9c;
 }
 
 /* KPI Cards */
@@ -34,7 +34,7 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 16px;
-  border-left: 5px solid #1e3a8a;
+  border-left: 5px solid #265f9c;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -97,7 +97,7 @@
 .chart-card h4 {
   margin: 0 0 15px 0;
   font-size: 14px;
-  color: #1e3a8a;
+  color: #265f9c;
 }
 
 /* ========================= */
@@ -118,7 +118,7 @@
 .table-section h3 {
   margin: 0 0 15px 0;
   font-size: 15px;
-  color: #1e3a8a;
+  color: #265f9c;
 }
 
 .table-wrapper {
@@ -136,7 +136,7 @@ table {
 th {
   position: sticky;
   top: 0;
-  background: #1e3a8a;
+  background: #265f9c;
   color: white;
   padding: 12px;
   font-size: 12px;
@@ -238,12 +238,12 @@ tr:hover {
 }
 
 .filter-bar select:hover {
-  border-color: #1e3a8a;
+  border-color: #265f9c;
 }
 
 .filter-bar select:focus {
   outline: none;
-  border-color: #1e3a8a;
+  border-color: #265f9c;
   box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
 }
 
@@ -318,6 +318,6 @@ tr:hover {
 
 .filter-item select:focus {
   outline: none;
-  border-color: #1e3a8a;
+  border-color: #265f9c;
   box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.08);
 }
