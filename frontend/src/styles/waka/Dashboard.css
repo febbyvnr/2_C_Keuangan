@@ -47,7 +47,7 @@
 
 .card p {
   font-size: 13px;
-  color: #64748b;
+  color: #585858;
   margin: 0;
 }
 .card h3 {
@@ -57,12 +57,44 @@
 }
 
 /* ========================= */
-/* 🔥 FIX UTAMA LAYOUT */
+/* 🔥 KPI TOP (TAMBAHAN SAJA) */
+/* ========================= */
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* pastikan teks tetap normal */
+.card-top p {
+  margin: 0;
+  color: #585858;
+}
+
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.kpi-badge.up {
+  color: #16a34a;
+}
+
+.kpi-badge.down {
+  color: #dc2626;
+}
+
+/* ========================= */
+/* FIX UTAMA LAYOUT */
 /* ========================= */
 
 .main-grid {
-  display: flex; /* 🔥 dari grid → flex */
-  flex-direction: column; /* 🔥 biar stack ke bawah */
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
@@ -153,7 +185,7 @@
   display: flex;
   flex-direction: column;
   font-size: 11px;
-  color: #64748b;
+  color: #585858;
   min-width: 110px;
 }
 
@@ -343,7 +375,7 @@
 /* biar lebih lega */
 .summary-sub {
   font-size: 12px;
-  color: #475569;
+  color: #585858;
   margin-bottom: 8px;
 }
 
@@ -372,27 +404,23 @@
 .insight-value {
   font-size: 13px;
   font-weight: 600;
-  color: #475569;
+  color: #585858;
   margin-top: 4px;
 }
 
-/* icon panah */
 .insight-icon {
   font-size: 14px;
   font-weight: bold;
 }
 
-/* hijau (tertinggi) */
 .insight-icon.up {
   color: #2e7d32;
 }
 
-/* merah (terendah) */
 .insight-icon.down {
   color: #c62828;
 }
 
-/* item kanan → dorong ke kanan */
 .insight-item:last-child {
   align-items: flex-end;
   text-align: right;
@@ -401,12 +429,12 @@
 .insight-row {
   display: flex;
   justify-content: space-between;
-  align-items: center; /* 🔥 bikin sejajar */
+  align-items: center;
   width: 100%;
 }
 
 .insight-title {
-  margin: 0; /* 🔥 hilangin efek turun */
+  margin: 0;
 }
 
 .insight-value {

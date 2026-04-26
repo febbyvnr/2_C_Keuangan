@@ -164,25 +164,59 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* KPI */}
         <div className="waka-grid">
           <div className="card">
-            <p>Total RKT</p>
+            <div className="card-top">
+              <p>Total RKT</p>
+              <span className={`kpi-badge ${totalRKT > 0 ? "up" : "down"}`}>
+                {totalRKT > 0 ? "↑" : "↓"} {totalRKT > 0 ? "100%" : "0%"}
+              </span>
+            </div>
             <h3>{totalRKT}</h3>
           </div>
 
           <div className="card">
-            <p>Total RKA</p>
+            <div className="card-top">
+              <p>Total RKA</p>
+              <span className={`kpi-badge ${totalRKA > 0 ? "up" : "down"}`}>
+                {totalRKA > 0 ? "↑" : "↓"} {totalRKA > 0 ? "100%" : "0%"}
+              </span>
+            </div>
             <h3>{totalRKA}</h3>
           </div>
 
           <div className="card success">
-            <p>Terpakai</p>
+            <div className="card-top">
+              <p>Terpakai</p>
+              <span
+                className={`kpi-badge ${totalTerpakai > 0 ? "up" : "down"}`}
+              >
+                {totalTerpakai > 0 ? "↑" : "↓"}{" "}
+                {totalAnggaranRKT > 0
+                  ? Math.min(
+                      (totalTerpakai / totalAnggaranRKT) * 100,
+                      100,
+                    ).toFixed(0)
+                  : 0}
+                %
+              </span>
+            </div>
             <h3>Rp {totalTerpakai.toLocaleString()}</h3>
           </div>
 
           <div className="card warning">
-            <p>Sisa</p>
+            <div className="card-top">
+              <p>Sisa</p>
+              <span className={`kpi-badge ${totalSisa > 0 ? "up" : "down"}`}>
+                {totalSisa > 0 ? "↑" : "↓"}{" "}
+                {totalAnggaranRKT > 0
+                  ? Math.min((totalSisa / totalAnggaranRKT) * 100, 100).toFixed(
+                      0,
+                    )
+                  : 0}
+                %
+              </span>
+            </div>
             <h3>Rp {totalSisa.toLocaleString()}</h3>
           </div>
         </div>
