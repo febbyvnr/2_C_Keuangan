@@ -202,9 +202,12 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={trendData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="bulan" />
-                      <YAxis tickFormatter={formatJt} />
-                      <Tooltip formatter={(v) => `Rp ${v.toLocaleString()}`} />
+                      <XAxis dataKey="bulan" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
+                      <Tooltip
+                        contentStyle={{ fontSize: "11px" }}
+                        formatter={(v) => `Rp ${v.toLocaleString()}`}
+                      />
 
                       <Area
                         type="monotone"
@@ -226,10 +229,10 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={formatJt} />
+                    <XAxis dataKey="name" tick={{ fontSize: 13 }} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                     <Tooltip formatter={(v) => `Rp ${v.toLocaleString()}`} />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: "11px" }} />
 
                     <Bar dataKey="terpakai" fill="#265f9c" />
                     <Bar dataKey="sisa" fill="#EDA60F" />
