@@ -111,8 +111,8 @@
   display: flex;
   flex-direction: column;
 
-  height: 420px; /* 🔥 tambahan ini saja */
-  overflow: hidden; /* 🔥 supaya scroll di dalam */
+  height: 420px;
+  overflow: hidden;
 }
 
 .table-section h3 {
@@ -149,6 +149,11 @@ td {
   font-size: 13px;
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
+}
+
+td:nth-child(3) {
+  font-weight: 600;
+  color: #1e293b;
 }
 
 tr:hover {
@@ -207,12 +212,10 @@ tr:hover {
   margin-bottom: 20px;
 }
 
-/* biar title ga nambah margin aneh */
 .header-bar .waka-title {
   margin: 0;
 }
 
-/* filter tetap kanan */
 .filter-bar {
   display: flex;
   gap: 10px;
@@ -224,26 +227,99 @@ tr:hover {
   border: 1px solid #cbd5e1;
   font-size: 12px;
   background: #ffffff;
-  color: #1e293b; /* teks gelap biar kebaca */
+  color: #1e293b;
   cursor: pointer;
 
-  /* hilangkan style aneh bawaan browser */
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  /* shadow halus biar matching card */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* 🔥 hover biar lebih hidup */
 .filter-bar select:hover {
   border-color: #1e3a8a;
 }
 
-/* 🔥 focus (klik) */
 .filter-bar select:focus {
   outline: none;
   border-color: #1e3a8a;
   box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+/* ========================= */
+/* HEADER CARD (NEW STYLE) */
+/* ========================= */
+
+.header-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-top {
+  margin: 0;
+}
+
+.header-filter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ========================= */
+/* FILTER IMPROVEMENT (FINAL) */
+/* ========================= */
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #64748b;
+  min-width: 110px;
+}
+
+/* 🔥 label jadi bold */
+.filter-item span {
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* 🔥 dropdown lebih clean & tipis */
+.filter-item select {
+  padding: 8px 32px 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2364748b' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+
+  transition: all 0.2s ease;
+}
+
+.filter-item select:hover {
+  border-color: #cbd5e1;
+}
+
+.filter-item select:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.08);
 }

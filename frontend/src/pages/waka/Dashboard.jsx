@@ -74,7 +74,6 @@ export default function Dashboard() {
   const formatJt = (value) =>
     value >= 1000000 ? `${(value / 1000000).toFixed(1)} jt` : value;
 
-  // 🔥 FIX UTAMA: GROUP PER BULAN
   const grouped = {};
 
   sortedFpd.forEach((d) => {
@@ -108,14 +107,16 @@ export default function Dashboard() {
       <SidebarWaka />
 
       <main className="waka-container">
-        <div className="header-bar">
-          <h2 className="waka-title">Dashboard Waka</h2>
+        <div className="header-card">
+          <div className="header-top">
+            <h2 className="waka-title">Dashboard</h2>
+          </div>
 
-          <div className="filter-bar">
+          <div className="header-filter">
             <div className="filter-item">
               <span>Tahun</span>
               <select onChange={(e) => setSelectedYear(e.target.value)}>
-                <option value="all">Tahun</option>
+                <option value="all">Semua</option>
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
               </select>
@@ -124,7 +125,7 @@ export default function Dashboard() {
             <div className="filter-item">
               <span>Bulan</span>
               <select onChange={(e) => setSelectedMonth(e.target.value)}>
-                <option value="all">Bulan</option>
+                <option value="all">Semua</option>
                 <option value="1">Jan</option>
                 <option value="2">Feb</option>
                 <option value="3">Mar</option>
