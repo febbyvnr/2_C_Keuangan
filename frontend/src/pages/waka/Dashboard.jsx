@@ -243,25 +243,62 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 🔥 2 CARD BAWAH */}
+        {/* 🔥 2 CARD BAWAH (UPDATED) */}
         <div className="bottom-grid">
+          {/* CARD 1 */}
           <div className="summary-card">
             <h4>Ringkasan Anggaran</h4>
-            <p>Total Anggaran: Rp {totalAnggaranRKT.toLocaleString()}</p>
-            <p>Rata-rata: Rp {Math.round(rataRata).toLocaleString()}</p>
-            <p>Total Program: {totalRKT}</p>
+
+            <h2 className="summary-big">
+              Rp {totalAnggaranRKT.toLocaleString()}
+            </h2>
+            <p className="summary-label">Total Anggaran</p>
+
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${
+                    totalAnggaranRKT > 0
+                      ? (totalTerpakai / totalAnggaranRKT) * 100
+                      : 0
+                  }%`,
+                }}
+              ></div>
+            </div>
+
+            <p className="summary-sub">
+              {totalAnggaranRKT > 0
+                ? `${((totalTerpakai / totalAnggaranRKT) * 100).toFixed(
+                    0,
+                  )}% terpakai`
+                : "0%"}
+            </p>
+
+            <div className="summary-footer">
+              <span>Rata-rata: Rp {Math.round(rataRata).toLocaleString()}</span>
+              <span>Total Program: {totalRKT}</span>
+            </div>
           </div>
 
+          {/* CARD 2 */}
           <div className="summary-card">
             <h4>Insight Program</h4>
-            <p>Tertinggi: {maxProgram?.PROGRAM_KERJA || "-"}</p>
-            <p>Terendah: {minProgram?.PROGRAM_KERJA || "-"}</p>
-            <p>
-              Selisih: Rp{" "}
-              {(
-                (maxProgram?.NOMINAL || 0) - (minProgram?.NOMINAL || 0)
-              ).toLocaleString()}
-            </p>
+
+            <h3 className="summary-highlight">
+              {maxProgram?.PROGRAM_KERJA || "-"}
+            </h3>
+            <p className="summary-label">Program Tertinggi</p>
+
+            <div className="summary-footer">
+              <span>
+                ⬆ Selisih: Rp{" "}
+                {(
+                  (maxProgram?.NOMINAL || 0) - (minProgram?.NOMINAL || 0)
+                ).toLocaleString()}
+              </span>
+              <span>⬇ Terendah: {minProgram?.PROGRAM_KERJA || "-"}</span>
+            </div>
           </div>
         </div>
       </main>
