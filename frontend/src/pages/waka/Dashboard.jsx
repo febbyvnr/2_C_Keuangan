@@ -36,11 +36,13 @@ export default function Dashboard() {
       .then((data) => setFpd(data.data || []));
   }, []);
 
-  // FILTER
   const filteredFpd = fpd.filter((d) => {
-    if (!d.TGL_FPD) return true;
+    if (!d.TGL_FPD) return false;
 
     const date = new Date(d.TGL_FPD);
+
+    if (isNaN(date.getTime())) return false;
+
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
@@ -50,12 +52,10 @@ export default function Dashboard() {
     );
   });
 
-  // SORT
   const sortedFpd = [...filteredFpd].sort(
     (a, b) => new Date(a.TGL_FPD) - new Date(b.TGL_FPD),
   );
 
-  // HELPER
   const getNominal = (d) => d.NOMINAL_FPD || d.nominal_fpd || d.nominal || 0;
   const getSisa = (d) => d.NOMINAL_SISA || d.nominal_sisa || d.sisa || 0;
 
@@ -64,7 +64,6 @@ export default function Dashboard() {
     return date.toLocaleString("id-ID", { month: "short" });
   };
 
-  // KPI
   const totalRKT = rkt.length;
   const totalRKA = rka.length;
 
@@ -77,7 +76,7 @@ export default function Dashboard() {
   const grouped = {};
 
   sortedFpd.forEach((d) => {
-    if (!d.TGL_FPD) return;
+    if (!d.TGL_FPD || isNaN(new Date(d.TGL_FPD))) return;
 
     const bulan = monthName(d.TGL_FPD);
 
@@ -108,7 +107,6 @@ export default function Dashboard() {
       return monthOrder.indexOf(a.bulan) - monthOrder.indexOf(b.bulan);
     });
 
-  // BAR
   const barData = [
     {
       name: "Keuangan",
@@ -183,14 +181,13 @@ export default function Dashboard() {
 
         {/* MAIN */}
         <div className="main-grid">
-          {/* LEFT */}
           <div className="chart-section">
             <div className="chart-card">
-              <h4>Trend Penggunaan Dana</h4>
+              <h4>Penggunaan Dana (FPD)</h4>
 
               <div className="chart-inner">
-                {trendData.length === 0 ? (
-                  <p className="no-data">Tidak ada data</p>
+                {filteredFpd.length === 0 ? (
+                  <p className="no-data">Belum ada data untuk periode ini</p>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trendData}>
@@ -247,7 +244,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT */}
           <div className="table-section">
             <h3>Program Kerja (RKT)</h3>
 
