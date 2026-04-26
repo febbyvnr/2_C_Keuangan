@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Dashboard.css";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -190,22 +190,25 @@ export default function Dashboard() {
                   <p className="no-data">Belum ada data untuk periode ini</p>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trendData}>
+                    <AreaChart data={trendData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="bulan" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
                       <Tooltip
                         formatter={(value) => `Rp ${value.toLocaleString()}`}
                       />
-                      <Line
+
+                      <Area
                         type="monotone"
                         dataKey="nominal"
                         stroke="#265f9c"
+                        fill="#265f9c"
+                        fillOpacity={0.12}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                         activeDot={{ r: 5 }}
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 )}
               </div>
