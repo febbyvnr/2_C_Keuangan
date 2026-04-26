@@ -88,10 +88,25 @@ export default function Dashboard() {
     grouped[bulan] += getNominal(d);
   });
 
-  const trendData = Object.keys(grouped).map((bulan) => ({
-    bulan,
-    nominal: grouped[bulan],
-  }));
+  const trendData = Object.entries(grouped)
+    .map(([bulan, nominal]) => ({ bulan, nominal }))
+    .sort((a, b) => {
+      const monthOrder = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      return monthOrder.indexOf(a.bulan) - monthOrder.indexOf(b.bulan);
+    });
 
   // BAR
   const barData = [
