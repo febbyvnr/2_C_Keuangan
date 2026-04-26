@@ -40,7 +40,6 @@ export default function Dashboard() {
     if (!d.TGL_FPD) return false;
 
     const date = new Date(d.TGL_FPD);
-
     if (isNaN(date.getTime())) return false;
 
     const month = date.getMonth() + 1;
@@ -70,6 +69,23 @@ export default function Dashboard() {
   const totalTerpakai = sortedFpd.reduce((sum, d) => sum + getNominal(d), 0);
   const totalSisa = sortedFpd.reduce((sum, d) => sum + getSisa(d), 0);
 
+  const totalAnggaranRKT = rkt.reduce(
+    (sum, d) => sum + (d.NOMINAL || d.nominal || 0),
+    0,
+  );
+
+  const rataRata = rkt.length > 0 ? totalAnggaranRKT / rkt.length : 0;
+
+  const maxProgram = rkt.reduce(
+    (max, d) => ((d.NOMINAL || 0) > (max?.NOMINAL || 0) ? d : max),
+    null,
+  );
+
+  const minProgram = rkt.reduce(
+    (min, d) => ((d.NOMINAL || 0) < (min?.NOMINAL || Infinity) ? d : min),
+    null,
+  );
+
   const formatJt = (value) =>
     value >= 1000000 ? `${(value / 1000000).toFixed(1)} jt` : value;
 
@@ -80,9 +96,7 @@ export default function Dashboard() {
 
     const bulan = monthName(d.TGL_FPD);
 
-    if (!grouped[bulan]) {
-      grouped[bulan] = 0;
-    }
+    if (!grouped[bulan]) grouped[bulan] = 0;
 
     grouped[bulan] += getNominal(d);
   });
@@ -90,21 +104,21 @@ export default function Dashboard() {
   const trendData = Object.entries(grouped)
     .map(([bulan, nominal]) => ({ bulan, nominal }))
     .sort((a, b) => {
-      const monthOrder = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
+      const order = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
         "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
+        "Jun",
+        "Jul",
+        "Agu",
+        "Sep",
+        "Okt",
+        "Nov",
+        "Des",
       ];
-      return monthOrder.indexOf(a.bulan) - monthOrder.indexOf(b.bulan);
+      return order.indexOf(a.bulan) - order.indexOf(b.bulan);
     });
 
   const barData = [
@@ -120,6 +134,7 @@ export default function Dashboard() {
       <SidebarWaka />
 
       <main className="waka-container">
+        {/* HEADER */}
         <div className="header-card">
           <div className="header-top">
             <h2 className="waka-title">Dashboard</h2>
@@ -139,18 +154,13 @@ export default function Dashboard() {
               <span>Bulan</span>
               <select onChange={(e) => setSelectedMonth(e.target.value)}>
                 <option value="all">Semua</option>
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4">April</option>
-                <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">Desember</option>
+                {[...Array(12)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {new Date(0, i).toLocaleString("id-ID", {
+                      month: "long",
+                    })}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -179,7 +189,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* MAIN */}
+        {/* CHART */}
         <div className="main-grid">
           <div className="chart-section">
             <div className="chart-card">
@@ -192,11 +202,9 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={trendData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="bulan" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
-                      <Tooltip
-                        formatter={(value) => `Rp ${value.toLocaleString()}`}
-                      />
+                      <XAxis dataKey="bulan" />
+                      <YAxis tickFormatter={formatJt} />
+                      <Tooltip formatter={(v) => `Rp ${v.toLocaleString()}`} />
 
                       <Area
                         type="monotone"
@@ -204,9 +212,6 @@ export default function Dashboard() {
                         stroke="#265f9c"
                         fill="#265f9c"
                         fillOpacity={0.12}
-                        strokeWidth={2}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 5 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -221,67 +226,39 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} tickFormatter={formatJt} />
-                    <Tooltip
-                      formatter={(value) => `Rp ${value.toLocaleString()}`}
-                    />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                    <XAxis dataKey="name" />
+                    <YAxis tickFormatter={formatJt} />
+                    <Tooltip formatter={(v) => `Rp ${v.toLocaleString()}`} />
+                    <Legend />
 
-                    <Bar
-                      dataKey="terpakai"
-                      fill="#265f9c"
-                      radius={[6, 6, 0, 0]}
-                      barSize={40}
-                    />
-
-                    <Bar
-                      dataKey="sisa"
-                      fill="#EDA60F"
-                      radius={[6, 6, 0, 0]}
-                      barSize={40}
-                    />
+                    <Bar dataKey="terpakai" fill="#265f9c" />
+                    <Bar dataKey="sisa" fill="#EDA60F" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="table-section">
-            <h3>Program Kerja (RKT)</h3>
+        {/* 🔥 2 CARD BAWAH */}
+        <div className="bottom-grid">
+          <div className="summary-card">
+            <h4>Ringkasan Anggaran</h4>
+            <p>Total Anggaran: Rp {totalAnggaranRKT.toLocaleString()}</p>
+            <p>Rata-rata: Rp {Math.round(rataRata).toLocaleString()}</p>
+            <p>Total Program: {totalRKT}</p>
+          </div>
 
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Program</th>
-                    <th>Indikator</th>
-                    <th>Nominal</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {rkt.length > 0 ? (
-                    rkt.map((item, i) => (
-                      <tr key={i}>
-                        <td>{item.PROGRAM_KERJA || item.program_kerja}</td>
-                        <td>{item.INDIKATOR || item.indikator}</td>
-                        <td>
-                          Rp{" "}
-                          {(item.NOMINAL || item.nominal || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="3" style={{ textAlign: "center" }}>
-                        Tidak ada data
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="summary-card">
+            <h4>Insight Program</h4>
+            <p>Tertinggi: {maxProgram?.PROGRAM_KERJA || "-"}</p>
+            <p>Terendah: {minProgram?.PROGRAM_KERJA || "-"}</p>
+            <p>
+              Selisih: Rp{" "}
+              {(
+                (maxProgram?.NOMINAL || 0) - (minProgram?.NOMINAL || 0)
+              ).toLocaleString()}
+            </p>
           </div>
         </div>
       </main>
