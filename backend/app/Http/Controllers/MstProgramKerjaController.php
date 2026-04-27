@@ -343,11 +343,13 @@ class MstProgramKerjaController extends Controller
                 
                 $programKerja->update($validated);
 
-                TrPm::create([
-                    'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
-                    'NIP_VALIDATOR_PM' => null,
-                    'DESKRIPSI_TR_PM' => 'Diajukan: Perbaikan RKT telah dikirim ulang',
-                ]);
+                if (str_starts_with($lastNote, 'revisi')) {
+                    TrPm::create([
+                        'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
+                        'NIP_VALIDATOR_PM' => null,
+                        'DESKRIPSI_TR_PM' => 'Diajukan: Perbaikan RKT telah dikirim ulang',
+                    ]);
+                }
 
                 return $programKerja->fresh([
                     'tahunAnggaran',
@@ -459,89 +461,69 @@ class MstProgramKerjaController extends Controller
         ]);
 
         try {
-            $programKerja = MstProgramKerja::active()->findOrFail($id);
+            $data = DB::transaction(function () use ($validated, $id) {
+                $programKerja = MstProgramKerja::with(['trPm'])
+                    ->active()
+                    ->findOrFail($id);
 
-            $validator = DB::table('mst_karyawan')
-                ->where('NIP_KARYAWAN', $validated['NIP_VALIDATOR_PROGKER'])
-                ->first();
-
-            if (!$validator) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validator tidak ditemukan.',
-                ], 404);
-            }
-
-            $jabatan = strtolower($validator->JABATAN_FUNGSIONAL ?? '');
-
-            if (!str_contains($jabatan, 'waka') && !str_contains($jabatan, 'kepala sekolah')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Hanya Wakil Kepala Sekolah atau Kepala Sekolah yang boleh approve RKT.',
-                ], 422);
-            }
-
-            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $id)
-                ->orderByDesc('ID_PM')
-                ->first();
-
-            $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
-
-            if (str_starts_with($lastNote, 'ditolak')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Program kerja sudah ditolak, tidak bisa di-approve.',
-                ], 422);
-            }
-
-            $currentValidator = null;
-
-            if ($programKerja->NIP_VALIDATOR_PROGKER) {
-                $currentValidator = DB::table('mst_karyawan')
-                    ->where('NIP_KARYAWAN', $programKerja->NIP_VALIDATOR_PROGKER)
+                $validator = DB::table('mst_karyawan')
+                    ->where('NIP_KARYAWAN', $validated['NIP_VALIDATOR_PROGKER'])
                     ->first();
-            }
 
-            $currentJabatan = strtolower($currentValidator->JABATAN_FUNGSIONAL ?? '');
-
-            if (!$programKerja->NIP_VALIDATOR_PROGKER) {
-                if (!str_contains($jabatan, 'waka')) {
+                if (!$validator) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Approval pertama harus dilakukan oleh Wakil Kepala Sekolah.',
-                    ], 422);
-                }
-            } else {
-                if (str_contains($currentJabatan, 'kepala sekolah')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Program kerja sudah disetujui final oleh Kepala Sekolah.',
-                    ], 422);
+                        'message' => 'Validator tidak ditemukan.',
+                    ], 404);
                 }
 
-                if (!str_contains($currentJabatan, 'waka')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Status approval sebelumnya tidak valid.',
-                    ], 422);
-                }
+                $jabatan = strtolower($validator->JABATAN_FUNGSIONAL ?? '');
 
                 if (!str_contains($jabatan, 'kepala sekolah')) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Approval lanjutan harus dilakukan oleh Kepala Sekolah.',
+                        'message' => 'Hanya Kepala Sekolah yang boleh menyetujui RKT.',
                     ], 422);
                 }
-            }
 
-            $programKerja->update([
-                'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER'],
-            ]);
+                if ($programKerja->NIP_VALIDATOR_PROGKER) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Program kerja sudah disetujui Kepala Sekolah.',
+                    ], 422);
+                }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Approve berhasil',
-                'data' => $programKerja->fresh([
+                $lastPm = $programKerja->trPm
+                    ->sortByDesc('ID_PM')
+                    ->first();
+
+                $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+
+                if (str_starts_with($lastNote, 'ditolak')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Program kerja sudah ditolak, tidak bisa di-approve.',
+                    ], 422);
+                }
+
+                if (str_starts_with($lastNote, 'revisi')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Program kerja masih revisi, tidak bisa di-approve.',
+                    ], 422);
+                }
+
+                $programKerja->update([
+                    'NIP_VALIDATOR_PROGKER' => $validated['NIP_VALIDATOR_PROGKER'],
+                ]);
+
+                TrPm::create([
+                    'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
+                    'NIP_VALIDATOR_PM' => $validated['NIP_VALIDATOR_PROGKER'],
+                    'DESKRIPSI_TR_PM' => 'Disetujui: RKT disetujui Kepala Sekolah',
+                ]);
+
+                return $programKerja->fresh([
                     'tahunAnggaran',
                     'unit',
                     'tan',
@@ -549,7 +531,17 @@ class MstProgramKerjaController extends Controller
                     'kegiatan',
                     'detailProgramKerja',
                     'trPm',
-                ]),
+                ]);
+            });
+
+            if ($data instanceof \Illuminate\Http\JsonResponse) {
+                return $data;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'RKT berhasil disetujui Kepala Sekolah',
+                'data' => $data,
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
