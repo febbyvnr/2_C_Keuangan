@@ -6,6 +6,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
     const [selected, setSelected] = useState(null);
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [statusFilter, setStatusFilter] = useState("default");
     const itemsPerPage = 10;
     const [sortConfig, setSortConfig] = useState({
         key: "ID_FPD",
@@ -62,53 +63,49 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             ? "bi bi-funnel-fill"
             : "bi bi-funnel-fill";
     };
-
-    const statusOrder = {
-        "approved": 1,
-        "pending": 3,
-        "rejected": 2
-    };
     
     const getStatus = (item) => {
-        if (!item.NIP_VALIDATOR_FPD) {
+        const validator = item.NIP_VALIDATOR_FPD?.toString().trim();
+        if (!validator) {
             return {
-                type: "pending",
-                icon: "bi bi-exclamation-circle-fill icon-danger icon-warning-animate"
+                type: "pending"
             };
         }
-        if (item.NIP_VALIDATOR_FPD === "Ditolak") {
+        if (validator.toLowerCase() === "ditolak") {
             return {
-                type: "rejected",
-                label: "Ditolak"
+                type: "rejected"
             };
         }
         return {
-            type: "approved",
-            label: "Disetujui"
+            type: "approved"
         };
     };
 
-    const sortedData = [...data].sort((a, b) => {
-        let valA = a[sortConfig.key];
-        let valB = b[sortConfig.key];
-        if (sortConfig.key === "status") {
-            const typeA = getStatus(a).type; 
-            const typeB = getStatus(b).type;
-            valA = statusOrder[typeA] || 99;
-            valB = statusOrder[typeB] || 99;
-        }
-        if (sortConfig.key === "PROGRAM") {
-            valA = a.program_kerja?.INDIKATOR || "";
-            valB = b.program_kerja?.INDIKATOR || "";
-        }
-        if (sortConfig.key === "TGL_FPD") {
-            valA = new Date(a.TGL_FPD);
-            valB = new Date(b.TGL_FPD);
-        }
-        if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
+    const getStatusPriority = (item) => {
+        const type = getStatus(item).type;
+        return statusOrder[type] || 99;
+    };
+
+    const sortedData = [...data]
+        .filter((item) => {
+            if (statusFilter === "all" || statusFilter === "default") return true;
+            return getStatus(item).type === statusFilter;
+        })
+        .sort((a, b) => {
+            let valA = a[sortConfig.key];
+            let valB = b[sortConfig.key];
+            if (sortConfig.key === "PROGRAM") {
+                valA = a.program_kerja?.INDIKATOR || "";
+                valB = b.program_kerja?.INDIKATOR || "";
+            }
+            if (sortConfig.key === "TGL_FPD") {
+                valA = new Date(a.TGL_FPD);
+                valB = new Date(b.TGL_FPD);
+            }
+            if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+            if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+            return 0;
+        });
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
@@ -220,8 +217,28 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
     return (
         <div className="fpd-container">
             <div className="fpd-header">
-                <div></div>
+                <div>
+                    <div className="status-filter">
+                        <span>Urutkan Status Berdasarkan :</span>
+                        <div className="custom-dropdown">
+                            <button className={`dropdown-btn ${statusFilter !== "default" ? "active" : ""}`}>
+                                {statusFilter === "default" && "Semua"}
+                                {statusFilter === "pending" && "Menunggu Verifikasi"}
+                                {statusFilter === "approved" && "Disetujui"}
+                                {statusFilter === "rejected" && "Ditolak"}
+                                <i className="bi bi-chevron-down"></i>
+                            </button>
+                            <div className="dropdown-menu">
+                                <div onClick={() => setStatusFilter("default")}>Semua</div>
+                                <div onClick={() => setStatusFilter("pending")}>Menunggu Verifikasi</div>
+                                <div onClick={() => setStatusFilter("approved")}>Disetujui</div>
+                                <div onClick={() => setStatusFilter("rejected")}>Ditolak</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div className="header-actions">
+                    
                     <button
                         className="btn-reset"
                         onClick={() => {
@@ -269,9 +286,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                                     <th onClick={() => handleSort("NOMINAL_ANGGARAN")}>
                                         Anggaran <i className={getIcon("NOMINAL_ANGGARAN")}></i>
                                     </th>
-                                    <th onClick={() => handleSort("status")}>
-                                        Status <i className={getIcon("status")}></i>
-                                    </th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -416,14 +431,14 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                                     <button
                                         className="approve-btn"
                                         onClick={handleApprove}
-                                        disabled={selected.NIP_VALIDATOR_FPD}
+                                        disabled={getStatus(selected).type !== "pending"}
                                     >
                                         Setujui
                                     </button>
                                     <button
                                         className="reject-btn"
                                         onClick={handleReject}
-                                        disabled={selected.NIP_VALIDATOR_FPD}
+                                        disabled={getStatus(selected).type !== "pending"}
                                     >
                                         Tolak
                                     </button>
@@ -432,7 +447,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                         </div>
                     ) : (
                         <div className="empty-state">
-                            <p>Pilih data untuk melihat detail</p>
+                            <p>Pilih Data Untuk Melihat Detail Pengajuan Dana</p>
                         </div>
                     )}
                     {toast && (
