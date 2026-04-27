@@ -158,6 +158,7 @@ Route::prefix('rkt')->group(function () {
     Route::put('/reject/{id}', [MstProgramKerjaController::class, 'reject'])->whereNumber('id');
     Route::put('/revisi/{id}', [MstProgramKerjaController::class, 'revisi'])->whereNumber('id');
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
+    Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
 });
 
