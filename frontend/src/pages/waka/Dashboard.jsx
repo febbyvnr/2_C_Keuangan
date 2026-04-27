@@ -132,8 +132,6 @@ export default function Dashboard() {
       <SidebarWaka />
 
       <main className="waka-container">
-        {/* HEADER */}
-        {/* 🔥 HEADER (DIGANTI JADI WELCOME) */}
         <div className="header-card welcome-card">
           <div className="welcome-left">
             <h2 className="welcome-title">Selamat Datang</h2>
@@ -150,7 +148,6 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* 🔥 FILTER TETAP ADA */}
           <div className="header-filter">
             <div className="filter-item">
               <span>Tahun</span>
@@ -234,7 +231,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* CHART */}
         <div className="main-grid">
           <div className="chart-section">
             <div className="chart-card">
@@ -293,9 +289,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 🔥 2 CARD BAWAH (UPDATED) */}
         <div className="bottom-grid">
-          {/* CARD 1 */}
           <div className="summary-card">
             <h4>Ringkasan Anggaran</h4>
 
@@ -327,7 +321,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* CARD 2 */}
           <div className="summary-card">
             <h4 className="insight-main-title">Insight Program</h4>
 
