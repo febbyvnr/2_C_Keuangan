@@ -186,13 +186,14 @@ class MstKegiatanController extends Controller
                 ], 404);
             }
 
-            if ($this->isKegiatanUsed($kegiatan)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kegiatan tidak boleh diubah karena sudah dipakai pada program kerja',
-                    'data' => null,
-                ], 422);
-            }
+            // klp sblh bs edit walaupun uda dipake tabel lain, asal ga memutus FK aja
+            // if ($this->isKegiatanUsed($kegiatan)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Kegiatan tidak boleh diubah karena sudah dipakai pada program kerja',
+            //         'data' => null,
+            //     ], 422);
+            // }
 
             $validated = $request->validate(
                 [

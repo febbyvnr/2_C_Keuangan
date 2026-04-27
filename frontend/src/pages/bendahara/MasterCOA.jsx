@@ -288,12 +288,6 @@ export default function MasterCOA() {
                                     <td className="aksi">
                                         <button
                                             className="btn-edit"
-                                            disabled={item.is_used}
-                                            title={
-                                                item.is_used
-                                                    ? "COA tidak bisa diedit karena sudah dipakai Program Kerja"
-                                                    : "Edit COA"
-                                            }
                                             onClick={() => handleEdit(item)}
                                         >
                                             <i className="bi bi-pencil"></i>

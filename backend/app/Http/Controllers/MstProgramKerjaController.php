@@ -593,6 +593,84 @@ class MstProgramKerjaController extends Controller
         }
     }
 
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PM' => 'required|string',
+        ]);
+        try {
+            $program = MstProgramKerja::findOrFail($id);
+            $karyawan = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
+                ->first();
+
+            if (!$karyawan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validator tidak ditemukan'
+                ], 404);
+            }
+            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $id)
+                ->orderByDesc('ID_PM')
+                ->first();
+            $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
+            TrPm::create([
+                'ID_PROGRAM_KERJA' => $id,
+                'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
+                'DESKRIPSI_TR_PM' => $baseDesc . ' : Ditolak',
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Program kerja berhasil ditolak'
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menolak program kerja',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function revisi(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PM' => 'required|string',
+            'DESKRIPSI' => 'required|string',
+        ]);
+        try {
+            $program = MstProgramKerja::findOrFail($id);
+            $karyawan = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
+                ->first();
+            if (!$karyawan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validator tidak ditemukan'
+                ], 404);
+            }
+            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $id)
+                ->orderByDesc('ID_PM')
+                ->first();
+            $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
+            TrPm::create([
+                'ID_PROGRAM_KERJA' => $id,
+                'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
+                'DESKRIPSI_TR_PM' => $baseDesc . ' : ' . $request->DESKRIPSI,
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Program kerja masuk tahap revisi'
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan revisi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function exportExcel(Request $request)
     {
         $filters = $request->only([

@@ -251,6 +251,7 @@
 
 .waka-rkt-table-wrap {
     overflow-x: auto;
+    padding-top: 10px;
 }
 
 .waka-rkt-table {

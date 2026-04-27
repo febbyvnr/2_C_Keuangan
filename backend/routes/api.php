@@ -152,12 +152,14 @@ Route::prefix('ref-tan')->group(function () {
 Route::prefix('rkt')->group(function () {
     Route::get('/', [MstProgramKerjaController::class, 'index']);
     Route::get('/export/excel', [MstProgramKerjaController::class, 'exportExcel']);
-    Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
     Route::post('/store', [MstProgramKerjaController::class, 'store']);
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update'])->whereNumber('id');
     Route::put('/approve/{id}', [MstProgramKerjaController::class, 'approve'])->whereNumber('id');
+    Route::put('/reject/{id}', [MstProgramKerjaController::class, 'reject'])->whereNumber('id');
+    Route::put('/revisi/{id}', [MstProgramKerjaController::class, 'revisi'])->whereNumber('id');
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
     Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
+    Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
 });
 
 Route::prefix('dtl-fpd')->group(function () {
@@ -176,6 +178,7 @@ Route::prefix('fpd-anggaran')->group(function () {
     Route::get('/{id}', [FpdAnggaranController::class, 'show']);
     Route::post('/store', [FpdAnggaranController::class, 'store']);
     Route::put('/update/{id}', [FpdAnggaranController::class, 'update']);
+    Route::put('/reject/{id}', [FpdAnggaranController::class, 'reject']);
     Route::delete('/delete/{id}', [FpdAnggaranController::class, 'destroy']);
 });
 
