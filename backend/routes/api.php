@@ -157,6 +157,7 @@ Route::prefix('rkt')->group(function () {
     Route::put('/update/{id}', [MstProgramKerjaController::class, 'update'])->whereNumber('id');
     Route::put('/approve/{id}', [MstProgramKerjaController::class, 'approve'])->whereNumber('id');
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
+    Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
 });
 
 Route::prefix('dtl-fpd')->group(function () {

@@ -146,7 +146,14 @@ class TrPmController extends Controller
                 ->orderByDesc('ID_PM')
                 ->first();
 
-            $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+            $lastNote = strtolower(trim($lastPm->DESKRIPSI_TR_PM ?? ''));
+
+            if (!str_starts_with($lastNote, 'diajukan') && !str_starts_with($lastNote, 'pengajuan')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya RKT yang sudah diajukan yang bisa direvisi atau ditolak.',
+                ], 422);
+            }
 
             if (str_starts_with($lastNote, 'ditolak')) {
                 return response()->json([
