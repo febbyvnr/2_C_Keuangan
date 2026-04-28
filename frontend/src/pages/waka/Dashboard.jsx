@@ -316,7 +316,7 @@ export default function Dashboard() {
             <h4>Ringkasan Anggaran</h4>
 
             <p className="summary-sub">
-              Total Anggaran:{" "}
+              Persentase Anggaran Terpakai:{" "}
               <span className="percentage">
                 {totalAnggaranRKT > 0
                   ? `${Math.min(
@@ -348,27 +348,47 @@ export default function Dashboard() {
           <div className="summary-card">
             <h4 className="insight-main-title">Insight Program</h4>
 
-            <div className="insight-grid">
-              <div className="insight-item">
-                <p className="insight-label">Program Tertinggi</p>
+            <div className="insight-compare">
+              <div className="insight-col">
+                <p className="insight-heading">PROGRAM PENYERAPAN TERBESAR</p>
 
-                <h3 className="insight-title">
-                  <span className="insight-icon up">↑</span>{" "}
+                <div className="insight-percent">
+                  ↑{" "}
+                  {totalAnggaranRKT > 0
+                    ? (
+                        ((maxProgram?.NOMINAL || 0) / totalAnggaranRKT) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  %
+                </div>
+
+                <p className="insight-program">
                   {maxProgram?.PROGRAM_KERJA || "-"}
-                </h3>
+                </p>
 
                 <p className="insight-value">
                   Rp {(maxProgram?.NOMINAL || 0).toLocaleString()}
                 </p>
               </div>
 
-              <div className="insight-item">
-                <p className="insight-label">Program Terendah</p>
+              <div className="insight-col">
+                <p className="insight-heading">PROGRAM PENYERAPAN TERKECIL</p>
 
-                <h3 className="insight-title">
-                  <span className="insight-icon down">↓</span>{" "}
+                <div className="insight-percent">
+                  ↓{" "}
+                  {totalAnggaranRKT > 0
+                    ? (
+                        ((minProgram?.NOMINAL || 0) / totalAnggaranRKT) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  %
+                </div>
+
+                <p className="insight-program">
                   {minProgram?.PROGRAM_KERJA || "-"}
-                </h3>
+                </p>
 
                 <p className="insight-value">
                   Rp {(minProgram?.NOMINAL || 0).toLocaleString()}
