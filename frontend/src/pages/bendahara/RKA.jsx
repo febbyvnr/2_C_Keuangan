@@ -63,6 +63,10 @@ export default function RKA() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const [sumberDanaList, setSumberDanaList] = useState([]);
+  const [sumberDanaKeyword, setSumberDanaKeyword] = useState("");
+const [showSumberDanaDropdown, setShowSumberDanaDropdown] = useState(false);
+
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [savingDetail, setSavingDetail] = useState(false);
   const [detailForm, setDetailForm] = useState({
@@ -93,6 +97,18 @@ export default function RKA() {
         });
   }, [data, search, statusFilter]);
 
+  const filteredSumberDana = useMemo(() => {
+    const keyword = sumberDanaKeyword.toLowerCase().trim();
+
+    if (!keyword) return sumberDanaList;
+
+    return sumberDanaList.filter((item) =>
+        String(item.DESKRIPSI_SUMBER_DANA || "")
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [sumberDanaList, sumberDanaKeyword]);
+
   const fetchRka = async () => {
     try {
       setLoading(true);
@@ -117,8 +133,20 @@ export default function RKA() {
     }
   };
 
+  const fetchSumberDana = async () => {
+    try {
+        const response = await axios.get("http://127.0.0.1:8000/api/ref-sumber-dana");
+        const rows = response.data?.data ?? response.data ?? [];
+        setSumberDanaList(Array.isArray(rows) ? rows : []);
+    } catch (error) {
+        console.error("Gagal ambil sumber dana:", error);
+        setSumberDanaList([]);
+    }
+  };
+
   useEffect(() => {
     fetchRka();
+    fetchSumberDana();
   }, []);
 
   const handleReset = () => {
@@ -153,6 +181,9 @@ const handleOpenDetailModal = () => {
     SATUAN: "",
     HARGA_SATUAN: "",
   });
+
+  setSumberDanaKeyword("");
+  setShowSumberDanaDropdown(false);
 
   setShowDetailModal(true);
 };
@@ -499,15 +530,51 @@ const handleSubmitDetail = async (e) => {
             </div>
 
             <form className="rka-modal-form" onSubmit={handleSubmitDetail}>
-                <label>
+                <label className="rka-sumber-dana-field">
                 <span>Sumber Dana</span>
+
                 <input
-                    type="number"
-                    name="ID_REF_DANA"
-                    value={detailForm.ID_REF_DANA}
-                    onChange={handleDetailChange}
-                    placeholder="ID sumber dana"
+                    type="text"
+                    value={sumberDanaKeyword}
+                    onChange={(e) => {
+                    setSumberDanaKeyword(e.target.value);
+                    setShowSumberDanaDropdown(true);
+                    setDetailForm((prev) => ({
+                        ...prev,
+                        ID_REF_DANA: "",
+                    }));
+                    }}
+                    onFocus={() => setShowSumberDanaDropdown(true)}
+                    placeholder="Cari sumber dana..."
+                    required
                 />
+
+                {showSumberDanaDropdown && (
+                    <div className="rka-sumber-dana-dropdown">
+                    {filteredSumberDana.length > 0 ? (
+                        filteredSumberDana.map((item) => (
+                        <button
+                            type="button"
+                            key={item.ID_REF_DANA}
+                            onClick={() => {
+                            setDetailForm((prev) => ({
+                                ...prev,
+                                ID_REF_DANA: item.ID_REF_DANA,
+                            }));
+                            setSumberDanaKeyword(item.DESKRIPSI_SUMBER_DANA);
+                            setShowSumberDanaDropdown(false);
+                            }}
+                        >
+                            {item.DESKRIPSI_SUMBER_DANA}
+                        </button>
+                        ))
+                    ) : (
+                        <div className="rka-sumber-dana-empty">
+                        Sumber dana tidak ditemukan
+                        </div>
+                    )}
+                    </div>
+                )}
                 </label>
 
                 <label>
