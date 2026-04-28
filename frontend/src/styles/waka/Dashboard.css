@@ -162,8 +162,8 @@
 }
 
 .waka-title {
-  margin-top: -4px;
-  font-size: 100px;
+  margin-top: 0px;
+  font-size: 28px;
   line-height: 1.2;
   font-weight: 700;
   color: #f4f6f9;

@@ -134,7 +134,7 @@ export default function Dashboard() {
       <main className="waka-container">
         <div className="header-card welcome-card">
           <div className="welcome-left">
-            <h2 className="welcome-title">Selamat Datang</h2>
+            <h2 className="waka-title">Selamat Datang</h2>
 
             <p className="welcome-sub">Wakil Kepala Sekolah</p>
 
