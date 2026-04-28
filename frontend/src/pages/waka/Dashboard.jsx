@@ -244,10 +244,13 @@ export default function Dashboard() {
                     <AreaChart data={trendData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="bulan" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "#585858" }}
+                        tickFormatter={formatJt}
+                      />
                       <Tooltip
                         contentStyle={{ fontSize: "12px", textAlign: "center" }}
-                        itemStyle={{ textAlign: "center" }}
+                        itemStyle={{ textAlign: "center", color: "#585858" }}
                         formatter={(v) => `Rp ${v.toLocaleString()}`}
                       />
 
@@ -277,10 +280,14 @@ export default function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#585858" }}
+                      tickFormatter={formatJt}
+                    />
                     <Tooltip
                       shared={false}
                       contentStyle={{ fontSize: "12px" }}
+                      itemStyle={{ color: "#585858" }}
                       formatter={(v) => `Rp ${v.toLocaleString()}`}
                     />
                     <Legend
@@ -291,6 +298,9 @@ export default function Dashboard() {
                         top: -35,
                         right: 0,
                       }}
+                      formatter={(value) => (
+                        <span style={{ color: "#585858" }}>{value}</span>
+                      )}
                     />
                     <Bar dataKey="terpakai" fill="#265f9c" />
                     <Bar dataKey="sisa" fill="#EDA60F" />
