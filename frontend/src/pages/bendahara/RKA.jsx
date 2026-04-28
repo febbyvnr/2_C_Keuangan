@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import SidebarBendahara from "../../components/SidebarBendahara";
-import "../../styles/bendahara/SidebarBendahara.css";
 import "../../styles/bendahara/RKA.css";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, FileSpreadsheet, FileText } from "lucide-react";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -31,19 +29,31 @@ function getTotalRincian(item) {
 }
 
 function getStatusRka(item) {
-  const details = getDetails(item);
+  const anggaranRkt = Number(item?.NOMINAL || 0);
+  const totalRincian = getTotalRincian(item);
 
-  if (!details.length) {
+  if (totalRincian === 0) {
     return {
       label: "Belum Ada Rincian",
       className: "rka-status-badge draft",
     };
   }
 
+  if (totalRincian > anggaranRkt) {
+    return {
+      label: "Melebihi Anggaran",
+      className: "rka-status-badge danger",
+    };
+  }
+
   return {
-    label: "Sudah Ada Rincian",
+    label: "Sesuai Anggaran",
     className: "rka-status-badge ready",
   };
+}
+
+function getSisaAnggaran(item) {
+  return Number(item?.NOMINAL || 0) - getTotalRincian(item);
 }
 
 export default function RKA() {
@@ -103,9 +113,13 @@ export default function RKA() {
     fetchRka();
   };
 
-  const handleExport = () => {
-    window.open("http://127.0.0.1:8000/api/rka/export/pdf", "_blank");
+  const handleExportExcel = () => {
+    window.open("http://127.0.0.1:8000/api/rka/export", "_blank");
   };
+
+  const handleExportPdf = () => {
+    window.open("http://127.0.0.1:8000/api/rka/export/pdf", "_blank");
+ };
 
   return (
     <div className="rka-shell">
@@ -120,9 +134,14 @@ export default function RKA() {
             </div>
 
             <div className="rka-header-actions">
-              <button className="btn-warning-custom" onClick={handleExport}>
-                <Download size={16} />
-                Export PDF
+              <button className="btn-success-custom" onClick={handleExportExcel}>
+                <FileSpreadsheet size={16} />
+                    Export Excel
+              </button>
+
+              <button className="btn-warning-custom" onClick={handleExportPdf}>
+                <FileText size={16} />
+                    Export PDF
               </button>
 
               <button className="btn-primary-custom" type="button">
@@ -169,6 +188,7 @@ export default function RKA() {
                         <th>Waktu</th>
                         <th>Anggaran RKT</th>
                         <th>Total Rincian</th>
+                        <th>Selisih</th>
                         <th>Status</th>
                       </tr>
                     </thead>
@@ -209,6 +229,10 @@ export default function RKA() {
                                 {formatRupiah(getTotalRincian(item))}
                               </td>
 
+                              <td className={getSisaAnggaran(item) < 0 ? "rka-amount danger" : "rka-amount"}>
+                                {formatRupiah(getSisaAnggaran(item))}
+                              </td>
+
                               <td>
                                 <span className={status.className}>
                                   {status.label}
@@ -219,7 +243,7 @@ export default function RKA() {
                         })
                       ) : (
                         <tr>
-                          <td colSpan="6" className="rka-empty">
+                          <td colSpan="7" className="rka-empty">
                             Tidak ada data RKA
                           </td>
                         </tr>
@@ -273,6 +297,19 @@ export default function RKA() {
                         <span className="rka-detail-label">Total Rincian</span>
                         <span className="rka-detail-value strong">
                           {formatRupiah(getTotalRincian(selectedItem))}
+                        </span>
+                      </div>
+
+                      <div className="rka-detail-item">
+                        <span className="rka-detail-label">Selisih Anggaran</span>
+                            <span
+                                className={
+                                getSisaAnggaran(selectedItem) < 0
+                                    ? "rka-detail-value strong danger"
+                                    : "rka-detail-value strong"
+                                }
+                            >
+                             {formatRupiah(getSisaAnggaran(selectedItem))}
                         </span>
                       </div>
 
@@ -332,10 +369,6 @@ export default function RKA() {
                   <div className="rka-detail-actions">
                     <button className="btn-primary-custom rka-detail-btn">
                       Tambah Detail
-                    </button>
-
-                    <button className="btn-light-custom rka-detail-btn">
-                      Lihat Detail
                     </button>
                   </div>
                 </>
