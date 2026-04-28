@@ -271,6 +271,12 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={false}
+                      axisLine={false}
+                      tickLine={false}
+                    />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                     <Tooltip
                       shared={false}
@@ -286,7 +292,6 @@ export default function Dashboard() {
                         right: 0,
                       }}
                     />
-
                     <Bar dataKey="terpakai" fill="#265f9c" />
                     <Bar dataKey="sisa" fill="#EDA60F" />
                   </BarChart>
