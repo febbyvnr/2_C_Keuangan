@@ -271,14 +271,21 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 13 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={formatJt} />
                     <Tooltip
                       shared={false}
                       contentStyle={{ fontSize: "12px" }}
                       formatter={(v) => `Rp ${v.toLocaleString()}`}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      wrapperStyle={{
+                        fontSize: "11px",
+                        top: -35,
+                        right: 0,
+                      }}
+                    />
 
                     <Bar dataKey="terpakai" fill="#265f9c" />
                     <Bar dataKey="sisa" fill="#EDA60F" />
