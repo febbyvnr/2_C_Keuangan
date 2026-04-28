@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "../../styles/bendahara/RKA.css";
-import { Download, Plus, FileSpreadsheet, FileText } from "lucide-react";
+import {Plus, FileSpreadsheet, FileText } from "lucide-react";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -181,9 +181,9 @@ export default function RKA() {
               </div>
 
               <div className="rka-filter-actions">
-                <button className="btn-primary-custom" type="button">
+                {/* <button className="btn-primary-custom" type="button">
                   Cari
-                </button>
+                </button> */}
                 <button className="btn-light-custom" type="button" onClick={handleReset}>
                   Reset
                 </button>
