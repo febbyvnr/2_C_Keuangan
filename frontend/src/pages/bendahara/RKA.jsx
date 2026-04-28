@@ -61,6 +61,7 @@ export default function RKA() {
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const selectedItem = useMemo(() => {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
@@ -68,17 +69,19 @@ export default function RKA() {
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-
-    if (!keyword) return data;
-
     return data.filter((item) => {
-      return (
-        String(item.PROGRAM_KERJA || "").toLowerCase().includes(keyword) ||
-        String(item.INDIKATOR || "").toLowerCase().includes(keyword) ||
-        String(item.SASARAN || "").toLowerCase().includes(keyword)
-      );
-    });
-  }, [data, search]);
+            const status = getStatusRka(item).label;
+            const matchSearch =
+                !keyword ||
+                String(item.PROGRAM_KERJA || "").toLowerCase().includes(keyword) ||
+                String(item.INDIKATOR || "").toLowerCase().includes(keyword) ||
+                String(item.SASARAN || "").toLowerCase().includes(keyword);
+
+            const matchStatus = !statusFilter || status === statusFilter;
+
+            return matchSearch && matchStatus;
+        });
+  }, [data, search, statusFilter]);
 
   const fetchRka = async () => {
     try {
@@ -110,6 +113,7 @@ export default function RKA() {
 
   const handleReset = () => {
     setSearch("");
+    setStatusFilter("");
     fetchRka();
   };
 
@@ -161,6 +165,19 @@ export default function RKA() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
+              </div>
+
+              <div className="rka-input-group rka-status-filter">
+                <label>Status</label>
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                    <option value="">Semua Status</option>
+                    <option value="Belum Ada Rincian">Belum Ada Rincian</option>
+                    <option value="Sesuai Anggaran">Sesuai Anggaran</option>
+                    <option value="Melebihi Anggaran">Melebihi Anggaran</option>
+                </select>
               </div>
 
               <div className="rka-filter-actions">

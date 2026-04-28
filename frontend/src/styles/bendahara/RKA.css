@@ -167,9 +167,53 @@
   padding: 10px 14px;
   outline: none;
   font: inherit;
+  background: #ffffff;
+  color: #111827;
+}
+
+.rka-input-group input::placeholder {
+  color: #94a3b8;
 }
 
 .rka-input-group input:focus {
+  border-color: #1f4e82;
+  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.rka-input-group input,
+.rka-input-group select {
+  height: 44px;
+}
+
+.rka-status-filter label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.rka-input-group input:focus {
+  border-color: #1f4e82;
+  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.rka-status-filter {
+  min-width: 220px;
+}
+
+.rka-input-group select {
+  min-height: 44px;
+  border: 1px solid #d5deea;
+  border-radius: 12px;
+  padding: 10px 14px;
+  outline: none;
+  font: inherit;
+  background: #ffffff;
+  color: #111827;
+}
+
+.rka-input-group select:focus {
   border-color: #1f4e82;
   box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
 }
