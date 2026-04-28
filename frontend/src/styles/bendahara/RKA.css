@@ -160,7 +160,7 @@
   color: #64748b;
 }
 
-.rka-input-group input {
+/* .rka-input-group input {
   min-height: 44px;
   border: 1px solid #d5deea;
   border-radius: 12px;
@@ -169,7 +169,7 @@
   font: inherit;
   background: #ffffff;
   color: #111827;
-}
+} */
 
 .rka-input-group input::placeholder {
   color: #94a3b8;
@@ -472,6 +472,130 @@
 .rka-detail-empty-icon {
   font-size: 2rem;
   margin-bottom: 10px;
+}
+
+.rka-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.rka-modal-box {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+}
+
+.rka-modal-header {
+  padding: 20px 22px;
+  border-bottom: 1px solid #eef2f7;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rka-modal-header h3 {
+  margin: 0 0 4px;
+  color: #111827;
+}
+
+.rka-modal-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.rka-modal-close {
+  border: none;
+  background: #eef2f7;
+  color: #334155;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rka-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.rka-modal-form {
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.rka-modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rka-modal-form label.full,
+.rka-modal-total,
+.rka-modal-actions {
+  grid-column: 1 / -1;
+}
+
+.rka-modal-form span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.rka-modal-form input {
+  height: 44px;
+  border: 1px solid #d5deea;
+  border-radius: 12px;
+  padding: 0 14px;
+  outline: none;
+  font: inherit;
+}
+.rka-modal-form input,
+.rka-modal-form select {
+  background: #ffffff;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+.rka-modal-form input:focus {
+  border-color: #1f4e82;
+  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.rka-modal-total {
+  background: #f8fafc;
+  border: 1px solid #e5edf7;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rka-modal-total strong {
+  color: #1f4e82;
+}
+
+.rka-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 @media (max-width: 1080px) {

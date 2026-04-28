@@ -63,6 +63,16 @@ export default function RKA() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [savingDetail, setSavingDetail] = useState(false);
+  const [detailForm, setDetailForm] = useState({
+    ID_REF_DANA: "",
+    QTY: "",
+    VOLUME: "",
+    SATUAN: "",
+    HARGA_SATUAN: "",
+  });
+
   const selectedItem = useMemo(() => {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
   }, [data, selectedId]);
@@ -123,7 +133,73 @@ export default function RKA() {
 
   const handleExportPdf = () => {
     window.open("http://127.0.0.1:8000/api/rka/export/pdf", "_blank");
- };
+  };
+
+  const detailTotal =
+  Number(detailForm.QTY || 0) *
+  Number(detailForm.VOLUME || 0) *
+  Number(detailForm.HARGA_SATUAN || 0);
+
+const handleOpenDetailModal = () => {
+  if (!selectedItem) {
+    alert("Pilih program kerja terlebih dahulu.");
+    return;
+  }
+
+  setDetailForm({
+    ID_REF_DANA: "",
+    QTY: "",
+    VOLUME: "",
+    SATUAN: "",
+    HARGA_SATUAN: "",
+  });
+
+  setShowDetailModal(true);
+};
+
+const handleDetailChange = (e) => {
+  const { name, value } = e.target;
+  setDetailForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+const handleSubmitDetail = async (e) => {
+  e.preventDefault();
+
+  if (!selectedItem) return;
+
+  const totalSekarang = getTotalRincian(selectedItem);
+  const anggaranRkt = Number(selectedItem.NOMINAL || 0);
+
+  if (totalSekarang + detailTotal > anggaranRkt) {
+    alert("Total rincian melebihi anggaran RKT.");
+    return;
+  }
+
+  try {
+    setSavingDetail(true);
+
+    await axios.post("http://127.0.0.1:8000/api/rka/store", {
+      ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
+      ID_REF_DANA: detailForm.ID_REF_DANA || null,
+      QTY: Number(detailForm.QTY),
+      VOLUME: Number(detailForm.VOLUME),
+      SATUAN: detailForm.SATUAN,
+      HARGA_SATUAN: Number(detailForm.HARGA_SATUAN),
+      NOMINAL: detailTotal,
+      TOTAL_PROGKER: detailTotal,
+    });
+
+    setShowDetailModal(false);
+    await fetchRka();
+  } catch (error) {
+    alert(error.response?.data?.message || "Gagal menambah detail RKA");
+  } finally {
+    setSavingDetail(false);
+  }
+};
 
   return (
     <div className="rka-shell">
@@ -148,7 +224,7 @@ export default function RKA() {
                     Export PDF
               </button>
 
-              <button className="btn-primary-custom" type="button">
+              <button className="btn-primary-custom" type="button" onClick={handleOpenDetailModal}>
                 <Plus size={16} />
                 Tambah Detail RKA
               </button>
@@ -384,7 +460,7 @@ export default function RKA() {
                   </div>
 
                   <div className="rka-detail-actions">
-                    <button className="btn-primary-custom rka-detail-btn">
+                    <button className="btn-primary-custom rka-detail-btn" onClick={handleOpenDetailModal}>
                       Tambah Detail
                     </button>
                   </div>
@@ -398,6 +474,117 @@ export default function RKA() {
             </aside>
           </div>
         </div>
+
+        {showDetailModal && (
+        <div className="rka-modal-overlay">
+            <div className="rka-modal-box">
+            <div className="rka-modal-header">
+                <div>
+                <h3>Tambah Detail RKA</h3>
+                <p>{selectedItem?.PROGRAM_KERJA}</p>
+                <p>
+                    Anggaran RKT: {formatRupiah(selectedItem?.NOMINAL)} • Total saat ini:{" "}
+                    {formatRupiah(getTotalRincian(selectedItem))}
+                </p>
+                </div>
+
+                <button
+                type="button"
+                className="rka-modal-close"
+                onClick={() => setShowDetailModal(false)}
+                disabled={savingDetail}
+                >
+                ×
+                </button>
+            </div>
+
+            <form className="rka-modal-form" onSubmit={handleSubmitDetail}>
+                <label>
+                <span>Sumber Dana</span>
+                <input
+                    type="number"
+                    name="ID_REF_DANA"
+                    value={detailForm.ID_REF_DANA}
+                    onChange={handleDetailChange}
+                    placeholder="ID sumber dana"
+                />
+                </label>
+
+                <label>
+                <span>Qty</span>
+                <input
+                    type="number"
+                    name="QTY"
+                    min="1"
+                    value={detailForm.QTY}
+                    onChange={handleDetailChange}
+                    required
+                />
+                </label>
+
+                <label>
+                <span>Volume</span>
+                <input
+                    type="number"
+                    name="VOLUME"
+                    min="1"
+                    value={detailForm.VOLUME}
+                    onChange={handleDetailChange}
+                    required
+                />
+                </label>
+
+                <label>
+                <span>Satuan</span>
+                <input
+                    type="text"
+                    name="SATUAN"
+                    value={detailForm.SATUAN}
+                    onChange={handleDetailChange}
+                    placeholder="contoh: box, pcs, paket"
+                    required
+                />
+                </label>
+
+                <label className="full">
+                <span>Harga Satuan</span>
+                <input
+                    type="number"
+                    name="HARGA_SATUAN"
+                    min="0"
+                    value={detailForm.HARGA_SATUAN}
+                    onChange={handleDetailChange}
+                    required
+                />
+                </label>
+
+                <div className="rka-modal-total">
+                <span>Total Rincian</span>
+                <strong>{formatRupiah(detailTotal)}</strong>
+                </div>
+
+                <div className="rka-modal-actions">
+                <button
+                    type="button"
+                    className="btn-light-custom"
+                    onClick={() => setShowDetailModal(false)}
+                    disabled={savingDetail}
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    className="btn-primary-custom"
+                    disabled={savingDetail}
+                >
+                    {savingDetail ? "Menyimpan..." : "Simpan Detail"}
+                </button>
+                </div>
+            </form>
+            </div>
+        </div>
+        )}
       </main>
     </div>
   );
