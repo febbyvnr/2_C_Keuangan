@@ -5,7 +5,7 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px;
+  padding: 20px 16px;
   background: #f3f6fb;
 }
 
@@ -14,8 +14,8 @@
   flex-direction: column;
   gap: 22px;
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .rka-header-card,
