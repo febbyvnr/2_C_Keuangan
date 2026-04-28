@@ -295,12 +295,14 @@ export default function Dashboard() {
 
             <p className="summary-sub">
               Total Anggaran:{" "}
-              {totalAnggaranRKT > 0
-                ? `${Math.min(
-                    (totalTerpakai / totalAnggaranRKT) * 100,
-                    100,
-                  ).toFixed(0)}%`
-                : "0%"}
+              <span className="percentage">
+                {totalAnggaranRKT > 0
+                  ? `${Math.min(
+                      (totalTerpakai / totalAnggaranRKT) * 100,
+                      100,
+                    ).toFixed(0)}%`
+                  : "0%"}
+              </span>
             </p>
 
             <div className="progress-bar">
