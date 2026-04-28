@@ -9,7 +9,6 @@ const MOBILE_BREAKPOINT = 640;
 const MENU_ITEMS = [
   { label: "Dashboard", to: "/pic/guru", icon: "bi bi-columns-gap", end: true },
   { label: "Page RKT", to: "/pic/guru/rkt", icon: "bi bi-journal-check" },
-  { label: "Page RKA", to: "/pic/guru/rka", icon: "bi bi-calculator" },
   { label: "Page Realisasi RKT", icon: "bi bi-bar-chart-steps" },
   { label: "Page Bridging RKT", icon: "bi bi-diagram-2" },
   { label: "Page Pengajuan Dana", to: "/pic/guru/fpd", icon: "bi bi-cash-coin" },

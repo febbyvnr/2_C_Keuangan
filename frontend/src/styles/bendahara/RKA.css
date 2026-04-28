@@ -1,21 +1,21 @@
-.rka-shell {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  min-height: 100vh;
-  background: #f3f6fb;
-  color: #1f2937;
-}
-
 .rka-main {
-  padding: 20px;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px;
   background: #f3f6fb;
 }
 
 .rka-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 22px;
   width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .rka-header-card,
@@ -102,6 +102,36 @@
   background: #eef2f7;
 }
 
+.btn-success-custom {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.2s ease;
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+.btn-success-custom:hover {
+  background: #185c37;
+}
+
+.rka-status-badge.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.rka-amount.danger,
+.rka-detail-value.danger {
+  color: #dc2626 !important;
+}
+
 .rka-filter-card {
   padding: 18px 20px;
 }
@@ -125,9 +155,9 @@
 }
 
 .rka-input-group label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .rka-input-group input {
@@ -137,9 +167,59 @@
   padding: 10px 14px;
   outline: none;
   font: inherit;
+  background: #ffffff;
+  color: #111827;
+}
+
+.rka-input-group input::placeholder {
+  color: #94a3b8;
 }
 
 .rka-input-group input:focus {
+  border-color: #1f4e82;
+  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.rka-input-group input,
+.rka-input-group select {
+  height: 44px;
+}
+
+.rka-status-filter label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.rka-status-filter {
+  min-width: 220px;
+}
+
+.rka-input-group select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  padding: 0 44px 0 14px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+  background-color: #ffffff;
+  color: #1e293b;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 18px;
+}
+
+.rka-input-group select:focus {
   border-color: #1f4e82;
   box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
 }
@@ -237,6 +317,17 @@
   text-align: center;
   padding: 24px;
   color: #64748b;
+}
+
+.rka-table th:nth-child(4),
+.rka-table td:nth-child(4),
+.rka-table th:nth-child(5),
+.rka-table td:nth-child(5),
+.rka-table th:nth-child(6),
+.rka-table td:nth-child(6),
+.rka-table th:nth-child(7),
+.rka-table td:nth-child(7) {
+  text-align: center;
 }
 
 .rka-detail-card {
@@ -381,6 +472,180 @@
 .rka-detail-empty-icon {
   font-size: 2rem;
   margin-bottom: 10px;
+}
+
+.rka-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.rka-modal-box {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+}
+
+.rka-modal-header {
+  padding: 20px 22px;
+  border-bottom: 1px solid #eef2f7;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rka-modal-header h3 {
+  margin: 0 0 4px;
+  color: #111827;
+}
+
+.rka-modal-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.rka-modal-close {
+  border: none;
+  background: #eef2f7;
+  color: #334155;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rka-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.rka-modal-form {
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.rka-modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rka-modal-form label.full,
+.rka-modal-total,
+.rka-modal-actions {
+  grid-column: 1 / -1;
+}
+
+.rka-modal-form span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.rka-modal-form input {
+  height: 44px;
+  border: 1px solid #d5deea;
+  border-radius: 12px;
+  padding: 0 14px;
+  outline: none;
+  font: inherit;
+}
+.rka-modal-form input,
+.rka-modal-form select {
+  background: #ffffff;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+.rka-modal-form input:focus {
+  border-color: #1f4e82;
+  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.rka-modal-total {
+  background: #f8fafc;
+  border: 1px solid #e5edf7;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rka-modal-total strong {
+  color: #1f4e82;
+}
+
+.rka-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.rka-modal-form select {
+  height: 44px;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  padding: 0 44px 0 14px;
+  outline: none;
+  font: inherit;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.rka-sumber-dana-field {
+  position: relative;
+}
+
+.rka-sumber-dana-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.rka-sumber-dana-dropdown button {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  padding: 11px 14px;
+  text-align: left;
+  cursor: pointer;
+  color: #111827;
+  font-size: 14px;
+}
+
+.rka-sumber-dana-dropdown button:hover {
+  background: #f1f7ff;
+}
+
+.rka-sumber-dana-empty {
+  padding: 12px 14px;
+  color: #64748b;
+  font-size: 13px;
 }
 
 @media (max-width: 1080px) {
