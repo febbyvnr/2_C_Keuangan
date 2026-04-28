@@ -313,49 +313,36 @@ export default function Dashboard() {
 
         <div className="bottom-grid">
           <div className="summary-card ringkasan-card">
-            <div className="summary-block">
-              <h4 className="summary-title">Status Anggaran</h4>
+            <h4 className="summary-title">Kondisi Program</h4>
 
-              <div className="summary-card ringkasan-card">
-                {(() => {
-                  const persen =
-                    totalAnggaranRKT > 0
-                      ? (totalTerpakai / totalAnggaranRKT) * 100
-                      : 0;
+            {(() => {
+              const persen =
+                totalAnggaranRKT > 0 ? totalTerpakai / totalAnggaranRKT : 0;
 
-                  return (
-                    <div className="status-wrapper">
-                      <div
-                        className={`status-item ${
-                          persen >= 100 ? "active danger" : ""
-                        }`}
-                      >
-                        <span className="dot"></span>
-                        Over Budget
-                      </div>
+              let status = "Baik";
+              let desc = "Sebagian besar program berjalan sesuai rencana";
+              let color = "#2E7D32";
 
-                      <div
-                        className={`status-item ${
-                          persen >= 80 && persen < 100 ? "active warning" : ""
-                        }`}
-                      >
-                        <span className="dot"></span>
-                        Hampir Habis
-                      </div>
+              if (persen > 1) {
+                status = "Bermasalah";
+                desc = "Penggunaan anggaran melebihi rencana";
+                color = "#C62828";
+              } else if (persen >= 0.8) {
+                status = "Perlu Perhatian";
+                desc = "Penggunaan anggaran mendekati batas";
+                color = "#EDA60F";
+              }
 
-                      <div
-                        className={`status-item ${
-                          persen < 80 ? "active success" : ""
-                        }`}
-                      >
-                        <span className="dot"></span>
-                        Aman
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
+              return (
+                <div className="kondisi-wrapper">
+                  <div className="kondisi-main" style={{ color }}>
+                    {status}
+                  </div>
+
+                  <p className="kondisi-desc">{desc}</p>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="summary-card">

@@ -419,72 +419,28 @@
 }
 
 /* ========================= */
-/* STATUS ANGGARAN */
+/* KONDISI PROGRAM */
 /* ========================= */
 
-.status-wrapper {
+.kondisi-wrapper {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: center;
+  margin-top: 12px;
 }
 
-/* tiap item */
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* teks utama (Baik / Warning / Bermasalah) */
+.kondisi-main {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* deskripsi */
+.kondisi-desc {
   font-size: 13px;
-  color: #9ca3af; /* abu default */
-  transition: all 0.2s ease;
-}
-
-/* dot */
-.status-item .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #d1d5db; /* abu default */
-}
-
-/* ========================= */
-/* ACTIVE STATES */
-/* ========================= */
-
-/* Over Budget */
-.status-item.active.danger {
-  color: #c62828;
-  font-weight: 600;
-}
-
-.status-item.active.danger .dot {
-  background: #c62828;
-}
-
-/* Hampir Habis */
-.status-item.active.warning {
-  color: #eda60f;
-  font-weight: 600;
-}
-
-.status-item.active.warning .dot {
-  background: #eda60f;
-}
-
-/* Aman */
-.status-item.active.success {
-  color: #2e7d32;
-  font-weight: 600;
-}
-
-.status-item.active.success .dot {
-  background: #2e7d32;
-}
-
-.summary-title {
+  color: #585858;
   text-align: center;
-  margin-top: -6px;
-  margin-bottom: 10px;
-  justify-content: flex-start;
+  max-width: 80%;
 }
