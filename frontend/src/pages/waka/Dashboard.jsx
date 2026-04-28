@@ -312,36 +312,49 @@ export default function Dashboard() {
         </div>
 
         <div className="bottom-grid">
-          <div className="summary-card">
-            <h4>Ringkasan Anggaran</h4>
+          <div className="summary-card ringkasan-card">
+            <div className="summary-block">
+              <h4 className="summary-title">Status Anggaran</h4>
 
-            <p className="summary-sub">
-              Persentase Anggaran Terpakai:{" "}
-              <span className="percentage">
-                {totalAnggaranRKT > 0
-                  ? `${Math.min(
-                      (totalTerpakai / totalAnggaranRKT) * 100,
-                      100,
-                    ).toFixed(0)}%`
-                  : "0%"}
-              </span>
-            </p>
-
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${
+              <div className="summary-card ringkasan-card">
+                {(() => {
+                  const persen =
                     totalAnggaranRKT > 0
-                      ? Math.min((totalTerpakai / totalAnggaranRKT) * 100, 100)
-                      : 0
-                  }%`,
-                }}
-              ></div>
-            </div>
+                      ? (totalTerpakai / totalAnggaranRKT) * 100
+                      : 0;
 
-            <div className="summary-footer">
-              <span>Total Program: {totalRKT}</span>
+                  return (
+                    <div className="status-wrapper">
+                      <div
+                        className={`status-item ${
+                          persen >= 100 ? "active danger" : ""
+                        }`}
+                      >
+                        <span className="dot"></span>
+                        Over Budget
+                      </div>
+
+                      <div
+                        className={`status-item ${
+                          persen >= 80 && persen < 100 ? "active warning" : ""
+                        }`}
+                      >
+                        <span className="dot"></span>
+                        Hampir Habis
+                      </div>
+
+                      <div
+                        className={`status-item ${
+                          persen < 80 ? "active success" : ""
+                        }`}
+                      >
+                        <span className="dot"></span>
+                        Aman
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
           </div>
 

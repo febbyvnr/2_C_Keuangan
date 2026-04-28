@@ -272,6 +272,11 @@
   color: #1a1a1a;
 }
 
+.ringkasan-card h4 {
+  text-align: center;
+  margin: 0 0 16px 0;
+}
+
 .summary-card p {
   margin: 6px 0;
   font-size: 13px;
@@ -411,4 +416,75 @@
 .chart-card,
 .summary-card {
   border: 1px solid #e5e7eb;
+}
+
+/* ========================= */
+/* STATUS ANGGARAN */
+/* ========================= */
+
+.status-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* tiap item */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #9ca3af; /* abu default */
+  transition: all 0.2s ease;
+}
+
+/* dot */
+.status-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d1d5db; /* abu default */
+}
+
+/* ========================= */
+/* ACTIVE STATES */
+/* ========================= */
+
+/* Over Budget */
+.status-item.active.danger {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.status-item.active.danger .dot {
+  background: #c62828;
+}
+
+/* Hampir Habis */
+.status-item.active.warning {
+  color: #eda60f;
+  font-weight: 600;
+}
+
+.status-item.active.warning .dot {
+  background: #eda60f;
+}
+
+/* Aman */
+.status-item.active.success {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.status-item.active.success .dot {
+  background: #2e7d32;
+}
+
+.summary-title {
+  text-align: center;
+  margin-top: -6px;
+  margin-bottom: 10px;
+  justify-content: flex-start;
 }
