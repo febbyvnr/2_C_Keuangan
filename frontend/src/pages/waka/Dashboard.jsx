@@ -355,7 +355,9 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="summary-card">
-            <h4 className="insight-main-title">Insight Program</h4>
+            <h4 className="insight-main-title insight-title">
+              Insight Program
+            </h4>
 
             <div className="insight-compare">
               <div className="insight-col">

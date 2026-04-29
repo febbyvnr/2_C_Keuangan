@@ -341,7 +341,7 @@
 .insight-main-title {
   text-align: center;
   color: #1a1a1a !important;
-  margin: -4px 0 16px 0;
+  margin: -20px 0 8px 0;
 }
 
 .insight-compare {
@@ -391,7 +391,8 @@
   font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 4px 0;
+  margin: 0;
+  margin-bottom: -4px;
 }
 
 /* nominal */
@@ -416,6 +417,10 @@
 .chart-card,
 .summary-card {
   border: 1px solid #e5e7eb;
+}
+
+.summary-card .insight-title {
+  transform: translateY(-13px);
 }
 
 /* ========================= */
