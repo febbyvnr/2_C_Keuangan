@@ -12,7 +12,7 @@ const createEmptyForm = () => ({
   ID_TAN: "",
   ID_MASTER_COA: "",
   ID_KEGIATAN: "",
-  NOMINAL: "",
+  TOTAL_PROGKER: "",
   INDIKATOR: "",
   SASARAN: "",
   WAKTU_AWAL: "",
@@ -172,7 +172,7 @@ export default function CreateRKT() {
       ID_TAN: data?.ID_TAN ? String(data.ID_TAN) : "",
       ID_MASTER_COA: String(data?.ID_MASTER_COA ?? ""),
       ID_KEGIATAN: String(data?.ID_KEGIATAN ?? ""),
-      NOMINAL: String(data?.NOMINAL ?? ""),
+      TOTAL_PROGKER: String(data?.TOTAL_PROGKER ?? ""),
       INDIKATOR: data?.INDIKATOR ?? "",
       SASARAN: data?.SASARAN ?? "",
       WAKTU_AWAL: normalizeDate(data?.WAKTU_AWAL),
@@ -257,7 +257,7 @@ export default function CreateRKT() {
       ID_TAN: form.ID_TAN ? Number(form.ID_TAN) : null,
       ID_MASTER_COA: Number(form.ID_MASTER_COA),
       ID_KEGIATAN: Number(form.ID_KEGIATAN),
-      NOMINAL: Number(form.NOMINAL),
+      TOTAL_PROGKER: Number(form.TOTAL_PROGKER),
       NIP_PENANGGUNG_JAWAB: user.NIP_KARYAWAN,
       NIP_LOGIN: user.NIP_KARYAWAN,
       AKSI: aksi,
@@ -455,12 +455,12 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Nominal Anggaran</span>
+                  <span>Total Program Kerja</span>
                   <input
                     type="number"
                     min="0"
-                    name="NOMINAL"
-                    value={form.NOMINAL}
+                    name="TOTAL_PROGKER"
+                    value={form.TOTAL_PROGKER}
                     onChange={handleChange}
                     required
                   />

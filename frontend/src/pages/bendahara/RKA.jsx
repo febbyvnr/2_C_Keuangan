@@ -20,16 +20,20 @@ function getDetails(item) {
   return item?.details || item?.detail_program_kerja || item?.detailProgramKerja || [];
 }
 
+function getAnggaranRkt(item) {
+  return Number(item?.TOTAL_PROGKER || 0);
+}
+
 function getTotalRincian(item) {
   const details = getDetails(item);
 
   return details.reduce((total, detail) => {
-    return total + Number(detail.TOTAL_PROGKER || detail.NOMINAL || 0);
+    return total + Number(detail.NOMINAL || 0);
   }, 0);
 }
 
 function getStatusRka(item) {
-  const anggaranRkt = Number(item?.NOMINAL || 0);
+  const anggaranRkt = getAnggaranRkt(item);
   const totalRincian = getTotalRincian(item);
 
   if (totalRincian === 0) {
@@ -53,7 +57,7 @@ function getStatusRka(item) {
 }
 
 function getSisaAnggaran(item) {
-  return Number(item?.NOMINAL || 0) - getTotalRincian(item);
+  return getAnggaranRkt(item) - getTotalRincian(item);
 }
 
 export default function RKA() {
@@ -243,13 +247,13 @@ const handleSubmitDetail = async (e) => {
   if (!selectedItem) return;
 
   const totalSekarang = getTotalRincian(selectedItem);
-  const anggaranRkt = Number(selectedItem.NOMINAL || 0);
+  const anggaranRkt = getAnggaranRkt(selectedItem);
 
   const totalLama = editingDetail
     ? Number(
         getDetails(selectedItem).find(
           (detail) => detail.ID_DT_PROGKER === editingDetail
-        )?.TOTAL_PROGKER || 0
+        )?.NOMINAL || 0
       )
     : 0;
 
@@ -408,7 +412,7 @@ const handleSubmitDetail = async (e) => {
                               </td>
 
                               <td className="rka-amount">
-                                {formatRupiah(item.NOMINAL)}
+                                {formatRupiah(getAnggaranRkt(item))}
                               </td>
 
                               <td className="rka-amount">
@@ -475,7 +479,7 @@ const handleSubmitDetail = async (e) => {
                       <div className="rka-detail-item">
                         <span className="rka-detail-label">Anggaran RKT</span>
                         <span className="rka-detail-value strong">
-                          {formatRupiah(selectedItem.NOMINAL)}
+                          {formatRupiah(getAnggaranRkt(selectedItem))}
                         </span>
                       </div>
 
@@ -525,7 +529,7 @@ const handleSubmitDetail = async (e) => {
                         const qty = Number(detail.QTY || 0);
                         const volume = Number(detail.VOLUME || 1);
                         const satuan = detail.SATUAN || "Item Rincian";
-                        const total = Number(detail.TOTAL_PROGKER || detail.NOMINAL || 0);
+                        const total = Number(detail.NOMINAL || 0);
 
                         return (
                           <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
@@ -591,7 +595,7 @@ const handleSubmitDetail = async (e) => {
                 <h3>Tambah Detail RKA</h3>
                 <p>{selectedItem?.PROGRAM_KERJA}</p>
                 <p>
-                    Anggaran RKT: {formatRupiah(selectedItem?.NOMINAL)} • Total saat ini:{" "}
+                    Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
                     {formatRupiah(getTotalRincian(selectedItem))}
                 </p>
                 </div>
