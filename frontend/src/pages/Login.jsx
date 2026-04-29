@@ -45,6 +45,8 @@ export default function Login() {
 
             if (roleText.includes("bendahara") || roleText.includes("keuangan")) {
                 navigate("/bendahara/dashboard");
+            } else if (roleText.includes("kepala sekolah") || roleText.includes("kepsek")) {
+                navigate("/kepsek/monitoring");
             } else if (roleText.includes("guru")) {
                 navigate("/pic/guru");
             } else if (roleText.includes("waka")) {
