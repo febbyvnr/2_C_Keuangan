@@ -294,6 +294,9 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update'])->whereNumber('id');
     Route::delete('/delete/{id}', [RkaController::class, 'destroy'])->whereNumber('id');
+
+    Route::put('/detail/{id}', [RkaController::class, 'updateDetail'])->whereNumber('id');
+    Route::delete('/detail/{id}', [RkaController::class, 'destroyDetail'])->whereNumber('id');
 });
 
 Route::prefix('jenis-pembayaran')->group(function () {

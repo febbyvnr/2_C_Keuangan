@@ -242,6 +242,93 @@ class RkaController extends Controller
         }
     }
 
+    public function updateDetail(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'ID_REF_DANA' => 'nullable|integer',
+            'QTY' => 'required|integer|min:1',
+            'VOLUME' => 'required|integer|min:1',
+            'SATUAN' => 'required|string|max:50',
+            'HARGA_SATUAN' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $detail = RkaDetail::find($id);
+
+            if (!$detail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Detail RKA tidak ditemukan.'
+                ], 404);
+            }
+
+            $subtotal = $request->QTY * $request->HARGA_SATUAN * $request->VOLUME;
+
+            $detail->update([
+                'ID_REF_DANA' => $request->ID_REF_DANA,
+                'QTY' => $request->QTY,
+                'VOLUME' => $request->VOLUME,
+                'SATUAN' => $request->SATUAN,
+                'HARGA_SATUAN' => $request->HARGA_SATUAN,
+                'TOTAL_PROGKER' => $subtotal,
+                'NOMINAL' => $subtotal,
+            ]);
+
+            $this->logActivity('UPDATE_DETAIL_RKA', 'Update Detail RKA ID: ' . $id);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail RKA berhasil diperbarui.',
+                'data' => $detail,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function destroyDetail($id): JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            $detail = RkaDetail::find($id);
+
+            if (!$detail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Detail RKA tidak ditemukan.'
+                ], 404);
+            }
+
+            $detail->delete();
+
+            $this->logActivity('DELETE_DETAIL_RKA', 'Hapus Detail RKA ID: ' . $id);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail RKA berhasil dihapus.',
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     /**
      * EXPORT PDF: Hanya cetak data aktif (Poin 69)
      */
