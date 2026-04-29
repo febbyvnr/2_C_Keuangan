@@ -405,7 +405,7 @@ export default function RKT() {
                                 </td>
 
                                 <td className="rkt-amount">
-                                  {formatRupiah(item.NOMINAL)}
+                                  {formatRupiah(item.TOTAL_PROGKER)}
                                 </td>
 
                                 <td>
@@ -528,9 +528,9 @@ export default function RKT() {
                       </div>
 
                       <div className="rkt-detail-item">
-                        <span className="rkt-detail-label">Nominal</span>
+                        <span className="rkt-detail-label">Total Program Kerja</span>
                         <span className="rkt-detail-value strong">
-                          {formatRupiah(selectedItem.NOMINAL)}
+                          {formatRupiah(selectedItem.TOTAL_PROGKER)}
                         </span>
                       </div>
 
