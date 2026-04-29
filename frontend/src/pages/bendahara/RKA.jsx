@@ -529,39 +529,39 @@ const handleSubmitDetail = async (e) => {
 
                         return (
                           <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
-  <span className="rka-detail-text">
-    {index + 1}. {qty} {satuan} × {volume} ×{" "}
-    {formatRupiah(detail.HARGA_SATUAN)}
-  </span>
+                            <span className="rka-detail-text">
+                              {index + 1}. {qty} {satuan} × {volume} ×{" "}
+                              {formatRupiah(detail.HARGA_SATUAN)}
+                            </span>
 
-  <div className="rka-detail-action-icons">
-    <button
-      type="button"
-      className="rka-icon-btn edit"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleEdit(detail);
-      }}
-      title="Edit rincian"
-    >
-      <Pencil size={15} />
-    </button>
+                            <div className="rka-detail-action-icons">
+                              <button
+                                type="button"
+                                className="rka-icon-btn edit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(detail);
+                                }}
+                                title="Edit rincian"
+                              >
+                                <Pencil size={15} />
+                              </button>
 
-    <button
-      type="button"
-      className="rka-icon-btn delete"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleDelete(detail.ID_DT_PROGKER);
-      }}
-      title="Hapus rincian"
-    >
-      <Trash2 size={15} />
-    </button>
-  </div>
+                              <button
+                                type="button"
+                                className="rka-icon-btn delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(detail.ID_DT_PROGKER);
+                                }}
+                                title="Hapus rincian"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
 
-  <b className="rka-detail-total">{formatRupiah(total)}</b>
-</div>
+                            <b className="rka-detail-total">{formatRupiah(total)}</b>
+                          </div>
                         );
                       })}
                     </div>
