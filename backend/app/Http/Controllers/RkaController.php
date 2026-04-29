@@ -131,7 +131,7 @@ class RkaController extends Controller
                             ->where('ID_TA_ANGGARAN', $rka->ID_TA_ANGGARAN)
                             ->value('NOMINAL_PAGU') ?? 0;
                             
-                if ($pagu > 0 && ($rka->NOMINAL + $subtotalInput) > $pagu) {
+                if ($pagu > 0 && ($rka->TOTAL_PROGKER + $subtotalInput) > $pagu) {
                     return response()->json(['success' => false, 'message' => 'Gagal: Melebihi Pagu Unit'], 400);
                 }
             }
@@ -144,15 +144,15 @@ class RkaController extends Controller
                     'QTY'              => $detail['QTY'],
                     'HARGA_SATUAN'     => $detail['HARGA_SATUAN'],
                     'VOLUME'           => $detail['VOLUME'] ?? 1,
-                    'TOTAL_PROGKER'    => $subtotal,
                     'NOMINAL'          => $subtotal,
                     'SATUAN'           => $detail['SATUAN'] ?? null,
-                    'TGL_AWAL'         => $detail['TGL_AWAL'] ?? null,
-                    'TGL_AKHIR'        => $detail['TGL_AKHIR'] ?? null,
+                    'TGL_AWAL'         => $rka->WAKTU_AWAL,
+                    'TGL_AKHIR'        => $rka->WAKTU_AKHIR,
+
                 ]);
             }
 
-            // $rka->NOMINAL += $subtotalInput;
+            // $rka->TOTAL_PROGKER += $subtotalInput;
             // $rka->save();
 
             $this->logActivity('CREATE_RKA', 'Tambah RKA ID: ' . $rka->ID_PROGRAM_KERJA);
@@ -194,15 +194,14 @@ class RkaController extends Controller
                         'QTY'              => $detail['QTY'],
                         'HARGA_SATUAN'     => $detail['HARGA_SATUAN'],
                         'VOLUME'           => $detail['VOLUME'] ?? 1,
-                        'TOTAL_PROGKER'    => $subtotal,
                         'NOMINAL'          => $subtotal,
                         'SATUAN'           => $detail['SATUAN'] ?? null,
-                        'TGL_AWAL'         => $detail['TGL_AWAL'] ?? null,
-                        'TGL_AKHIR'        => $detail['TGL_AKHIR'] ?? null,
+                        'TGL_AWAL'         => $rka->WAKTU_AWAL,
+                        'TGL_AKHIR'        => $rka->WAKTU_AKHIR,
                     ]);
                     // $newTotal += $subtotal;
                 }
-                // $rka->NOMINAL = $newTotal;
+                // $rka->TOTAL_PROGKER = $newTotal;
                 // $rka->save();
             }
 
@@ -272,7 +271,6 @@ class RkaController extends Controller
                 'VOLUME' => $request->VOLUME,
                 'SATUAN' => $request->SATUAN,
                 'HARGA_SATUAN' => $request->HARGA_SATUAN,
-                'TOTAL_PROGKER' => $subtotal,
                 'NOMINAL' => $subtotal,
             ]);
 
