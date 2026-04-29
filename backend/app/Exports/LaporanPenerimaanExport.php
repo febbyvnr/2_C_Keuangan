@@ -14,15 +14,17 @@ class LaporanPenerimaanExport implements WithEvents
 {
     protected $start, $end, $sumberDana;
     protected $total = 0;
-    protected $rowCount = 0;
-    protected $role = 'Bendahara'; 
+    protected $role = 'Bendahara';
+    
+    protected $nip;
 
-    public function __construct($start, $end, $sumberDana, $role = null)
+    public function __construct($start, $end, $sumberDana, $role = null, $nip = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
-        $this->role = $role ?? 'Bendahara';
+        $this->role = $role ?: 'Bendahara';
+        $this->nip = $nip;
     }
 
     public function collection()
@@ -160,23 +162,34 @@ class LaporanPenerimaanExport implements WithEvents
                 // =====================
                 $footerRow = $totalRow + 4;
 
+                $role = $this->role;
 
-            // =====================
-            // TANGGAL
-            // =====================
-            $sheet->setCellValue("E" . ($footerRow+2), 'Yogyakarta, ' . date('d F Y'));
+                if ($role === 'Kepala Sekolah') {
+                    $nama = 'Drs. Budi Santoso';
+                } else {
+                    $role = 'Bendahara';
+                    $nama = 'Rina Putri, S.E.';
+                }
 
-            $sheet->getStyle("E" . ($footerRow+2))
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $nip = $this->nip ?: '-';
 
+                // TTD
+                $sheet->mergeCells("B" . ($footerRow+1) . ":D" . ($footerRow+1));
+                $sheet->mergeCells("B" . ($footerRow+3) . ":D" . ($footerRow+3));
+                $sheet->mergeCells("B" . ($footerRow+7) . ":D" . ($footerRow+7));
+                $sheet->mergeCells("B" . ($footerRow+8) . ":D" . ($footerRow+8));
 
-            // =====================
-            // BY ROLE
-            // =====================
-            $sheet->setCellValue("E" . ($footerRow+3), 'By: ' . ($this->role = Auth::user()->role ?? 'Bendahara'));    
+                $sheet->setCellValue("B" . ($footerRow+1), $role . ',');
+                $sheet->setCellValue("B" . ($footerRow+3), $nama);
+                $sheet->setCellValue("B" . ($footerRow+7), '-------------------------');
+             $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
 
-            $sheet->getStyle("E" . ($footerRow+3))
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("B" . ($footerRow+1) . ":D" . ($footerRow+8))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->setCellValue("E" . ($footerRow+10), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("E" . ($footerRow+10))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 $sheet->freezePane("A7");
             },

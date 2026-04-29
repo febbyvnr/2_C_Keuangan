@@ -12,7 +12,13 @@ class RefTahunAnggaranController extends Controller
      */
     public function index()
     {
-        return RefTahunAnggaran::orderBy('ID_TA_ANGGARAN', 'desc')->get();
+        return RefTahunAnggaran::withCount(['programKerja', 'tarif'])
+            ->orderBy('ID_TA_ANGGARAN', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->is_used = ($item->program_kerja_count > 0 || $item->tarif_count > 0);
+                return $item;
+            });
     }
 
     /**
@@ -65,32 +71,33 @@ class RefTahunAnggaranController extends Controller
      */
     public function update(Request $request, $id)
     {
-    $data = RefTahunAnggaran::findOrFail($id);
+        $data = RefTahunAnggaran::findOrFail($id);
 
-    $request->validate([
-        'DESKRIPSI_TAHUN_ANGGARAN' => 'required',
-        'IS_CURRENT' => 'required|boolean',
-    ]);
+        $request->validate([
+            'DESKRIPSI_TAHUN_ANGGARAN' => 'required',
+            'IS_CURRENT' => 'required|boolean',
+        ]);
 
-    if (
-        $data->programKerja()->exists() ||
-        $data->tarif()->exists()
-    ) {
-        return response()->json([
-            'message' => 'Tidak boleh mengubah data karena sudah dipakai transaksi'
-        ], 400);
+        // kl klp sblh ttp bs edit walaupun uda dipake tabel lain, asal ga memutus FK tabel lain aja
+        // if (
+        //     $data->programKerja()->exists() ||
+        //     $data->tarif()->exists()
+        // ) {
+        //     return response()->json([
+        //         'message' => 'Tidak boleh mengubah data karena sudah dipakai transaksi'
+        //     ], 400);
+        // }
+
+        if ($request->IS_CURRENT == 1) {
+            RefTahunAnggaran::where('IS_CURRENT', 1)
+                ->where('ID_TA_ANGGARAN', '!=', $id)
+                ->update(['IS_CURRENT' => 0]);
+        }
+
+        $data->update($request->all());
+
+        return $data;
     }
-
-    if ($request->IS_CURRENT == 1) {
-        RefTahunAnggaran::where('IS_CURRENT', 1)
-            ->where('ID_TA_ANGGARAN', '!=', $id)
-            ->update(['IS_CURRENT' => 0]);
-    }
-
-    $data->update($request->all());
-
-    return $data;
-}
     /**
      * Menghapus Tahun Anggaran
      */

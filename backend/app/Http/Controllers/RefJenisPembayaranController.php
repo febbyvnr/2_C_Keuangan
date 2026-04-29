@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RefJenisPembayaran;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 use App\Exports\RefJenisPembayaranExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,19 +16,17 @@ class RefJenisPembayaranController extends Controller
     
     public function index()
     {
-        try {
-            $data = RefJenisPembayaran::all();
-            return response()->json([
-                'success' => true,
-                'message' => 'Data ditemukan',
-                'data' => $data
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: '.$e->getMessage()
-            ], 500);
-        }
+        $data = RefJenisPembayaran::all();
+        $data->transform(function ($item) {
+            $item->is_used = DB::table('tr_pembayaran')
+                ->where('ID_JENIS_PEMBAYARAN', $item->ID_JENIS_PEMBAYARAN)
+                ->exists();
+            return $item;
+        });
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 
     

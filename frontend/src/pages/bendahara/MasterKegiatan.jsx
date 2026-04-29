@@ -13,7 +13,7 @@ export default function MasterKegiatan() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({
         key: "ID_KEGIATAN",
-        direction: "asc"
+        direction: "desc"
     });
     const [form, setForm] = useState({
         MST_ID_KEGIATAN: "",
@@ -126,21 +126,16 @@ export default function MasterKegiatan() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update" : "Berhasil tambah");
             closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast("error", json.message || "Gagal");
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm("Yakin mau hapus?")) return;
-        try {
-            const res = await fetch(`http://localhost:8000/api/kegiatan/delete/${id}`, { method: "DELETE" });
-            const json = await res.json();
-            if (json.success) { fetchData(); }
-        } catch (err) { console.error(err); }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -148,6 +143,42 @@ export default function MasterKegiatan() {
         setIsEdit(false);
         setEditId(null);
         setForm({ MST_ID_KEGIATAN: "", DESKRIPSI_KEGIATAN: "" });
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/kegiatan/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -204,13 +235,23 @@ export default function MasterKegiatan() {
                                     <td>{item.MST_ID_KEGIATAN}</td>
                                     <td>{item.DESKRIPSI_KEGIATAN}</td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
-                                            onClick={() => handleDelete(item.ID_KEGIATAN)}
+                                            disabled={item.is_used > 0 || item.has_child > 0}
+                                            title={
+                                                item.is_used > 0
+                                                    ? "Tidak bisa dihapus karena sudah dipakai program kerja"
+                                                    : item.has_child > 0
+                                                    ? "Tidak bisa dihapus karena punya sub kegiatan"
+                                                    : ""
+                                            }
+                                            onClick={() => setConfirmDeleteId(item.ID_KEGIATAN)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -269,10 +310,10 @@ export default function MasterKegiatan() {
                             >
                                 <option value="">-- Pilih Parent --</option>
                                 {parentList
-                                    .filter(item => item.ID_KEGIATAN !== editId) //bisa ref ke diri sendiri kah?
+                                    .filter(item => item.ID_KEGIATAN !== editId)
                                     .map((item) => (
                                         <option key={item.ID_KEGIATAN} value={item.ID_KEGIATAN}>
-                                            [{item.ID_KEGIATAN}] {item.DESKRIPSI_KEGIATAN}
+                                            {item.ID_KEGIATAN} - {item.DESKRIPSI_KEGIATAN}
                                         </option>
                                     ))}
                             </select>
@@ -283,6 +324,47 @@ export default function MasterKegiatan() {
                                 <button type="submit" className="btn-submit">{isEdit ? "Perbarui" : "Tambah"}</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Kegiatan
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus kegiatan ini?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

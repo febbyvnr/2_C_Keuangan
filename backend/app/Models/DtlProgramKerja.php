@@ -22,7 +22,6 @@ class DtlProgramKerja extends Model
         'HARGA_SATUAN',
         'VOLUME',
         'SATUAN',
-        'TOTAL_PROGKER',
     ];
 
     protected $casts = [
@@ -35,7 +34,6 @@ class DtlProgramKerja extends Model
         'QTY' => 'integer',
         'HARGA_SATUAN' => 'double',
         'VOLUME' => 'integer',
-        'TOTAL_PROGKER' => 'double',
     ];
 
     /**

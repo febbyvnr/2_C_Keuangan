@@ -46,6 +46,11 @@ import LaporanYayasan from "./pages/yayasan/Laporan.jsx";
 import MonitoringYayasan from "./pages/yayasan/Monitoring.jsx";
 import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
+import RKT from "./pages/pic/guru/RKT.jsx";
+import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
+import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+
+import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
 function BendaharaLayout() {

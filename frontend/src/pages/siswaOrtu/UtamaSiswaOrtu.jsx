@@ -71,7 +71,12 @@ const [siswaData, setSiswaData] = useState(null);
     return tagihanData.map((item) => {
       const totalTagihan = Number(item.JUMLAH_TAGIHAN_SISWA || 0);
       const totalBayar = Number(item.TOTAL_PEMBAYARAN || 0);
-      const sisa = Number(item.SISA_TAGIHAN || totalTagihan - totalBayar);
+      const sisaAsli =
+        item.SISA_TAGIHAN !== undefined && item.SISA_TAGIHAN !== null
+          ? Number(item.SISA_TAGIHAN)
+          : totalTagihan - totalBayar;
+
+      const sisa = Math.max(0, sisaAsli);
 
       let status = "Belum Bayar";
       if (sisa <= 0) {

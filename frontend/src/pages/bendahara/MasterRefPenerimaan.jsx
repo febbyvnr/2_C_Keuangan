@@ -13,7 +13,7 @@ export default function MasterRefPenerimaan() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_PENERIMAAN", 
-        direction: "asc" 
+        direction: "desc" 
     });
     const [form, setForm] = useState({
         REF_ID_REF_PENERIMAAN: "",
@@ -79,6 +79,10 @@ export default function MasterRefPenerimaan() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const payload = {
+            ...form,
+            REF_ID_REF_PENERIMAAN: form.REF_ID_REF_PENERIMAAN === "" ? null : form.REF_ID_REF_PENERIMAAN,
+        };
         const url = isEdit
             ? `http://localhost:8000/api/ref-penerimaan/update/${editId}`
             : "http://localhost:8000/api/ref-penerimaan/store";
@@ -86,43 +90,28 @@ export default function MasterRefPenerimaan() {
         const res = await fetch(url, {
             method,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form)
+            body: JSON.stringify({
+                ...form,
+                REF_ID_REF_PENERIMAAN: form.REF_ID_REF_PENERIMAAN || null
+            })
         });
         const json = await res.json();
-        if (json.success) {
-            alert(isEdit ? "Berhasil update Referensi Penerimaan" : "Berhasil tambah Referensi Penerimaan");
-            setShowModal(false);
-            setIsEdit(false);
-            setEditId(null);
-            setForm({
-                REF_ID_REF_PENERIMAAN: "",
-                DESKRIPSI_REF_PENERIMAAN: ""
-            });
+        if (res.ok) {
+            closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(
+                "error",
+                json.message ||
+                json.error ||
+                (json.errors ? Object.values(json.errors).flat().join(", ") : "Gagal")
+            );
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus Referensi Penerimaan ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/ref-penerimaan/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (json.success) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -164,6 +153,44 @@ export default function MasterRefPenerimaan() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "success", message = "") => {
+        setVisible(false);
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/ref-penerimaan/delete/${confirmDeleteId}`,
+                { method: "DELETE" }
+            );
+            const json = await res.json();
+            if (res.ok) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -230,7 +257,10 @@ export default function MasterRefPenerimaan() {
                                     <td>{item.REF_ID_REF_PENERIMAAN}</td>
                                     <td>{item.DESKRIPSI_REF_PENERIMAAN}</td>
                                     <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <button
+                                            className="btn-edit"
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
@@ -238,12 +268,10 @@ export default function MasterRefPenerimaan() {
                                             disabled={item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "Referensi Penerimaan sudah digunakan Program Kerja"
-                                                    : "Hapus Referensi Penerimaan"
+                                                    ? "Tidak bisa dihapus karena sudah digunakan / memiliki child"
+                                                    : ""
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_REF_PENERIMAAN)
-                                            }
+                                            onClick={() => handleDelete(item.ID_REF_PENERIMAAN)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -292,18 +320,17 @@ export default function MasterRefPenerimaan() {
                             >
                                 <option value="">-- Pilih Parent --</option>
                                 {parentList
-                                    .filter(item =>
-                                        String(item.ID_REF_PENERIMAAN) !== String(editId) ||
-                                        String(item.ID_REF_PENERIMAAN) === form.REF_ID_REF_PENERIMAAN
-                                    )
+                                    .filter((item) => !isEdit || item.ID_REF_PENERIMAAN !== editId)
+                                    .sort((a, b) => b.ID_REF_PENERIMAAN - a.ID_REF_PENERIMAAN)
                                     .map((item) => (
                                         <option
                                             key={item.ID_REF_PENERIMAAN}
                                             value={String(item.ID_REF_PENERIMAAN)}
                                         >
-                                            [{item.ID_REF_PENERIMAAN}] {item.DESKRIPSI_REF_PENERIMAAN}
+                                            {item.ID_REF_PENERIMAAN} - {item.DESKRIPSI_REF_PENERIMAAN}
                                         </option>
-                                    ))}
+                                    ))
+                                }
                             </select>
                             <label>Deskripsi Referensi Penerimaan</label>
                             <input
@@ -326,6 +353,47 @@ export default function MasterRefPenerimaan() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"} ${toast.type === "error" ? "error" : ""}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Referensi Penerimaan
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Referensi Penerimaan?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -9,9 +9,12 @@ class RefTarifController extends Controller
 {
     public function index()
     {
-        return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+        $data = RefTarif::with(['jenisTarif', 'tahunAnggaran'])
             ->orderBy('TGL_PENETAPAN', 'desc')
             ->get();
+        return response()->json([
+            'data' => $data
+        ]);
     }
 
     public function search(Request $request)
@@ -41,6 +44,7 @@ class RefTarifController extends Controller
         $data = RefTarif::create([
             'ID_JENIS_TARIF' => $request->ID_JENIS_TARIF,
             'ID_TA_ANGGARAN' => $request->ID_TA_ANGGARAN,
+            'DESKRIPSI_TARIF' => $request->DESKRIPSI_TARIF,
             'NOMINAL' => $request->NOMINAL,
             'TGL_PENETAPAN' => $request->TGL_PENETAPAN,
         ]);
@@ -63,6 +67,7 @@ class RefTarifController extends Controller
         $data->update([
             'ID_JENIS_TARIF' => $request->ID_JENIS_TARIF,
             'ID_TA_ANGGARAN' => $request->ID_TA_ANGGARAN,
+            'DESKRIPSI_TARIF' => $request->DESKRIPSI_TARIF,
             'NOMINAL' => $request->NOMINAL,
             'TGL_PENETAPAN' => $request->TGL_PENETAPAN,
         ]);
