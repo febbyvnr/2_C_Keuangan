@@ -461,7 +461,7 @@ const handleSubmitDetail = async (e) => {
                     <div className="rka-detail-list">
                       <div className="rka-detail-list-title">Rincian Anggaran</div>
 
-                      {getDetails(selectedItem).map((detail) => {
+                      {getDetails(selectedItem).map((detail, index) => {
                         const qty = Number(detail.QTY || 0);
                         const volume = Number(detail.VOLUME || 1);
                         const satuan = detail.SATUAN || "Item Rincian";
@@ -470,9 +470,10 @@ const handleSubmitDetail = async (e) => {
                         return (
                           <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
                             <div>
-                              <strong>{satuan}</strong>
+                              
                               <span>
-                                Qty {qty} × Volume {volume}
+                                {/* Qty {qty} × Volume {volume} */}
+                                {index + 1}. {qty} {satuan} × {volume} × {formatRupiah(detail.HARGA_SATUAN)}
                               </span>
                             </div>
 
