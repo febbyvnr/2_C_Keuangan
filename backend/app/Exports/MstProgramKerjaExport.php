@@ -43,6 +43,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                 'kegiatan',
             ])
             ->active()
+            ->whereNotNull('NIP_VALIDATOR_PROGKER')
             ->orderBy('ID_PROGRAM_KERJA', 'asc');
 
         if ($search !== '') {

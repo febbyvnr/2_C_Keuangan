@@ -134,6 +134,18 @@ export default function SidebarBendahara() {
                                 </NavLink>
                             </li>
 
+                            <li className="nav-item">
+                                <NavLink
+                                to="/bendahara/rka"
+                                className={({ isActive }) =>
+                                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                                }
+                                >
+                                <i className="bi bi-calculator"></i>
+                                Page RKA
+                                </NavLink>
+                            </li>
+
                             <li className="nav-item" onMouseEnter={() => setOpenMaster(true)} onMouseLeave={() => !isMasterActive && setOpenMaster(false)}>
                                 <div className={`nav-link text-dark master-menu ${isMasterActive ? "sidebar-active" : ""}`}>
                                     <i className="bi bi-database"></i>

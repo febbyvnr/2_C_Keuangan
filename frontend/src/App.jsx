@@ -135,7 +135,6 @@ export default function App() {
                 <Route path="/pic/guru/rkt" element={<RKT />} />
                 <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
                 <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-                <Route path="/pic/guru/rka" element={<RKAPicGuru />} />
 
                 {/* WAKA */}
                 {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
