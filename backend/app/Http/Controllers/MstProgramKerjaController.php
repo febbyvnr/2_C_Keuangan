@@ -152,7 +152,7 @@ class MstProgramKerjaController extends Controller
                 'integer',
                 Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
             ],
-            'NOMINAL' => [
+            'TOTAL_PROGKER' => [
                 'required',
                 'numeric',
                 'min:0',
@@ -205,7 +205,7 @@ class MstProgramKerjaController extends Controller
                     'ID_TAN' => $validated['ID_TAN'] ?? null,
                     'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
                     'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
-                    'NOMINAL' => $validated['NOMINAL'],
+                    'TOTAL_PROGKER' => $validated['TOTAL_PROGKER'],
                     'INDIKATOR' => $validated['INDIKATOR'] ?? null,
                     'SASARAN' => $validated['SASARAN'] ?? null,
                     'WAKTU_AWAL' => $validated['WAKTU_AWAL'],
@@ -280,7 +280,7 @@ class MstProgramKerjaController extends Controller
                 'integer',
                 Rule::exists('mst_kegiatan', 'ID_KEGIATAN'),
             ],
-            'NOMINAL' => [
+            'TOTAL_PROGKER' => [
                 'required',
                 'numeric',
                 'min:0',

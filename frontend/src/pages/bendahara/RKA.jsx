@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "../../styles/bendahara/RKA.css";
-import {Plus, FileSpreadsheet, FileText } from "lucide-react";
+import { Plus, FileSpreadsheet, FileText, Pencil, Trash2 } from "lucide-react";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -20,16 +20,20 @@ function getDetails(item) {
   return item?.details || item?.detail_program_kerja || item?.detailProgramKerja || [];
 }
 
+function getAnggaranRkt(item) {
+  return Number(item?.TOTAL_PROGKER || 0);
+}
+
 function getTotalRincian(item) {
   const details = getDetails(item);
 
   return details.reduce((total, detail) => {
-    return total + Number(detail.TOTAL_PROGKER || detail.NOMINAL || 0);
+    return total + Number(detail.NOMINAL || 0);
   }, 0);
 }
 
 function getStatusRka(item) {
-  const anggaranRkt = Number(item?.NOMINAL || 0);
+  const anggaranRkt = getAnggaranRkt(item);
   const totalRincian = getTotalRincian(item);
 
   if (totalRincian === 0) {
@@ -53,7 +57,7 @@ function getStatusRka(item) {
 }
 
 function getSisaAnggaran(item) {
-  return Number(item?.NOMINAL || 0) - getTotalRincian(item);
+  return getAnggaranRkt(item) - getTotalRincian(item);
 }
 
 export default function RKA() {
@@ -62,10 +66,11 @@ export default function RKA() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [editingDetail, setEditingDetail] = useState(null);
 
   const [sumberDanaList, setSumberDanaList] = useState([]);
   const [sumberDanaKeyword, setSumberDanaKeyword] = useState("");
-const [showSumberDanaDropdown, setShowSumberDanaDropdown] = useState(false);
+  const [showSumberDanaDropdown, setShowSumberDanaDropdown] = useState(false);
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [savingDetail, setSavingDetail] = useState(false);
@@ -174,6 +179,8 @@ const handleOpenDetailModal = () => {
     return;
   }
 
+  setEditingDetail(null);
+
   setDetailForm({
     ID_REF_DANA: "",
     QTY: "",
@@ -184,8 +191,46 @@ const handleOpenDetailModal = () => {
 
   setSumberDanaKeyword("");
   setShowSumberDanaDropdown(false);
-
   setShowDetailModal(true);
+};
+
+const handleEdit = (detail) => {
+  setEditingDetail(detail.ID_DT_PROGKER);
+
+  setDetailForm({
+    ID_REF_DANA: detail.ID_REF_DANA || "",
+    QTY: detail.QTY || "",
+    VOLUME: detail.VOLUME || "",
+    SATUAN: detail.SATUAN || "",
+    HARGA_SATUAN: detail.HARGA_SATUAN || "",
+  });
+
+  const sumberDana = sumberDanaList.find(
+    (item) => Number(item.ID_REF_DANA) === Number(detail.ID_REF_DANA)
+  );
+
+  setSumberDanaKeyword(
+    sumberDana?.DESKRIPSI_SUMBER_DANA || detail.DESKRIPSI_SUMBER_DANA || ""
+  );
+
+  setShowSumberDanaDropdown(false);
+  setShowDetailModal(true);
+};
+
+const handleDelete = async (idDetail) => {
+  const confirmDelete = window.confirm(
+    "Yakin mau menghapus rincian anggaran ini?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/rka/detail/${idDetail}`);
+
+    await fetchRka();
+  } catch (error) {
+    alert(error.response?.data?.message || "Gagal menghapus detail RKA");
+  }
 };
 
 const handleDetailChange = (e) => {
@@ -202,31 +247,52 @@ const handleSubmitDetail = async (e) => {
   if (!selectedItem) return;
 
   const totalSekarang = getTotalRincian(selectedItem);
-  const anggaranRkt = Number(selectedItem.NOMINAL || 0);
+  const anggaranRkt = getAnggaranRkt(selectedItem);
 
-  if (totalSekarang + detailTotal > anggaranRkt) {
+  const totalLama = editingDetail
+    ? Number(
+        getDetails(selectedItem).find(
+          (detail) => detail.ID_DT_PROGKER === editingDetail
+        )?.NOMINAL || 0
+      )
+    : 0;
+
+  const totalSetelahUpdate = totalSekarang - totalLama + detailTotal;
+
+  if (totalSetelahUpdate > anggaranRkt) {
     alert("Total rincian melebihi anggaran RKT.");
     return;
   }
 
+  const payload = {
+    ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
+    ID_REF_DANA: detailForm.ID_REF_DANA || null,
+    QTY: Number(detailForm.QTY),
+    VOLUME: Number(detailForm.VOLUME),
+    SATUAN: detailForm.SATUAN,
+    HARGA_SATUAN: Number(detailForm.HARGA_SATUAN),
+  };
+
   try {
     setSavingDetail(true);
 
-    await axios.post("http://127.0.0.1:8000/api/rka/store", {
-      ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
-      ID_REF_DANA: detailForm.ID_REF_DANA || null,
-      QTY: Number(detailForm.QTY),
-      VOLUME: Number(detailForm.VOLUME),
-      SATUAN: detailForm.SATUAN,
-      HARGA_SATUAN: Number(detailForm.HARGA_SATUAN),
-      NOMINAL: detailTotal,
-      TOTAL_PROGKER: detailTotal,
-    });
+    if (editingDetail) {
+      await axios.put(
+        `http://127.0.0.1:8000/api/rka/detail/${editingDetail}`,
+        payload
+      );
+    } else {
+      await axios.post("http://127.0.0.1:8000/api/rka/store", {
+        ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
+        details: [payload],
+      });
+    }
 
     setShowDetailModal(false);
+    setEditingDetail(null);
     await fetchRka();
   } catch (error) {
-    alert(error.response?.data?.message || "Gagal menambah detail RKA");
+    alert(error.response?.data?.message || "Gagal menyimpan detail RKA");
   } finally {
     setSavingDetail(false);
   }
@@ -346,7 +412,7 @@ const handleSubmitDetail = async (e) => {
                               </td>
 
                               <td className="rka-amount">
-                                {formatRupiah(item.NOMINAL)}
+                                {formatRupiah(getAnggaranRkt(item))}
                               </td>
 
                               <td className="rka-amount">
@@ -413,7 +479,7 @@ const handleSubmitDetail = async (e) => {
                       <div className="rka-detail-item">
                         <span className="rka-detail-label">Anggaran RKT</span>
                         <span className="rka-detail-value strong">
-                          {formatRupiah(selectedItem.NOMINAL)}
+                          {formatRupiah(getAnggaranRkt(selectedItem))}
                         </span>
                       </div>
 
@@ -445,11 +511,11 @@ const handleSubmitDetail = async (e) => {
                       </div>
 
                       <div className="rka-detail-item">
-                        <span className="rka-detail-label">Validator</span>
+                        <span className="rka-detail-label">Disetujui Oleh</span>
                         <span className="rka-detail-value">
                           {selectedItem.NIP_VALIDATOR_PROGKER
                             ? `${selectedItem.NIP_VALIDATOR_PROGKER} - ${
-                                selectedItem.NAMA_VALIDATOR || "Validator"
+                                selectedItem.NAMA_VALIDATOR || "Kepala Sekolah"
                               }`
                             : "Belum ada validator"}
                         </span>
@@ -459,34 +525,49 @@ const handleSubmitDetail = async (e) => {
                     <div className="rka-detail-list">
                       <div className="rka-detail-list-title">Rincian Anggaran</div>
 
-                      {getDetails(selectedItem).length > 0 ? (
-                        getDetails(selectedItem).map((detail) => (
-                          <div
-                            className="rka-detail-row"
-                            key={detail.ID_DT_PROGKER}
-                          >
-                            <div>
-                              <strong>
-                                {detail.SATUAN || "Item Rincian"}
-                              </strong>
-                              <span>
-                                Qty {detail.QTY || 0} × Volume{" "}
-                                {detail.VOLUME || 1}
-                              </span>
+                      {getDetails(selectedItem).map((detail, index) => {
+                        const qty = Number(detail.QTY || 0);
+                        const volume = Number(detail.VOLUME || 1);
+                        const satuan = detail.SATUAN || "Item Rincian";
+                        const total = Number(detail.NOMINAL || 0);
+
+                        return (
+                          <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
+                            <span className="rka-detail-text">
+                              {index + 1}. {qty} {satuan} × {volume} ×{" "}
+                              {formatRupiah(detail.HARGA_SATUAN)}
+                            </span>
+
+                            <div className="rka-detail-action-icons">
+                              <button
+                                type="button"
+                                className="rka-icon-btn edit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(detail);
+                                }}
+                                title="Edit rincian"
+                              >
+                                <Pencil size={15} />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="rka-icon-btn delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(detail.ID_DT_PROGKER);
+                                }}
+                                title="Hapus rincian"
+                              >
+                                <Trash2 size={15} />
+                              </button>
                             </div>
 
-                            <b>
-                              {formatRupiah(
-                                detail.TOTAL_PROGKER || detail.NOMINAL
-                              )}
-                            </b>
+                            <b className="rka-detail-total">{formatRupiah(total)}</b>
                           </div>
-                        ))
-                      ) : (
-                        <div className="rka-detail-empty">
-                          Belum ada rincian anggaran.
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -514,7 +595,7 @@ const handleSubmitDetail = async (e) => {
                 <h3>Tambah Detail RKA</h3>
                 <p>{selectedItem?.PROGRAM_KERJA}</p>
                 <p>
-                    Anggaran RKT: {formatRupiah(selectedItem?.NOMINAL)} • Total saat ini:{" "}
+                    Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
                     {formatRupiah(getTotalRincian(selectedItem))}
                 </p>
                 </div>

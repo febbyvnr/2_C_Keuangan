@@ -26,17 +26,17 @@ class RkaController extends Controller
             })->first();
     }
 
-    /**
-     * GET List: Hanya menampilkan yang aktif (FR-3.2.3.1)
-     */
+
     public function index(Request $request): JsonResponse
     {
         try {
             $data = Rka::with(['details'])
                 ->where(function ($q) {
-                    $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
-                      ->orWhereNull('mst_program_kerja.IS_DELETE');
-                })->get();
+                    $q->where('IS_DELETE', '!=', 1)
+                    ->orWhereNull('IS_DELETE');
+                })
+                ->whereNotNull('NIP_VALIDATOR_PROGKER')
+                ->get();
 
             return response()->json([
                 'success' => true,
@@ -60,7 +60,7 @@ class RkaController extends Controller
                 ->where(function ($q) {
                     $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
                       ->orWhereNull('mst_program_kerja.IS_DELETE');
-                });
+                })->whereNotNull('NIP_VALIDATOR_PROGKER');
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
@@ -131,7 +131,7 @@ class RkaController extends Controller
                             ->where('ID_TA_ANGGARAN', $rka->ID_TA_ANGGARAN)
                             ->value('NOMINAL_PAGU') ?? 0;
                             
-                if ($pagu > 0 && ($rka->NOMINAL + $subtotalInput) > $pagu) {
+                if ($pagu > 0 && ($rka->TOTAL_PROGKER + $subtotalInput) > $pagu) {
                     return response()->json(['success' => false, 'message' => 'Gagal: Melebihi Pagu Unit'], 400);
                 }
             }
@@ -144,16 +144,16 @@ class RkaController extends Controller
                     'QTY'              => $detail['QTY'],
                     'HARGA_SATUAN'     => $detail['HARGA_SATUAN'],
                     'VOLUME'           => $detail['VOLUME'] ?? 1,
-                    'TOTAL_PROGKER'    => $subtotal,
                     'NOMINAL'          => $subtotal,
                     'SATUAN'           => $detail['SATUAN'] ?? null,
-                    'TGL_AWAL'         => $detail['TGL_AWAL'] ?? null,
-                    'TGL_AKHIR'        => $detail['TGL_AKHIR'] ?? null,
+                    'TGL_AWAL'         => $rka->WAKTU_AWAL,
+                    'TGL_AKHIR'        => $rka->WAKTU_AKHIR,
+
                 ]);
             }
 
-            $rka->NOMINAL += $subtotalInput;
-            $rka->save();
+            // $rka->TOTAL_PROGKER += $subtotalInput;
+            // $rka->save();
 
             $this->logActivity('CREATE_RKA', 'Tambah RKA ID: ' . $rka->ID_PROGRAM_KERJA);
             DB::commit();
@@ -181,11 +181,11 @@ class RkaController extends Controller
             }
 
             DB::beginTransaction();
-            $rka->update($request->except('details'));
+            $rka->update($request->except(['details', 'NOMINAL']));
 
             if ($request->has('details')) {
                 RkaDetail::where('ID_PROGRAM_KERJA', $id)->delete();
-                $newTotal = 0;
+                // $newTotal = 0;
                 foreach ($request->details as $detail) {
                     $subtotal = $detail['QTY'] * $detail['HARGA_SATUAN'] * ($detail['VOLUME'] ?? 1);
                     RkaDetail::create([
@@ -194,16 +194,15 @@ class RkaController extends Controller
                         'QTY'              => $detail['QTY'],
                         'HARGA_SATUAN'     => $detail['HARGA_SATUAN'],
                         'VOLUME'           => $detail['VOLUME'] ?? 1,
-                        'TOTAL_PROGKER'    => $subtotal,
                         'NOMINAL'          => $subtotal,
                         'SATUAN'           => $detail['SATUAN'] ?? null,
-                        'TGL_AWAL'         => $detail['TGL_AWAL'] ?? null,
-                        'TGL_AKHIR'        => $detail['TGL_AKHIR'] ?? null,
+                        'TGL_AWAL'         => $rka->WAKTU_AWAL,
+                        'TGL_AKHIR'        => $rka->WAKTU_AKHIR,
                     ]);
-                    $newTotal += $subtotal;
+                    // $newTotal += $subtotal;
                 }
-                $rka->NOMINAL = $newTotal;
-                $rka->save();
+                // $rka->TOTAL_PROGKER = $newTotal;
+                // $rka->save();
             }
 
             $this->logActivity('UPDATE_RKA', 'Update RKA ID: ' . $id);
@@ -242,6 +241,92 @@ class RkaController extends Controller
         }
     }
 
+    public function updateDetail(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'ID_REF_DANA' => 'nullable|integer',
+            'QTY' => 'required|integer|min:1',
+            'VOLUME' => 'required|integer|min:1',
+            'SATUAN' => 'required|string|max:50',
+            'HARGA_SATUAN' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $detail = RkaDetail::find($id);
+
+            if (!$detail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Detail RKA tidak ditemukan.'
+                ], 404);
+            }
+
+            $subtotal = $request->QTY * $request->HARGA_SATUAN * $request->VOLUME;
+
+            $detail->update([
+                'ID_REF_DANA' => $request->ID_REF_DANA,
+                'QTY' => $request->QTY,
+                'VOLUME' => $request->VOLUME,
+                'SATUAN' => $request->SATUAN,
+                'HARGA_SATUAN' => $request->HARGA_SATUAN,
+                'NOMINAL' => $subtotal,
+            ]);
+
+            $this->logActivity('UPDATE_DETAIL_RKA', 'Update Detail RKA ID: ' . $id);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail RKA berhasil diperbarui.',
+                'data' => $detail,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function destroyDetail($id): JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            $detail = RkaDetail::find($id);
+
+            if (!$detail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Detail RKA tidak ditemukan.'
+                ], 404);
+            }
+
+            $detail->delete();
+
+            $this->logActivity('DELETE_DETAIL_RKA', 'Hapus Detail RKA ID: ' . $id);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail RKA berhasil dihapus.',
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     /**
      * EXPORT PDF: Hanya cetak data aktif (Poin 69)
      */
@@ -252,7 +337,8 @@ class RkaController extends Controller
                 ->where(function ($q) {
                     $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
                       ->orWhereNull('mst_program_kerja.IS_DELETE');
-                })->get();
+                })->whereNotNull('NIP_VALIDATOR_PROGKER')
+                 ->get();
 
             $pdf = app('dompdf.wrapper')->loadView('exports.rka_pdf', ['data' => $data]);
             $pdf->setPaper('a4', 'landscape');

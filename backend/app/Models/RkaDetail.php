@@ -9,7 +9,7 @@ class RkaDetail extends Model
 {
     protected $table = 'dtl_program_kerja';
     protected $primaryKey = 'ID_DT_PROGKER';
-    public $incrementing = true; // Diubah ke true
+    public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
 
@@ -23,7 +23,6 @@ class RkaDetail extends Model
         'HARGA_SATUAN',
         'VOLUME',
         'SATUAN',
-        'TOTAL_PROGKER',
     ];
 
     protected $casts = [
@@ -36,7 +35,6 @@ class RkaDetail extends Model
         'QTY' => 'integer',
         'HARGA_SATUAN' => 'double',
         'VOLUME' => 'integer',
-        'TOTAL_PROGKER' => 'double',
     ];
 
     public function rka(): BelongsTo
