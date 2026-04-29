@@ -26,17 +26,17 @@ class RkaController extends Controller
             })->first();
     }
 
-    /**
-     * GET List: Hanya menampilkan yang aktif (FR-3.2.3.1)
-     */
+
     public function index(Request $request): JsonResponse
     {
         try {
             $data = Rka::with(['details'])
                 ->where(function ($q) {
-                    $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
-                      ->orWhereNull('mst_program_kerja.IS_DELETE');
-                })->get();
+                    $q->where('IS_DELETE', '!=', 1)
+                    ->orWhereNull('IS_DELETE');
+                })
+                ->whereNotNull('NIP_VALIDATOR_PROGKER')
+                ->get();
 
             return response()->json([
                 'success' => true,
