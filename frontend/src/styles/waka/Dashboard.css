@@ -341,7 +341,7 @@
 .insight-main-title {
   text-align: center;
   color: #1a1a1a !important;
-  margin-bottom: 16px;
+  margin: -4px 0 16px 0;
 }
 
 .insight-compare {
@@ -419,28 +419,66 @@
 }
 
 /* ========================= */
-/* KONDISI PROGRAM */
+/* PROGRESS PENGAJUAN */
 /* ========================= */
 
-.kondisi-wrapper {
+.progress-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-/* teks utama (Baik / Warning / Bermasalah) */
-.kondisi-main {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-/* deskripsi */
-.kondisi-desc {
+/* teks atas */
+.progress-text {
   font-size: 13px;
-  color: #585858;
+  color: #334155;
+  text-align: left;
+}
+
+/* ========================= */
+/* PROGRESS BAR */
+/* ========================= */
+
+.progress-bar-large {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* isi bar */
+.progress-fill-large {
+  height: 100%;
+  background: #265f9c;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* ========================= */
+/* PERSENTASE */
+/* ========================= */
+
+.progress-percent {
+  font-size: 25px !important;
+  font-weight: 700;
+  color: #eda60f !important;
   text-align: center;
-  max-width: 80%;
+  margin: 4px 0;
+}
+
+/* ========================= */
+/* STATUS */
+/* ========================= */
+
+.progress-status {
+  font-size: 12px;
+  text-align: center;
+  color: #585858;
+}
+
+.progress-status span {
+  font-weight: 600;
+  color: #265f9c;
 }

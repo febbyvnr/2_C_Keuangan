@@ -14,6 +14,12 @@ import {
   Legend,
 } from "recharts";
 
+import {
+  BsCheckCircleFill,
+  BsExclamationTriangleFill,
+  BsXCircleFill,
+} from "react-icons/bs";
+
 export default function Dashboard() {
   const [rkt, setRkt] = useState([]);
   const [rka, setRka] = useState([]);
@@ -70,17 +76,18 @@ export default function Dashboard() {
   const totalSisa = sortedFpd.reduce((sum, d) => sum + getSisa(d), 0);
 
   const totalAnggaranRKT = rkt.reduce(
-    (sum, d) => sum + (d.NOMINAL || d.nominal || 0),
+    (sum, d) => sum + (d.TOTAL_PROGKER || 0),
     0,
   );
 
   const maxProgram = rkt.reduce(
-    (max, d) => ((d.NOMINAL || 0) > (max?.NOMINAL || 0) ? d : max),
+    (max, d) => ((d.TOTAL_PROGKER || 0) > (max?.TOTAL_PROGKER || 0) ? d : max),
     null,
   );
 
   const minProgram = rkt.reduce(
-    (min, d) => ((d.NOMINAL || 0) < (min?.NOMINAL || Infinity) ? d : min),
+    (min, d) =>
+      (d.TOTAL_PROGKER || 0) < (min?.TOTAL_PROGKER || Infinity) ? d : min,
     null,
   );
 
@@ -126,6 +133,19 @@ export default function Dashboard() {
       sisa: totalSisa,
     },
   ];
+
+  const filteredRkt =
+    selectedYear === "all" ? rkt : rkt.filter((d) => d.TAHUN == selectedYear);
+
+  const totalProgram = filteredRkt.length;
+
+  const programAktif = new Set(filteredFpd.map((d) => d.ID_PROGRAM_KERJA)).size;
+
+  const progress = totalProgram > 0 ? (programAktif / totalProgram) * 100 : 0;
+
+  let progressStatus = "Belum Mulai";
+  if (progress >= 80) progressStatus = "Hampir Selesai";
+  else if (progress >= 40) progressStatus = "Sedang Berjalan";
 
   return (
     <div className="dashboard-wrapper">
@@ -310,41 +330,30 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
         <div className="bottom-grid">
           <div className="summary-card ringkasan-card">
-            <h4 className="summary-title">Kondisi Program</h4>
+            <h4 className="summary-title">Status Pengajuan</h4>
 
-            {(() => {
-              const persen =
-                totalAnggaranRKT > 0 ? totalTerpakai / totalAnggaranRKT : 0;
+            <div className="progress-wrapper">
+              <p className="progress-text">
+                <strong>{programAktif}</strong> / {totalProgram} Program sudah
+                diajukan
+              </p>
 
-              let status = "Baik";
-              let desc = "Sebagian besar program berjalan sesuai rencana";
-              let color = "#2E7D32";
+              <div className="progress-bar-large">
+                <div
+                  className="progress-fill-large"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
 
-              if (persen > 1) {
-                status = "Bermasalah";
-                desc = "Penggunaan anggaran melebihi rencana";
-                color = "#C62828";
-              } else if (persen >= 0.8) {
-                status = "Perlu Perhatian";
-                desc = "Penggunaan anggaran mendekati batas";
-                color = "#EDA60F";
-              }
+              <p className="progress-percent">{progress.toFixed(0)}%</p>
 
-              return (
-                <div className="kondisi-wrapper">
-                  <div className="kondisi-main" style={{ color }}>
-                    {status}
-                  </div>
-
-                  <p className="kondisi-desc">{desc}</p>
-                </div>
-              );
-            })()}
+              <p className="progress-status">
+                Status: <span>{progressStatus}</span>
+              </p>
+            </div>
           </div>
-
           <div className="summary-card">
             <h4 className="insight-main-title">Insight Program</h4>
 
@@ -356,7 +365,7 @@ export default function Dashboard() {
                   ↑{" "}
                   {totalAnggaranRKT > 0
                     ? (
-                        ((maxProgram?.NOMINAL || 0) / totalAnggaranRKT) *
+                        ((maxProgram?.TOTAL_PROGKER || 0) / totalAnggaranRKT) *
                         100
                       ).toFixed(1)
                     : 0}
@@ -368,7 +377,7 @@ export default function Dashboard() {
                 </p>
 
                 <p className="insight-value">
-                  Rp {(maxProgram?.NOMINAL || 0).toLocaleString()}
+                  Rp {(maxProgram?.TOTAL_PROGKER || 0).toLocaleString()}
                 </p>
               </div>
 
@@ -379,7 +388,7 @@ export default function Dashboard() {
                   ↓{" "}
                   {totalAnggaranRKT > 0
                     ? (
-                        ((minProgram?.NOMINAL || 0) / totalAnggaranRKT) *
+                        ((minProgram?.TOTAL_PROGKER || 0) / totalAnggaranRKT) *
                         100
                       ).toFixed(1)
                     : 0}
@@ -391,7 +400,7 @@ export default function Dashboard() {
                 </p>
 
                 <p className="insight-value">
-                  Rp {(minProgram?.NOMINAL || 0).toLocaleString()}
+                  Rp {(minProgram?.TOTAL_PROGKER || 0).toLocaleString()}
                 </p>
               </div>
             </div>
