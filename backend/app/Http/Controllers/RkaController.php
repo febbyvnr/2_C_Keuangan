@@ -60,7 +60,7 @@ class RkaController extends Controller
                 ->where(function ($q) {
                     $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
                       ->orWhereNull('mst_program_kerja.IS_DELETE');
-                });
+                })->whereNotNull('NIP_VALIDATOR_PROGKER');
 
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
@@ -152,8 +152,8 @@ class RkaController extends Controller
                 ]);
             }
 
-            $rka->NOMINAL += $subtotalInput;
-            $rka->save();
+            // $rka->NOMINAL += $subtotalInput;
+            // $rka->save();
 
             $this->logActivity('CREATE_RKA', 'Tambah RKA ID: ' . $rka->ID_PROGRAM_KERJA);
             DB::commit();
@@ -181,11 +181,11 @@ class RkaController extends Controller
             }
 
             DB::beginTransaction();
-            $rka->update($request->except('details'));
+            $rka->update($request->except(['details', 'NOMINAL']));
 
             if ($request->has('details')) {
                 RkaDetail::where('ID_PROGRAM_KERJA', $id)->delete();
-                $newTotal = 0;
+                // $newTotal = 0;
                 foreach ($request->details as $detail) {
                     $subtotal = $detail['QTY'] * $detail['HARGA_SATUAN'] * ($detail['VOLUME'] ?? 1);
                     RkaDetail::create([
@@ -200,10 +200,10 @@ class RkaController extends Controller
                         'TGL_AWAL'         => $detail['TGL_AWAL'] ?? null,
                         'TGL_AKHIR'        => $detail['TGL_AKHIR'] ?? null,
                     ]);
-                    $newTotal += $subtotal;
+                    // $newTotal += $subtotal;
                 }
-                $rka->NOMINAL = $newTotal;
-                $rka->save();
+                // $rka->NOMINAL = $newTotal;
+                // $rka->save();
             }
 
             $this->logActivity('UPDATE_RKA', 'Update RKA ID: ' . $id);
@@ -252,7 +252,8 @@ class RkaController extends Controller
                 ->where(function ($q) {
                     $q->where('mst_program_kerja.IS_DELETE', '!=', 1)
                       ->orWhereNull('mst_program_kerja.IS_DELETE');
-                })->get();
+                })->whereNotNull('NIP_VALIDATOR_PROGKER')
+                 ->get();
 
             $pdf = app('dompdf.wrapper')->loadView('exports.rka_pdf', ['data' => $data]);
             $pdf->setPaper('a4', 'landscape');

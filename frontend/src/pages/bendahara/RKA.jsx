@@ -213,15 +213,17 @@ const handleSubmitDetail = async (e) => {
     setSavingDetail(true);
 
     await axios.post("http://127.0.0.1:8000/api/rka/store", {
-      ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
-      ID_REF_DANA: detailForm.ID_REF_DANA || null,
-      QTY: Number(detailForm.QTY),
-      VOLUME: Number(detailForm.VOLUME),
-      SATUAN: detailForm.SATUAN,
-      HARGA_SATUAN: Number(detailForm.HARGA_SATUAN),
-      NOMINAL: detailTotal,
-      TOTAL_PROGKER: detailTotal,
-    });
+    ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
+    details: [
+      {
+        ID_REF_DANA: detailForm.ID_REF_DANA || null,
+        QTY: Number(detailForm.QTY),
+        VOLUME: Number(detailForm.VOLUME),
+        SATUAN: detailForm.SATUAN,
+        HARGA_SATUAN: Number(detailForm.HARGA_SATUAN),
+      },
+    ],
+  });
 
     setShowDetailModal(false);
     await fetchRka();
@@ -445,11 +447,11 @@ const handleSubmitDetail = async (e) => {
                       </div>
 
                       <div className="rka-detail-item">
-                        <span className="rka-detail-label">Validator</span>
+                        <span className="rka-detail-label">Disetujui Oleh</span>
                         <span className="rka-detail-value">
                           {selectedItem.NIP_VALIDATOR_PROGKER
                             ? `${selectedItem.NIP_VALIDATOR_PROGKER} - ${
-                                selectedItem.NAMA_VALIDATOR || "Validator"
+                                selectedItem.NAMA_VALIDATOR || "Kepala Sekolah"
                               }`
                             : "Belum ada validator"}
                         </span>
@@ -459,34 +461,25 @@ const handleSubmitDetail = async (e) => {
                     <div className="rka-detail-list">
                       <div className="rka-detail-list-title">Rincian Anggaran</div>
 
-                      {getDetails(selectedItem).length > 0 ? (
-                        getDetails(selectedItem).map((detail) => (
-                          <div
-                            className="rka-detail-row"
-                            key={detail.ID_DT_PROGKER}
-                          >
+                      {getDetails(selectedItem).map((detail) => {
+                        const qty = Number(detail.QTY || 0);
+                        const volume = Number(detail.VOLUME || 1);
+                        const satuan = detail.SATUAN || "Item Rincian";
+                        const total = Number(detail.TOTAL_PROGKER || detail.NOMINAL || 0);
+
+                        return (
+                          <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
                             <div>
-                              <strong>
-                                {detail.SATUAN || "Item Rincian"}
-                              </strong>
+                              <strong>{satuan}</strong>
                               <span>
-                                Qty {detail.QTY || 0} × Volume{" "}
-                                {detail.VOLUME || 1}
+                                Qty {qty} × Volume {volume}
                               </span>
                             </div>
 
-                            <b>
-                              {formatRupiah(
-                                detail.TOTAL_PROGKER || detail.NOMINAL
-                              )}
-                            </b>
+                            <b>{formatRupiah(total)}</b>
                           </div>
-                        ))
-                      ) : (
-                        <div className="rka-detail-empty">
-                          Belum ada rincian anggaran.
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
                   </div>
 
