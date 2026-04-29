@@ -34,6 +34,8 @@ import WakaRKT from "./pages/waka/RKT";
 import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
 import WakaApprovalCenter from "./pages/waka/ApprovalCenter";
 import WakaMonitoring from "./pages/waka/Monitoring";
+import WakaRKA from "./pages/waka/RKA";
+import WakaFPD from "./pages/waka/FPD";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
@@ -47,6 +49,9 @@ import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
 import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
+import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+
+import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
 function BendaharaLayout() {
@@ -140,7 +145,12 @@ export default function App() {
                     <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
                     <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
                     <Route path="/waka/monitoring" element={<WakaMonitoring />} />
+                    <Route path="/waka/rka" element={<WakaRKA />} />
+                    <Route path="/waka/fpd" element={<WakaFPD />} />
                 {/* </Route> */}
+
+                {/* KEPALA SEKOLAH */}
+                <Route path="/kepsek/monitoring" element={<KepsekMonitoring />} />
 
                 <Route path="/yayasan" element={<YayasanLayout />}>
                     <Route path="dashboard" element={<DashboardYayasan />} />

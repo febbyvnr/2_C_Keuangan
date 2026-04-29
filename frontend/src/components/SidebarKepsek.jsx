@@ -5,32 +5,27 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const MENU_ITEMS = [
-    { label: "Dashboard", to: "/waka", icon: "bi bi-columns-gap", end: true },
-    { label: "RKT", to: "/waka/rkt", icon: "bi bi-journal-text" },
-    { label: "RKA", to: "/waka/rka", icon: "bi bi-cash-coin" },
-    { label: "FPD", to: "/waka/fpd", icon: "bi bi-cash-stack" },
-    { label: "Realisasi RKT", icon: "bi bi-bar-chart-line" },
-    { label: "Bridging RKT", icon: "bi bi-diagram-3" },
-    { label: "Evaluasi RKT", to: "/waka/evaluasi-rkt", icon: "bi bi-clipboard-data" },
-    { label: "Approval Center", to: "/waka/approval-center", icon: "bi bi-check2-square" },
-    { label: "Monitoring", to: "/waka/monitoring", icon: "bi bi-binoculars" },
+    { label: "Monitoring", to: "/kepsek/monitoring", icon: "bi bi-binoculars" },
 ];
 
-export default function SidebarWaka() {
+export default function SidebarKepsek() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [namaUser, setNamaUser] = useState("Kepala Sekolah");
 
     useEffect(() => {
+        try {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            if (user.NAMA_KARYAWAN) setNamaUser(user.NAMA_KARYAWAN);
+        } catch (_) {}
+
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
-            if (window.innerWidth > 768) {
-                setIsOpen(false);
-            }
+            if (window.innerWidth > 768) setIsOpen(false);
         };
-
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
@@ -38,7 +33,6 @@ export default function SidebarWaka() {
     const confirmLogout = async () => {
         try {
             const token = localStorage.getItem("token");
-
             await fetch("http://localhost:8000/api/logout", {
                 method: "POST",
                 headers: {
@@ -46,8 +40,8 @@ export default function SidebarWaka() {
                     Accept: "application/json",
                 },
             });
-        } catch (error) {
-            console.error("Gagal lapor logout ke backend:", error);
+        } catch (err) {
+            console.error("Gagal lapor logout:", err);
         } finally {
             localStorage.clear();
             setShowLogoutConfirm(false);
@@ -63,28 +57,23 @@ export default function SidebarWaka() {
                         <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>Konfirmasi Keluar</h4>
                         <p style={{ margin: "0 0 20px 0", color: "#666" }}>Apakah Anda yakin ingin logout dari sistem?</p>
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                            <button onClick={() => setShowLogoutConfirm(false)} style={styles.btnTidak}>
-                                Tidak
-                            </button>
-                            <button onClick={confirmLogout} style={styles.btnIya}>
-                                Iya
-                            </button>
+                            <button onClick={() => setShowLogoutConfirm(false)} style={styles.btnTidak}>Tidak</button>
+                            <button onClick={confirmLogout} style={styles.btnIya}>Iya</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {isMobile && isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>}
+            {isMobile && isOpen && (
+                <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
+            )}
 
             {(isCollapsed || isMobile) && !isOpen && (
                 <button
                     className="hamburger-btn floating-global"
                     onClick={() => {
-                        if (isMobile) {
-                            setIsOpen(true);
-                        } else {
-                            setIsCollapsed(false);
-                        }
+                        if (isMobile) setIsOpen(true);
+                        else setIsCollapsed(false);
                     }}
                 >
                     <i className="bi bi-list"></i>
@@ -101,16 +90,13 @@ export default function SidebarWaka() {
                                 </div>
                                 <div className="header-text">
                                     <div className="sidebar-title">SIBOKU</div>
-                                    <div className="sidebar-subtitle">Ruang Waka</div>
+                                    <div className="sidebar-subtitle">Ruang Kepala Sekolah</div>
                                 </div>
                                 <button
                                     className="hamburger-btn inside"
                                     onClick={() => {
-                                        if (isMobile) {
-                                            setIsOpen(false);
-                                        } else {
-                                            setIsCollapsed(true);
-                                        }
+                                        if (isMobile) setIsOpen(false);
+                                        else setIsCollapsed(true);
                                     }}
                                 >
                                     <i className="bi bi-list"></i>
@@ -122,8 +108,8 @@ export default function SidebarWaka() {
                                     <img src={profile} alt="profile" />
                                 </div>
                                 <div className="user-info">
-                                    <div className="user-role">Waka</div>
-                                    <div className="user-email">waka@smkbopkri2.sch.id</div>
+                                    <div className="user-role">Kepala Sekolah</div>
+                                    <div className="user-email" title={namaUser}>{namaUser}</div>
                                 </div>
                             </div>
                         </div>
@@ -131,25 +117,15 @@ export default function SidebarWaka() {
                         <ul className="nav flex-column sidebar-menu">
                             {MENU_ITEMS.map((item) => (
                                 <li key={item.label} className="nav-item">
-                                    {item.to ? (
-                                        <NavLink
-                                            to={item.to}
-                                            end={item.end}
-                                            className={({ isActive }) => (isActive ? "nav-link sidebar-active" : "nav-link text-dark")}
-                                        >
-                                            <i className={item.icon}></i>
-                                            {item.label}
-                                        </NavLink>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className="nav-link text-dark"
-                                            style={{ width: "100%", opacity: 0.55, cursor: "default", background: "transparent", border: "none" }}
-                                        >
-                                            <i className={item.icon}></i>
-                                            {item.label}
-                                        </button>
-                                    )}
+                                    <NavLink
+                                        to={item.to}
+                                        className={({ isActive }) =>
+                                            isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                                        }
+                                    >
+                                        <i className={item.icon}></i>
+                                        {item.label}
+                                    </NavLink>
                                 </li>
                             ))}
                         </ul>
@@ -171,43 +147,21 @@ export default function SidebarWaka() {
 
 const styles = {
     modalOverlay: {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 9999,
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)", display: "flex",
+        justifyContent: "center", alignItems: "center", zIndex: 9999,
     },
     modalBox: {
-        backgroundColor: "white",
-        padding: "20px 25px",
-        borderRadius: "8px",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-        maxWidth: "400px",
-        width: "90%",
-        textAlign: "left",
-        fontFamily: "sans-serif",
+        backgroundColor: "white", padding: "20px 25px", borderRadius: "8px",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.2)", maxWidth: "400px",
+        width: "90%", textAlign: "left", fontFamily: "sans-serif",
     },
     btnTidak: {
-        backgroundColor: "#dc2626",
-        color: "white",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "4px",
-        cursor: "pointer",
-        fontWeight: "bold",
+        backgroundColor: "#dc2626", color: "white", border: "none",
+        padding: "8px 16px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold",
     },
     btnIya: {
-        backgroundColor: "#0d6efd",
-        color: "white",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "4px",
-        cursor: "pointer",
-        fontWeight: "bold",
+        backgroundColor: "#4338ca", color: "white", border: "none",
+        padding: "8px 16px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold",
     },
 };
