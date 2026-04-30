@@ -100,6 +100,15 @@ export default function SidebarBendahara() {
                 <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
             )}
 
+            {!isMobile && isCollapsed && (
+                <button
+                    className="hamburger-btn outside"
+                    onClick={() => setIsCollapsed(false)}
+                >
+                    <i className="bi bi-list"></i>
+                </button>
+            )}
+
             <div className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${isCollapsed && !isMobile ? "collapsed" : ""}`}>
                 {(isMobile || !isCollapsed) && (
                     <>

@@ -154,3 +154,28 @@ export default function SidebarYayasan() {
         </>
     );
 }
+
+// Tambahan Styles untuk Modal Logout
+const styles = {
+    modalOverlay: {
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex", justifyContent: "center", alignItems: "center",
+        zIndex: 9999 
+    },
+    modalBox: {
+        backgroundColor: "white", padding: "20px 25px",
+        borderRadius: "8px", boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+        maxWidth: "400px", width: "90%", textAlign: "left",
+    },
+    btnTidak: {
+        backgroundColor: "#dc2626", color: "white",
+        border: "none", padding: "8px 16px", borderRadius: "4px",
+        cursor: "pointer", fontWeight: "bold"
+    },
+    btnIya: {
+        backgroundColor: "#0d6efd", color: "white",
+        border: "none", padding: "8px 16px", borderRadius: "4px",
+        cursor: "pointer", fontWeight: "bold"
+    }
+};

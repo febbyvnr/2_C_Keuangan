@@ -33,7 +33,7 @@ export default function Login() {
                 ...roles,
                 user.JABATAN_FUNGSIONAL,
                 user.GOLONGAN_KARYAWAN,
-                user.NAMA_KARYAWAN
+                //user.NAMA_KARYAWAN
             ]
                 .filter(Boolean)
                 .join(" ")
@@ -42,20 +42,23 @@ export default function Login() {
             console.log("ROLES:", roles);
             console.log("USER:", user);
             console.log("ROLE TEXT:", roleText);
-
-            if (roleText.includes("bendahara") || roleText.includes("keuangan")) {
-                navigate("/bendahara/dashboard");
-            } else if (roleText.includes("kepala sekolah") || roleText.includes("kepsek")) {
+            if (roleText.includes("yayasan")) {
+                navigate("/yayasan");
+            }
+            else if (roleText.includes("bendahara") || roleText.includes("keuangan")) {
+                navigate("/bendahara");
+            }
+            else if (roleText.includes("kepala sekolah") || roleText.includes("kepsek")) {
                 navigate("/kepsek/monitoring");
-            } else if (roleText.includes("guru")) {
-                navigate("/pic/guru");
-            } else if (roleText.includes("waka")) {
+            }
+            else if (roleText.includes("waka")) {
                 navigate("/waka");
-            } else if (roleText.includes("yayasan")) {
-                navigate("/yayasan/dashboard");
-            } else {
-                console.log("Role tidak dikenali:", roleText);
-                setErrorMsg("Role akun belum dikenali.");
+            }
+            else if (roleText.includes("guru") || roleText.includes("pic")) {
+                navigate("/pic/guru");
+            } 
+            else {
+                setErrorMsg("Maaf, Role akun Anda belum terdaftar di sistem.");
             }
         } catch (error) {
             setErrorMsg(error.status === 401 ? 'NIP atau Password salah!' : (error.message || 'Gagal terhubung ke server.'));

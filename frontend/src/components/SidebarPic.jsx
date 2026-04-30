@@ -1,4 +1,4 @@
-import "../styles/pic/guru/SidebarPic.css";
+import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -98,7 +98,7 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
       )}
 
       <div
-        className={`pic-sidebar-container ${isMobile && isOpen ? "active" : ""} ${
+        className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${
           isCollapsed && !isMobile ? "collapsed" : ""
         }`}
       >

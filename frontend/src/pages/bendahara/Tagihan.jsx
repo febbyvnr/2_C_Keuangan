@@ -473,19 +473,19 @@ function Tagihan() {
       </div>
 
       <div className="tagihan-summary">
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Total Tagihan</p>
           <h3>{summary.total}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Belum Lunas</p>
           <h3>{summary.belumLunas}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Lunas</p>
           <h3>{summary.lunas}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Total Nominal</p>
           <h3>{formatRupiah(summary.totalNominal)}</h3>
         </div>
@@ -498,7 +498,7 @@ function Tagihan() {
 
         <form className="tagihan-form" onSubmit={handleSubmit}>
           <div className="tagihan-form-grid">
-            <div className="form-group siswa-search-group" ref={siswaDropdownRef}>
+            <div className="tagihan-form-group tagihan-siswa-search-group" ref={siswaDropdownRef}>
               <label htmlFor="siswa-search">Siswa</label>
               <input
                 id="siswa-search"
@@ -517,27 +517,27 @@ function Tagihan() {
               />
 
               {showSiswaDropdown && (
-                <div className="siswa-dropdown">
+                <div className="tagihan-siswa-dropdown">
                   {filteredSiswaOptions.length > 0 ? (
                     filteredSiswaOptions.map((item) => (
                       <button
                         key={item.id}
                         type="button"
-                        className={`siswa-dropdown-item ${
+                        className={`tagihan-siswa-dropdown-item ${
                           formData.ID_SISWA_TETAP === item.id ? "active" : ""
                         }`}
                         onClick={() => handleSelectSiswa(item)}
                       >
-                        <span className="siswa-dropdown-name">
+                        <span className="tagihan-siswa-dropdown-name">
                           {item.nama || `Siswa #${item.id}`}
                         </span>
-                        <span className="siswa-dropdown-meta">
+                        <span className="tagihan-siswa-dropdown-meta">
                           {item.kelas ? `${item.kelas} • ` : ""}ID: {item.id}
                         </span>
                       </button>
                     ))
                   ) : (
-                    <div className="siswa-dropdown-empty">
+                    <div className="tagihan-siswa-dropdown-empty">
                       Siswa tidak ditemukan
                     </div>
                   )}
@@ -545,13 +545,14 @@ function Tagihan() {
               )}
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="ID_JENIS_PEMBAYARAN">Jenis Tagihan</label>
               <select
                 id="ID_JENIS_PEMBAYARAN"
                 name="ID_JENIS_PEMBAYARAN"
                 value={formData.ID_JENIS_PEMBAYARAN}
                 onChange={handleChange}
+                className={!formData.ID_JENIS_PEMBAYARAN ? "tagihan-select-placeholder" : ""}
               >
                 <option value="">Pilih jenis tagihan</option>
                 {jenisPembayaranOptions.map((item) => (
@@ -565,13 +566,14 @@ function Tagihan() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="BULAN_TAGIHAN_SISWA">Bulan Tagihan</label>
               <select
                 id="BULAN_TAGIHAN_SISWA"
                 name="BULAN_TAGIHAN_SISWA"
                 value={formData.BULAN_TAGIHAN_SISWA}
                 onChange={handleChange}
+                className={!formData.BULAN_TAGIHAN_SISWA ? "tagihan-select-placeholder" : ""}
               >
                 <option value="">Pilih bulan tagihan</option>
                 {BULAN_OPTIONS.map((bulan) => (
@@ -582,7 +584,7 @@ function Tagihan() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="TAHUN_TAGIHAN_SISWA">Tahun Tagihan</label>
               <input
                 type="number"
@@ -595,7 +597,7 @@ function Tagihan() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="JUMLAH_TAGIHAN_SISWA">Jumlah Tagihan (Rp)</label>
               <input
                 type="number"
@@ -608,7 +610,7 @@ function Tagihan() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="DUEDATETIME_TAGIHAN_SISWA">Jatuh Tempo</label>
               <input
                 type="date"
@@ -623,7 +625,7 @@ function Tagihan() {
           <div className="tagihan-form-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="tagihan-btn tagihan-btn-secondary"
               onClick={resetForm}
               disabled={submitLoading}
             >
@@ -631,7 +633,7 @@ function Tagihan() {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="tagihan-btn tagihan-btn-primary"
               disabled={submitLoading}
             >
               {submitLoading
@@ -645,17 +647,17 @@ function Tagihan() {
       </section>
 
       <section className="tagihan-card">
-        <div className="table-section-header">
+        <div className="tagihan-table-section-header">
           <div>
-            <h2 className="table-section-title">Daftar Tagihan Berjalan</h2>
-            <p className="table-section-subtitle">
+            <h2 className="tagihan-table-section-title">Daftar Tagihan Berjalan</h2>
+            <p className="tagihan-table-section-subtitle">
               Menampilkan tagihan dan sisa tunggakan per siswa.
             </p>
           </div>
         </div>
 
-        <div className="filter-bar">
-          <div className="filter-item">
+        <div className="tagihan-filter-bar">
+          <div className="tagihan-filter-item">
             <label htmlFor="search">Cari Siswa / Tagihan</label>
             <input
               id="search"
@@ -666,12 +668,13 @@ function Tagihan() {
             />
           </div>
 
-          <div className="filter-item">
+          {/* <div className="tagihan-filter-item">
             <label htmlFor="filterKelas">Kelas</label>
             <select
               id="filterKelas"
               value={filterKelas}
               onChange={(e) => setFilterKelas(e.target.value)}
+              className={filterKelas === "Semua" ? "tagihan-select-placeholder" : ""}
             >
               {kelasOptions.map((kelas) => (
                 <option key={kelas} value={kelas}>
@@ -679,14 +682,15 @@ function Tagihan() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
-          <div className="filter-item">
+          <div className="tagihan-filter-item">
             <label htmlFor="filterStatus">Status</label>
             <select
               id="filterStatus"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
+              className={filterStatus === "Semua" ? "tagihan-select-placeholder" : ""}
             >
               <option value="Semua">Semua</option>
               <option value="Belum Bayar">Belum Bayar</option>
@@ -695,19 +699,19 @@ function Tagihan() {
             </select>
           </div>
 
-          <div className="filter-actions">
+          <div className="tagihan-filter-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="tagihan-btn tagihan-btn-secondary"
               onClick={handleResetFilter}
             >
               Reset Filter
             </button>
 
-            <div className="export-group">
+            <div className="tagihan-export-group">
               <button
                 type="button"
-                className="btn btn-export-excel"
+                className="tagihan-btn tagihan-btn-export-excel"
                 onClick={handleExportExcel}
               >
                 Export Excel
@@ -715,7 +719,7 @@ function Tagihan() {
 
               <button
                 type="button"
-                className="btn btn-export-pdf"
+                className="tagihan-btn tagihan-btn-export-pdf"
                 onClick={handleExportPdf}
               >
                 Export PDF
@@ -725,7 +729,7 @@ function Tagihan() {
           </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="tagihan-table-wrapper">
           <table className="tagihan-table">
             <thead>
               <tr>
@@ -746,7 +750,7 @@ function Tagihan() {
               {loading ? (
                 <tr>
                   <td colSpan="10">
-                    <div className="empty-state">Memuat data tagihan...</div>
+                    <div className="tagihan-empty-state">Memuat data tagihan...</div>
                   </td>
                 </tr>
               ) : paginatedData.length > 0 ? (
@@ -759,11 +763,11 @@ function Tagihan() {
                       <td className="tagihan-id">#{item.ID_TAGIHAN_SISWA}</td>
 
                       <td>
-                        <div className="nama-siswa-cell">
-                          <span className="nama-siswa-text">
+                        <div className="tagihan-nama-siswa-cell">
+                          <span className="tagihan-nama-siswa-text">
                             {item.SISWA?.NAMA_SISWA_TETAP || "-"}
                           </span>
-                          <small className="kelas-siswa-text">
+                          <small className="tagihan-kelas-siswa-text">
                             {item.SISWA?.KELAS_SISWA || "-"}
                           </small>
                         </div>
@@ -780,65 +784,55 @@ function Tagihan() {
 
                       <td>{formatTanggal(item.DUEDATETIME_TAGIHAN_SISWA)}</td>
 
-                      <td className="nominal-text">
+                      <td className="tagihan-nominal-text">
                         {formatRupiah(item.JUMLAH_TAGIHAN_SISWA)}
                       </td>
 
-                      <td className="nominal-text">
+                      <td className="tagihan-nominal-text">
                         {formatRupiah(item.TOTAL_PEMBAYARAN)}
                       </td>
 
-                      <td className="sisa-highlight">
+                      <td className="tagihan-sisa-highlight">
                         {formatRupiah(item.SISA_TAGIHAN)}
                       </td>
 
                       <td>
                         <span
-                          className={`status-badge ${getStatusClass(computedStatus)}`}
+                          className={`tagihan-status-badge ${getStatusClass(computedStatus)}`}
                         >
                           {computedStatus}
                         </span>
                       </td>
 
                       <td>
-                        <div className="action-group">
-                          {hasPayment ? (
-                            <button
-                              type="button"
-                              className="btn btn-muted btn-sm"
-                              disabled
-                              title="Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
-                            >
-                              Tidak Bisa Edit
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleEdit(item)}
-                            >
-                              Edit
-                            </button>
-                          )}
+                        <div className="tagihan-action-group">
+                          <button
+                            type="button"
+                            className="tagihan-btn tagihan-btn-secondary tagihan-btn-sm"
+                            onClick={() => handleEdit(item)}
+                            disabled={hasPayment}
+                            title={
+                              hasPayment
+                                ? "Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
+                                : "Edit tagihan"
+                            }
+                          >
+                            Edit
+                          </button>
 
-                          {hasPayment ? (
-                            <button
-                              type="button"
-                              className="btn btn-muted btn-sm"
-                              disabled
-                              title="Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
-                            >
-                              Tidak Bisa Hapus
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDelete(item)}
-                            >
-                              Hapus
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="tagihan-btn tagihan-btn-danger tagihan-btn-sm"
+                            onClick={() => handleDelete(item)}
+                            disabled={hasPayment}
+                            title={
+                              hasPayment
+                                ? "Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
+                                : "Hapus tagihan"
+                            }
+                          >
+                            Hapus
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -847,7 +841,7 @@ function Tagihan() {
               ) : (
                 <tr>
                   <td colSpan="10">
-                    <div className="empty-state">
+                    <div className="tagihan-empty-state">
                       Tidak ada data tagihan yang sesuai filter.
                     </div>
                   </td>
@@ -857,7 +851,7 @@ function Tagihan() {
           </table>
         </div>
 
-        <div className="table-pagination">
+        <div className="tagihan-table-pagination">
           <p>
             Menampilkan{" "}
             {filteredData.length === 0
@@ -869,25 +863,27 @@ function Tagihan() {
             {filteredData.length} data
           </p>
 
-          <div className="pagination-actions">
+          <div className="tagihan-pagination-actions">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="tagihan-pagination-arrow"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
+              aria-label="Halaman sebelumnya"
             >
-              Prev
+              ‹
             </button>
 
-            <span className="pagination-page">{currentPage}</span>
+            <span className="tagihan-pagination-page">{currentPage}</span>
 
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="tagihan-pagination-arrow"
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((prev) => prev + 1)}
+              aria-label="Halaman berikutnya"
             >
-              Next
+              ›
             </button>
           </div>
         </div>

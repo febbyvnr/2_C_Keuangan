@@ -67,6 +67,7 @@ export default function RKA() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [editingDetail, setEditingDetail] = useState(null);
+  const [openStatus, setOpenStatus] = useState(false);
 
   const [sumberDanaList, setSumberDanaList] = useState([]);
   const [sumberDanaKeyword, setSumberDanaKeyword] = useState("");
@@ -340,7 +341,7 @@ const handleSubmitDetail = async (e) => {
                 />
               </div>
 
-              <div className="rka-input-group rka-status-filter">
+              {/* <div className="rka-input-group rka-status-filter">
                 <label>Status</label>
                 <select
                     value={statusFilter}
@@ -351,6 +352,41 @@ const handleSubmitDetail = async (e) => {
                     <option value="Sesuai Anggaran">Sesuai Anggaran</option>
                     <option value="Melebihi Anggaran">Melebihi Anggaran</option>
                 </select>
+              </div> */}
+              <div className="rka-input-group rka-status-filter">
+                <label>Status</label>
+
+                <div className="rka-custom-select">
+                  <button
+                    type="button"
+                    className={`rka-custom-select-btn ${!statusFilter ? "placeholder" : ""}`}
+                    onClick={() => setOpenStatus((prev) => !prev)}
+                  >
+                    {statusFilter || "Semua Status"}
+                  </button>
+
+                  {openStatus && (
+                    <div className="rka-custom-select-menu">
+                      {[
+                        "",
+                        "Belum Ada Rincian",
+                        "Sesuai Anggaran",
+                        "Melebihi Anggaran",
+                      ].map((status) => (
+                        <button
+                          type="button"
+                          key={status || "Semua Status"}
+                          onClick={() => {
+                            setStatusFilter(status);
+                            setOpenStatus(false);
+                          }}
+                        >
+                          {status || "Semua Status"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="rka-filter-actions">
@@ -615,19 +651,19 @@ const handleSubmitDetail = async (e) => {
                 <span>Sumber Dana</span>
 
                 <input
-                    type="text"
-                    value={sumberDanaKeyword}
-                    onChange={(e) => {
+                  type="text"
+                  value={detailForm.ID_REF_DANA ? sumberDanaKeyword : ""}
+                  onChange={(e) => {
                     setSumberDanaKeyword(e.target.value);
                     setShowSumberDanaDropdown(true);
                     setDetailForm((prev) => ({
-                        ...prev,
-                        ID_REF_DANA: "",
+                      ...prev,
+                      ID_REF_DANA: "",
                     }));
-                    }}
-                    onFocus={() => setShowSumberDanaDropdown(true)}
-                    placeholder="Cari sumber dana..."
-                    required
+                  }}
+                  onFocus={() => setShowSumberDanaDropdown(true)}
+                  placeholder="Cari sumber dana..."
+                  required
                 />
 
                 {showSumberDanaDropdown && (
