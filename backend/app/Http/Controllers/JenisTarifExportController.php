@@ -6,33 +6,72 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\JenisTarifExport;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class JenisTarifExportController extends Controller
 {
     public function export(Request $request)
     {
-        // Ambil role dari request atau dari user yang login
-        $role = $request->role ?? (Auth::user()->role ?? 'Bendahara');
+        return $this->processExport($request, 'xlsx');
+    }
 
-        // VALIDASI ROLE (Hanya Bendahara yang boleh akses)
-        if ($role !== 'Bendahara') {
+    public function exportPdf(Request $request)
+    {
+        return $this->processExport($request, 'pdf');
+    }
+
+    private function processExport(Request $request, string $type)
+    {
+        $nip = $request->nip
+            ?? $request->NIP_KARYAWAN
+            ?? (Auth::check() ? Auth::user()->nip : null);
+        $nama = $request->nama ?? (Auth::check() ? Auth::user()->name : null);
+        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        $dbRole = null;
+        if ($nip) {
+            $dbRole = DB::table('tr_jabatan as tj')
+                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                ->where('tj.NIP_KARYAWAN', $nip)
+                ->whereNull('tj.TGL_SELESAI_JABATAN')
+                ->value('rj.DESKRIPSI_JABATAN');
+        }
+
+        $role = trim($dbRole ?? $request->role ?? $authRole ?? 'Bendahara');
+
+        // Fallback: jika NIP belum ada, ambil dari jabatan aktif berdasarkan role.
+        if (!$nip) {
+            $nip = DB::table('tr_jabatan as tj')
+                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                ->whereNull('tj.TGL_SELESAI_JABATAN')
+                ->where('rj.DESKRIPSI_JABATAN', $role)
+                ->value('tj.NIP_KARYAWAN');
+        }
+
+        if (!in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
-                'message' => 'Hanya Bendahara yang boleh generate laporan'
+                'message' => 'Role tidak diizinkan generate laporan'
             ], 403);
         }
 
-        // PROSES EXCEL
         try {
+            if ($type === 'pdf') {
+                return Excel::download(
+                    new JenisTarifExport($role, $nip, $nama),
+                    'Data_Jenis_Tarif.pdf',
+                    \Maatwebsite\Excel\Excel::DOMPDF
+                );
+            }
+
             return Excel::download(
-                new JenisTarifExport($role),
+                new JenisTarifExport($role, $nip, $nama),
                 'Data_Jenis_Tarif.xlsx'
             );
         } catch (\Exception $e) {
-            // Jika masih error "Target class [excel]", kita paksa clear config via code
             \Illuminate\Support\Facades\Artisan::call('config:clear');
 
             return response()->json([
-                'message' => 'Terjadi kesalahan pada layanan Excel. Silakan coba klik export sekali lagi.',
+                'message' => 'Terjadi kesalahan pada layanan export. Silakan coba klik export sekali lagi.',
                 'error' => $e->getMessage()
             ], 500);
         }
