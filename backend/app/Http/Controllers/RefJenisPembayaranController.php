@@ -140,7 +140,7 @@ class RefJenisPembayaranController extends Controller
     {
         return Excel::download(
             new RefJenisPembayaranExport(),
-            'ref_jenis_pembayaran.xlsx'
+            'Ref_Jenis_Pembayaran.xlsx'
         );
     }
 }
