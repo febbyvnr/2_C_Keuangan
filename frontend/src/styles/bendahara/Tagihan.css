@@ -224,7 +224,7 @@
 
 .tagihan-filter-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) auto;
   gap: 14px;
   align-items: end;
   margin-bottom: 18px;

@@ -668,7 +668,7 @@ function Tagihan() {
             />
           </div>
 
-          <div className="tagihan-filter-item">
+          {/* <div className="tagihan-filter-item">
             <label htmlFor="filterKelas">Kelas</label>
             <select
               id="filterKelas"
@@ -682,7 +682,7 @@ function Tagihan() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className="tagihan-filter-item">
             <label htmlFor="filterStatus">Status</label>
