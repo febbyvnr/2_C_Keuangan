@@ -1,7 +1,28 @@
+import { useEffect, useState } from "react";
 import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/Dashboard.css";
 
 export default function DashboardPIC() {
+  const [program, setProgram] = useState([]);
+  const [fpd, setFpd] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/rkt") // ✅ FIX DI SINI
+      .then((res) => res.json())
+      .then((data) => setProgram(data.data || data || []));
+
+    fetch("http://localhost:8000/api/fpd-anggaran")
+      .then((res) => res.json())
+      .then((data) => setFpd(data.data || data || []));
+  }, []);
+
+  const totalProgram = program.length;
+  const programSelesai = program.filter((p) => p.STATUS === "SELESAI").length;
+
+  const programAktif = totalProgram - programSelesai;
+
+  const progress = totalProgram > 0 ? (programSelesai / totalProgram) * 100 : 0;
+
   return (
     <div className="dashboard-wrapper">
       <SidebarPic />
@@ -31,28 +52,28 @@ export default function DashboardPIC() {
             <div className="card-top">
               <p>Total Program</p>
             </div>
-            <h3>5</h3>
+            <h3>{totalProgram}</h3>
           </div>
 
           <div className="card">
             <div className="card-top">
               <p>Program Aktif</p>
             </div>
-            <h3>3</h3>
+            <h3>{programAktif}</h3>
           </div>
 
           <div className="card success">
             <div className="card-top">
               <p>Program Selesai</p>
             </div>
-            <h3>2</h3>
+            <h3>{programSelesai}</h3>
           </div>
 
           <div className="card warning">
             <div className="card-top">
               <p>Progress</p>
             </div>
-            <h3>40%</h3>
+            <h3>{progress.toFixed(0)}%</h3>
           </div>
         </div>
 
@@ -62,33 +83,41 @@ export default function DashboardPIC() {
             <h4>Aktivitas Terbaru</h4>
 
             <ul style={{ paddingLeft: "16px" }}>
-              <li>✔ Update progress Program Ujian</li>
-              <li>✔ Input dana Program Lomba</li>
-              <li>✔ Upload laporan Program Seminar</li>
+              {!fpd || fpd.length === 0 ? (
+                <li>Belum ada aktivitas</li>
+              ) : (
+                fpd
+                  .slice(0, 5)
+                  .map((d, i) => (
+                    <li key={i}>✔ Input dana {d.NAMA_PROGRAM || "Program"}</li>
+                  ))
+              )}
             </ul>
           </div>
         </div>
 
-        {/* ===== PROGRAM SAYA (WAJIB) ===== */}
+        {/* ===== PROGRAM SAYA ===== */}
         <div className="chart-card">
           <h4>Program Saya</h4>
 
           <div style={{ marginTop: "10px" }}>
-            <div className="card" style={{ marginBottom: "10px" }}>
-              <p>
-                <strong>Program Ujian</strong>
-              </p>
-              <p>Status: Sedang Berjalan</p>
-              <p>Progress: 70%</p>
-            </div>
-
-            <div className="card" style={{ marginBottom: "10px" }}>
-              <p>
-                <strong>Program Lomba</strong>
-              </p>
-              <p>Status: Belum Mulai</p>
-              <p>Progress: 0%</p>
-            </div>
+            {program.length === 0 ? (
+              <p>Tidak ada program</p>
+            ) : (
+              program.map((p) => (
+                <div
+                  key={p.ID_PROGRAM_KERJA}
+                  className="card"
+                  style={{ marginBottom: "10px" }}
+                >
+                  <p>
+                    <strong>{p.PROGRAM_KERJA}</strong>
+                  </p>
+                  <p>Status: {p.STATUS || "Belum Mulai"}</p>
+                  <p>Progress: {p.PROGRESS || 0}%</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
