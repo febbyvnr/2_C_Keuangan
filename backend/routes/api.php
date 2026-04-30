@@ -133,8 +133,10 @@ Route::prefix('tr-pm')->group(function () {
 
 Route::prefix('ref-pm')->group(function () {
     Route::get('/', [RefPmController::class, 'index']);
-    Route::post('/', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
+    Route::get('/export/excel', [RefPmController::class, 'exportExcel']);
+    Route::put('/evaluasi/{id}', [RefPmController::class, 'updateEvaluasi']);
+    Route::post('/', [RefPmController::class, 'store']);
     Route::get('/{id}', [RefPmController::class, 'show']);
     Route::put('/{id}', [RefPmController::class, 'update']);
     Route::delete('/{id}', [RefPmController::class, 'destroy']);
