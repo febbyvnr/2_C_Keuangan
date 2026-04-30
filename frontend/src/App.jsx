@@ -146,6 +146,9 @@ export default function App() {
         {/* PIC GURU */}
         <Route path="/pic/guru" element={<PicGuruFPD />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
+        <Route path="/pic/guru/rkt" element={<RKT />} />
+        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
+        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
 
         {/* WAKA */}
         {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
