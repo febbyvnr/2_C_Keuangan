@@ -12,7 +12,7 @@ export default function MasterJenisTarif() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({
         key: "ID_JENIS_TARIF",
-        direction: "asc"
+        direction: "desc"
     });
     const [form, setForm] = useState({
         DESKRIPSI_JENIS_TARIF: ""
@@ -111,38 +111,19 @@ export default function MasterJenisTarif() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update Jenis Tarif" : "Berhasil tambah Jenis Tarif");
+            showToast(isEdit ? "update" : "add");
             setShowModal(false);
             setIsEdit(false);
             setEditId(null);
-            setForm({
-                DESKRIPSI_JENIS_TARIF: ""
-            });
+            setForm({ DESKRIPSI_JENIS_TARIF: "" });
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast("error", json.message || "Gagal");
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus Jenis Tarif ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/jenis-tarif/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (json.success) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -164,6 +145,42 @@ export default function MasterJenisTarif() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/jenis-tarif/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -242,12 +259,10 @@ export default function MasterJenisTarif() {
                                             disabled={item.is_used}
                                             title={
                                                 item.is_used
-                                                    ? "Jenis Tarif sudah digunakan Program Kerja"
+                                                    ? "Jenis Tarif sudah digunakan"
                                                     : "Hapus Jenis Tarif"
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_JENIS_TARIF)
-                                            }
+                                            onClick={() => handleDelete(item.ID_JENIS_TARIF)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -316,6 +331,47 @@ export default function MasterJenisTarif() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Jenis Tarif
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus jenis tarif ini?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

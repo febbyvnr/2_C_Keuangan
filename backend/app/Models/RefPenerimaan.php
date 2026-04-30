@@ -14,19 +14,4 @@ class RefPenerimaan extends Model
         'REF_ID_REF_PENERIMAAN',
         'DESKRIPSI_REF_PENERIMAAN',
     ];
-
-    public function parent()
-    {
-        return $this->belongsTo(RefPenerimaan::class, 'REF_ID_REF_PENERIMAAN', 'ID_REF_PENERIMAAN');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(RefPenerimaan::class, 'REF_ID_REF_PENERIMAAN', 'ID_REF_PENERIMAAN');
-    }
-
-    public function transaksiPenerimaan()
-    {
-        return $this->hasMany(TrPenerimaan::class, 'ID_REF_PENERIMAAN', 'ID_REF_PENERIMAAN');
-    }
 }

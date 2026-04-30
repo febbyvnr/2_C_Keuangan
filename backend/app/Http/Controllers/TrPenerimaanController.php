@@ -2,88 +2,162 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePenerimaanRequest;
-use App\Http\Requests\UpdatePenerimaanRequest;
 use App\Models\TrPenerimaan;
-use Illuminate\Http\Request;
+use App\Exports\PenerimaanExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class TrPenerimaanController extends Controller
 {
-    // F85 & F86: Menampilkan & Mencari
-    public function index(Request $request)
+    public function index()
     {
-        $query = TrPenerimaan::query();
-
-        if ($request->filled('search')) {
-            $query->where('DESKRIPSI_TR_PENERIMAAN', 'like', "%{$request->search}%");
-        }
+        $data = DB::table('tr_penerimaan as tp')
+            ->leftJoin('ref_penerimaan as rp', 'tp.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+            ->select(
+                'tp.ID_TR_PENERIMAAN',
+                'tp.ID_REF_PENERIMAAN',
+                'tp.ID_REF_DANA',
+                'tp.DESKRIPSI_TR_PENERIMAAN',
+                'tp.TANGGAL_TR_PENERIMAAN',
+                'tp.JUMLAH_TR_PENERIMAAN',
+                'tp.NIP_PENERIMA',
+                'rp.DESKRIPSI_REF_PENERIMAAN'
+            )
+            ->orderBy('tp.ID_TR_PENERIMAAN', 'asc')
+            ->get();
 
         return response()->json([
-            'success' => true,
-            'data' => $query->get()
+            'data' => $data
         ]);
     }
 
-    // F82: Menambah Penerimaan
-    public function store(StorePenerimaanRequest $request)
+    public function store(Request $request)
     {
-        DB::beginTransaction();
-        try {
-            // INSERT ke tr_penerimaan (Ini berhasil karena sudah auto-increment di DB kamu)
-            $penerimaan = TrPenerimaan::create($request->validated());
-            
-            // LOGGING (F110) - Menangani ID Manual untuk activity_log
-            $this->logActivity(
-                'INSERT_PENERIMAAN', 
-                'ID: ' . $penerimaan->ID_TR_PENERIMAAN, 
-                'Menambah data penerimaan baru'
-            );
+        $validated = $request->validate([
+            'ID_REF_PENERIMAAN' => 'required',
+            'ID_REF_DANA' => 'required',
+            'DESKRIPSI_TR_PENERIMAAN' => 'required',
+            'TANGGAL_TR_PENERIMAAN' => 'required|date',
+            'JUMLAH_TR_PENERIMAAN' => 'required|numeric',
+            'NIP_PENERIMA' => 'required',
+        ]);
 
-            DB::commit();
-            return response()->json(['success' => true, 'data' => $penerimaan], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        $data = TrPenerimaan::create($validated);
+
+        return response()->json([
+            'message' => 'Data penerimaan berhasil disimpan',
+            'data' => $data
+        ], 201);
     }
 
-    // F83: Mengubah Penerimaan
-    public function update(UpdatePenerimaanRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $penerimaan = TrPenerimaan::findOrFail($id);
-        $penerimaan->update($request->validated());
+        $validated = $request->validate([
+            'ID_REF_PENERIMAAN' => 'required',
+            'ID_REF_DANA' => 'required',
+            'DESKRIPSI_TR_PENERIMAAN' => 'required',
+            'TANGGAL_TR_PENERIMAAN' => 'required|date',
+            'JUMLAH_TR_PENERIMAAN' => 'required|numeric',
+            'NIP_PENERIMA' => 'required',
+        ]);
 
-        $this->logActivity('UPDATE_PENERIMAAN', 'ID: ' . $id, 'Mengubah data penerimaan');
+        $data = TrPenerimaan::findOrFail($id);
+        $data->update($validated);
 
-        return response()->json(['success' => true, 'message' => 'Data diperbarui']);
+        return response()->json([
+            'message' => 'Data penerimaan berhasil diupdate',
+            'data' => $data
+        ]);
     }
 
-    // F84: Menghapus Penerimaan
     public function destroy($id)
     {
-        TrPenerimaan::findOrFail($id)->delete();
-        $this->logActivity('DELETE_PENERIMAAN', 'ID: ' . $id, 'Menghapus data penerimaan');
+        $data = TrPenerimaan::findOrFail($id);
+        $data->delete();
 
-        return response()->json(['success' => true, 'message' => 'Data dihapus']);
+        return response()->json([
+            'message' => 'Data penerimaan berhasil dihapus'
+        ]);
     }
 
-    /**
-     * Helper untuk mencatat log dengan ID Manual (Handle DB Tanpa Auto Increment)
-     */
-    private function logActivity($activityName, $relatedData, $description)
+    public function export(Request $request)
     {
-        // Step 1: Ambil ID terakhir dari activity_log secara manual
-        $lastId = DB::table('activity_log')->max('ID_ACTIVITY_LOG') ?? 0;
-        
-        // Step 2: Insert dengan menyertakan ID baru (lastId + 1)
-        DB::table('activity_log')->insert([
-            'ID_ACTIVITY_LOG'      => $lastId + 1,
-            'EVENT_TIME'           => now(),
-            'ACTOR_USERNAME'       => 'Admin_Keuangan_Tester', // Sementara karena auth off
-            'ACTIVITY_NAME'        => $activityName,
-            'RELATED_DATA'         => $relatedData,
-            'ACTIVITY_DESCRIPTION' => $description
+        $type = $request->query('type');
+        $tanggalAwal = $request->query('tanggal_awal');
+        $tanggalAkhir = $request->query('tanggal_akhir');
+
+        $query = DB::table('tr_penerimaan as tp')
+            ->leftJoin('ref_penerimaan as rp', 'tp.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
+            ->select(
+                'tp.ID_TR_PENERIMAAN',
+                'tp.TANGGAL_TR_PENERIMAAN',
+                'tp.DESKRIPSI_TR_PENERIMAAN',
+                'tp.JUMLAH_TR_PENERIMAAN',
+                'tp.ID_REF_DANA',
+                'tp.NIP_PENERIMA',
+                'rp.DESKRIPSI_REF_PENERIMAAN'
+            )
+            ->orderBy('tp.TANGGAL_TR_PENERIMAAN', 'asc')
+            ->orderBy('tp.ID_TR_PENERIMAAN', 'asc');
+
+        if ($tanggalAwal) {
+            $query->whereDate('tp.TANGGAL_TR_PENERIMAAN', '>=', $tanggalAwal);
+        }
+
+        if ($tanggalAkhir) {
+            $query->whereDate('tp.TANGGAL_TR_PENERIMAAN', '<=', $tanggalAkhir);
+        }
+
+        $rawData = $query->get();
+
+        $saldoBerjalan = 0;
+        $data = $rawData->map(function ($item, $index) use (&$saldoBerjalan) {
+            $debit = (float) $item->JUMLAH_TR_PENERIMAAN;
+            $kredit = 0;
+            $saldoBerjalan += $debit - $kredit;
+
+            return (object) [
+                'no' => $index + 1,
+                'tanggal' => $item->TANGGAL_TR_PENERIMAAN,
+                'uraian' => $item->DESKRIPSI_TR_PENERIMAAN ?: ($item->DESKRIPSI_REF_PENERIMAAN ?? '-'),
+                'debit' => $debit,
+                'kredit' => $kredit,
+                'saldo' => $saldoBerjalan,
+            ];
+        });
+
+        $saldoAkhir = $data->last()->saldo ?? 0;
+        $periode = ($tanggalAwal || $tanggalAkhir)
+            ? (($tanggalAwal ?: '-') . ' s/d ' . ($tanggalAkhir ?: '-'))
+            : '- s/d -';
+
+        $tanggalCetak = now()->format('d F Y');
+
+        if ($type === 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\PenerimaanExport($data, $periode, $saldoAkhir, $tanggalCetak),
+                'laporan_penerimaan.xlsx'
+            );
+        }
+
+        if ($type === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.penerimaan_pdf', [
+                'data' => $data,
+                'saldoAkhir' => $saldoAkhir,
+                'periode' => $periode,
+                'tanggalCetak' => $tanggalCetak,
+            ])->setPaper('a4', 'portrait');
+
+            return $pdf->download('laporan_penerimaan.pdf');
+        }
+
+        return response()->json([
+            'message' => 'Data laporan penerimaan',
+            'data' => $data,
+            'saldo_akhir' => $saldoAkhir,
+            'periode' => $periode,
         ]);
     }
 }

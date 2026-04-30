@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 const MENU_ITEMS = [
     { label: "Dashboard", to: "/waka", icon: "bi bi-columns-gap", end: true },
     { label: "RKT", to: "/waka/rkt", icon: "bi bi-journal-text" },
+    { label: "RKA", to: "/waka/rka", icon: "bi bi-cash-coin" },
+    { label: "FPD", to: "/waka/fpd", icon: "bi bi-cash-stack" },
     { label: "Realisasi RKT", icon: "bi bi-bar-chart-line" },
     { label: "Bridging RKT", icon: "bi bi-diagram-3" },
     { label: "Evaluasi RKT", to: "/waka/evaluasi-rkt", icon: "bi bi-clipboard-data" },

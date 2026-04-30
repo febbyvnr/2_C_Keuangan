@@ -13,7 +13,7 @@ export default function MasterRefPM() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_PM", 
-        direction: "asc" 
+        direction: "desc" 
     });
     const [form, setForm] = useState({
         REF_ID_REF_PM: "",
@@ -25,7 +25,9 @@ export default function MasterRefPM() {
         try {
             const res = await fetch("http://localhost:8000/api/ref-pm");
             const json = await res.json();
-            setData(json.data || []);
+            const result = json.data || []; 
+            setData(result);
+            setParentList(result);
         } catch (err) {
             console.error(err);
         }
@@ -103,40 +105,21 @@ export default function MasterRefPM() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update Referensi PM" : "Berhasil tambah Referensi PM");
-            setShowModal(false);
-            setIsEdit(false);
-            setEditId(null);
-            setForm({
-                REF_ID_REF_PM: "",
-                NAMA_PM: "",
-                DESKRIPSI_PM: ""
-            });
+            closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(
+                "error",
+                json.message ||
+                json.error ||
+                (json.errors ? Object.values(json.errors).flat().join(", ") : "Gagal")
+            );
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus Referensi PM ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/ref-pm/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (json.success) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -182,6 +165,44 @@ export default function MasterRefPM() {
         setCurrentPage(page);
     };
 
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "success", message = "") => {
+        setVisible(false);
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/ref-pm/delete/${confirmDeleteId}`,
+                { method: "DELETE" }
+            );
+            const json = await res.json();
+            if (res.ok) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
+    };
+
     return (
         <div className="ref-pm-container">
             <div className="ref-pm-header">
@@ -201,7 +222,7 @@ export default function MasterRefPM() {
                                 setCurrentPage(1);
                             }}
                         />
-                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
+                        <button className="search-btn" onClick={() => { setCurrentPage(1); }}>
                             Search
                         </button>
                     </div>
@@ -260,15 +281,13 @@ export default function MasterRefPM() {
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used}
+                                            disabled={item.is_used} 
                                             title={
                                                 item.is_used
-                                                    ? "Referensi PM sudah digunakan Program Kerja"
+                                                    ? "Data sudah digunakan di Transaksi PM atau memiliki child"
                                                     : "Hapus Referensi PM"
                                             }
-                                            onClick={() =>
-                                                handleDelete(item.ID_REF_PM)
-                                            }
+                                            onClick={() => handleDelete(item.ID_REF_PM)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -317,18 +336,14 @@ export default function MasterRefPM() {
                             >
                                 <option value="">-- Pilih Parent --</option>
                                 {parentList
-                                    .filter(item =>
-                                        String(item.ID_REF_PM) !== String(editId) ||
-                                        String(item.ID_REF_PM) === form.REF_ID_REF_PM
-                                    )
+                                    .filter(item => String(item.ID_REF_PM) !== String(editId)) // Gabisa ref diri sendiri
+                                    .sort((a, b) => b.ID_REF_PM - a.ID_REF_PM) // Urutan ID descending
                                     .map((item) => (
-                                        <option
-                                            key={item.ID_REF_PM}
-                                            value={String(item.ID_REF_PM)}
-                                        >
-                                            [{item.ID_REF_PM}] {item.DESKRIPSI_PM}
+                                        <option key={item.ID_REF_PM} value={String(item.ID_REF_PM)}>
+                                            {item.ID_REF_PM} - {item.NAMA_PM}
                                         </option>
-                                    ))}
+                                    ))
+                                }
                             </select>
                             <label>Nama Referensi PM</label>
                             <input
@@ -359,6 +374,47 @@ export default function MasterRefPM() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"} ${toast.type === "error" ? "error" : ""}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Referensi Penjaminan Mutu
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Referensi Penjaminan Mutu?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

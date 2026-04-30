@@ -1,0 +1,489 @@
+/* Layout Dasar */
+.dashboard-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: auto;
+  background: #f4f6f9;
+}
+
+.waka-container {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* KPI Cards */
+.waka-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-left: 5px solid #265f9c;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card.success {
+  border-left-color: #265f9c;
+}
+.card.warning {
+  border-left-color: #eda60f;
+}
+
+.card p {
+  font-size: 13px;
+  color: #585858;
+  margin: 0;
+}
+.card h3 {
+  font-size: 20px;
+  margin: 8px 0 0 0;
+  color: #1e293b;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-top p {
+  margin: 0;
+  color: #585858;
+}
+
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.kpi-badge.up {
+  color: #16a34a;
+}
+
+.kpi-badge.down {
+  color: #dc2626;
+}
+
+/* ========================= */
+/* FIX UTAMA LAYOUT */
+/* ========================= */
+
+.main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Charts Section */
+.chart-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* biar mobile tetap aman */
+@media (max-width: 900px) {
+  .chart-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+/* FIX CHART */
+.chart-inner {
+  width: 100%;
+  height: 260px;
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 200px;
+}
+
+.chart-card h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+/* Responsive KPI */
+@media (max-width: 1100px) {
+  .waka-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .waka-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================= */
+/* HEADER */
+/* ========================= */
+
+.header-card {
+  background: linear-gradient(90deg, #235399 0%, #2d66b8 100%);
+  border-radius: 16px;
+  padding: 6px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.waka-title {
+  margin-top: 4px;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #f4f6f9;
+}
+
+/* sub */
+.welcome-sub {
+  margin-top: -12px;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+/* tanggal */
+.welcome-date {
+  margin-top: -4px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+/* kanan (filter) */
+.header-filter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ========================= */
+/* FILTER */
+/* ========================= */
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  min-width: 110px;
+}
+
+/* label jadi putih */
+.filter-item span {
+  margin-bottom: 3px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* dropdown */
+.filter-item select {
+  padding: 3px 24px 3px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  cursor: pointer;
+
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 20 20' width='20'><path d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+
+  transition: all 0.2s ease;
+}
+
+/* option tetap normal */
+.filter-item select option {
+  color: #000;
+}
+
+/* hover */
+.filter-item select:hover {
+  border-color: #f4f6f9;
+}
+
+/* focus */
+.filter-item select:focus {
+  outline: none;
+  border-color: #f4f6f9;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* ========================= */
+/* BOTTOM CARD */
+/* ========================= */
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: #f4f6f9;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-card h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.ringkasan-card h4 {
+  text-align: center;
+  margin: 0 0 16px 0;
+}
+
+.summary-card p {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #334155;
+}
+
+.percentage {
+  color: #eda60f;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================= */
+/* IMPROVE SUMMARY CARD */
+/* ========================= */
+
+/* highlight program */
+.summary-highlight {
+  font-size: 15px;
+  font-weight: 600;
+  color: #265f9c;
+  margin: 6px 0;
+}
+
+/* footer bawah */
+.summary-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #475569;
+  margin-top: 10px;
+}
+
+/* ========================= */
+/* PROGRESS BAR */
+/* ========================= */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #265f9c;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* ========================= */
+/* INSIGHT PROGRAM */
+/* ========================= */
+
+.insight-main-title {
+  text-align: center;
+  color: #1a1a1a !important;
+  margin: -20px 0 8px 0;
+}
+
+.insight-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  text-align: center;
+  position: relative;
+}
+
+/* garis tengah */
+.insight-compare::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: #e5e7eb;
+}
+
+/* tiap kolom */
+.insight-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* heading */
+.insight-heading {
+  font-size: 12px;
+  color: #265f9c !important;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* persen utama */
+.insight-percent {
+  font-size: 22px;
+  font-weight: 700;
+  color: #eda60f;
+  margin-bottom: 6px;
+}
+
+/* nama program */
+.insight-program {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  margin-bottom: -4px;
+}
+
+/* nominal */
+.insight-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #585858;
+  margin: 0;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .insight-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .insight-compare::before {
+    display: none;
+  }
+}
+
+.chart-card,
+.summary-card {
+  border: 1px solid #e5e7eb;
+}
+
+.summary-card .insight-title {
+  transform: translateY(-14px);
+}
+
+/* ========================= */
+/* PROGRESS PENGAJUAN */
+/* ========================= */
+
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* teks atas */
+.progress-text {
+  font-size: 13px;
+  color: #334155;
+  text-align: left;
+}
+
+/* ========================= */
+/* PROGRESS BAR */
+/* ========================= */
+
+.progress-bar-large {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* isi bar */
+.progress-fill-large {
+  height: 100%;
+  background: #265f9c;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* ========================= */
+/* PERSENTASE */
+/* ========================= */
+
+.progress-percent {
+  font-size: 25px !important;
+  font-weight: 700;
+  color: #eda60f !important;
+  text-align: center;
+  margin: 4px 0;
+}
+
+/* ========================= */
+/* STATUS */
+/* ========================= */
+
+.progress-status {
+  font-size: 12px;
+  text-align: center;
+  color: #585858;
+}
+
+.progress-status span {
+  font-weight: 600;
+  color: #265f9c;
+}

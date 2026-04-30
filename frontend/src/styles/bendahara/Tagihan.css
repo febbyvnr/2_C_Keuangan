@@ -3,6 +3,10 @@
 }
 
 .tagihan-page {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+
   min-height: 100vh;
   background: #f5f7fb;
   padding: 32px;
@@ -161,7 +165,7 @@
 
 .filter-bar {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr auto;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
   gap: 14px;
   align-items: end;
   margin-bottom: 18px;
@@ -187,9 +191,11 @@
   border-radius: 12px;
   padding: 0 14px;
   font-size: 14px;
+  color: #111827;
   background: #ffffff;
   outline: none;
   transition: 0.2s ease;
+  -webkit-text-fill-color: #111827;
 }
 
 .filter-item input:focus,
@@ -202,7 +208,8 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  align-items: flex-end;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .btn {
@@ -535,6 +542,107 @@
   padding: 14px;
   font-size: 13px;
   color: #6b7280;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.btn:disabled {
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.btn-muted:hover {
+  background: #d1d5db;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.table-pagination p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-page {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #265f9c;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.export-group {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.export-group .btn,
+.filter-actions > .btn {
+  height: 44px;
+}
+
+.btn-export-excel {
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+.btn-export-excel:hover {
+  background: #185c37;
+}
+
+.btn-export-pdf {
+  background: #c62828;
+  color: #ffffff;
+}
+
+.btn-export-pdf:hover {
+  background: #b71c1c;
+}
+
+@media (max-width: 768px) {
+  .table-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 1100px) {

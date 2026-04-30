@@ -327,6 +327,39 @@ class FpdAnggaranController extends Controller
             ], 500);
         }
     }
+
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        try {
+            $fpd = FpdAnggaran::find($id);
+            if (!$fpd) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'FPD tidak ditemukan'
+                ], 404);
+            }
+            if ($fpd->NIP_VALIDATOR_FPD === "Ditolak") {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sudah ditolak sebelumnya'
+                ], 400);
+            }
+            $fpd->update([
+                'NIP_VALIDATOR_FPD' => "Ditolak"
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'FPD berhasil ditolak'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject FPD',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function export($id): JsonResponse|StreamedResponse
     {
         try {

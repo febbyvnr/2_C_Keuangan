@@ -12,6 +12,20 @@
             padding: 28px 36px;
         }
 
+        /* --- STYLING WATERMARK PUDAR --- */
+       #watermark {
+            position: fixed;
+            top: 25%;      
+            left: 35%;     
+            width: 30%;    
+            opacity: 0.15;
+            z-index: -1000;
+            text-align: center;
+        }
+        #watermark img {
+            width: 100%;
+        }
+
         .header { text-align: center; margin-bottom: 16px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
         .header h2 { font-size: 13px; font-weight: bold; text-transform: uppercase; }
@@ -57,6 +71,21 @@
     </style>
 </head>
 <body>
+
+    <!-- LOGO WATERMARK DIPANGGIL DI SINI -->
+    @php
+        $logoPath = public_path('logo.png');
+        $logoData = '';
+        if(file_exists($logoPath)) {
+            $logoData = base64_encode(file_get_contents($logoPath));
+        }
+    @endphp
+
+    @if($logoData)
+    <div id="watermark">
+        <img src="data:image/png;base64,{{ $logoData }}" alt="Watermark BOPKRI">
+    </div>
+    @endif
 
     <div class="header">
         <h1>SMK BOPKRI 2 YOGYAKARTA</h1>

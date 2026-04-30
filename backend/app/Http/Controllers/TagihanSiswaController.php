@@ -20,6 +20,7 @@ class TagihanSiswaController extends Controller
 {
     private const ALLOWED_STATUS = [
         'Belum Bayar',
+        'Cicilan',
         'Sudah Bayar',
     ];
 
@@ -248,7 +249,7 @@ class TagihanSiswaController extends Controller
             if ($totalPembayaran >= (float) $validated['JUMLAH_TAGIHAN_SISWA'] && (float) $validated['JUMLAH_TAGIHAN_SISWA'] > 0) {
                 $statusFinal = 'Sudah Bayar';
             } elseif ($totalPembayaran > 0 && $totalPembayaran < (float) $validated['JUMLAH_TAGIHAN_SISWA']) {
-                $statusFinal = 'Belum Bayar';
+                $statusFinal = 'Cicilan';
             }
 
             $tagihan->update([
@@ -551,24 +552,6 @@ class TagihanSiswaController extends Controller
         return Excel::download(new TagihanSiswaExport($filters), 'tagihan_siswa.xlsx');
     }
 
-    public function exportCsv(Request $request)
-    {
-        $filters = $request->only([
-            'ID_SISWA_TETAP',
-            'ID_JENIS_PEMBAYARAN',
-            'BULAN_TAGIHAN_SISWA',
-            'TAHUN_TAGIHAN_SISWA',
-            'STATUS_TAGIHAN_SISWA',
-            'search',
-            'tunggakan',
-        ]);
-
-        return Excel::download(
-            new TagihanSiswaExport($filters),
-            'tagihan_siswa.csv'
-        );
-    }
-
     public function exportPdf(Request $request)
     {
         $filters = $request->only([
@@ -699,5 +682,37 @@ class TagihanSiswaController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function getSiswaOptions(Request $request): JsonResponse
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstSiswa::query();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
+                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%')
+                ->orWhere('ID_SISWA_TETAP', 'like', '%' . $search . '%');
+            });
+        }
+
+        $siswa = $query
+            ->select([
+                'ID_SISWA_TETAP',
+                'NAMA_SISWA_TETAP',
+                'NISN_SISWA',
+                'KODE_TA',
+            ])
+            ->orderBy('NAMA_SISWA_TETAP', 'asc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar siswa berhasil diambil.',
+            'data' => $siswa,
+        ]);
     }
 }
