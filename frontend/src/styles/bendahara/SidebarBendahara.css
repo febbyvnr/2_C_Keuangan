@@ -242,6 +242,22 @@ body {
     box-shadow: none;
 }
 
+.hamburger-btn.outside {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1200;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
 .hamburger-btn.floating-global {
     position: fixed;
     top: 20px;
