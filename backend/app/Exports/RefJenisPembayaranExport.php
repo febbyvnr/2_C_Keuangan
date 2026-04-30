@@ -3,113 +3,134 @@
 namespace App\Exports;
 
 use App\Models\RefJenisPembayaran;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\{
-    FromCollection,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    WithEvents,
-    WithColumnWidths
-};
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Illuminate\Support\Facades\Auth;
 
-class RefJenisPembayaranExport implements 
-    FromCollection,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    WithEvents,
-    WithColumnWidths
+class RefJenisPembayaranExport implements WithEvents
 {
-    protected int $no = 0;
+    protected $role;
 
-    public function collection(): Collection
+    public function __construct($role = null)
     {
-        return RefJenisPembayaran::orderBy('ID_JENIS_PEMBAYARAN')->get();
-    }
-
-    public function map($item): array
-    {
-        return [
-            ++$this->no,
-            $item->ID_JENIS_PEMBAYARAN,
-            $item->DESKRIPSI_JENIS_PEMBAYARAN ?? '-',
-        ];
-    }
-
-    public function headings(): array
-    {
-        return [
-            ['No', 'ID', 'Deskripsi'],
-        ];
-    }
-
-    public function columnWidths(): array
-    {
-        return [
-            'A' => 8,   
-            'B' => 10,  
-            'C' => 30,  
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        
-        $sheet->getStyle('A1:C1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => 'solid',
-                'startColor' => ['rgb' => '2F5597'],
-            ],
-            'alignment' => [
-                'horizontal' => 'center',
-            ],
-        ]);
-
-        return [];
+        // Mengambil role dari Auth jika tidak dilempar dari controller
+        $this->role = $role ?? (Auth::user()->role ?? 'Bendahara');
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function (AfterSheet $event) {
-
+            AfterSheet::class => function ($event) {
                 $sheet = $event->sheet;
-                $highestRow = $sheet->getHighestRow();
 
-                
-                $sheet->getStyle("A1:C{$highestRow}")
-                    ->getBorders()
-                    ->getAllBorders()
-                    ->setBorderStyle('thin');
+                // =====================
+                // TITLE (Merged A & B)
+                // =====================
+                $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
+                $sheet->setCellValue('A3', 'DATA JENIS PEMBAYARAN');
 
-                
-                for ($i = 2; $i <= $highestRow; $i++) {
-                    if ($i % 2 == 0) {
-                        $sheet->getStyle("A{$i}:C{$i}")
-                            ->getFill()
-                            ->setFillType('solid')
-                            ->getStartColor()
-                            ->setRGB('E7E6E6');
-                    }
+                $sheet->mergeCells('A2:B2');
+                $sheet->mergeCells('A3:B3');
+                $sheet->mergeCells('A4:B4');
+
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
+                $sheet->getStyle('A4')->getFont()->setSize(11);
+
+                $sheet->getStyle('A2:A4')->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // SPACING JUDUL
+                $sheet->getRowDimension(2)->setRowHeight(26);
+                $sheet->getRowDimension(3)->setRowHeight(24);
+                $sheet->getRowDimension(4)->setRowHeight(22);
+
+                // =====================
+                // HEADER TABLE
+                // =====================
+                $headerRow = 6;
+
+                $sheet->setCellValue("A$headerRow", 'NO');
+                $sheet->setCellValue("B$headerRow", 'DESKRIPSI JENIS PEMBAYARAN');
+
+                $sheet->getStyle("A$headerRow:B$headerRow")->getFont()->setBold(true);
+                $sheet->getStyle("A$headerRow:B$headerRow")->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->getStyle("A$headerRow:B$headerRow")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FF2E75B6');
+
+                $sheet->getStyle("A$headerRow:B$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
+
+                // DROPDOWN FILTER
+                $sheet->setAutoFilter("A$headerRow:B$headerRow");
+
+                // WIDTH
+                $sheet->getColumnDimension('A')->setWidth(10);
+                $sheet->getColumnDimension('B')->setWidth(50);
+
+                // =====================
+                // DATA
+                // =====================
+                $data = RefJenisPembayaran::select('DESKRIPSI_JENIS_PEMBAYARAN')->get();
+
+                $startData = $headerRow + 1;
+                $row = $startData;
+                $no = 1;
+
+                foreach ($data as $item) {
+                    $sheet->setCellValue("A$row", $no);
+                    $sheet->setCellValue("B$row", $item->DESKRIPSI_JENIS_PEMBAYARAN);
+
+                    // Alignment nomor di tengah
+                    $sheet->getStyle("A$row")->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $row++;
+                    $no++;
                 }
 
-                
-                $sheet->getStyle('A')->getAlignment()->setHorizontal('center');
-                $sheet->getStyle('B')->getAlignment()->setHorizontal('center');
+                $endData = $row - 1;
 
-                
-                $sheet->getStyle('C')->getAlignment()->setWrapText(true);
+                // =====================
+                // STYLING DATA (Wrap & Border)
+                // =====================
+                $sheet->getStyle("B$startData:B$endData")
+                    ->getAlignment()->setWrapText(true);
 
-                
-                $sheet->freezePane('A2');
+                // BORDER
+                $sheet->getStyle("A$headerRow:B$endData")
+                    ->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
+
+                // AUTO HEIGHT
+                for ($i = $startData; $i <= $endData; $i++) {
+                    $sheet->getRowDimension($i)->setRowHeight(-1);
+                }
+
+                // =====================
+                // FOOTER (Tanda Tangan)
+                // =====================
+                $footerRow = $endData + 3;
+
+                // TANGGAL
+                $sheet->setCellValue("B" . ($footerRow), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("B" . ($footerRow))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                // ROLE
+                $sheet->setCellValue("B" . ($footerRow + 1), 'By: ' . $this->role);
+                $sheet->getStyle("B" . ($footerRow + 1))
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                // FREEZE PANE
+                $sheet->freezePane("A7");
             },
         ];
     }
 }
+
