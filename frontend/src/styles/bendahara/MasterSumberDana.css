@@ -41,55 +41,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.sumber-dana-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.sumber-dana-table th {
-    text-align: left;
-    padding: 12px;
-    color: #585858;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.sumber-dana-table th:nth-child(1),
-.sumber-dana-table td:nth-child(1) {
-    width: 80px;
-    text-align: center;
-}
-
-.sumber-dana-table th:nth-child(2),
-.sumber-dana-table td:nth-child(2) {
-    width: 120px;
-    text-align: center;
-}
-
-.sumber-dana-table th:nth-child(3),
-.sumber-dana-table td:nth-child(3) {
-    width: auto;
-}
-
-.sumber-dana-table td:nth-child(3) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sumber-dana-table th:nth-child(4),
-.sumber-dana-table td:nth-child(4) {
-    width: 120px;
-    text-align: center;
-    text-align: center;
-}
-
-.sumber-dana-table td {
-    padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
-    color: #1a1a1a;
-}
-
 .aksi {
     display: flex;
     justify-content: center;
@@ -131,11 +82,6 @@
     background-color: #7d7d7e;
     cursor: not-allowed;
     opacity: 0.5;
-}
-
-.text-center {
-    text-align: center;
-    color: #7d7d7e;
 }
 
 .pagination-wrapper {
@@ -528,5 +474,317 @@
     to {
         opacity: 1;
         transform: translate(-50%, 0);
+    }
+}
+
+.tree-list {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 0;
+}
+
+.tree-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.tree-row:hover {
+    background: #f6f7f9;
+}
+
+.tree-left {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 45px;
+}
+
+.tree-line {
+    width: 24px; 
+    height: 100%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tree-line.active::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #d0d7de;
+}
+
+.tree-connector {
+    width: 24px;
+    height: 100%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tree-connector::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #d0d7de;
+}
+
+.tree-connector.is-last::before {
+    bottom: 50%;
+}
+
+.tree-connector::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 18px;
+    height: 2px;
+    background: #d0d7de;
+}
+
+.tree-number {
+    font-weight: 600;
+    color: #1F4E82;
+    min-width: 40px;
+    margin-left: 8px;
+}
+
+.tree-text {
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.tree-actions {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 1024px) {
+    .sumber-dana-container {
+        padding: 16px;
+    }
+
+    .sumber-dana-header h2 {
+        font-size: 20px;
+    }
+
+    .btn-primary,
+    .search-btn {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .tree-text {
+        font-size: 13px;
+    }
+
+    .tree-number {
+        font-size: 13px;
+        min-width: 35px;
+    }
+
+    .modal-box {
+        width: 90%;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* HEADER */
+    .sumber-dana-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .sumber-dana-header h2 {
+        font-size: 18px;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-primary,
+    .search-btn {
+        font-size: 12.5px;
+        padding: 6px 10px;
+    }
+
+    .sumber-dana-table-wrapper {
+        padding: 12px;
+    }
+
+    .tree-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 12px;
+        gap: 6px;
+    }
+
+    .tree-left {
+        height: auto;
+    }
+
+    .tree-text {
+        font-size: 12.5px;
+        line-height: 1.4;
+    }
+
+    .tree-number {
+        font-size: 12px;
+        min-width: 30px;
+    }
+
+    .tree-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        width: 28px;
+        height: 28px;
+    }
+
+    .pagination-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .pagination button,
+    .page-btn {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    .modal-box {
+        width: 95%;
+        padding: 18px;
+    }
+
+    .modal-box h3 {
+        font-size: 16px;
+    }
+
+    .modal-box input {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+
+    .toast-box {
+        font-size: 12px;
+        min-width: 220px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .sumber-dana-container {
+        padding: 10px;
+    }
+
+    .sumber-dana-header h2 {
+        font-size: 16px;
+    }
+
+    /* BUTTON */
+    .btn-primary,
+    .search-btn {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    .tree-text {
+        font-size: 12px;
+    }
+
+    .tree-number {
+        font-size: 11px;
+    }
+
+    .status {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .form-group label {
+        font-size: 12px !important;
+    }
+
+    .form-group input {
+        font-size: 12px;
+        padding: 7px;
+    }
+
+    .checkbox-inline {
+        font-size: 12px;
+    }
+
+    .modal-box {
+        padding: 15px;
+    }
+
+    .modal-box h3 {
+        font-size: 15px;
+    }
+
+    .btn-submit,
+    .btn-cancel {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .toast-text {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+
+    .sumber-dana-header h2 {
+        font-size: 14px;
+    }
+
+    .btn-primary,
+    .search-btn {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+
+    .tree-text {
+        font-size: 11px;
+    }
+
+    .tree-number {
+        font-size: 10px;
+    }
+
+    .pagination button {
+        font-size: 10px;
+        padding: 4px 6px;
     }
 }

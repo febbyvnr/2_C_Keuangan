@@ -18,7 +18,7 @@
 .btn-primary {
     background-color: #1F4E82;
     color: #ffffff;
-    border: 2px solid transparent;
+    border: 2px solid #1F4E82;
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -422,4 +422,94 @@
         opacity: 1;
         transform: translate(-50%, 0);
     }
+}
+
+
+.tree-list {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 0;
+}
+
+.tree-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.tree-row:hover {
+    background: #f6f7f9;
+}
+
+.tree-left {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 45px;
+}
+
+.tree-line {
+    width: 24px; 
+    height: 100%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tree-line.active::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #d0d7de;
+}
+
+.tree-connector {
+    width: 24px;
+    height: 100%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tree-connector::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #d0d7de;
+}
+
+.tree-connector.is-last::before {
+    bottom: 50%;
+}
+
+.tree-connector::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 18px;
+    height: 2px;
+    background: #d0d7de;
+}
+
+.tree-number {
+    font-weight: 600;
+    color: #1F4E82;
+    min-width: 40px;
+    margin-left: 8px;
+}
+
+.tree-text {
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.tree-actions {
+    display: flex;
+    gap: 8px;
 }
