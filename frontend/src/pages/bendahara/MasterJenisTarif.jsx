@@ -300,9 +300,9 @@ export default function MasterJenisTarif() {
                     <a href={`http://localhost:8000/api/export/jenis-tarif`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
-                    {/* <a href={`http://localhost:8000/api/jenis-tarif/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                    <a href={`http://localhost:8000/api/export/jenis-tarif/export-pdf?search=${search}`} className="btn-outline-danger custom-btn">
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
-                    </a> */}
+                    </a>
                 </div>
             </div>
             {showModal && (
