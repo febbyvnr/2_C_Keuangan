@@ -26,6 +26,7 @@ use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
+use App\Http\Controllers\RefJenisPembayaranExportController;
 use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\LaporanRkasController;
 use App\Http\Controllers\LaporanKeuanganYayasanController;
@@ -283,6 +284,8 @@ Route::prefix('laporan')->group(function () {
     Route::post('/rkas/export-pdf', [LaporanRkasController::class, 'exportPdf']);
     Route::get('/yayasan/export-excel', [LaporanKeuanganYayasanController::class, 'exportExcel']);
     Route::get('/yayasan/export-pdf', [LaporanKeuanganYayasanController::class, 'exportPdf']);
+    Route::get('/jenis-tarif/export-excel', [JenisTarifExportController::class, 'export']);
+    Route::get('/jenis-tarif/export-pdf', [JenisTarifExportController::class, 'exportPdf']);
 });
 
     Route::get('/siswa-ortu/profile/{id}', [TagihanSiswaController::class, 'getProfileSiswa']);
@@ -314,7 +317,7 @@ Route::prefix('jenis-pembayaran')->group(function () {
     Route::put('/update/{id}', [RefJenisPembayaranController::class, 'update']);
     Route::delete('/delete/{id}', [RefJenisPembayaranController::class, 'destroy']);
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
-    Route::get('/export', [RefJenisPembayaranController::class, 'export']);
+    Route::get('/export', [RefJenisPembayaranExportController::class, 'export']);
 });
 
 Route::prefix('export')->group(function () {

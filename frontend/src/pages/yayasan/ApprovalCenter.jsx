@@ -144,7 +144,7 @@ export default function ApprovalCenter() {
                                     <td>{item.PROGRAM_KERJA || "-"}</td>
                                     <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN}</td>
                                     <td>
-                                        Rp {Number(item.NOMINAL || 0).toLocaleString("id-ID")}
+                                        Rp {Number(item.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
                                     </td>
                                     <td>
                                         {item.STATUS_APPROVAL === "Ditolak" ? (
@@ -237,7 +237,7 @@ export default function ApprovalCenter() {
                             <div className="detail-row">
                                 <span>Anggaran</span>
                                 <span>
-                                    Rp {Number(selected.NOMINAL || 0).toLocaleString("id-ID")}
+                                    Rp {Number(selected.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
                                 </span>
                             </div>
                             <div className="detail-row">

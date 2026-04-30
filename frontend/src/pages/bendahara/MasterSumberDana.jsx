@@ -318,12 +318,12 @@ export default function MasterSumberDana() {
                     </button>
                 </div>
                 <div className="export-wrapper">
-                    <a href={`http://localhost:8000/api/ref-sumber-dana/export/excel?search=${search}`} className="btn-outline-success custom-btn">
+                    {/* <a href={`http://localhost:8000/api/ref-sumber-dana/export/excel?search=${search}`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
                     <a href={`http://localhost:8000/api/ref-sumber-dana/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
-                    </a>
+                    </a> */}
                 </div>
             </div>
             {showModal && (
