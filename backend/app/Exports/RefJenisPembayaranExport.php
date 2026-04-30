@@ -16,7 +16,7 @@ class RefJenisPembayaranExport implements WithEvents
     protected $nip;
     protected $nama;
 
-    public function __construct($role = null)
+    public function __construct($role = null, $nip = null, $nama = null)
     {
         // Mengambil role dari Auth jika tidak dilempar dari controller
         $this->role = $role ?? (Auth::user()->role ?? 'Bendahara');

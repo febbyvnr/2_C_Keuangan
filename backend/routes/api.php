@@ -26,6 +26,7 @@ use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
+use App\Http\Controllers\RefJenisPembayaranExportController;
 use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\LaporanRkasController;
 use App\Http\Controllers\LaporanKeuanganYayasanController;
@@ -314,7 +315,7 @@ Route::prefix('jenis-pembayaran')->group(function () {
     Route::put('/update/{id}', [RefJenisPembayaranController::class, 'update']);
     Route::delete('/delete/{id}', [RefJenisPembayaranController::class, 'destroy']);
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
-    Route::get('/export', [RefJenisPembayaranController::class, 'export']);
+    Route::get('/export', [RefJenisPembayaranExportController::class, 'export']);
 });
 
 Route::prefix('export')->group(function () {
