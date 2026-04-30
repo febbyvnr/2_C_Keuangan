@@ -122,7 +122,7 @@ class RefJenisPembayaranExport implements WithEvents
                 $footerRow = $endData + 3;
 
                 $role = $this->role ?: 'Bendahara';
-                $nama = 'Rina Putri, S.E.';
+                $nama = $this->nama ?: 'Rina Putri, S.E.';
                 $nip = $this->nip ?: '-';
 
                 // TANGGAL
