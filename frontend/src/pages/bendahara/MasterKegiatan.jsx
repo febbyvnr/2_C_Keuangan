@@ -237,12 +237,6 @@ export default function MasterKegiatan() {
                                     <td className="aksi">
                                         <button
                                             className="btn-edit"
-                                            disabled={item.is_used > 0}
-                                            title={
-                                                item.is_used > 0
-                                                    ? "Tidak bisa diedit karena sudah dipakai program kerja"
-                                                    : ""
-                                            }
                                             onClick={() => handleEdit(item)}
                                         >
                                             <i className="bi bi-pencil"></i>

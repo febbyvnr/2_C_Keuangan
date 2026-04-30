@@ -101,6 +101,7 @@ class TrPmController extends Controller
                 'NIP_VALIDATOR_PM' => 'required|string|max:20',
                 'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
                 'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
+                'AKSI' => 'required|in:REVISI,DITOLAK',
             ]);
             $programKerja = \App\Models\MstProgramKerja::where('ID_PROGRAM_KERJA', $validated['ID_PROGRAM_KERJA'])
                 ->where('IS_DELETE', 0)
@@ -126,58 +127,33 @@ class TrPmController extends Controller
 
             $jabatanPm = strtolower($validatorPm->JABATAN_FUNGSIONAL ?? '');
 
-            if (!str_contains($jabatanPm, 'waka') && !str_contains($jabatanPm, 'kepala sekolah')) {
+            if (!str_contains($jabatanPm, 'kepala sekolah')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Hanya Wakil Kepala Sekolah atau Kepala Sekolah yang boleh memberi revisi/tolak.',
+                    'message' => 'Hanya Kepala Sekolah yang boleh memberi revisi/tolak RKT.',
                 ], 422);
             }
 
-            $currentValidator = null;
-
             if ($programKerja->NIP_VALIDATOR_PROGKER) {
-                $currentValidator = \Illuminate\Support\Facades\DB::table('mst_karyawan')
-                    ->where('NIP_KARYAWAN', $programKerja->NIP_VALIDATOR_PROGKER)
-                    ->first();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Program kerja sudah disetujui Kepala Sekolah, tidak bisa diberi revisi/tolak.',
+                ], 422);
             }
 
-            $currentJabatan = strtolower($currentValidator->JABATAN_FUNGSIONAL ?? '');
-
-            if (!$programKerja->NIP_VALIDATOR_PROGKER) {
-                if (!str_contains($jabatanPm, 'waka')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Revisi/tolak pertama harus dilakukan oleh Wakil Kepala Sekolah.',
-                    ], 422);
-                }
-            } else {
-                if (str_contains($currentJabatan, 'kepala sekolah')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Program kerja sudah final disetujui Kepala Sekolah.',
-                    ], 422);
-                }
-
-                if (!str_contains($currentJabatan, 'waka')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Status approval sebelumnya tidak valid.',
-                    ], 422);
-                }
-
-                if (!str_contains($jabatanPm, 'kepala sekolah')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Revisi/tolak lanjutan harus dilakukan oleh Kepala Sekolah.',
-                    ], 422);
-                }
-            }
 
             $lastPm = TrPm::where('ID_PROGRAM_KERJA', $validated['ID_PROGRAM_KERJA'])
                 ->orderByDesc('ID_PM')
                 ->first();
 
-            $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
+            $lastNote = strtolower(trim($lastPm->DESKRIPSI_TR_PM ?? ''));
+
+            if (!str_starts_with($lastNote, 'diajukan') && !str_starts_with($lastNote, 'pengajuan')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya RKT yang sudah diajukan yang bisa direvisi atau ditolak.',
+                ], 422);
+            }
 
             if (str_starts_with($lastNote, 'ditolak')) {
                 return response()->json([
@@ -187,11 +163,21 @@ class TrPmController extends Controller
             }
 
 
+            $catatan = trim($validated['DESKRIPSI_TR_PM'] ?? '');
+
+            $prefix = $validated['AKSI'] === 'REVISI' ? 'Revisi' : 'Ditolak';
+
+            $validated['DESKRIPSI_TR_PM'] = $catatan
+                ? $prefix . ': ' . $catatan
+                : $prefix;
+
+            unset($validated['AKSI']);
+
             $data = TrPm::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'TR PM berhasil ditambahkan',
+                'message' => 'Catatan review RKT berhasil ditambahkan',
                 'data' => $data,
             ], 201);
         } catch (ValidationException $e) {
@@ -209,78 +195,94 @@ class TrPmController extends Controller
         }
     }
 
+    // public function update(Request $request, $id): JsonResponse
+    // {
+    //     try {
+    //         $id = (int) $id;
+    //         $data = TrPm::find($id);
+
+    //         if (!$data) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Data tidak ditemukan',
+    //                 'data' => null,
+    //             ], 404);
+    //         }
+
+    //         $validated = $request->validate([
+    //             'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
+    //             'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
+    //             'TGL_PM' => 'required|date',
+    //             'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
+    //             'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
+    //             'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
+    //         ]);
+
+    //         $data->update($validated);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data berhasil diupdate',
+    //             'data' => $data,
+    //         ]);
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Validasi gagal',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function update(Request $request, $id): JsonResponse
     {
-        try {
-            $id = (int) $id;
-            $data = TrPm::find($id);
-
-            if (!$data) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
-                ], 404);
-            }
-
-            $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
-                'ID_REF_PM' => 'required|integer|exists:ref_pm,ID_REF_PM',
-                'TGL_PM' => 'required|date',
-                'DESKRIPSI_TR_PM' => 'nullable|string|max:500',
-                'ID_VISI_MISI' => 'nullable|integer|exists:ref_visi_misi,ID_VISI_MISI',
-                'TINGKAT_KESESUAIAN' => 'nullable|in:Sesuai,Kurang Sesuai,Tidak Sesuai',
-            ]);
-
-            $data->update($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil diupdate',
-                'data' => $data,
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Catatan review RKT tidak boleh diubah karena digunakan sebagai audit trail.',
+        ], 403);
     }
+
+    // public function destroy($id): JsonResponse
+    // {
+    //     try {
+    //         $id = (int) $id;
+    //         $data = TrPm::find($id);
+
+    //         if (!$data) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Data tidak ditemukan',
+    //                 'data' => null,
+    //             ], 404);
+    //         }
+
+    //         $data->delete();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data berhasil dihapus',
+    //             'data' => null,
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan saat menghapus data',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
     public function destroy($id): JsonResponse
     {
-        try {
-            $id = (int) $id;
-            $data = TrPm::find($id);
-
-            if (!$data) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
-                ], 404);
-            }
-
-            $data->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil dihapus',
-                'data' => null,
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menghapus data',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Catatan review RKT tidak boleh dihapus karena digunakan sebagai audit trail.',
+        ], 403);
     }
 }

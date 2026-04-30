@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { Navigate } from "react-router-dom"
+import { Navigate } from "react-router-dom";
 
 import SidebarBendahara from "./components/SidebarBendahara";
 import SidebarWaka from "./components/SidebarWaka";
@@ -34,6 +34,7 @@ import WakaRKT from "./pages/waka/RKT";
 import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
 import WakaApprovalCenter from "./pages/waka/ApprovalCenter";
 import WakaMonitoring from "./pages/waka/Monitoring";
+import DashboardWaka from "./pages/waka/Dashboard";
 
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
@@ -47,111 +48,123 @@ import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
 import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
+import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 
+import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
 function BendaharaLayout() {
-    return (
-        <div className="layout" style={{ display: "flex" }}>
-            <SidebarBendahara />
-            <div className="content-wrapper" style={{ flex: 1 }}>
-                <Outlet />
-            </div>
-        </div>
-    );
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarBendahara />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
 }
 
 function WakaLayout() {
-    return (
-        <div className="layout" style={{ display: "flex" }}>
-            <SidebarWaka />
-            <div className="content-wrapper" style={{ flex: 1 }}>
-                <Outlet />
-            </div>
-        </div>
-    );
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarWaka />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
 }
 
 function YayasanLayout() {
-    return (
-        <div className="layout" style={{ display: "flex" }}>
-            <SidebarYayasan />
-            <div className="content-wrapper" style={{ flex: 1 }}>
-                <Outlet />
-            </div>
-        </div>
-    );
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarYayasan />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                {/* --- TAMBAHAN 2: Rute Login --- */}
-                <Route path="/login" element={<Login />} />
-                
-                {/* --- UBAHAN DIKIT: Kalo ngetik root (/), arahin ke login dulu --- */}
-                <Route path="/" element={<Navigate to="/login" />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* --- TAMBAHAN 2: Rute Login --- */}
+        <Route path="/login" element={<Login />} />
 
-                {/* BENDHARA LAYOUT */}
-                <Route path="/bendahara" element={<BendaharaLayout />}>
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="dana" element={<Dana />} />
-                    <Route path="rka" element={<RKA />} />
-                    <Route path="bku" element={<BKU />} />
-                    <Route path="bkm" element={<BKM />} />
-                    <Route path="bkk" element={<BKK />} />
-                    <Route path="tagihan" element={<Tagihan />} />
-                    <Route path="tarif" element={<Tarif />} />
-                    <Route path="laporan" element={<Laporan />} />
-                    <Route path="verifikasi" element={<Verifikasi />} />
-                    <Route path="penerimaan" element={<Penerimaan />} />
-                    <Route path="log" element={<Log />} />
+        {/* --- UBAHAN DIKIT: Kalo ngetik root (/), arahin ke login dulu --- */}
+        <Route path="/" element={<Navigate to="/login" />} />
 
-                    <Route path="master/coa" element={<MasterCOA />} />
-                    <Route path="master/kegiatan" element={<MasterKegiatan />} />
-                    <Route path="master/tahun-anggaran" element={<MasterTahunAnggaran />} />
-                    <Route path="master/tahun-akademik" element={<MasterTahunAkademik />} />
-                    <Route path="master/sumber-dana" element={<MasterSumberDana />} />
-                    <Route path="master/ref-penerimaan" element={<MasterRefPenerimaan />} />
-                    <Route path="master/ref-pm" element={<MasterRefPM />} />
-                    <Route path="master/tarif" element={<MasterTarif />} />
-                    <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
-                    <Route path="master/jenis-pembayaran" element={<MasterJenisPembayaran />} />
-                </Route>
+        {/* BENDHARA LAYOUT */}
+        <Route path="/bendahara" element={<BendaharaLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dana" element={<Dana />} />
+          <Route path="rka" element={<RKA />} />
+          <Route path="bku" element={<BKU />} />
+          <Route path="bkm" element={<BKM />} />
+          <Route path="bkk" element={<BKK />} />
+          <Route path="tagihan" element={<Tagihan />} />
+          <Route path="tarif" element={<Tarif />} />
+          <Route path="laporan" element={<Laporan />} />
+          <Route path="verifikasi" element={<Verifikasi />} />
+          <Route path="penerimaan" element={<Penerimaan />} />
+          <Route path="log" element={<Log />} />
 
-                {/* SISWA ORTU */}
-                <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
-                <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
-                <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
+          <Route path="master/coa" element={<MasterCOA />} />
+          <Route path="master/kegiatan" element={<MasterKegiatan />} />
+          <Route
+            path="master/tahun-anggaran"
+            element={<MasterTahunAnggaran />}
+          />
+          <Route
+            path="master/tahun-akademik"
+            element={<MasterTahunAkademik />}
+          />
+          <Route path="master/sumber-dana" element={<MasterSumberDana />} />
+          <Route
+            path="master/ref-penerimaan"
+            element={<MasterRefPenerimaan />}
+          />
+          <Route path="master/ref-pm" element={<MasterRefPM />} />
+          <Route path="master/tarif" element={<MasterTarif />} />
+          <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
+          <Route
+            path="master/jenis-pembayaran"
+            element={<MasterJenisPembayaran />}
+          />
+        </Route>
 
-                {/* PIC GURU */}
-                <Route path="/pic/guru" element={<PicGuruFPD />} />
-                <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
-                <Route path="/pic/guru/rkt" element={<RKT />} />
-                <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
-                <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-                <Route path="/pic/guru/rka" element={<RKA />} />
+        {/* SISWA ORTU */}
+        <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
+        <Route
+          path="/siswa-ortu/pembayaran/:id"
+          element={<PembayaranTagihanSiswaOrtu />}
+        />
+        <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
-                {/* WAKA */}
-                {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
-                {/* <Route path="/waka" element={<WakaLayout />}> */}
-                    <Route path="/waka" element={<WakaRKT />} />
-                    <Route path="/waka/rkt" element={<WakaRKT />} />
-                    <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
-                    <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
-                    <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
-                    <Route path="/waka/monitoring" element={<WakaMonitoring />} />
-                {/* </Route> */}
+        {/* PIC GURU */}
+        <Route path="/pic/guru" element={<PicGuruFPD />} />
+        <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
 
-                <Route path="/yayasan" element={<YayasanLayout />}>
-                    <Route path="dashboard" element={<DashboardYayasan />} />
-                    <Route path="approval" element={<ApprovalYayasan />} />
-                    <Route path="laporan" element={<LaporanYayasan />} />
-                    <Route path="monitoring" element={<MonitoringYayasan />} />
-                </Route>
+        {/* WAKA */}
+        {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
+        {/* <Route path="/waka" element={<WakaLayout />}> */}
+        <Route path="/waka" element={<DashboardWaka />} />
+        <Route path="/waka/rkt" element={<WakaRKT />} />
+        <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
+        <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
+        <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
+        <Route path="/waka/monitoring" element={<WakaMonitoring />} />
+        {/* </Route> */}
 
-            </Routes>
-        </BrowserRouter>
-    );
+        <Route path="/yayasan" element={<YayasanLayout />}>
+          <Route path="dashboard" element={<DashboardYayasan />} />
+          <Route path="approval" element={<ApprovalYayasan />} />
+          <Route path="laporan" element={<LaporanYayasan />} />
+          <Route path="monitoring" element={<MonitoringYayasan />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }

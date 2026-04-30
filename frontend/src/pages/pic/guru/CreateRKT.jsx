@@ -12,7 +12,7 @@ const createEmptyForm = () => ({
   ID_TAN: "",
   ID_MASTER_COA: "",
   ID_KEGIATAN: "",
-  NOMINAL: "",
+  TOTAL_PROGKER: "",
   INDIKATOR: "",
   SASARAN: "",
   WAKTU_AWAL: "",
@@ -84,7 +84,8 @@ const normalizeKegiatanItems = (items) => {
 
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, options);
-  const json = await response.json();
+  const text = await response.text();
+  const json = text ? JSON.parse(text) : {};
 
   if (!response.ok || json?.success === false) {
     throw new Error(
@@ -112,7 +113,7 @@ export default function CreateRKT() {
 
   const [form, setForm] = useState(createEmptyForm());
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [catatanReview, setCatatanReview] = useState("");
@@ -139,25 +140,11 @@ export default function CreateRKT() {
         fetchJson(`${API_BASE_URL}/kegiatan`),
       ]);
 
-    const nextUnits = extractCollection(unitJson);
-    const nextTa = extractCollection(taJson);
-    const nextTan = extractCollection(tanJson);
-    const nextCoa = extractCollection(coaJson);
-    const nextKegiatan = normalizeKegiatanItems(extractCollection(kegiatanJson));
-
-    setUnitOptions(nextUnits);
-    setTahunAnggaranOptions(nextTa);
-    setTanOptions(nextTan);
-    setCoaOptions(nextCoa);
-    setKegiatanOptions(nextKegiatan);
-
-    return {
-      nextUnits,
-      nextTa,
-      nextTan,
-      nextCoa,
-      nextKegiatan,
-    };
+    setUnitOptions(extractCollection(unitJson));
+    setTahunAnggaranOptions(extractCollection(taJson));
+    setTanOptions(extractCollection(tanJson));
+    setCoaOptions(extractCollection(coaJson));
+    setKegiatanOptions(normalizeKegiatanItems(extractCollection(kegiatanJson)));
   };
 
   const loadRktDetail = async () => {
@@ -165,14 +152,19 @@ export default function CreateRKT() {
     const data = extractObject(json);
 
     const trPmList = data?.trPm || data?.tr_pm || [];
-    const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
+    const reviewNote = [...trPmList]
+      .reverse()
+      .find((item) => {
+        const note = String(item?.DESKRIPSI_TR_PM || "").toLowerCase();
 
-    setCatatanReview(
-      lastNote ||
-        data?.CATATAN_REVISI ||
-        data?.catatan_revisi ||
-        ""
-    );
+        return (
+          note.includes("revisi") ||
+          note.includes("ditolak") ||
+          note.includes("tolak")
+        );
+      })?.DESKRIPSI_TR_PM;
+
+    setCatatanReview(reviewNote || "" );
 
     setForm({
       ID_TA_ANGGARAN: String(data?.ID_TA_ANGGARAN ?? ""),
@@ -180,7 +172,7 @@ export default function CreateRKT() {
       ID_TAN: data?.ID_TAN ? String(data.ID_TAN) : "",
       ID_MASTER_COA: String(data?.ID_MASTER_COA ?? ""),
       ID_KEGIATAN: String(data?.ID_KEGIATAN ?? ""),
-      NOMINAL: String(data?.NOMINAL ?? ""),
+      TOTAL_PROGKER: String(data?.TOTAL_PROGKER ?? ""),
       INDIKATOR: data?.INDIKATOR ?? "",
       SASARAN: data?.SASARAN ?? "",
       WAKTU_AWAL: normalizeDate(data?.WAKTU_AWAL),
@@ -193,18 +185,17 @@ export default function CreateRKT() {
   const initializePage = async () => {
     setLoading(true);
     setError("");
+    setMessage("");
 
     try {
-      const { nextUnits, nextTa, nextTan, nextCoa, nextKegiatan } =
-        await loadMasterData();
+      await loadMasterData();
 
       if (isEditMode) {
         await loadRktDetail();
-        return;
+      } else {
+        setForm(createEmptyForm());
+        setCatatanReview("");
       }
-
-      setForm(createEmptyForm());
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -225,14 +216,7 @@ export default function CreateRKT() {
       return;
     }
 
-    setForm((current) => ({
-      ...createEmptyForm(),
-      ID_TA_ANGGARAN: current.ID_TA_ANGGARAN,
-      ID_UNIT: current.ID_UNIT,
-      ID_TAN: current.ID_TAN,
-      ID_MASTER_COA: current.ID_MASTER_COA,
-      ID_KEGIATAN: current.ID_KEGIATAN,
-    }));
+    setForm(createEmptyForm());
   };
 
   const handleChange = (event) => {
@@ -252,7 +236,7 @@ export default function CreateRKT() {
     }
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event, aksi = "AJUKAN") => {
     event.preventDefault();
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -262,7 +246,7 @@ export default function CreateRKT() {
       return;
     }
 
-    setSubmitting(true);
+    setSubmittingAction(aksi);
     setMessage("");
     setError("");
 
@@ -273,9 +257,10 @@ export default function CreateRKT() {
       ID_TAN: form.ID_TAN ? Number(form.ID_TAN) : null,
       ID_MASTER_COA: Number(form.ID_MASTER_COA),
       ID_KEGIATAN: Number(form.ID_KEGIATAN),
-      NOMINAL: Number(form.NOMINAL),
+      TOTAL_PROGKER: Number(form.TOTAL_PROGKER),
       NIP_PENANGGUNG_JAWAB: user.NIP_KARYAWAN,
-      NIP_VALIDATOR_PROGKER: null,
+      NIP_LOGIN: user.NIP_KARYAWAN,
+      AKSI: aksi,
     };
 
     try {
@@ -291,12 +276,19 @@ export default function CreateRKT() {
         body: JSON.stringify(payload),
       });
 
-      setMessage(isEditMode ? "RKT berhasil diperbarui." : "RKT berhasil diajukan.");
+      setMessage(
+        isEditMode
+          ? "RKT berhasil diperbarui."
+          : aksi === "DRAFT"
+          ? "RKT berhasil disimpan sebagai draft."
+          : "RKT berhasil diajukan."
+      );
+
       navigate("/pic/guru/rkt");
     } catch (err) {
       setError(err.message);
     } finally {
-      setSubmitting(false);
+      setSubmittingAction("");
     }
   };
 
@@ -312,7 +304,7 @@ export default function CreateRKT() {
               <p>
                 {isEditMode
                   ? "Perbarui data RKT sesuai catatan review."
-                  : "Setelah diajukan, RKT akan direview oleh Waka."}
+                  : "Simpan sebagai draft atau ajukan RKT untuk direview."}
               </p>
             </div>
 
@@ -329,6 +321,7 @@ export default function CreateRKT() {
                 type="button"
                 className="create-rkt-button secondary"
                 onClick={initializePage}
+                disabled={loading}
               >
                 Refresh
               </button>
@@ -352,7 +345,10 @@ export default function CreateRKT() {
           {loading ? (
             <div className="create-rkt-empty">Memuat data form...</div>
           ) : (
-            <form className="create-rkt-form" onSubmit={handleSubmit}>
+            <form
+              className="create-rkt-form"
+              onSubmit={(event) => handleSubmit(event, "AJUKAN")}
+            >
               <div className="create-rkt-master-grid">
                 <label className="create-rkt-field">
                   <span>Tahun Anggaran</span>
@@ -392,20 +388,20 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                    <span>TAN</span>
-                    <select
-                        name="ID_TAN"
-                        value={form.ID_TAN}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Pilih TAN</option>
-                        {tanOptions.map((item) => (
-                        <option key={item.ID_TAN} value={item.ID_TAN}>
-                            {normalizeTanLabel(item)}
-                        </option>
-                        ))}
-                    </select>
+                  <span>TAN</span>
+                  <select
+                    name="ID_TAN"
+                    value={form.ID_TAN}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Pilih TAN</option>
+                    {tanOptions.map((item) => (
+                      <option key={item.ID_TAN} value={item.ID_TAN}>
+                        {normalizeTanLabel(item)}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <label className="create-rkt-field">
@@ -459,12 +455,12 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Nominal Anggaran</span>
+                  <span>Total Program Kerja</span>
                   <input
                     type="number"
                     min="0"
-                    name="NOMINAL"
-                    value={form.NOMINAL}
+                    name="TOTAL_PROGKER"
+                    value={form.TOTAL_PROGKER}
                     onChange={handleChange}
                     required
                   />
@@ -472,7 +468,12 @@ export default function CreateRKT() {
 
                 <label className="create-rkt-field create-rkt-field-pj">
                   <span>Penanggung Jawab</span>
-                  <input type="text" value={penanggungJawabLabel} readOnly />
+                  <input
+                    type="text"
+                    value={penanggungJawabLabel}
+                    readOnly
+                    placeholder="Data user login tidak ditemukan"
+                  />
                 </label>
 
                 <label className="create-rkt-field">
@@ -490,7 +491,6 @@ export default function CreateRKT() {
                       type="button"
                       className="create-rkt-date-trigger"
                       onClick={() => openDatePicker(waktuAwalRef)}
-                      aria-label="Buka kalender waktu awal"
                     >
                       <i className="bi bi-calendar3"></i>
                     </button>
@@ -512,7 +512,6 @@ export default function CreateRKT() {
                       type="button"
                       className="create-rkt-date-trigger"
                       onClick={() => openDatePicker(waktuAkhirRef)}
-                      aria-label="Buka kalender waktu akhir"
                     >
                       <i className="bi bi-calendar3"></i>
                     </button>
@@ -558,16 +557,30 @@ export default function CreateRKT() {
                   type="button"
                   className="create-rkt-button secondary"
                   onClick={resetForm}
+                  disabled={Boolean(submittingAction)}
                 >
                   Reset
                 </button>
 
+                {!isEditMode && (
+                  <button
+                    type="button"
+                    className="create-rkt-button secondary"
+                    disabled={Boolean(submittingAction)}
+                    onClick={(event) => handleSubmit(event, "DRAFT")}
+                  >
+                    {submittingAction === "DRAFT"
+                      ? "Menyimpan..."
+                      : "Simpan Draft"}
+                  </button>
+                )}
+
                 <button
                   type="submit"
                   className="create-rkt-button primary"
-                  disabled={submitting}
+                  disabled={Boolean(submittingAction)}
                 >
-                  {submitting
+                  {submittingAction === "AJUKAN"
                     ? isEditMode
                       ? "Menyimpan..."
                       : "Mengajukan..."
@@ -575,6 +588,12 @@ export default function CreateRKT() {
                     ? "Simpan Perbaikan"
                     : "Ajukan RKT"}
                 </button>
+
+                {!isEditMode && (
+                  <p className="create-rkt-hint">
+                    Draft bisa diedit kapan saja sebelum diajukan.
+                  </p>
+                )}
               </div>
             </form>
           )}

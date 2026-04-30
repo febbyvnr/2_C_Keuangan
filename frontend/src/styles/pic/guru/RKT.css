@@ -458,7 +458,6 @@
 .rkt-status-badge.draft {
   background: #fef3c7;
   color: #92400e;
-  font-weight: 600;
 }
 
 .rkt-status-badge.submitted {
@@ -466,14 +465,10 @@
   color: #1d4ed8;
 }
 
-.rkt-status-badge.reviewed {
-  background: #ede9fe;
-  color: #6d28d9;
-}
-
 .rkt-status-badge.revision {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fdba74;
 }
 
 .rkt-status-badge.approved {
@@ -481,19 +476,14 @@
   color: #15803d;
 }
 
-.rkt-status-badge.locked {
-  background: #e5e7eb;
-  color: #374151;
-}
-
 .rkt-status-badge.rejected {
-  background-color: #fee2e2;
+  background: #fee2e2;
   color: #b91c1c;
 }
 
-.rkt-status-badge.revision {
-  background-color: #fef3c7;
-  color: #92400e;
+.rkt-status-badge.locked {
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .rkt-table th:nth-child(6),

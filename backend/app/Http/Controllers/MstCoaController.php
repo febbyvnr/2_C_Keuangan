@@ -161,13 +161,14 @@ class MstCoaController extends Controller
                 ], 404);
             }
 
-            if ($this->isCoaUsed($coa)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
-                    'data' => null,
-                ], 422);
-            }
+            // kl klp sebelah ttp bisa edit walaupun uda dipake,asal ga memutus FK ke tabel lain aja
+            // if ($this->isCoaUsed($coa)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
+            //         'data' => null,
+            //     ], 422);
+            // }
             $validated = $request->validate(
                 [
                     'MST_ID_MASTER_COA' => [

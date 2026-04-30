@@ -14,8 +14,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: -10px;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .header-actions {
@@ -81,6 +80,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
+    padding-top: 10px;
 }
 
 .fpd-table-wrapper {
@@ -251,6 +251,11 @@ tr:hover {
 
 .reject-btn {
     background: #C62828;
+}
+
+button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
 }
 
 .detail-row {
@@ -464,4 +469,66 @@ tr:hover {
 .status.pending {
     background: #f59e0b;
     color: white;
+}
+
+.status-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.custom-dropdown {
+    position: relative;
+    z-index: 50;
+}
+
+.dropdown-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #585858;
+    width: fit-content;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.dropdown-btn.active {
+    background: rgba(38, 95, 156, 0.08);
+    border: 1px solid #265F9C;
+    color: #265F9C;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: none;
+    width: 160px;
+    z-index: 9999;
+    font-size: 14px;
+}
+
+.custom-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu div {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.dropdown-menu div:hover {
+    background: rgba(38, 95, 156, 0.08);
+    border-left: 3px solid #265F9C;
+    color: #265F9C;
 }

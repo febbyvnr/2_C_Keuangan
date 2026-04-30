@@ -268,12 +268,6 @@ export default function MasterTahunAkademik() {
                                     <td className="aksi">
                                         <button
                                             className="btn-edit"
-                                            disabled={!!item.is_used}
-                                            title={
-                                                item.is_used
-                                                    ? "Tidak bisa diedit karena sudah dipakai Program Kerja"
-                                                    : ""
-                                            }
                                             onClick={() => handleEdit(item)}
                                         >
                                             <i className="bi bi-pencil"></i>

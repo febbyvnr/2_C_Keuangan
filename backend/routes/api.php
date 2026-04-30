@@ -160,6 +160,7 @@ Route::prefix('rkt')->group(function () {
     Route::put('/reject/{id}', [MstProgramKerjaController::class, 'reject'])->whereNumber('id');
     Route::put('/revisi/{id}', [MstProgramKerjaController::class, 'revisi'])->whereNumber('id');
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
+    Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
 });
 
@@ -302,6 +303,9 @@ Route::prefix('rka')->group(function () {
     Route::post('/store', [RkaController::class, 'store']);
     Route::put('/update/{id}', [RkaController::class, 'update'])->whereNumber('id');
     Route::delete('/delete/{id}', [RkaController::class, 'destroy'])->whereNumber('id');
+
+    Route::put('/detail/{id}', [RkaController::class, 'updateDetail'])->whereNumber('id');
+    Route::delete('/detail/{id}', [RkaController::class, 'destroyDetail'])->whereNumber('id');
 });
 
 Route::prefix('jenis-pembayaran')->group(function () {

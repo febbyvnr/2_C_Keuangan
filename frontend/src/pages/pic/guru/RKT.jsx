@@ -29,39 +29,27 @@ function formatLongDate(value) {
 }
 
 function getStatusInfo(item) {
+  if (!item) {
+    return {
+      value: "diajukan",
+      label: "Diajukan",
+      detailLabel: "Diajukan",
+      className: "rkt-status-badge submitted",
+    };
+  }
+
   const validator = item?.NIP_VALIDATOR_PROGKER;
 
   const trPmList = item?.trPm || item?.tr_pm || [];
   const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
-  const note = lastNote.toLowerCase();
+  const note = lastNote.toLowerCase().trim();
 
-  const jabatanValidator =
-  item?.JABATAN_VALIDATOR?.toLowerCase() || "";
-
-  if (validator && jabatanValidator.includes("kepala sekolah")) {
+  if (note.startsWith("draft")) {
     return {
-      value: "disetujui",
-      label: "Disetujui",
-      detailLabel: "Disetujui Kepala Sekolah (Final)",
-      className: "rkt-status-badge approved",
-    };
-  }
-
-  if (validator && jabatanValidator.includes("waka")) {
-    return {
-      value: "disetujui",
-      label: "Disetujui",
-      detailLabel: "Disetujui Wakil Kepala Sekolah",
-      className: "rkt-status-badge approved",
-    };
-  }
-
-  if (validator) {
-    return {
-      value: "disetujui",
-      label: "Disetujui",
-      detailLabel: "Disetujui",
-      className: "rkt-status-badge approved",
+      value: "draft",
+      label: "Draft",
+      detailLabel: "Draft (Belum diajukan)",
+      className: "rkt-status-badge draft",
     };
   }
 
@@ -78,15 +66,24 @@ function getStatusInfo(item) {
     return {
       value: "revisi",
       label: "Revisi",
-      detailLabel: "Revisi",
+      detailLabel: "Perlu Revisi",
       className: "rkt-status-badge revision",
+    };
+  }
+
+  if (validator) {
+    return {
+      value: "disetujui",
+      label: "Disetujui",
+      detailLabel: "Disetujui Kepala Sekolah",
+      className: "rkt-status-badge approved",
     };
   }
 
   return {
     value: "diajukan",
     label: "Diajukan",
-    detailLabel: "Diajukan",
+    detailLabel: "Menunggu Approval Kepala Sekolah",
     className: "rkt-status-badge submitted",
   };
 }
@@ -204,10 +201,13 @@ export default function RKT() {
 
   const canEdit =
     isOwner &&
-    (selectedStatusValue === "diajukan" || selectedStatusValue === "revisi");
+    (selectedStatusValue === "draft" || selectedStatusValue === "revisi");
 
   const canDelete =
-    isOwner && selectedStatusValue === "diajukan";
+    isOwner && (selectedStatusValue === "draft");
+
+  const canSubmit =
+    isOwner && selectedStatusValue === "draft";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -226,6 +226,18 @@ export default function RKT() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleAjukan = async (id) => {
+    try {
+      await axios.post(`http://127.0.0.1:8000/api/rkt/ajukan/${id}`, {
+        NIP_LOGIN: nipLogin,
+      });
+
+      await fetchRkt(search, pagination.currentPage);
+    } catch (error) {
+      alert(error.response?.data?.message || "Gagal mengajukan RKT");
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
 
@@ -233,7 +245,12 @@ export default function RKT() {
       setDeleting(true);
 
       await axios.delete(
-        `http://127.0.0.1:8000/api/rkt/delete/${deleteTarget.ID_PROGRAM_KERJA}`
+        `http://127.0.0.1:8000/api/rkt/delete/${deleteTarget.ID_PROGRAM_KERJA}`,
+        {
+          data: {
+            NIP_LOGIN: nipLogin,
+          },
+        }
       );
 
       setDeleteTarget(null);
@@ -319,6 +336,7 @@ export default function RKT() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">Semua Status</option>
+                  <option value="draft">Draft</option>
                   <option value="diajukan">Diajukan</option>
                   <option value="disetujui">Disetujui</option>
                   <option value="ditolak">Ditolak</option>
@@ -387,7 +405,7 @@ export default function RKT() {
                                 </td>
 
                                 <td className="rkt-amount">
-                                  {formatRupiah(item.NOMINAL)}
+                                  {formatRupiah(item.TOTAL_PROGKER)}
                                 </td>
 
                                 <td>
@@ -510,9 +528,9 @@ export default function RKT() {
                       </div>
 
                       <div className="rkt-detail-item">
-                        <span className="rkt-detail-label">Nominal</span>
+                        <span className="rkt-detail-label">Total Program Kerja</span>
                         <span className="rkt-detail-value strong">
-                          {formatRupiah(selectedItem.NOMINAL)}
+                          {formatRupiah(selectedItem.TOTAL_PROGKER)}
                         </span>
                       </div>
 
@@ -600,16 +618,6 @@ export default function RKT() {
                     {selectedStatusValue === "diajukan" && (
                       <>
                         <button
-                          className="btn-yellow-sm rkt-detail-btn"
-                          disabled={!canEdit}
-                          onClick={() =>
-                            navigate(`/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`)
-                          }
-                        >
-                          Edit
-                        </button>
-
-                        <button
                           className="btn-red-sm rkt-detail-btn"
                           disabled={!canDelete}
                           onClick={() => setDeleteTarget(selectedItem)}
@@ -618,7 +626,7 @@ export default function RKT() {
                         </button>
 
                         <button className="btn-light-custom rkt-detail-btn" disabled>
-                          Menunggu Approval
+                          Menunggu Approval Kepala Sekolah
                         </button>
                       </>
                     )}
@@ -634,9 +642,35 @@ export default function RKT() {
                         >
                           Perbaiki Revisi
                         </button>
+                      </>
+                    )}
 
-                        <button className="btn-light-custom rkt-detail-btn" disabled>
-                          Perlu Perbaikan
+                    {selectedStatusValue === "draft" && (
+                      <>
+                        <button
+                          className="btn-yellow-sm rkt-detail-btn"
+                          disabled={!canEdit}
+                          onClick={() =>
+                            navigate(`/pic/guru/rkt/edit/${selectedItem.ID_PROGRAM_KERJA}`)
+                          }
+                        >
+                          Edit Draft
+                        </button>
+
+                        <button
+                          className="btn-primary-custom rkt-detail-btn"
+                          disabled={!canSubmit}
+                          onClick={() => handleAjukan(selectedItem.ID_PROGRAM_KERJA)}
+                        >
+                          Ajukan RKT
+                        </button>
+
+                        <button
+                          className="btn-red-sm rkt-detail-btn"
+                          disabled={!canDelete}
+                          onClick={() => setDeleteTarget(selectedItem)}
+                        >
+                          Hapus
                         </button>
                       </>
                     )}
