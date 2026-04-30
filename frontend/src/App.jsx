@@ -145,7 +145,7 @@ export default function App() {
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
-        <Route path="/pic/guru" element={<PicGuruFPD />} />
+        <Route path="/pic/guru" element={<DashboardPIC />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
         <Route path="/pic/guru/rkt" element={<RKT />} />
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
