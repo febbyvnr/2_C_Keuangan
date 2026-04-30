@@ -15,7 +15,7 @@ export default function MasterCOA() {
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_MASTER_COA",
-        direction: "desc"
+        direction: "asc"
     });
     const [form, setForm] = useState({
         MST_ID_MASTER_COA: "",
@@ -157,13 +157,6 @@ export default function MasterCOA() {
         });
     };
 
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
-
     const sortedData = [...data].sort((a, b) => {
         let valA = a[sortConfig.key] || "";
         let valB = b[sortConfig.key] || "";
@@ -177,7 +170,6 @@ export default function MasterCOA() {
         if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
     });
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -196,6 +188,90 @@ export default function MasterCOA() {
         setTimeout(() => setVisible(false), 2500);
         setTimeout(() => setToast(null), 3000);
     };
+
+    const buildTree = (nodes) => {
+        const map = {};
+        const roots = [];
+        nodes.forEach(item => {
+            map[item.ID_MASTER_COA] = { ...item, children: [] };
+        });
+        nodes.forEach(item => {
+            const parentId = item.MST_ID_MASTER_COA;
+            const isParent = !parentId || parentId === 0 || parentId === "0";
+            if (!isParent) {
+                if (map[parentId]) {
+                    map[parentId].children.push(map[item.ID_MASTER_COA]);
+                } else {
+                    roots.push(map[item.ID_MASTER_COA]);
+                }
+            } else {
+                roots.push(map[item.ID_MASTER_COA]);
+            }
+        });
+        return roots;
+    };
+
+    const sortTree = (nodes) => {
+        return nodes
+            .sort((a, b) => {
+                const valA = isNaN(a[sortConfig.key]) ? (a[sortConfig.key] || "").toString().toLowerCase() : Number(a[sortConfig.key]);
+                const valB = isNaN(b[sortConfig.key]) ? (b[sortConfig.key] || "").toString().toLowerCase() : Number(b[sortConfig.key]);
+                
+                if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
+            })
+            .map(node => ({
+                ...node,
+                children: sortTree(node.children)
+            }));
+    };
+
+    const addNumbering = (nodes, prefix = "") => {
+        return nodes.map((node, index) => {
+            const number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const isLast = index === nodes.length - 1;
+            return {
+                ...node,
+                number,
+                isLast,
+                children: addNumbering(node.children, number)
+            };
+        });
+    };
+
+    const flattenTree = (nodes, level = 0, parentLines = []) => {
+        let result = [];
+        nodes.forEach(node => {
+            result.push({
+                ...node,
+                level,
+                parentLines: level === 0 ? [] : parentLines 
+            });
+            if (node.children.length > 0) {
+                result = result.concat(
+                    flattenTree(
+                        node.children,
+                        level + 1,
+                        level === 0 ? [] : [...parentLines, !node.isLast]
+                    )
+                );
+            }
+        });
+        return result;
+    };
+
+    const tree = sortTree(buildTree(data));
+    const numbered = addNumbering(tree);
+    const allFlatRows = flattenTree(numbered); 
+    const totalData = allFlatRows.length;
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentRows = allFlatRows.slice(indexOfFirst, indexOfLast);
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     return (
         <div className="coa-container">
@@ -247,71 +323,46 @@ export default function MasterCOA() {
                 </div>
             </div>
             <div className="coa-table-wrapper">
-                <table className="coa-table">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort("ID_MASTER_COA")}>
-                                ID <i className={getIcon("ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("MST_ID_MASTER_COA")}>
-                                MST ID <i className={getIcon("MST_ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("KODE_COA")}>
-                                Kode COA <i className={getIcon("KODE_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_COA")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_COA")}></i>
-                            </th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Loading...
-                                </td>
-                            </tr>
-                        ) : currentData.length === 0 ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Tidak ada data
-                                </td>
-                            </tr>
-                        ) : (
-                            currentData.map((item) => (
-                                <tr key={item.ID_MASTER_COA}>
-                                    <td>{item.ID_MASTER_COA}</td>
-                                    <td>{item.MST_ID_MASTER_COA}</td>
-                                    <td>{item.KODE_COA}</td>
-                                    <td>{item.DESKRIPSI_COA}</td>
-                                    <td className="aksi">
-                                        <button
-                                            className="btn-edit"
-                                            onClick={() => handleEdit(item)}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </button>
-                                        <button
-                                            className="btn-delete"
-                                            disabled={(item.is_used ?? false) || (item.has_child ?? false)}
-                                            title={
-                                                item.is_used
-                                                    ? "COA sudah digunakan Program Kerja"
-                                                    : item.has_child
-                                                    ? "Memiliki Child COA"
-                                                    : "Hapus COA"
-                                            }
-                                            onClick={() => handleDelete(item)}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                <div className="tree-list">
+                    {loading ? (
+                        <div className="text-center" style={{padding: "20px"}}>Loading...</div>
+                    ) : currentRows.length === 0 ? (
+                        <div className="text-center" style={{padding: "20px"}}>Tidak ada data</div>
+                    ) : (
+                        currentRows.map((item) => (
+                            <div 
+                                className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
+                                key={item.ID_MASTER_COA}
+                            >
+                                <div className="tree-left" style={{ paddingLeft: "10px" }}>
+                                    {item.parentLines.map((hasActiveLine, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            className={`tree-line ${hasActiveLine ? "active" : ""}`} 
+                                        />
+                                    ))}
+                                    {item.level > 0 && (
+                                        <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
+                                    )}
+                                    <span className="tree-number">{item.number}</span>
+                                    <span className="tree-text">{item.KODE_COA} | {item.DESKRIPSI_COA}</span>
+                                </div>
+                                <div className="tree-actions">
+                                    <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <i className="bi bi-pencil"></i>
+                                    </button>
+                                    <button
+                                        className="btn-delete"
+                                        disabled={item.is_used > 0 || (item.children && item.children.length > 0)}
+                                        onClick={() => setConfirmDeleteId(item.ID_MASTER_COA)}
+                                    >
+                                        <i className="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">

@@ -51,6 +51,9 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 
 import SidebarKepsek from "./components/SidebarKepsek";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
+//import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+import DashboardPIC from "./pages/pic/guru/Dashboard";
+
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
@@ -156,8 +159,11 @@ export default function App() {
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
-        <Route path="/pic/guru" element={<PicGuruFPD />} />
+        <Route path="/pic/guru" element={<DashboardPIC />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
+        <Route path="/pic/guru/rkt" element={<RKT />} />
+        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
+        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
 
 
         {/* KEPSEK */}
