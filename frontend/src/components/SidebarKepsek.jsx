@@ -1,10 +1,11 @@
-import "../styles/bendahara/SidebarBendahara.css";
+import "../styles/kepsek/SidebarKepsek.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const MENU_ITEMS = [
+    { label: "Dashboard", to: "/kepsek/dashboard", icon: "bi bi-speedometer2" },
     { label: "Monitoring", to: "/kepsek/monitoring", icon: "bi bi-binoculars" },
 ];
 
