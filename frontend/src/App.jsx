@@ -48,7 +48,7 @@ import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 
 import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
-import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
@@ -146,6 +146,10 @@ export default function App() {
         {/* PIC GURU */}
         <Route path="/pic/guru" element={<PicGuruFPD />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
+        <Route path="/pic/guru/rkt" element={<RKT />} />
+        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
+        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
+        
 
         {/* WAKA */}
         {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
