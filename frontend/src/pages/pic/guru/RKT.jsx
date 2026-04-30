@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
-import "../../../styles/pic/guru/SidebarPic.css";
+import "../../../styles/bendahara/SidebarBendahara.css";
 import "../../../styles/pic/guru/RKT.css";
 import { Plus, Download } from "lucide-react";
 function formatRupiah(value) {
@@ -96,6 +96,8 @@ export default function RKT() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -286,6 +288,19 @@ export default function RKT() {
     return found ?? "-";
   };
 
+  const statusOptions = [
+    { value: "", label: "Semua Status" },
+    { value: "draft", label: "Draft" },
+    { value: "diajukan", label: "Diajukan" },
+    { value: "disetujui", label: "Disetujui" },
+    { value: "ditolak", label: "Ditolak" },
+    { value: "revisi", label: "Revisi" },
+  ];
+
+  const selectedStatusLabel =
+    statusOptions.find((option) => option.value === statusFilter)?.label ||
+    "Semua Status";
+
   return (
     <div className="rkt-shell">
       <SidebarPic />
@@ -331,17 +346,34 @@ export default function RKT() {
 
               <div className="rkt-input-group rkt-filter-small">
                 <label>Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Semua Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="diajukan">Diajukan</option>
-                  <option value="disetujui">Disetujui</option>
-                  <option value="ditolak">Ditolak</option>
-                  <option value="revisi">Revisi</option>
-                </select>
+                  <div className="rkt-custom-select">
+                    <button
+                      type="button"
+                      className={`rkt-custom-select-btn ${
+                        !statusFilter ? "placeholder" : ""
+                      }`}
+                      onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                    >
+                      {selectedStatusLabel}
+                    </button>
+
+                    {statusDropdownOpen && (
+                      <div className="rkt-custom-select-menu">
+                        {statusOptions.map((option) => (
+                          <button
+                            key={option.value || "all"}
+                            type="button"
+                            onClick={() => {
+                              setStatusFilter(option.value);
+                              setStatusDropdownOpen(false);
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
               </div>
 
               <div className="rkt-filter-actions">
