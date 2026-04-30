@@ -283,6 +283,8 @@ Route::prefix('laporan')->group(function () {
     Route::post('/rkas/export-pdf', [LaporanRkasController::class, 'exportPdf']);
     Route::get('/yayasan/export-excel', [LaporanKeuanganYayasanController::class, 'exportExcel']);
     Route::get('/yayasan/export-pdf', [LaporanKeuanganYayasanController::class, 'exportPdf']);
+    Route::get('/jenis-tarif/export-excel', [JenisTarifExportController::class, 'export']);
+    Route::get('/jenis-tarif/export-pdf', [JenisTarifExportController::class, 'exportPdf']);
 });
 
     Route::get('/siswa-ortu/profile/{id}', [TagihanSiswaController::class, 'getProfileSiswa']);

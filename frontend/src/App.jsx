@@ -49,7 +49,8 @@ import ApprovalYayasan from "./pages/yayasan/ApprovalCenter.jsx";
 import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 
-
+import SidebarKepsek from "./components/SidebarKepsek";
+import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
@@ -79,6 +80,17 @@ function YayasanLayout() {
   return (
     <div className="layout" style={{ display: "flex" }}>
       <SidebarYayasan />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
+function KepsekLayout() {
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarKepsek />
       <div className="content-wrapper" style={{ flex: 1 }}>
         <Outlet />
       </div>
@@ -146,11 +158,16 @@ export default function App() {
         {/* PIC GURU */}
         <Route path="/pic/guru" element={<PicGuruFPD />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
-        <Route path="/pic/guru/rkt" element={<RKT />} />
-        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
-        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-        
 
+
+        {/* KEPSEK */}
+        <Route path="/kepsek" element={<KepsekLayout />}>
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<KepsekDashboard />} />
+          <Route path="monitoring" element={<KepsekMonitoring />} />
+        </Route>
+
+        
         {/* WAKA */}
         {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
         {/* <Route path="/waka" element={<WakaLayout />}> */}

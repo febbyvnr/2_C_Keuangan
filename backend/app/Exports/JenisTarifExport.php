@@ -34,28 +34,31 @@ class JenisTarifExport implements WithEvents
                 // TITLE (Merged A & B)
                 // =====================
                 $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
-                $sheet->setCellValue('A3', 'DATA JENIS TARIF');
-
+                $sheet->setCellValue('A3', 'LAPORAN JENIS TARIF');
                 $sheet->mergeCells('A2:B2');
                 $sheet->mergeCells('A3:B3');
-                $sheet->mergeCells('A4:B4');
 
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
-                $sheet->getStyle('A4')->getFont()->setSize(11);
-
-                $sheet->getStyle('A2:A4')->getAlignment()
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(13);
+                $sheet->getStyle('A2:A3')->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // SPACING JUDUL
-                $sheet->getRowDimension(2)->setRowHeight(26);
-                $sheet->getRowDimension(3)->setRowHeight(24);
-                $sheet->getRowDimension(4)->setRowHeight(22);
+                $sheet->getRowDimension(2)->setRowHeight(22);
+                $sheet->getRowDimension(3)->setRowHeight(20);
+                $sheet->getRowDimension(4)->setRowHeight(12);
+                $sheet->getRowDimension(5)->setRowHeight(6);
+                $sheet->getRowDimension(6)->setRowHeight(8);
+
+                $sheet->mergeCells('A5:B5');
+                $sheet->getStyle('A5:B5')
+                    ->getBorders()->getBottom()
+                    ->setBorderStyle(Border::BORDER_THICK);
 
                 // =====================
                 // HEADER TABLE
                 // =====================
-                $headerRow = 6;
+                $headerRow = 7;
 
                 $sheet->setCellValue("A$headerRow", 'NO');
                 $sheet->setCellValue("B$headerRow", 'DESKRIPSI JENIS TARIF');
@@ -64,18 +67,11 @@ class JenisTarifExport implements WithEvents
                 $sheet->getStyle("A$headerRow:B$headerRow")->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getStyle("A$headerRow:B$headerRow")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('FF2E75B6');
-
-                $sheet->getStyle("A$headerRow:B$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
-
-                // DROPDOWN FILTER
-                $sheet->setAutoFilter("A$headerRow:B$headerRow");
+                $sheet->setShowGridlines(false);
 
                 // WIDTH
-                $sheet->getColumnDimension('A')->setWidth(10);
-                $sheet->getColumnDimension('B')->setWidth(50);
+                $sheet->getColumnDimension('A')->setWidth(8);
+                $sheet->getColumnDimension('B')->setWidth(55);
 
                 // =====================
                 // DATA
@@ -97,17 +93,23 @@ class JenisTarifExport implements WithEvents
                 }
 
                 $endData = $row - 1;
+                $totalRow = $endData + 1;
+
+                $sheet->setCellValue("A$totalRow", 'TOTAL JENIS TARIF');
+                $sheet->setCellValue("B$totalRow", $no - 1);
+                $sheet->getStyle("A$totalRow:B$totalRow")->getFont()->setBold(true);
+                $sheet->getStyle("A$totalRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("B$totalRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->getStyle("A$headerRow:B$totalRow")
+                    ->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
 
                 // =====================
                 // STYLING DATA (Wrap & Border)
                 // =====================
                 $sheet->getStyle("B$startData:B$endData")
                     ->getAlignment()->setWrapText(true);
-
-                // BORDER
-                $sheet->getStyle("A$headerRow:B$endData")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
 
                 // AUTO HEIGHT
                 for ($i = $startData; $i <= $endData; $i++) {
@@ -117,28 +119,32 @@ class JenisTarifExport implements WithEvents
                 // =====================
                 // FOOTER (Tanda Tangan)
                 // =====================
-                $footerRow = $endData + 3;
+                $footerRow = $totalRow + 3;
 
                 $role = $this->role ?: 'Bendahara';
                 $nama = $this->nama ?: '-';
                 $nip = $this->nip ?: '-';
 
-                // TANGGAL
-                $sheet->setCellValue("B" . ($footerRow), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("B" . ($footerRow))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
                 // TTD
-                $sheet->setCellValue("B" . ($footerRow + 2), $role . ',');
-                $sheet->setCellValue("B" . ($footerRow + 4), $nama);
-                $sheet->setCellValue("B" . ($footerRow + 8), '-------------------------');
-                $sheet->setCellValue("B" . ($footerRow + 9), 'NIP: ' . $nip);
+                $sheet->mergeCells("A" . ($footerRow + 2) . ":B" . ($footerRow + 2));
+                $sheet->mergeCells("A" . ($footerRow + 4) . ":B" . ($footerRow + 4));
+                $sheet->mergeCells("A" . ($footerRow + 8) . ":B" . ($footerRow + 8));
+                $sheet->mergeCells("A" . ($footerRow + 9) . ":B" . ($footerRow + 9));
 
-                $sheet->getStyle("B" . ($footerRow + 2) . ":B" . ($footerRow + 9))
+                $sheet->setCellValue("A" . ($footerRow + 2), $role . ',');
+                $sheet->setCellValue("A" . ($footerRow + 4), $nama);
+                $sheet->setCellValue("A" . ($footerRow + 8), '-------------------------');
+                $sheet->setCellValue("A" . ($footerRow + 9), 'NIP: ' . $nip);
+
+                $sheet->getStyle("A" . ($footerRow + 2) . ":A" . ($footerRow + 9))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // FREEZE PANE
-                $sheet->freezePane("A7");
+                $dateRow = $footerRow + 11;
+                $sheet->mergeCells("A$dateRow:B$dateRow");
+                $sheet->setCellValue("A$dateRow", 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("A$dateRow")
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
             },
         ];
     }
