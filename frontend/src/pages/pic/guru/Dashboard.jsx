@@ -105,16 +105,23 @@ export default function DashboardPIC() {
               <p>Tidak ada program</p>
             ) : (
               program.map((p) => (
-                <div
-                  key={p.ID_PROGRAM_KERJA}
-                  className="card"
-                  style={{ marginBottom: "10px" }}
-                >
-                  <p>
+                <div key={p.ID_PROGRAM_KERJA} className="card program-card">
+                  <div className="program-header">
                     <strong>{p.PROGRAM_KERJA}</strong>
+                    <span className="status">{p.STATUS || "Belum Mulai"}</span>
+                  </div>
+
+                  <p>
+                    Progress:{" "}
+                    <span className="progress-text">{p.PROGRESS || 0}%</span>
                   </p>
-                  <p>Status: {p.STATUS || "Belum Mulai"}</p>
-                  <p>Progress: {p.PROGRESS || 0}%</p>
+
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${p.PROGRESS || 0}%` }}
+                    ></div>
+                  </div>
                 </div>
               ))
             )}
