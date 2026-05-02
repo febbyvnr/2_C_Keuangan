@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MstProgramKerja;
+use App\Models\TrPm;
 use App\Models\RefPm;
-use App\Models\TrPm; 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles; 
+use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -26,62 +27,60 @@ class RefPmController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = RefPm::with(['trPm.programKerja'])
-                ->orderBy('ID_REF_PM', 'asc')
+            // Mengambil Master Program Kerja beserta transaksinya untuk ditampilkan di aplikasi
+            $data = MstProgramKerja::with(['trPm.refPm'])
+                ->where('IS_DELETE', 0)
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'message' => $data->isEmpty() ? 'Data tidak ditemukan' : 'Data berhasil diambil',
-                'data' => $data,
+                'data' => $data
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data',
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    public function updateEvaluasi(Request $request, $id): JsonResponse
+    public function updateEvaluasi(Request $request, $id_pm): JsonResponse
     {
         try {
-            $trPm = TrPm::findOrFail($id);
+            $trPm = TrPm::findOrFail($id_pm);
             $user = Auth::user();
 
-            // Proteksi: PIC tidak bisa edit jika sudah divalidasi NIP_VALIDATOR oleh Kepsek
-            if ($user->role === 'PIC' && !empty($trPm->NIP_VALIDATOR)) {
+            // Proteksi: PIC tidak bisa edit jika NIP_VALIDATOR_PM sudah diisi Kepala Sekolah
+            if ($user->role === 'PIC' && !empty($trPm->NIP_VALIDATOR_PM)) {
                 return response()->json([
                     'success' => false, 
                     'message' => 'Akses Terkunci. Sudah divalidasi Kepala Sekolah.'
                 ], 403);
             }
 
-            $data = $request->all();
+            $payload = $request->only(['DESKRIPSI_TR_PM', 'ID_REF_PM']);
+            
+            // Jika yang login Kepsek, otomatis isi NIP_VALIDATOR_PM
             if ($user->role === 'Kepala Sekolah') {
-                $data['NIP_VALIDATOR'] = $user->nip;
+                $payload['NIP_VALIDATOR_PM'] = $user->nip;
             }
 
-            $trPm->update($data);
+            $trPm->update($payload);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Data evaluasi berhasil diperbarui',
-                'data' => $trPm,
+                'success' => true, 
+                'message' => 'Berhasil diperbarui'
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui data',
-                'error' => $e->getMessage(),
+                'success' => false, 
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
     public function exportExcel()
     {
-        // Membersihkan buffer agar file .xlsx tidak corrupt/rusak
         if (ob_get_contents()) ob_end_clean();
 
         return Excel::download(new class implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents {
@@ -90,8 +89,10 @@ class RefPmController extends Controller
 
             public function collection()
             {
-                return RefPm::with(['trPm.programKerja'])
-                    ->orderBy('ID_REF_PM', 'asc')
+                // Mengambil Master Program Kerja sebagai baris utama Excel
+                return MstProgramKerja::with(['trPm'])
+                    ->where('IS_DELETE', 0)
+                    ->orderBy('ID_PROGRAM_KERJA', 'asc')
                     ->get();
             }
 
@@ -101,46 +102,45 @@ class RefPmController extends Controller
             {
                 return [
                     'NO', 'PROGRAM', 'KEGIATAN', 'SASARAN', 'INDIKATOR KEBERHASILAN', 
-                    'PENANGGUNG JAWAB', 'ANGGARAN', 'POS ANGGARAN/SUMBER PEMBIAYAAN', 
+                    'PENANGGUNG JAWAB', 'ANGGARAN', 'POS ANGGARAN', 
                     'WAKTU PELAKSANAAN', 'KELUARAN', 
                     'VISI (M)', 'VISI (K)', 'MISI (M)', 'MISI (K)', 'NILAI (M)', 'NILAI (K)', 'TUJUAN (M)', 'TUJUAN (K)',
                     'EFEKTIF', 'EFISIEN', 'USULAN PERUBAHAN', 'KOREKSI DARI YAYASAN', 'TANGGAPAN JAWABAN', 'EVALUASI', 'REKOMENDASI'
                 ];
             }
 
-            public function map($refPm): array
+            public function map($mst): array
             {
-                $rows = [];
-                if ($refPm->trPm->isEmpty()) {
-                    $rows[] = [
-                        $this->rowNumber++, '-', $refPm->NAMA_PM, '-', '-', '-', 0, '-', '-', '-',
-                        '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
-                    ];
-                } else {
-                    foreach ($refPm->trPm as $tr) {
-                        $mst = $tr->programKerja; 
-                        $rows[] = [
-                            $this->rowNumber++,
-                            'PROGRAM UTAMA',
-                            $mst->{'PROGRAM KERJA'} ?? $refPm->NAMA_PM, // Handle kolom ber-spasi
-                            $mst->SASARAN ?? '-',
-                            $mst->INDIKATOR ?? '-',
-                            $mst->NIP_PENANGGUNG_JAWAB ?? '-',
-                            $mst->{'TOTAL PROGKER'} ?? 0, // Handle kolom ber-spasi
-                            $tr->DESKRIPSII_TR_PM ?? '-', 
-                            ($mst->{'WAKTU AWAL'} ?? '') . ' s/d ' . ($mst->{'WAKTU AKHIR'} ?? ''),
-                            $mst->{'KELUARAN PROGKER'} ?? '-',
-                            $tr->RELEVANSI_VISI_M ?? '', $tr->RELEVANSI_VISI_K ?? '',
-                            $tr->RELEVANSI_MISI_M ?? '', $tr->RELEVANSI_MISI_K ?? '',
-                            $tr->RELEVANSI_NILAI_M ?? '', $tr->RELEVANSI_NILAI_K ?? '',
-                            $tr->RELEVANSI_TUJUAN_M ?? '', $tr->RELEVANSI_TUJUAN_K ?? '',
-                            $tr->EFEKTIF ?? '', $tr->EFISIEN ?? '',
-                            $tr->USULAN_PERUBAHAN ?? '', $tr->KOREKSI_YAYASAN ?? '',
-                            $tr->TANGGAPAN_JAWABAN ?? '', $tr->EVALUASI ?? '', $tr->REKOMENDASI ?? '',
-                        ];
-                    }
-                }
-                return $rows;
+                $transaksi = $mst->trPm;
+                
+                // Fungsi pencari data di tabel tr_pm berdasarkan ID_REF_PM
+                $getTrVal = function($idRef) use ($transaksi) {
+                    $item = $transaksi->where('ID_REF_PM', $idRef)->first();
+                    return $item ? $item->DESKRIPSI_TR_PM : '';
+                };
+
+                return [
+                    $this->rowNumber++,
+                    'PROGRAM UTAMA',
+                    $mst->PROGRAM_KERJA ?? '-',
+                    $mst->SASARAN ?? '-',
+                    $mst->INDIKATOR ?? '-',
+                    $mst->NIP_PENANGGUNG_JAWAB ?? '-',
+                    $mst->TOTAL_PROGKER ?? 0,
+                    '-',
+                    ($mst->WAKTU_AWAL ?? '') . ' s/d ' . ($mst->WAKTU_AKHIR ?? ''),
+                    $mst->{'KELUARAN PROGKER'} ?? '-',
+                    
+                    // Relevansi (ID 1-8 di ref_pm)
+                    $getTrVal(1), $getTrVal(2), 
+                    $getTrVal(3), $getTrVal(4), 
+                    $getTrVal(5), $getTrVal(6), 
+                    $getTrVal(7), $getTrVal(8), 
+                    
+                    // Evaluasi Tambahan (ID 9-15 di ref_pm)
+                    $getTrVal(9), $getTrVal(10), $getTrVal(11), 
+                    $getTrVal(12), $getTrVal(13), $getTrVal(14), $getTrVal(15)
+                ];
             }
 
             public function styles(Worksheet $sheet)
@@ -153,7 +153,7 @@ class RefPmController extends Controller
                 $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Header Oranye (Tujuan & Indikator)
+                // Tujuan & Indikator (Orange)
                 $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'TUJUAN');
                 $sheet->mergeCells('C4:Y4'); $sheet->setCellValue('C4', 'INDIKATOR');
                 $sheet->getStyle('A4:Y4')->applyFromArray([
@@ -163,24 +163,24 @@ class RefPmController extends Controller
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
                 ]);
 
-                // Blok Tujuan I-IV
                 $tujuanData = [
-                    ["I. Meningkatkan lulusan yang kompeten, berjiwa entrepreneur, mandiri dan berkarakter kebopkrian.", "I.1. 70% lulusan dapat mengimplemasikan nilai-nilai ke bopkrian.\nI.2.  25% peserta didik memiliki jiwa entrepreneur, yang bercirikan kebopkrian.\nI.3. 80% lulusan kompeten, dapat diterima di industri / dunia kerja dan memiliki karakter ke bopkrian."],
-                    ["II. Meningkatkan Kualitas SDM.", "II.1. Memiliki guru berpendidikan S1 sebanyak 90%.\nII.2. Memiliki guru produktif bersertifikat kompetensi di bidang keahlian masing-masing, berlisensi industri dan LSP sebanyak 90%.\nII.3.Memiliki guru bersertifikat pengajar kebutuhan khususs sebanyak 20% untuk mewujudkan sekolah ramah Inklusi."],
-                    ["III. Mewujudkan tata Kelola yang berkualitas.", "III.1. Memiliki panduan tata kelola yang berkualitas transparan dan akuntabel\nIII.2. Meningkatkan kualitas sarana dan prasarana sebanyak 95& sesuai standar industri ramah inklusi"],
-                    ["IV. Mewujudkan sekolah yang mampu berkompetisi era global.", "IV.1. Meningkatkan kerjasama dengan DUDIKA setingkat internasional 20%.\nIV.2.Meningkatkan kompetensi siwa dalam berbahasa asing 40%."]
+                    ["I. Meningkatkan lulusan yang kompeten, berjiwa entrepreneur, mandiri dan berkarakter kebopkrian.", "I.1. 70% lulusan dapat mengimplemasikan nilai-nilai ke bopkrian.\nI.2. 25% peserta didik memiliki jiwa entrepreneur, yang bercirikan kebopkrian.\nI.3. 80% lulusan kompeten, dapat diterima di industri / dunia kerja dan memiliki karakter ke bopkrian."],
+                    ["II. Meningkatkan Kualitas SDM.", "II.1. Memiliki guru berpendidikan S1 sebanyak 90%.\nII.2. Memiliki guru produktif bersertifikat kompetensi di bidang keahlian masing-masing, berlisensi industri dan LSP sebanyak 90%.\nII.3. Memiliki guru bersertifikat pengajar kebutuhan khusus sebanyak 20% untuk mewujudkan sekolah ramah Inklusi."],
+                    ["III. Mewujudkan tata Kelola yang berkualitas.", "III.1. Memiliki panduan tata kelola yang berkualitas transparan dan akuntabel.\nIII.2. Meningkatkan kualitas sarana dan prasarana sebanyak 95% sesuai standar industri ramah inklusi."],
+                    ["IV. Mewujudkan sekolah yang mampu berkompetisi era global.", "IV.1. Meningkatkan kerjasama dengan DUDIKA setingkat internasional 20%.\nIV.2. Meningkatkan kompetensi siswa dalam berbahasa asing 40%."]
                 ];
+
                 $row = 5;
                 foreach ($tujuanData as $dt) {
                     $sheet->mergeCells("A$row:B$row"); $sheet->setCellValue("A$row", $dt[0]);
                     $sheet->mergeCells("C$row:Y$row"); $sheet->setCellValue("C$row", $dt[1]);
                     $sheet->getStyle("A$row:Y$row")->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER);
                     $sheet->getStyle("A$row:Y$row")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-                    $sheet->getRowDimension($row)->setRowHeight(80);
+                    $sheet->getRowDimension($row)->setRowHeight(110); 
                     $row++;
                 }
 
-                // Header Biru Utama
+                // Header Biru
                 $sheet->getStyle('A12:Y14')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F81BD']],
@@ -188,13 +188,12 @@ class RefPmController extends Controller
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
                 ]);
 
-                // Header Relevansi
                 $sheet->mergeCells('K12:R12'); $sheet->setCellValue('K12', 'RELEVANSI');
                 $sheet->mergeCells('K13:L13'); $sheet->setCellValue('K13', 'VISI');
                 $sheet->mergeCells('M13:N13'); $sheet->setCellValue('M13', 'MISI');
                 $sheet->mergeCells('O13:P13'); $sheet->setCellValue('O13', 'NILAI');
                 $sheet->mergeCells('Q13:R13'); $sheet->setCellValue('Q13', 'TUJUAN');
-                
+
                 $labels = ['K14'=>'M','L14'=>'K','M14'=>'M','N14'=>'K','O14'=>'M','P14'=>'K','Q14'=>'M','R14'=>'K'];
                 foreach($labels as $cell => $val) { $sheet->setCellValue($cell, $val); }
 
@@ -210,9 +209,8 @@ class RefPmController extends Controller
                     AfterSheet::class => function(AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
                         $highestRow = $sheet->getHighestRow();
-                        // Menutup border secara dinamis mengikuti data terakhir
                         $sheet->getStyle("A12:Y$highestRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-                        $sheet->getStyle("A15:Y$highestRow")->getAlignment()->setWrapText(true);
+                        $sheet->getStyle("A15:Y$highestRow")->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_TOP);
                     },
                 ];
             }
