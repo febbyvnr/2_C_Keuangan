@@ -38,6 +38,8 @@ use App\Http\Controllers\RkaController;
 use App\Http\Controllers\LaporanBukuKhasUmumController;
 use App\Http\Controllers\LaporanPengeluaranController;
 
+use App\Http\Controllers\DashboardBendaharaController;
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -328,3 +330,5 @@ Route::prefix('export')->group(function () {
 Route::prefix('laporan')->group(function () {
     Route::get('/pengeluaran', [LaporanPengeluaranController::class, 'pengeluaran']);
 });
+
+Route::get('/dashboard-bendahara', [DashboardBendaharaController::class, 'index']);
