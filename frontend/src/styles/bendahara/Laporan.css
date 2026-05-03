@@ -64,13 +64,13 @@ body {
 }
 
 .btn-outline {
-  padding: 6px 14px; /* lebih kecil */
-  border-radius: 8px; /* lebih halus */
-  font-size: 13px; /* lebih kecil */
-  border: 1.5px solid; /* lebih tipis */
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1.5px solid;
   display: flex;
   align-items: center;
-  gap: 6px; /* jarak icon */
+  gap: 6px;
   font-weight: 500;
 }
 
@@ -97,25 +97,32 @@ body {
 }
 
 /* ========================= */
-/* FILTER */
+/* FILTER (FIXED - NO CARD) */
 /* ========================= */
 .laporan-filter {
-  background: white;
-  padding: 12px;
-  border-radius: 12px;
+  background: transparent; /* 🔥 hilangkan card putih */
+  padding: 0;
+  border-radius: 0;
   display: flex;
   gap: 10px;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
+/* INPUT FIX */
 .laporan-filter input,
 .laporan-filter select {
-  border: 1px solid #ddd;
+  border: 1px solid #d1d5db;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 13px;
   background: white;
+  color: var(--text-main) !important; /* 🔥 FIX TEXT PUTIH */
+}
+
+/* placeholder */
+.laporan-filter input::placeholder {
+  color: var(--text-secondary);
 }
 
 .laporan-filter input:focus,
@@ -232,11 +239,9 @@ body {
   box-shadow: none !important;
 }
 
-/* EXCEL FIX */
 .laporan-actions .btn-outline.excel {
   border-color: var(--success) !important;
   color: var(--success) !important;
-  background: transparent !important;
 }
 
 .laporan-actions .btn-outline.excel:hover {
@@ -244,11 +249,9 @@ body {
   color: white !important;
 }
 
-/* PDF FIX */
 .laporan-actions .btn-outline.pdf {
   border-color: var(--error) !important;
   color: var(--error) !important;
-  background: transparent !important;
 }
 
 .laporan-actions .btn-outline.pdf:hover {
