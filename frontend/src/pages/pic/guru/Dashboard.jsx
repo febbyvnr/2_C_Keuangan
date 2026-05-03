@@ -7,7 +7,7 @@ export default function DashboardPIC() {
   const [fpd, setFpd] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/rkt") // ✅ FIX DI SINI
+    fetch("http://localhost:8000/api/rkt")
       .then((res) => res.json())
       .then((data) => setProgram(data.data || data || []));
 
