@@ -163,28 +163,33 @@ export default function DashboardPIC() {
             {program.length === 0 ? (
               <p>Tidak ada program</p>
             ) : (
-              program.map((p) => (
-                <div key={p.ID_PROGRAM_KERJA} className="card program-card">
-                  <div className="program-header">
-                    <strong>{p.PROGRAM_KERJA}</strong>
-                    <span className="status">{p.STATUS || "Belum Mulai"}</span>
-                  </div>
+              program.map((p) => {
+                const prog = Number(getProgress(p.ID_PROGRAM_KERJA));
 
-                  <p>
-                    Progress:{" "}
-                    <span className="progress-text">
-                      {getProgress(p.ID_PROGRAM_KERJA)}%
-                    </span>
-                  </p>
+                let statusLabel = "Belum Mulai";
+                if (prog > 0 && prog < 100) statusLabel = "Berjalan";
+                if (prog === 100) statusLabel = "Selesai";
 
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${getProgress(p.ID_PROGRAM_KERJA)}%` }}
-                    ></div>
+                return (
+                  <div key={p.ID_PROGRAM_KERJA} className="card program-card">
+                    <div className="program-header">
+                      <strong>{p.PROGRAM_KERJA}</strong>
+                      <span className="status">{statusLabel}</span>
+                    </div>
+
+                    <p>
+                      Progress: <span className="progress-text">{prog}%</span>
+                    </p>
+
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${prog}%` }}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
