@@ -129,7 +129,7 @@
   gap: 10px;
 }
 
-/* 🔥 FIX UTAMA: JUDUL PROGRAM */
+/* JUDUL PROGRAM */
 .program-header strong {
   font-size: 13px;
   font-weight: 600;
@@ -137,7 +137,7 @@
   flex: 1;
 }
 
-/* 🔥 FIX: TEXT BODY */
+/* TEXT BODY */
 .program-card p {
   margin: 4px 0;
   font-size: 13px;
@@ -176,7 +176,6 @@
   margin-bottom: 12px;
   transition: 0.2s ease;
 
-  /* 🔥 INI KUNCI */
   border: 1px solid #e5e7eb;
 
   /* optional depth */
