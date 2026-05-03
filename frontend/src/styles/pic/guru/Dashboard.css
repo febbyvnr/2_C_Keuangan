@@ -115,7 +115,7 @@
 
 /* 🔥 FIX UTAMA: JUDUL PROGRAM */
 .program-header strong {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e293b;
   flex: 1;
@@ -175,4 +175,75 @@
 .progress-text {
   color: #eda60f; /* kuning */
   font-weight: 600;
+}
+
+/* ===== ACTIVITY LIST ===== */
+.activity-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ITEM */
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  padding: 12px 14px;
+
+  transition: 0.2s ease;
+}
+
+/* HOVER */
+.activity-item:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+/* ICON */
+.activity-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #e2e8f0;
+  border-radius: 10px;
+
+  color: #235399;
+  font-size: 16px;
+}
+
+/* TEXT */
+.activity-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* JUDUL */
+.activity-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* TANGGAL */
+.activity-date {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* EMPTY */
+.no-activity {
+  font-size: 13px;
+  color: #9ca3af;
 }

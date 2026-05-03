@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/Dashboard.css";
 
+import { BsCalendarEvent } from "react-icons/bs";
+
 export default function DashboardPIC() {
   const [program, setProgram] = useState([]);
   const [fpd, setFpd] = useState([]);
@@ -22,6 +24,11 @@ export default function DashboardPIC() {
   const programAktif = totalProgram - programSelesai;
 
   const progress = totalProgram > 0 ? (programSelesai / totalProgram) * 100 : 0;
+
+  const getNamaProgram = (id) => {
+    const found = program.find((p) => p.ID_PROGRAM_KERJA === id);
+    return found ? found.PROGRAM_KERJA : "Program";
+  };
 
   return (
     <div className="dashboard-wrapper">
@@ -82,17 +89,42 @@ export default function DashboardPIC() {
           <div className="chart-card">
             <h4>Aktivitas Terbaru</h4>
 
-            <ul style={{ paddingLeft: "16px" }}>
+            <div className="activity-list">
               {!fpd || fpd.length === 0 ? (
-                <li>Belum ada aktivitas</li>
+                <p className="no-activity">Belum ada aktivitas</p>
               ) : (
-                fpd
-                  .slice(0, 5)
-                  .map((d, i) => (
-                    <li key={i}>✔ Input dana {d.NAMA_PROGRAM || "Program"}</li>
-                  ))
+                fpd.slice(0, 5).map((d, i) => (
+                  <div key={i} className="activity-item">
+                    <div className="activity-icon">
+                      <BsCalendarEvent />
+                    </div>
+
+                    <div className="activity-content">
+                      <p className="activity-title">
+                        Input dana {getNamaProgram(d.ID_PROGRAM_KERJA)}
+                      </p>
+
+                      <span className="activity-date">
+                        {d.TGL_FPD
+                          ? new Date(d.TGL_FPD).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "-"}{" "}
+                        •{" "}
+                        {d.TGL_FPD
+                          ? new Date(d.TGL_FPD).toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
+                ))
               )}
-            </ul>
+            </div>
           </div>
         </div>
 
