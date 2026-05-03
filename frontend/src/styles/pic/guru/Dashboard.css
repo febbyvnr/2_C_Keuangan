@@ -67,6 +67,10 @@
   border-radius: 12px;
 }
 
+.main-grid {
+  margin-bottom: 16px;
+}
+
 .chart-card h4 {
   font-size: 18px;
   font-weight: 600;
