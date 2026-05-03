@@ -30,6 +30,21 @@ export default function DashboardPIC() {
     return found ? found.PROGRAM_KERJA : "Program";
   };
 
+  const getProgress = (id) => {
+    const prog = program.find((p) => p.ID_PROGRAM_KERJA === id);
+    if (!prog) return 0;
+
+    const total = prog.TOTAL_PROGKER || 0;
+
+    const realisasi = fpd
+      .filter((d) => d.ID_PROGRAM_KERJA === id)
+      .reduce((sum, d) => sum + (d.NOMINAL_FPD || 0), 0);
+
+    if (total === 0) return 0;
+
+    return Math.min((realisasi / total) * 100, 100).toFixed(0);
+  };
+
   return (
     <div className="dashboard-wrapper">
       <SidebarPic />
@@ -145,29 +160,20 @@ export default function DashboardPIC() {
 
                   <p>
                     Progress:{" "}
-                    <span className="progress-text">{p.PROGRESS || 0}%</span>
+                    <span className="progress-text">
+                      {getProgress(p.ID_PROGRAM_KERJA)}%
+                    </span>
                   </p>
 
                   <div className="progress-bar">
                     <div
                       className="progress-fill"
-                      style={{ width: `${p.PROGRESS || 0}%` }}
+                      style={{ width: `${getProgress(p.ID_PROGRAM_KERJA)}%` }}
                     ></div>
                   </div>
                 </div>
               ))
             )}
-          </div>
-        </div>
-
-        {/* ===== QUICK ACTION ===== */}
-        <div className="summary-card">
-          <h4>Quick Action</h4>
-
-          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-            <button className="btn-primary">+ Tambah Laporan</button>
-            <button className="btn-primary">💰 Input Dana</button>
-            <button className="btn-primary">✏ Update Progress</button>
           </div>
         </div>
       </main>
