@@ -19,11 +19,23 @@ export default function DashboardPIC() {
   }, []);
 
   const totalProgram = program.length;
-  const programSelesai = program.filter((p) => p.STATUS === "SELESAI").length;
 
-  const programAktif = totalProgram - programSelesai;
+  const diajukan = program.filter((p) => (p.tr_pm || []).length > 0).length;
 
-  const progress = totalProgram > 0 ? (programSelesai / totalProgram) * 100 : 0;
+  // DISETUJUI (sementara)
+  const disetujui = 0;
+
+  const totalAnggaran = program.reduce(
+    (sum, p) => sum + (p.TOTAL_PROGKER || 0),
+    0,
+  );
+
+  const totalRealisasi = fpd.reduce((sum, d) => sum + (d.NOMINAL_FPD || 0), 0);
+
+  const progress =
+    totalAnggaran > 0
+      ? Math.min((totalRealisasi / totalAnggaran) * 100, 100)
+      : 0;
 
   const getNamaProgram = (id) => {
     const found = program.find((p) => p.ID_PROGRAM_KERJA === id);
@@ -79,16 +91,16 @@ export default function DashboardPIC() {
 
           <div className="card">
             <div className="card-top">
-              <p>Program Aktif</p>
+              <p>Diajukan</p>
             </div>
-            <h3>{programAktif}</h3>
+            <h3>{diajukan}</h3>
           </div>
 
           <div className="card success">
             <div className="card-top">
-              <p>Program Selesai</p>
+              <p>Disetujui</p>
             </div>
-            <h3>{programSelesai}</h3>
+            <h3>{disetujui}</h3>
           </div>
 
           <div className="card warning">
