@@ -11,26 +11,29 @@ class DashboardBendaharaController extends Controller
     public function index()
     {
         try {
-            $totalAnggaran = MstProgramKerja::sum('TOTAL_PROGKER');
-            $totalRealisasi = DtlFpd::sum('NOMINAL');
-            $totalPembayaranSiswa = TrPembayaran::sum('NOMINAL');
+            $totalAnggaran = (float) MstProgramKerja::sum('TOTAL_PROGKER');
+
+            $totalRealisasi = (float) DtlFpd::sum('TOTAL');
+
+            $totalPembayaranSiswa = (float) TrPembayaran::sum('JUMLAH_BAYAR');
 
             $persentase = $totalAnggaran > 0
                 ? ($totalRealisasi / $totalAnggaran) * 100
                 : 0;
-
+                
             return response()->json([
                 'status' => true,
                 'message' => 'Dashboard bendahara berhasil diambil',
                 'data' => [
-                    'total_anggaran' => $totalAnggaran ?? 0,
-                    'total_realisasi' => $totalRealisasi ?? 0,
+                    'total_anggaran' => $totalAnggaran,
+                    'total_realisasi' => $totalRealisasi,
                     'persentase_serapan' => round($persentase, 2),
-                    'total_pembayaran_siswa' => $totalPembayaranSiswa ?? 0
+                    'total_pembayaran_siswa' => $totalPembayaranSiswa,
+                    'sisa_anggaran' => $totalAnggaran - $totalRealisasi
                 ]
             ], 200);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             return response()->json([
                 'status' => false,
