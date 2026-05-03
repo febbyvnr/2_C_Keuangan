@@ -11,23 +11,14 @@ class DashboardKepsekKeuanganController extends Controller
     public function index()
     {
         try {
-            // =========================
-            // 1. DATA UTAMA (SAMA DENGAN BENDAHARA)
-            // =========================
             $totalAnggaran = (float) MstProgramKerja::sum('TOTAL_PROGKER');
             $totalRealisasi = (float) DtlFpd::sum('TOTAL');
             $totalPembayaran = (float) TrPembayaran::sum('JUMLAH_BAYAR');
 
-            // =========================
-            // 2. SERAPAN
-            // =========================
             $persentase = $totalAnggaran > 0
                 ? ($totalRealisasi / $totalAnggaran) * 100
                 : 0;
 
-            // =========================
-            // 3. STATUS (INSIGHT UNTUK KEPSEK)
-            // =========================
             if ($persentase >= 80) {
                 $status = "Baik";
             } elseif ($persentase >= 50) {
@@ -36,9 +27,6 @@ class DashboardKepsekKeuanganController extends Controller
                 $status = "Belum Optimal";
             }
 
-            // =========================
-            // 4. RESPONSE (LEBIH RINGKAS UNTUK FE KEPSEK)
-            // =========================
             return response()->json([
                 'status' => true,
                 'message' => 'Dashboard Kepala Sekolah',
