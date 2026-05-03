@@ -6,7 +6,7 @@ use App\Models\MstProgramKerja;
 use App\Models\DtlFpd;
 use App\Models\TrPembayaran;
 
-class DashboardKepsekController extends Controller
+class DashboardKepsekKeuanganController extends Controller
 {
     public function index()
     {

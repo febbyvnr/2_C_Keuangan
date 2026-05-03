@@ -39,7 +39,7 @@ use App\Http\Controllers\LaporanBukuKhasUmumController;
 use App\Http\Controllers\LaporanPengeluaranController;
 
 use App\Http\Controllers\DashboardBendaharaController;
-use App\Http\Controllers\DashboardKepsekController;
+use App\Http\Controllers\DashboardKepsekKeuanganController;
 
 
 Route::get('/user', function (Request $request) {
@@ -335,4 +335,5 @@ Route::prefix('laporan')->group(function () {
 
 Route::get('/dashboard-bendahara', [DashboardBendaharaController::class, 'index']);
 
-Route::get('/dashboard-kepsek', [DashboardKepsekController::class, 'index']);
+
+Route::get('/dashboard-kepsek', [DashboardKepsekKeuanganController::class, 'index']);
