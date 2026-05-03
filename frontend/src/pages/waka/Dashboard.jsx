@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { HiMenu } from "react-icons/hi";
 import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Dashboard.css";
 import {
@@ -21,6 +22,7 @@ import {
 } from "react-icons/bs";
 
 export default function Dashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [rkt, setRkt] = useState([]);
   const [rka, setRka] = useState([]);
   const [fpd, setFpd] = useState([]);
