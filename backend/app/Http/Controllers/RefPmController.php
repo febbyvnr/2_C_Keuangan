@@ -86,7 +86,7 @@ class RefPmController extends Controller
 
             public function collection()
             {
-                return MstProgramKerja::with(['trPm'])
+                return MstProgramKerja::where('IS_DELETE', 0)
                     ->orderBy('ID_PROGRAM_KERJA', 'asc')
                     ->get();
             }
@@ -108,16 +108,12 @@ class RefPmController extends Controller
             {
                 $this->rowNum++;
                 
-                $transaksi = $mst->trPm;
-                
-                // Ambil semua teks relevansi untuk kolom M agar sejajar
-                $deskripsiTeks = $transaksi->whereIn('ID_REF_PM', [1, 2, 3, 4, 5, 6, 7, 8])
-                                           ->pluck('DESKRIPSI_TR_PM')
-                                           ->filter()
-                                           ->implode("\n");
+                // Ambil semua transaksi terkait Progker ini sekaligus
+                $transaksi = TrPm::where('ID_PROGRAM_KERJA', $mst->ID_PROGRAM_KERJA)->get();
 
+                // Fungsi pembantu menggunakan firstWhere berdasarkan ID gambar terbaru
                 $getTrVal = function($idRef) use ($transaksi) {
-                    $item = $transaksi->where('ID_REF_PM', $idRef)->first();
+                    $item = $transaksi->firstWhere('ID_REF_PM', $idRef);
                     return $item ? $item->DESKRIPSI_TR_PM : '';
                 };
 
@@ -131,20 +127,28 @@ class RefPmController extends Controller
                     (int)($mst->TOTAL_PROGKER ?? 0), 
                     '-',
                     ($mst->WAKTU_AWAL ?? '') . ' s/d ' . ($mst->WAKTU_AKHIR ?? ''),
-                    $mst->{'KELUARAN PROGKER'} ?? '-',
+                    $mst->KELUARAN_PROGKER ?? '-', 
                     
-                    $deskripsiTeks, '', 
-                    $deskripsiTeks, '', 
-                    $deskripsiTeks, '', 
-                    $deskripsiTeks, '', 
+                    // RELEVANSI - Sesuai urutan ID di database baru (15-22)
+                    $getTrVal(15), $getTrVal(16),   // VISI (M) & (K)
+                    $getTrVal(17), $getTrVal(18),   // MISI (M) & (K)
+                    $getTrVal(19), $getTrVal(20),   // NILAI (M) & (K)
+                    $getTrVal(21), $getTrVal(22),   // TUJUAN (M) & (K)
                     
-                    $getTrVal(9), $getTrVal(10), $getTrVal(11), 
-                    $getTrVal(12), $getTrVal(13), $getTrVal(14), $getTrVal(15)
+                    // EVALUASI & LAINNYA - Sesuai urutan ID (23-29)
+                    $getTrVal(23), // EFEKTIF
+                    $getTrVal(24), // EFISIEN
+                    $getTrVal(25), // USULAN PERUBAHAN
+                    $getTrVal(26), // KOREKSI DARI YAYASAN
+                    $getTrVal(27), // TANGGAPAN JAWABAN
+                    $getTrVal(28), // EVALUASI TOTAL
+                    $getTrVal(29)  // REKOMENDASI
                 ];
             }
 
             public function styles(Worksheet $sheet)
             {
+                // Judul Atas
                 $sheet->mergeCells('A1:Y1');
                 $sheet->setCellValue('A1', 'EVALUASI RKT TAHUN 2026');
                 $sheet->mergeCells('A2:Y2');
@@ -152,6 +156,7 @@ class RefPmController extends Controller
                 $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+                // Tabel Tujuan & Indikator (Statis)
                 $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'TUJUAN');
                 $sheet->mergeCells('C4:Y4'); $sheet->setCellValue('C4', 'INDIKATOR');
                 $sheet->getStyle('A4:Y4')->applyFromArray([
@@ -178,6 +183,7 @@ class RefPmController extends Controller
                     $row++;
                 }
 
+                // Header Utama Tabel Evaluasi (Baris 12-14)
                 $sheet->getStyle('A12:Y14')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F81BD']],
