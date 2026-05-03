@@ -41,6 +41,12 @@
   gap: 16px;
 }
 
+@media (max-width: 768px) {
+  .waka-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .card {
   background: white;
   padding: 16px;
@@ -60,6 +66,13 @@
   padding: 16px;
   border-radius: 12px;
   margin-top: 20px;
+}
+
+.chart-card h4 {
+  font-size: 18px; /* gedein di sini */
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
 }
 
 .progress-bar {
