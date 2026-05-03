@@ -27,7 +27,6 @@ class RefPmController extends Controller
     public function index(): JsonResponse
     {
         try {
-            // Mengambil Master Program Kerja beserta transaksinya untuk ditampilkan di aplikasi
             $data = MstProgramKerja::with(['trPm.refPm'])
                 ->where('IS_DELETE', 0)
                 ->get();
@@ -50,7 +49,6 @@ class RefPmController extends Controller
             $trPm = TrPm::findOrFail($id_pm);
             $user = Auth::user();
 
-            // Proteksi: PIC tidak bisa edit jika NIP_VALIDATOR_PM sudah diisi Kepala Sekolah
             if ($user->role === 'PIC' && !empty($trPm->NIP_VALIDATOR_PM)) {
                 return response()->json([
                     'success' => false, 
@@ -60,7 +58,6 @@ class RefPmController extends Controller
 
             $payload = $request->only(['DESKRIPSI_TR_PM', 'ID_REF_PM']);
             
-            // Jika yang login Kepsek, otomatis isi NIP_VALIDATOR_PM
             if ($user->role === 'Kepala Sekolah') {
                 $payload['NIP_VALIDATOR_PM'] = $user->nip;
             }
@@ -85,13 +82,11 @@ class RefPmController extends Controller
 
         return Excel::download(new class implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents {
             
-            private $rowNumber = 1;
+            private $rowNum = 0;
 
             public function collection()
             {
-                // Mengambil Master Program Kerja sebagai baris utama Excel
                 return MstProgramKerja::with(['trPm'])
-                    ->where('IS_DELETE', 0)
                     ->orderBy('ID_PROGRAM_KERJA', 'asc')
                     ->get();
             }
@@ -111,33 +106,38 @@ class RefPmController extends Controller
 
             public function map($mst): array
             {
+                $this->rowNum++;
+                
                 $transaksi = $mst->trPm;
                 
-                // Fungsi pencari data di tabel tr_pm berdasarkan ID_REF_PM
+                // Ambil semua teks relevansi untuk kolom M agar sejajar
+                $deskripsiTeks = $transaksi->whereIn('ID_REF_PM', [1, 2, 3, 4, 5, 6, 7, 8])
+                                           ->pluck('DESKRIPSI_TR_PM')
+                                           ->filter()
+                                           ->implode("\n");
+
                 $getTrVal = function($idRef) use ($transaksi) {
                     $item = $transaksi->where('ID_REF_PM', $idRef)->first();
                     return $item ? $item->DESKRIPSI_TR_PM : '';
                 };
 
                 return [
-                    $this->rowNumber++,
+                    $this->rowNum, 
                     'PROGRAM UTAMA',
                     $mst->PROGRAM_KERJA ?? '-',
                     $mst->SASARAN ?? '-',
                     $mst->INDIKATOR ?? '-',
                     $mst->NIP_PENANGGUNG_JAWAB ?? '-',
-                    $mst->TOTAL_PROGKER ?? 0,
+                    (int)($mst->TOTAL_PROGKER ?? 0), 
                     '-',
                     ($mst->WAKTU_AWAL ?? '') . ' s/d ' . ($mst->WAKTU_AKHIR ?? ''),
                     $mst->{'KELUARAN PROGKER'} ?? '-',
                     
-                    // Relevansi (ID 1-8 di ref_pm)
-                    $getTrVal(1), $getTrVal(2), 
-                    $getTrVal(3), $getTrVal(4), 
-                    $getTrVal(5), $getTrVal(6), 
-                    $getTrVal(7), $getTrVal(8), 
+                    $deskripsiTeks, '', 
+                    $deskripsiTeks, '', 
+                    $deskripsiTeks, '', 
+                    $deskripsiTeks, '', 
                     
-                    // Evaluasi Tambahan (ID 9-15 di ref_pm)
                     $getTrVal(9), $getTrVal(10), $getTrVal(11), 
                     $getTrVal(12), $getTrVal(13), $getTrVal(14), $getTrVal(15)
                 ];
@@ -145,7 +145,6 @@ class RefPmController extends Controller
 
             public function styles(Worksheet $sheet)
             {
-                // Judul
                 $sheet->mergeCells('A1:Y1');
                 $sheet->setCellValue('A1', 'EVALUASI RKT TAHUN 2026');
                 $sheet->mergeCells('A2:Y2');
@@ -153,7 +152,6 @@ class RefPmController extends Controller
                 $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Tujuan & Indikator (Orange)
                 $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'TUJUAN');
                 $sheet->mergeCells('C4:Y4'); $sheet->setCellValue('C4', 'INDIKATOR');
                 $sheet->getStyle('A4:Y4')->applyFromArray([
@@ -180,7 +178,6 @@ class RefPmController extends Controller
                     $row++;
                 }
 
-                // Header Biru
                 $sheet->getStyle('A12:Y14')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F81BD']],
@@ -193,7 +190,7 @@ class RefPmController extends Controller
                 $sheet->mergeCells('M13:N13'); $sheet->setCellValue('M13', 'MISI');
                 $sheet->mergeCells('O13:P13'); $sheet->setCellValue('O13', 'NILAI');
                 $sheet->mergeCells('Q13:R13'); $sheet->setCellValue('Q13', 'TUJUAN');
-
+                
                 $labels = ['K14'=>'M','L14'=>'K','M14'=>'M','N14'=>'K','O14'=>'M','P14'=>'K','Q14'=>'M','R14'=>'K'];
                 foreach($labels as $cell => $val) { $sheet->setCellValue($cell, $val); }
 
