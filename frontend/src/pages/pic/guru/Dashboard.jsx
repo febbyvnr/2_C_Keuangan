@@ -22,20 +22,7 @@ export default function DashboardPIC() {
 
   const diajukan = program.filter((p) => (p.tr_pm || []).length > 0).length;
 
-  // DISETUJUI (sementara)
-  const disetujui = 0;
-
-  const totalAnggaran = program.reduce(
-    (sum, p) => sum + (p.TOTAL_PROGKER || 0),
-    0,
-  );
-
-  const totalRealisasi = fpd.reduce((sum, d) => sum + (d.NOMINAL_FPD || 0), 0);
-
-  const progress =
-    totalAnggaran > 0
-      ? Math.min((totalRealisasi / totalAnggaran) * 100, 100)
-      : 0;
+  const disetujui = program.filter((p) => p.STATUS === "DISETUJUI").length;
 
   const getNamaProgram = (id) => {
     const found = program.find((p) => p.ID_PROGRAM_KERJA === id);
@@ -54,15 +41,21 @@ export default function DashboardPIC() {
 
     if (total === 0) return 0;
 
-    return Math.min((realisasi / total) * 100, 100).toFixed(0);
+    return Math.min((realisasi / total) * 100, 100);
   };
+
+  const progress =
+    program.length > 0
+      ? program.reduce((sum, p) => {
+          return sum + getProgress(p.ID_PROGRAM_KERJA);
+        }, 0) / program.length
+      : 0;
 
   return (
     <div className="dashboard-wrapper">
       <SidebarPic />
 
       <main className="waka-container">
-        {/* ===== HEADER ===== */}
         <div className="header-card welcome-card">
           <div className="welcome-left">
             <h2 className="waka-title">Selamat Datang</h2>
@@ -80,7 +73,6 @@ export default function DashboardPIC() {
           </div>
         </div>
 
-        {/* ===== KPI STATUS (4) ===== */}
         <div className="waka-grid">
           <div className="card">
             <div className="card-top">
@@ -111,7 +103,6 @@ export default function DashboardPIC() {
           </div>
         </div>
 
-        {/* ===== AKTIVITAS TERBARU ===== */}
         <div className="main-grid">
           <div className="chart-card">
             <h4>Aktivitas Terbaru</h4>
@@ -155,7 +146,6 @@ export default function DashboardPIC() {
           </div>
         </div>
 
-        {/* ===== PROGRAM SAYA ===== */}
         <div className="chart-card">
           <h4>Program Saya</h4>
 
