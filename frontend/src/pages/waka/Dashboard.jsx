@@ -22,10 +22,10 @@ import {
 } from "react-icons/bs";
 
 export default function Dashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [rkt, setRkt] = useState([]);
   const [rka, setRka] = useState([]);
   const [fpd, setFpd] = useState([]);
+  const [open, setOpen] = useState(false);
 
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
@@ -151,7 +151,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
-      <SidebarWaka />
+      <div className={`sidebar ${open ? "active" : ""}`}>
+        <SidebarWaka />
+      </div>
 
       <main className="waka-container">
         <div className="header-card welcome-card">

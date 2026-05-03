@@ -488,10 +488,6 @@
   color: #265f9c;
 }
 
-/* ========================= */
-/* FIX MOBILE FINAL */
-/* ========================= */
-
 @media (max-width: 768px) {
   /* 1. SEMBUNYIKAN SIDEBAR TOTAL */
   aside,
@@ -514,9 +510,20 @@
     box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
   }
 
-  /* 3. KONTEN UTAMA JADI FULL */
-  .dashboard-wrapper {
-    display: block !important;
+  @media (max-width: 768px) {
+    .dashboard-wrapper {
+      flex-direction: row !important;
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    .waka-container {
+      flex: 1;
+      width: calc(100% - 240px);
+    }
   }
 
   .waka-container {
@@ -527,7 +534,6 @@
     flex: none !important;
   }
 
-  /* 4. HEADER & FILTER */
   .header-card {
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -536,7 +542,6 @@
     height: auto !important;
   }
 
-  /* Penyesuaian judul agar sejajar dengan tombol */
   .welcome-left {
     width: 100%;
   }
