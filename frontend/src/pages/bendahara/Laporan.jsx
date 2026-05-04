@@ -3,20 +3,16 @@ import "../../styles/bendahara/Laporan.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 export default function Laporan() {
-  const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU"];
+  const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU", "Yayasan"];
 
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
-  // FILTER
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
 
-  // =========================
-  // LOAD DATA
-  // =========================
   const loadData = () => {
     let baseUrl = "";
 
@@ -26,6 +22,8 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
     } else {
       setData([]);
       setTotal(0);
@@ -53,6 +51,16 @@ export default function Laporan() {
   // EXPORT
   // =========================
   const handleExportExcel = () => {
+    let baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+
+    if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    } else if (active === "BKU") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
+    }
+
     const params = new URLSearchParams({
       start,
       end,
@@ -60,13 +68,20 @@ export default function Laporan() {
       type: "excel",
     });
 
-    window.open(
-      `http://127.0.0.1:8000/api/laporan/penerimaan?${params.toString()}`,
-      "_blank",
-    );
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
   const handleExportPDF = () => {
+    let baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+
+    if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    } else if (active === "BKU") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
+    }
+
     const params = new URLSearchParams({
       start,
       end,
@@ -74,18 +89,12 @@ export default function Laporan() {
       type: "pdf",
     });
 
-    window.open(
-      `http://127.0.0.1:8000/api/laporan/penerimaan?${params.toString()}`,
-      "_blank",
-    );
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
-
-  const saldo = total;
 
   return (
     <div style={{ padding: "30px" }}>
@@ -107,9 +116,7 @@ export default function Laporan() {
       {/* ================= PENERIMAAN ================= */}
       {active === "Penerimaan" && (
         <>
-          {/* HEADER */}
           <div className="laporan-header">
-            {/* LEFT (EXPORT BUTTONS) */}
             <div className="laporan-actions">
               <button className="btn-outline excel" onClick={handleExportExcel}>
                 <i className="bi bi-file-earmark-excel"></i>
@@ -122,7 +129,6 @@ export default function Laporan() {
               </button>
             </div>
 
-            {/* RIGHT (FILTER) */}
             <div className="laporan-filter">
               <input
                 type="date"
@@ -150,7 +156,6 @@ export default function Laporan() {
             </div>
           </div>
 
-          {/* TABLE */}
           <div className="laporan-table">
             <table>
               <thead>
@@ -159,8 +164,7 @@ export default function Laporan() {
                   <th>Tanggal</th>
                   <th>Kategori</th>
                   <th>Keterangan</th>
-                  <th>Pemasukan</th>
-                  <th>Pengeluaran</th>
+                  <th>Nominal</th>
                 </tr>
               </thead>
 
@@ -174,35 +178,28 @@ export default function Laporan() {
                       </td>
                       <td>{item.jenis}</td>
                       <td>{item.uraian}</td>
-                      <td>
+
+                      <td className="nominal">
                         Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}
                       </td>
-                      <td>-</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
+                    <td colSpan="5" style={{ textAlign: "center" }}>
                       Tidak ada data
                     </td>
                   </tr>
                 )}
               </tbody>
-
               <tfoot>
                 <tr>
                   <td colSpan="4" style={{ textAlign: "right" }}>
                     TOTAL
                   </td>
-                  <td>Rp {total.toLocaleString("id-ID")}</td>
-                  <td>-</td>
-                </tr>
-
-                <tr>
-                  <td colSpan="4" style={{ textAlign: "right" }}>
-                    SALDO
+                  <td style={{ textAlign: "right", fontWeight: "600" }}>
+                    Rp {total.toLocaleString("id-ID")}
                   </td>
-                  <td colSpan="2">Rp {saldo.toLocaleString("id-ID")}</td>
                 </tr>
               </tfoot>
             </table>
@@ -218,12 +215,14 @@ export default function Laporan() {
               <table>
                 <thead>
                   <tr>
-                    <th>Coming Soon</th>
+                    <th>{active}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ textAlign: "center" }}>Fitur belum dibuat</td>
+                    <td style={{ textAlign: "center" }}>
+                      Fitur {active} belum dibuat
+                    </td>
                   </tr>
                 </tbody>
               </table>
