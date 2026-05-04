@@ -396,3 +396,13 @@ body {
 .laporan-actions .btn-outline i {
   font-size: 14px;
 }
+
+/* ========================= */
+/* TITLE */
+/* ========================= */
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
