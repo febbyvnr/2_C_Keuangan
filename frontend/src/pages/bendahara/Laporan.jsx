@@ -13,7 +13,6 @@ export default function Laporan() {
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
 
-  // 🔥 PAGINATION STATE
   const [page, setPage] = useState(1);
   const perPage = 10;
 
@@ -52,6 +51,44 @@ export default function Laporan() {
       });
   };
 
+  const handleExportExcel = () => {
+    let baseUrl = "";
+
+    if (active === "Penerimaan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+    } else if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    }
+
+    const params = new URLSearchParams({
+      start,
+      end,
+      sumber_dana: sumberDana,
+      type: "excel",
+    });
+
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
+  };
+
+  const handleExportPDF = () => {
+    let baseUrl = "";
+
+    if (active === "Penerimaan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+    } else if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    }
+
+    const params = new URLSearchParams({
+      start,
+      end,
+      sumber_dana: sumberDana,
+      type: "pdf",
+    });
+
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
+  };
+
   useEffect(() => {
     loadData();
   }, [active]);
@@ -87,12 +124,12 @@ export default function Laporan() {
         <>
           <div className="laporan-header">
             <div className="laporan-actions">
-              <button className="btn-outline excel">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
                 <i className="bi bi-file-earmark-excel"></i>
                 Export Excel
               </button>
 
-              <button className="btn-outline pdf">
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
                 <i className="bi bi-file-earmark-pdf"></i>
                 Export PDF
               </button>
