@@ -262,12 +262,15 @@ body {
 /* ========================= */
 .laporan-total-card {
   background: #ffffff;
-  padding: 10px 16px;
-  border-radius: 12px;
+  padding: 12px 18px;
+  border-radius: 14px;
+
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 14px;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .laporan-total-card span {
