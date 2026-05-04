@@ -228,33 +228,71 @@ body {
 }
 
 /* ========================= */
-/* PAGINATION */
+/* PAGINATION PERFECT FIX */
 /* ========================= */
+
 .laporan-pagination {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
 }
 
-.laporan-pagination button {
-  border: 1px solid #e5e7eb;
-  background: white;
-  padding: 6px 10px;
+/* RESET BIAR GA KETIBAN */
+.laporan-pagination .page-btn {
+  all: unset; /* tetap dipakai */
+
+  width: 30px; /* 🔥 dari 38 → 30 */
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border-radius: 8px;
+  border: 1px solid #e5e7eb;
+
+  background: #ffffff;
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 500;
+
   cursor: pointer;
-  font-size: 13px;
-  color: var(--text-main);
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
-.laporan-pagination button:hover {
-  background: #f1f5f9;
+.laporan-pagination .page-btn.arrow {
+  color: #6b7280;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.laporan-pagination button.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
+/* HOVER */
+.laporan-pagination .page-btn:hover {
+  border-color: #cbd5f5;
+  background: #f9fafb;
+  color: #265f9c;
+}
+
+/* ACTIVE PAGE */
+.laporan-pagination .page-btn.active {
+  background: #265f9c;
+  color: #ffffff;
+  border-color: #265f9c;
+  font-weight: 600;
+}
+
+/* FOCUS EFFECT */
+.laporan-pagination .page-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(38, 95, 156, 0.18);
+}
+
+/* DISABLED (panah kiri) */
+.laporan-pagination .page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ========================= */

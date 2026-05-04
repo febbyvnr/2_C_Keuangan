@@ -174,21 +174,29 @@ export default function Laporan() {
 
             {/* tengah */}
             <div className="laporan-pagination">
-              <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+              {/* kiri */}
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
                 ‹
               </button>
 
+              {/* angka */}
               {[...Array(totalPage)].map((_, i) => (
                 <button
                   key={i}
-                  className={page === i + 1 ? "active" : ""}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
                   onClick={() => setPage(i + 1)}
                 >
                   {i + 1}
                 </button>
               ))}
 
+              {/* kanan */}
               <button
+                className="page-btn arrow"
                 onClick={() => setPage(page + 1)}
                 disabled={page === totalPage}
               >
