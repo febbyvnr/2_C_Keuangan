@@ -13,6 +13,10 @@ export default function Laporan() {
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
 
+  // 🔥 PAGINATION STATE
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
   const loadData = () => {
     let baseUrl = "";
 
@@ -40,6 +44,7 @@ export default function Laporan() {
       .then((res) => {
         setData(res.data || []);
         setTotal(res.total || 0);
+        setPage(1); // reset page
       })
       .catch(() => {
         setData([]);
@@ -47,60 +52,25 @@ export default function Laporan() {
       });
   };
 
-  // =========================
-  // EXPORT
-  // =========================
-  const handleExportExcel = () => {
-    let baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
-
-    if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
-    } else if (active === "BKU") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Yayasan") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
-    }
-
-    const params = new URLSearchParams({
-      start,
-      end,
-      sumber_dana: sumberDana,
-      type: "excel",
-    });
-
-    window.open(`${baseUrl}?${params.toString()}`, "_blank");
-  };
-
-  const handleExportPDF = () => {
-    let baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
-
-    if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
-    } else if (active === "BKU") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Yayasan") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
-    }
-
-    const params = new URLSearchParams({
-      start,
-      end,
-      sumber_dana: sumberDana,
-      type: "pdf",
-    });
-
-    window.open(`${baseUrl}?${params.toString()}`, "_blank");
-  };
-
   useEffect(() => {
     loadData();
   }, [active]);
+
+  // =========================
+  // PAGINATION LOGIC
+  // =========================
+  const totalData = data.length;
+  const totalPage = Math.ceil(totalData / perPage);
+
+  const startIndex = (page - 1) * perPage;
+  const endIndex = startIndex + perPage;
+
+  const currentData = data.slice(startIndex, endIndex);
 
   return (
     <div style={{ padding: "30px" }}>
       <h2>Laporan</h2>
 
-      {/* ================= TAB ================= */}
       <div className="laporan-tabs">
         {tabs.map((tab) => (
           <div
@@ -113,17 +83,16 @@ export default function Laporan() {
         ))}
       </div>
 
-      {/* ================= PENERIMAAN ================= */}
       {active === "Penerimaan" && (
         <>
           <div className="laporan-header">
             <div className="laporan-actions">
-              <button className="btn-outline excel" onClick={handleExportExcel}>
+              <button className="btn-outline excel">
                 <i className="bi bi-file-earmark-excel"></i>
                 Export Excel
               </button>
 
-              <button className="btn-outline pdf" onClick={handleExportPDF}>
+              <button className="btn-outline pdf">
                 <i className="bi bi-file-earmark-pdf"></i>
                 Export PDF
               </button>
@@ -156,6 +125,7 @@ export default function Laporan() {
             </div>
           </div>
 
+          {/* ================= TABLE ================= */}
           <div className="laporan-table">
             <table>
               <thead>
@@ -169,16 +139,15 @@ export default function Laporan() {
               </thead>
 
               <tbody>
-                {data.length > 0 ? (
-                  data.map((item, i) => (
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
                     <tr key={i}>
-                      <td>{i + 1}</td>
+                      <td>{startIndex + i + 1}</td>
                       <td>
                         {new Date(item.tanggal).toLocaleDateString("id-ID")}
                       </td>
                       <td>{item.jenis}</td>
                       <td>{item.uraian}</td>
-
                       <td className="nominal">
                         Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}
                       </td>
@@ -192,22 +161,50 @@ export default function Laporan() {
                   </tr>
                 )}
               </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="4" style={{ textAlign: "right" }}>
-                    TOTAL
-                  </td>
-                  <td style={{ textAlign: "right", fontWeight: "600" }}>
-                    Rp {total.toLocaleString("id-ID")}
-                  </td>
-                </tr>
-              </tfoot>
             </table>
+          </div>
+
+          {/* ================= FOOT AREA ================= */}
+          <div className="laporan-footer">
+            {/* kiri */}
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            {/* tengah */}
+            <div className="laporan-pagination">
+              <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={page === i + 1 ? "active" : ""}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            {/* kanan */}
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
           </div>
         </>
       )}
 
-      {/* ================= TAB LAIN ================= */}
       {active !== "Penerimaan" && (
         <div className="laporan-content">
           <div style={{ flex: 1 }}>

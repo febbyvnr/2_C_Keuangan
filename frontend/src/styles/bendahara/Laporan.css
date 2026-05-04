@@ -75,7 +75,6 @@ body {
   font-weight: 500;
 }
 
-/* EXCEL */
 .btn-outline.excel {
   border-color: var(--success);
   color: var(--success);
@@ -86,7 +85,6 @@ body {
   color: white;
 }
 
-/* PDF */
 .btn-outline.pdf {
   border-color: var(--error);
   color: var(--error);
@@ -205,6 +203,7 @@ body {
   width: 140px;
 }
 
+/* NOMINAL */
 .laporan-table .nominal {
   text-align: right !important;
   font-weight: 600;
@@ -212,16 +211,73 @@ body {
 }
 
 /* ========================= */
-/* FOOTER */
+/* 🔥 FOOTER BAR (NEW) */
 /* ========================= */
-.laporan-table tfoot tr {
-  font-weight: 600;
-  background: #f9fafb;
+.laporan-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 20px;
 }
 
-.laporan-table tfoot td {
+/* INFO KIRI */
+.laporan-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ========================= */
+/* PAGINATION */
+/* ========================= */
+.laporan-pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.laporan-pagination button {
+  border: 1px solid #e5e7eb;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-main);
+  transition: 0.2s;
+}
+
+.laporan-pagination button:hover {
+  background: #f1f5f9;
+}
+
+.laporan-pagination button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ========================= */
+/* TOTAL CARD */
+/* ========================= */
+.laporan-total-card {
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 14px;
-  color: #111827;
+}
+
+.laporan-total-card span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.laporan-total-card strong {
+  color: var(--primary);
+  font-weight: 700;
 }
 
 /* ========================= */
@@ -240,6 +296,15 @@ body {
 
   .laporan-actions {
     justify-content: flex-start;
+  }
+
+  .laporan-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .laporan-pagination {
+    justify-content: center;
   }
 }
 
