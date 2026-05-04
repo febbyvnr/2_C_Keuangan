@@ -130,6 +130,21 @@ export default function RKT() {
     });
   }, [data, search, statusFilter]);
 
+  const totalFilteredData = filteredData.length;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalFilteredData / pagination.perPage)
+  );
+
+  const startIndex = (pagination.currentPage - 1) * pagination.perPage;
+  const endIndex = startIndex + pagination.perPage;
+
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  const showingStart = totalFilteredData === 0 ? 0 : startIndex + 1;
+  const showingEnd = Math.min(endIndex, totalFilteredData);
+
   const fetchRkt = async (customSearch = search, page = 1) => {
     try {
       setLoading(true);
@@ -171,10 +186,10 @@ export default function RKT() {
 
       setData(rows);
       setPagination({
-        currentPage,
-        lastPage,
+        currentPage: page,
+        lastPage: Math.max(1, Math.ceil(rows.length / perPage)),
         perPage,
-        total,
+        total: rows.length,
       });
 
       setSelectedId((prev) => {
@@ -225,6 +240,24 @@ export default function RKT() {
     setSearch("");
     setStatusFilter("");
     fetchRkt("", 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleChangePage = (nextPage) => {
+    if (nextPage < 1 || nextPage > totalPages) return;
+
+    setPagination((current) => ({
+      ...current,
+      currentPage: nextPage,
+      lastPage: totalPages,
+      total: totalFilteredData,
+    }));
+
+    const nextStartIndex = (nextPage - 1) * pagination.perPage;
+    const nextItem = filteredData[nextStartIndex];
+
+    setSelectedId(nextItem?.ID_PROGRAM_KERJA || null);
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -366,6 +399,10 @@ export default function RKT() {
                             onClick={() => {
                               setStatusFilter(option.value);
                               setStatusDropdownOpen(false);
+                              setPagination((current) => ({
+                                ...current,
+                                currentPage: 1,
+                              }));
                             }}
                           >
                             {option.label}
@@ -406,8 +443,8 @@ export default function RKT() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredData.length > 0 ? (
-                          filteredData.map((item, index) => {
+                        {paginatedData.length > 0 ? (
+                          paginatedData.map((item, index) => {
 
                             return (
                               <tr
@@ -461,21 +498,14 @@ export default function RKT() {
 
                   <div className="rkt-pagination">
                     <span className="rkt-pagination-info">
-                      Menampilkan{" "}
-                      {filteredData.length > 0 ? 1 : 0}
-                      {" - "}
-                      {filteredData.length}
-                      {" dari "}
-                      {data.length} data
+                      Menampilkan {showingStart} - {showingEnd} dari {totalFilteredData} data
                     </span>
 
                     <div className="rkt-pagination-actions">
                       <button
                         className="rkt-page-btn"
                         disabled={pagination.currentPage === 1}
-                        onClick={() =>
-                          fetchRkt(search, pagination.currentPage - 1)
-                        }
+                        onClick={() => handleChangePage(pagination.currentPage - 1)}
                       >
                         ‹
                       </button>
@@ -486,12 +516,8 @@ export default function RKT() {
 
                       <button
                         className="rkt-page-btn"
-                        disabled={
-                          pagination.currentPage === pagination.lastPage
-                        }
-                        onClick={() =>
-                          fetchRkt(search, pagination.currentPage + 1)
-                        }
+                        disabled={pagination.currentPage === totalPages}
+                        onClick={() => handleChangePage(pagination.currentPage + 1)}
                       >
                         ›
                       </button>
