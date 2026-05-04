@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanPenerimaanExport;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
 
 class LaporanPenerimaanController extends Controller
 {
@@ -18,8 +18,7 @@ class LaporanPenerimaanController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        // FIX: ambil NIP dari request atau login
-        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+        $nip = Auth::check() ? Auth::user()->nip : null;
 
         $authRole = Auth::check() ? Auth::user()->role : null;
 
@@ -29,18 +28,16 @@ class LaporanPenerimaanController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        // FIX UTAMA
         $role = $dbRole ?? $authRole;
-        $role = trim($role);
 
-        // VALIDASI ROLE
-        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+        $role = strtolower(trim($role));
+
+        if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
             return response()->json([
-                'message' => 'Role tidak diizinkan generate laporan'
+                'message' => 'Role tidak diizinkan mengakses laporan'
             ], 403);
         }
 
-        // EXCEL
         if ($type == 'excel') {
             return Excel::download(
                 new LaporanPenerimaanExport($start, $end, $sumberDana, $role, $nip),
@@ -48,7 +45,6 @@ class LaporanPenerimaanController extends Controller
             );
         }
 
-        // QUERY UTAMA (PDF & JSON)
         $query = DB::table('TR_PENERIMAAN as p')
             ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
             ->join('REF_SUMBER_DANA as rd', 'p.ID_REF_DANA', '=', 'rd.ID_REF_DANA')
@@ -72,16 +68,15 @@ class LaporanPenerimaanController extends Controller
         $data = $query->get();
         $total = $data->sum('jumlah');
 
-        // PDF
         if (strtolower(trim($type)) === 'pdf') {
 
-        $pdf = Pdf::loadView(
-             'exports.LaporanPenerimaan_pdf',
-            compact('data', 'total', 'start', 'end', 'role', 'nip') 
-        );
+            $pdf = Pdf::loadView(
+                'exports.LaporanPenerimaan_pdf',
+                compact('data', 'total', 'start', 'end', 'role', 'nip')
+            );
 
-        return $pdf->download('Laporan_Penerimaan.pdf');
-    }
+            return $pdf->download('Laporan_Penerimaan.pdf');
+        }
 
         return response()->json([
             'data' => $data,
