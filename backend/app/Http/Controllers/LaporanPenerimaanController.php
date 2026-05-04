@@ -18,26 +18,34 @@ class LaporanPenerimaanController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        $nip = Auth::check() ? Auth::user()->nip : null;
+        // ✅ FIX: ambil dari request atau login
+        $nip = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
 
+        // ✅ FIX: ambil role dari auth (backup)
         $authRole = Auth::check() ? Auth::user()->role : null;
 
+        // ✅ ambil role dari database
         $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
             ->where('tj.NIP_KARYAWAN', $nip)
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
+        // ✅ prioritas DB, fallback ke auth
         $role = $dbRole ?? $authRole;
 
         $role = strtolower(trim($role));
 
+        // ✅ VALIDASI ROLE
         if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
             return response()->json([
                 'message' => 'Role tidak diizinkan mengakses laporan'
             ], 403);
         }
 
+        // =========================
+        // EXPORT EXCEL
+        // =========================
         if ($type == 'excel') {
             return Excel::download(
                 new LaporanPenerimaanExport($start, $end, $sumberDana, $role, $nip),
@@ -45,6 +53,9 @@ class LaporanPenerimaanController extends Controller
             );
         }
 
+        // =========================
+        // QUERY DATA
+        // =========================
         $query = DB::table('TR_PENERIMAAN as p')
             ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
             ->join('REF_SUMBER_DANA as rd', 'p.ID_REF_DANA', '=', 'rd.ID_REF_DANA')
@@ -68,6 +79,9 @@ class LaporanPenerimaanController extends Controller
         $data = $query->get();
         $total = $data->sum('jumlah');
 
+        // =========================
+        // EXPORT PDF
+        // =========================
         if (strtolower(trim($type)) === 'pdf') {
 
             $pdf = Pdf::loadView(
@@ -78,6 +92,9 @@ class LaporanPenerimaanController extends Controller
             return $pdf->download('Laporan_Penerimaan.pdf');
         }
 
+        // =========================
+        // RESPONSE JSON
+        // =========================
         return response()->json([
             'data' => $data,
             'total' => $total
