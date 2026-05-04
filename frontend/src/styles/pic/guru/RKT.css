@@ -1056,3 +1056,36 @@ body:has(.sidebar-container.collapsed) .rkt-subtitle {
   padding-left: 58px;
   font-size: 13px;
 }
+
+.rkt-main,
+.rkt-wrapper,
+.rkt-content-section,
+.rkt-table-card {
+  min-width: 0;
+}
+
+.rkt-table-card {
+  overflow: visible;
+}
+
+.rkt-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rkt-table {
+  width: 100%;
+  min-width: 760px;
+}
+
+.rkt-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.rkt-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
