@@ -5,6 +5,7 @@
         body { 
             font-family: sans-serif; 
             position: relative;
+            font-size: 12px;
         }
 
         table { 
@@ -18,8 +19,32 @@
             text-align: center;
         }
 
+        /* 🔥 HEADER TABEL (LEBIH RAPI) */
         th { 
-            background: #f5f5f5; 
+            background: #f1f5f9; /* abu modern */
+            font-weight: 700;
+            color: #374151;
+        }
+
+        /* 🔥 ISI TABEL (LEBIH CLEAN) */
+        td {
+            color: #1a1a1a;
+            font-weight: 400;
+        }
+
+        /* 🔥 NOMINAL RATA KANAN */
+        td:last-child {
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        /* 🔥 TOTAL */
+        tr:last-child td {
+            font-weight: bold;
+        }
+
+        tr:last-child td:first-child {
+            text-align: right;
         }
 
         .no-border td {
@@ -140,7 +165,6 @@
         $nama = 'Rina Putri, S.E.';
     }
 
-    //  NIP dari controller (DB)
     $nip = $nip ?? '-';
 @endphp
 
