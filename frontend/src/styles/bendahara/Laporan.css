@@ -213,7 +213,7 @@ body {
 }
 
 /* ========================= */
-/* 🔥 FOOTER BAR (NEW) */
+/* FOOTER BAR */
 /* ========================= */
 .laporan-footer {
   display: flex;
@@ -242,9 +242,9 @@ body {
 
 /* RESET BIAR GA KETIBAN */
 .laporan-pagination .page-btn {
-  all: unset; /* tetap dipakai */
+  all: unset;
 
-  width: 30px; /* 🔥 dari 38 → 30 */
+  width: 30px;
   height: 30px;
 
   display: flex;
