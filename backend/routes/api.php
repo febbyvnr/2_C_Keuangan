@@ -219,7 +219,7 @@ Route::prefix('ref-visi-misi')->group(function () {
 });
 
 Route::prefix('ref-pm')->group(function () {
-    Route::get('/', [RefPmController::class, 'index']);Route::get('/export/excel', [RefPmController::class, 'exportExcel']);
+    Route::get('/', [RefPmController::class, 'index']);
     Route::put('/evaluasi/{id}', [RefPmController::class, 'updateEvaluasi']);
     Route::post('/store', [RefPmController::class, 'store']);
     Route::get('/search', [RefPmController::class, 'search']);
