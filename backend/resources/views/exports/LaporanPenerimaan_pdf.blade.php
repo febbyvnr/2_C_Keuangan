@@ -19,26 +19,22 @@
             text-align: center;
         }
 
-        /* 🔥 HEADER TABEL (LEBIH RAPI) */
         th { 
-            background: #f1f5f9; /* abu modern */
-            font-weight: 700;
-            color: #374151;
+            background: #e5e7eb; 
+            font-weight: bold;
+            color: #000000; 
         }
 
-        /* 🔥 ISI TABEL (LEBIH CLEAN) */
         td {
             color: #1a1a1a;
-            font-weight: 400;
+            font-weight: normal;
         }
 
-        /* 🔥 NOMINAL RATA KANAN */
         td:last-child {
             text-align: right;
             padding-right: 10px;
         }
 
-        /* 🔥 TOTAL */
         tr:last-child td {
             font-weight: bold;
         }
@@ -53,16 +49,24 @@
 
         .header-text {
             text-align: center;
+            width: 100%;
         }
 
         .title-main {
             font-size: 18px;
             font-weight: bold;
+            text-align: center;
         }
 
         .title-sub {
             font-size: 16px;
             font-weight: bold;
+            text-align: center;
+        }
+
+        .header-text span {
+            display: block;
+            text-align: center;
         }
 
         .watermark {
