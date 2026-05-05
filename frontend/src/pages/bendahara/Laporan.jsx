@@ -301,7 +301,7 @@ export default function Laporan() {
       {active === "BKU" && (
         <>
           <div className="laporan-header">
-            <div className="laporan-actions">
+            <div className="laporan-actions bku-actions">
               <button className="btn-outline excel" onClick={handleExportExcel}>
                 <i className="bi bi-file-earmark-excel"></i>
                 Export Excel
@@ -314,7 +314,7 @@ export default function Laporan() {
             </div>
 
             {/* TAB BKU */}
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="bku-tab-container">
               {[
                 { label: "BKU", value: "bku" },
                 { label: "Tunai", value: "p1" },
@@ -322,9 +322,7 @@ export default function Laporan() {
               ].map((tab) => (
                 <button
                   key={tab.value}
-                  className={`btn ${
-                    bkuTab === tab.value ? "btn-primary" : "btn-outline"
-                  }`}
+                  className={`bku-tab ${bkuTab === tab.value ? "active" : ""}`}
                   onClick={() => setBkuTab(tab.value)}
                 >
                   {tab.label}
