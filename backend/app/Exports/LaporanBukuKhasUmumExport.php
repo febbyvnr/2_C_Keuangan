@@ -15,21 +15,28 @@ class LaporanBukuKhasUmumExport implements WithMultipleSheets
     protected $role;
     protected $nip; 
 
-    public function __construct($bku, $p1, $p2, $role = 'Bendahara', $nip = null) 
+    protected $nama;
+    protected $nip_ttd;
+
+    public function __construct($bku, $p1, $p2, $role = 'Bendahara', $nip = null, $nama = null, $nip_ttd = null) 
     {
         $this->bku = $bku;
         $this->p1 = $p1;
         $this->p2 = $p2;
         $this->role = $role;
-        $this->nip = $nip; 
+        $this->nip = $nip;
+        $this->nama = $nama;
+        $this->nip_ttd = $nip_ttd;
     }
 
-    public function sheets(): array
+     public function sheets(): array
     {
         return [
-            new SheetBKU($this->bku, $this->role, $this->nip), 
-            new SheetBKUP1Tunai($this->p1, $this->role, $this->nip),
-            new SheetBKUP2Bank($this->p2, $this->role, $this->nip),
+            new SheetBKU($this->bku, $this->role, $this->nip, $this->nama, $this->nip_ttd), 
+
+            new SheetBKUP1Tunai($this->p1, $this->role, $this->nip, $this->nama, $this->nip_ttd),
+
+            new SheetBKUP2Bank($this->p2, $this->role, $this->nip, $this->nama, $this->nip_ttd),
         ];
     }
 }
