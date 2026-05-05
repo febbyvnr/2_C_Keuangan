@@ -398,6 +398,91 @@ body {
 }
 
 /* ========================= */
+/* BKU */
+/* ========================= */
+
+/* ===== CONTAINER ===== */
+.bku-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ========================= */
+/* EXPORT BUTTON (BKU ONLY) */
+/* ========================= */
+.bku-actions .btn-outline {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.bku-actions .btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.bku-actions .btn-outline i {
+  font-size: 14px;
+}
+
+/* ========================= */
+/* TAB BKU */
+/* ========================= */
+.bku-tab-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bku-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bku-tab:hover {
+  background: #e5e7eb;
+}
+
+.bku-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .bku-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bku-tab-container {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .bku-tab {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ========================= */
 /* TITLE */
 /* ========================= */
 h2 {
