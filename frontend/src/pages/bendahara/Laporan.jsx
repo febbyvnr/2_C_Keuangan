@@ -16,6 +16,8 @@ export default function Laporan() {
   const [page, setPage] = useState(1);
   const perPage = 10;
 
+  const [bkuTab, setBkuTab] = useState("bku");
+
   const loadData = () => {
     let baseUrl = "";
 
@@ -51,8 +53,25 @@ export default function Laporan() {
         return res.json();
       })
       .then((res) => {
-        setData(res.data || []);
-        setTotal(res.total || 0);
+        let selectedData = res.data || [];
+        let computedTotal = res.total || 0;
+
+        if (active === "BKU") {
+          if (bkuTab === "bku") {
+            selectedData = res.bku || [];
+          } else if (bkuTab === "p1") {
+            selectedData = res.tunai || [];
+          } else if (bkuTab === "p2") {
+            selectedData = res.bank || [];
+          }
+
+          computedTotal = selectedData.reduce((acc, item) => {
+            return acc + (item.saldo ?? item.jumlah ?? 0);
+          }, 0);
+        }
+
+        setData(selectedData);
+        setTotal(computedTotal);
         setPage(1);
       })
       .catch((err) => {
@@ -103,6 +122,12 @@ export default function Laporan() {
   useEffect(() => {
     loadData();
   }, [active]);
+
+  useEffect(() => {
+    if (active === "BKU") {
+      loadData();
+    }
+  }, [bkuTab]);
 
   // =========================
   // PAGINATION LOGIC
@@ -261,7 +286,129 @@ export default function Laporan() {
         </>
       )}
 
-      {active !== "Penerimaan" && (
+      {/* ================= BKU ================= */}
+      {active === "BKU" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                Export PDF
+              </button>
+            </div>
+
+            {/* TAB BKU */}
+            <div style={{ display: "flex", gap: "10px" }}>
+              {[
+                { label: "BKU", value: "bku" },
+                { label: "Tunai (P1)", value: "p1" },
+                { label: "Bank (P2)", value: "p2" },
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  className={`btn ${
+                    bkuTab === tab.value ? "btn-primary" : "btn-outline"
+                  }`}
+                  onClick={() => setBkuTab(tab.value)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Uraian</th>
+                  <th>Debit</th>
+                  <th>Kredit</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+                      <td>
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </td>
+                      <td>{item.uraian}</td>
+                      <td>
+                        Rp {Number(item.debit ?? 0).toLocaleString("id-ID")}
+                      </td>
+                      <td>
+                        Rp {Number(item.kredit ?? 0).toLocaleString("id-ID")}
+                      </td>
+                      <td>
+                        Rp {Number(item.saldo ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER SAMA */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= SISANYA ================= */}
+      {!["Penerimaan", "BKU"].includes(active) && (
         <div className="laporan-content">
           <div style={{ flex: 1 }}>
             <div className="laporan-table">
