@@ -7,9 +7,9 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 
 class SheetBKUP1Tunai extends SheetBKU implements WithTitle
 {
-    public function __construct($data, $role, $nip = null)
+    public function __construct($data, $role, $nip = null, $nama = null, $nip_ttd = null)
     {
-        parent::__construct($data, $role, $nip);
+        parent::__construct($data, $role, $nip, $nama, $nip_ttd);
     }
 
     public function title(): string
@@ -19,17 +19,19 @@ class SheetBKUP1Tunai extends SheetBKU implements WithTitle
 
     public function registerEvents(): array
     {
-        $events = parent::registerEvents();
+        $parentEvents = parent::registerEvents();
 
-        $events[AfterSheet::class] = function ($event) {
+        $parentAfterSheet = $parentEvents[AfterSheet::class];
 
-            parent::registerEvents()[AfterSheet::class]($event);
+        return [
+            AfterSheet::class => function ($event) use ($parentAfterSheet) {
 
-            $sheet = $event->sheet;
+                $parentAfterSheet($event);
 
-            $sheet->setCellValue('A3', 'LAPORAN BUKU KAS UMUM - TUNAI (P1)');
-        };
+                $sheet = $event->sheet;
 
-        return $events;
+                $sheet->setCellValue('A3', 'LAPORAN BUKU KAS UMUM - TUNAI (P1)');
+            },
+        ];
     }
 }

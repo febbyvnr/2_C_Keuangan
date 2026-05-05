@@ -15,12 +15,16 @@ class SheetBKU implements WithEvents, WithTitle
     protected $data;
     protected $role;
     protected $nip;
+    protected $nama;
+    protected $nip_ttd;
 
-    public function __construct($data, $role = 'Bendahara', $nip = null) 
+    public function __construct($data, $role = 'Bendahara', $nip = null, $nama = null, $nip_ttd = null) 
     {
         $this->data = $data;
         $this->role = $role;
         $this->nip = $nip;
+        $this->nama = $nama;
+        $this->nip_ttd = $nip_ttd;
     }
 
     public function title(): string
@@ -95,17 +99,17 @@ class SheetBKU implements WithEvents, WithTitle
                 $no = 1;
                 $saldoAkhir = 0;
 
-                foreach ($this->data as $item) {
-                    $sheet->setCellValue("A$row", $no++);
-                    $sheet->setCellValue("B$row", $item->tanggal);
-                    $sheet->setCellValue("C$row", $item->uraian);
-                    $sheet->setCellValue("D$row", $item->debit);
-                    $sheet->setCellValue("E$row", $item->kredit);
-                    $sheet->setCellValue("F$row", $item->saldo);
+               foreach ($this->data as $item) {
+    $sheet->setCellValue("A$row", $no++);
+    $sheet->setCellValue("B$row", date('d-m-Y', strtotime($item['tanggal'])));
+    $sheet->setCellValue("C$row", $item['uraian'] ?? '-');
+    $sheet->setCellValue("D$row", $item['debit'] ?? 0);
+    $sheet->setCellValue("E$row", $item['kredit'] ?? 0);
+    $sheet->setCellValue("F$row", $item['saldo'] ?? 0);
 
-                    $saldoAkhir = $item->saldo;
-                    $row++;
-                }
+    $saldoAkhir = $item['saldo'] ?? 0;
+    $row++;
+}
 
                 $endData = $row - 1;
 
@@ -146,18 +150,10 @@ class SheetBKU implements WithEvents, WithTitle
                 // =====================
                 $footerRow = $totalRow + 4;
 
-                $role = $this->role;
+                $role = ucfirst($this->role ?? 'Bendahara');
+                $nama = $this->nama ?? '-';
+                $nip = $this->nip_ttd ?? '-';
 
-                if ($role === 'Kepala Sekolah') {
-                    $nama = 'Drs. Budi Santoso';
-                } else {
-                    $role = 'Bendahara';
-                    $nama = 'Rina Putri, S.E.';
-                }
-
-                $nip = $this->nip ?: '-';
-
-                // TTD (CENTER)
                 $sheet->mergeCells("B" . ($footerRow+1) . ":E" . ($footerRow+1));
                 $sheet->mergeCells("B" . ($footerRow+3) . ":E" . ($footerRow+3));
                 $sheet->mergeCells("B" . ($footerRow+7) . ":E" . ($footerRow+7));
@@ -175,7 +171,6 @@ class SheetBKU implements WithEvents, WithTitle
                 $sheet->getStyle("F" . ($footerRow+10))
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                // FREEZE
                 $sheet->freezePane("A7");
             },
         ];
