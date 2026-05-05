@@ -27,8 +27,7 @@ function Tagihan() {
 
   const [tagihanList, setTagihanList] = useState([]);
   const [siswaOptions, setSiswaOptions] = useState([]);
-  const [jenisPembayaranOptions, setJenisPembayaranOptions] = useState([]);
-
+  const [jenisTagihanOptions, setJenisTagihanOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -40,7 +39,7 @@ function Tagihan() {
 
   const initialForm = {
     ID_SISWA_TETAP: "",
-    ID_JENIS_PEMBAYARAN: "",
+    ID_JENIS_TAGIHAN: "",
     BULAN_TAGIHAN_SISWA: "",
     TAHUN_TAGIHAN_SISWA: "",
     JUMLAH_TAGIHAN_SISWA: "",
@@ -123,7 +122,7 @@ function Tagihan() {
     const sisa = Number(item.SISA_TAGIHAN ?? 0);
 
     if (sisa <= 0) return "Lunas";
-    if (totalBayar > 0) return "Belum Lunas";
+    if (totalBayar > 0) return "Cicilan";
     return "Belum Bayar";
   };
 
@@ -132,6 +131,7 @@ function Tagihan() {
       case "belum bayar":
       case "belum dibayar":
         return "belum-bayar";
+      case "cicilan":
       case "mengangsur":
       case "menunggu verifikasi":
       case "belum lunas":
@@ -156,12 +156,18 @@ function Tagihan() {
 
     const belumLunas = tagihanList.filter((item) => {
       const computedStatus = getComputedStatus(item).toLowerCase();
-      return computedStatus === "belum bayar" || computedStatus === "belum lunas";
+
+      return (
+        computedStatus === "belum bayar" ||
+        computedStatus === "cicilan" ||
+        computedStatus === "belum lunas"
+      );
     }).length;
 
     const lunas = tagihanList.filter((item) => {
       const computedStatus = getComputedStatus(item).toLowerCase();
-      return computedStatus === "lunas";
+
+      return computedStatus === "lunas" || computedStatus === "sudah bayar";
     }).length;
 
     const totalNominal = tagihanList.reduce(
@@ -176,7 +182,9 @@ function Tagihan() {
     return tagihanList.filter((item) => {
       const namaSiswa = item.SISWA?.NAMA_SISWA_TETAP || "";
       const jenisTagihan =
-        item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "";
+        item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+        item.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
+        "";
       const kode = String(item.ID_TAGIHAN_SISWA || "");
       const kelas = item.SISWA?.KELAS_SISWA || "";
       const computedStatus = getComputedStatus(item);
@@ -224,7 +232,7 @@ function Tagihan() {
   useEffect(() => {
     fetchTagihan();
     fetchSiswaOptions();
-    fetchJenisPembayaranOptions();
+    fetchJenisTagihanOptions();
   }, []);
 
   useEffect(() => {
@@ -283,15 +291,16 @@ function Tagihan() {
     }
   };
 
-  const fetchJenisPembayaranOptions = async () => {
+  const fetchJenisTagihanOptions = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/jenis-pembayaran`);
-      setJenisPembayaranOptions(Array.isArray(res.data?.data) ? res.data.data : []);
+      const res = await axios.get(`${API_BASE_URL}/ref-jenis-tagihan`);
+      setJenisTagihanOptions(Array.isArray(res.data?.data) ? res.data.data : []);
     } catch (error) {
       console.warn(
-        "Endpoint jenis pembayaran belum tersedia, dropdown jenis pembayaran masih kosong."
+        "Endpoint jenis tagihan belum tersedia, dropdown jenis tagihan masih kosong.",
+        error
       );
-      setJenisPembayaranOptions([]);
+      setJenisTagihanOptions([]);
     }
   };
 
@@ -336,7 +345,7 @@ function Tagihan() {
 
     if (
       !formData.ID_SISWA_TETAP ||
-      !formData.ID_JENIS_PEMBAYARAN ||
+      !formData.ID_JENIS_TAGIHAN ||
       !formData.BULAN_TAGIHAN_SISWA ||
       !formData.TAHUN_TAGIHAN_SISWA ||
       !formData.JUMLAH_TAGIHAN_SISWA ||
@@ -395,7 +404,7 @@ function Tagihan() {
     setSelectedId(item.ID_TAGIHAN_SISWA);
     setFormData({
       ID_SISWA_TETAP: siswaId,
-      ID_JENIS_PEMBAYARAN: item.ID_JENIS_PEMBAYARAN || "",
+      ID_JENIS_TAGIHAN: item.ID_JENIS_TAGIHAN || "",
       BULAN_TAGIHAN_SISWA: item.BULAN_TAGIHAN_SISWA || "",
       TAHUN_TAGIHAN_SISWA: item.TAHUN_TAGIHAN_SISWA || "",
       JUMLAH_TAGIHAN_SISWA: item.JUMLAH_TAGIHAN_SISWA || "",
@@ -546,21 +555,21 @@ function Tagihan() {
             </div>
 
             <div className="tagihan-form-group">
-              <label htmlFor="ID_JENIS_PEMBAYARAN">Jenis Tagihan</label>
+              <label htmlFor="ID_JENIS_TAGIHAN">Jenis Tagihan</label>
               <select
-                id="ID_JENIS_PEMBAYARAN"
-                name="ID_JENIS_PEMBAYARAN"
-                value={formData.ID_JENIS_PEMBAYARAN}
+                id="ID_JENIS_TAGIHAN"
+                name="ID_JENIS_TAGIHAN"
+                value={formData.ID_JENIS_TAGIHAN}
                 onChange={handleChange}
-                className={!formData.ID_JENIS_PEMBAYARAN ? "tagihan-select-placeholder" : ""}
+                className={!formData.ID_JENIS_TAGIHAN ? "tagihan-select-placeholder" : ""}
               >
                 <option value="">Pilih jenis tagihan</option>
-                {jenisPembayaranOptions.map((item) => (
+                {jenisTagihanOptions.map((item) => (
                   <option
-                    key={item.ID_JENIS_PEMBAYARAN}
-                    value={item.ID_JENIS_PEMBAYARAN}
+                    key={item.ID_JENIS_TAGIHAN}
+                    value={item.ID_JENIS_TAGIHAN}
                   >
-                    {item.DESKRIPSI_JENIS_PEMBAYARAN}
+                    {item.DESKRIPSI_JENIS_TAGIHAN}
                   </option>
                 ))}
               </select>
@@ -694,7 +703,7 @@ function Tagihan() {
             >
               <option value="Semua">Semua</option>
               <option value="Belum Bayar">Belum Bayar</option>
-              <option value="Belum Lunas">Belum Lunas</option>
+              <option value="Cicilan">Cicilan</option>
               <option value="Lunas">Lunas</option>
             </select>
           </div>
@@ -774,7 +783,9 @@ function Tagihan() {
                       </td>
 
                       <td>
-                        {item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}
+                        {item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+                          item.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
+                          "-"}
                       </td>
 
                       <td>
