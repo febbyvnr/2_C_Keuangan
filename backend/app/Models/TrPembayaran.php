@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RefJenisPembayaran;
+use App\Models\RefMetodePembayaran;
 use App\Models\RefTahunAnggaran;
 use App\Models\MstSiswa;
 use App\Models\TagihanSiswa;
+use App\Models\TrCicilan;
 
 class TrPembayaran extends Model
 {
@@ -16,11 +17,11 @@ class TrPembayaran extends Model
     protected $table = 'tr_pembayaran';
     protected $primaryKey = 'ID_PEMBAYARAN';
     public $timestamps = false;
-    public $incrementing = false;
+
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'ID_PEMBAYARAN',
         'ID_SISWA_TETAP',
         'KODE_TA',
         'ID_JENIS_PEMBAYARAN',
@@ -32,9 +33,24 @@ class TrPembayaran extends Model
         'NIP_VALIDATOR_PEMBAYARAN',
     ];
 
+    protected $casts = [
+        'ID_PEMBAYARAN' => 'integer',
+        'ID_SISWA_TETAP' => 'integer',
+        'KODE_TA' => 'integer',
+        'ID_JENIS_PEMBAYARAN' => 'integer',
+        'ID_TAGIHAN_SISWA' => 'integer',
+        'REF_ID_JENIS_PEMBAYARAN' => 'integer',
+        'TGL_BAYAR' => 'datetime',
+        'JUMLAH_BAYAR' => 'double',
+    ];
+
     public function cicilan()
     {
-        return $this->hasMany(TrCicilan::class, 'ID_PEMBAYARAN', 'ID_PEMBAYARAN');
+        return $this->hasMany(
+            TrCicilan::class,
+            'ID_PEMBAYARAN',
+            'ID_PEMBAYARAN'
+        );
     }
 
     public function tahunAnggaran()
@@ -46,12 +62,12 @@ class TrPembayaran extends Model
         );
     }
 
-    public function jenisPembayaran()
+    public function metodePembayaran()
     {
         return $this->belongsTo(
-            RefJenisPembayaran::class,
+            RefMetodePembayaran::class,
             'ID_JENIS_PEMBAYARAN',
-            'ID_JENIS_PEMBAYARAN'
+            'ID_METODE_PEMBAYARAN'
         );
     }
 

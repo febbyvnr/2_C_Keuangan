@@ -40,6 +40,8 @@ use App\Http\Controllers\LaporanPengeluaranController;
 
 use App\Http\Controllers\DashboardBendaharaController;
 use App\Http\Controllers\DashboardKepsekKeuanganController;
+use App\Http\Controllers\RefJenisTagihanController;
+use App\Http\Controllers\RefMetodePembayaranController;
 
 
 Route::get('/user', function (Request $request) {
@@ -268,13 +270,15 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
 });
 
+Route::get('/ref-jenis-tagihan', [RefJenisTagihanController::class, 'index']);
+Route::get('/ref-metode-pembayaran', [RefMetodePembayaranController::class, 'index']);
+
 Route::prefix('tagihan-siswa')->group(function () {
     Route::get('/', [TagihanSiswaController::class, 'index']);
     Route::get('/search', [TagihanSiswaController::class, 'search']);
     Route::get('/siswa-options', [TagihanSiswaController::class, 'getSiswaOptions']);
     Route::get('/export', [TagihanSiswaController::class, 'export']);
     Route::get('/export/excel', [TagihanSiswaController::class, 'exportExcel']);
-    Route::get('/export/csv', [TagihanSiswaController::class, 'exportCsv']);
     Route::get('/export/pdf', [TagihanSiswaController::class, 'exportPdf']);
     Route::get('/{id}', [TagihanSiswaController::class, 'show']);
     Route::post('/store', [TagihanSiswaController::class, 'store']);

@@ -24,6 +24,22 @@ function UtamaSiswaOrtu() {
       minimumFractionDigits: 0,
     }).format(Number(value || 0));
 
+  const formatTanggal = (value) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -75,19 +91,19 @@ function UtamaSiswaOrtu() {
 
       const sisa = Math.max(0, sisaAsli);
 
-      let status = "Belum Bayar";
+      let status = item.STATUS_TAGIHAN_SISWA || "Belum Bayar";
 
       if (sisa <= 0) {
-        status = "Lunas";
+        status = "Sudah Bayar";
       } else if (totalBayar > 0) {
-        status = "Belum Lunas";
+        status = "Cicilan";
       }
 
       return {
         id: item.ID_TAGIHAN_SISWA,
         tagihan:
-          item?.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN ||
-          item?.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN ||
+          item?.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+          item?.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
           "Tagihan",
         totalTagihan,
         totalBayar,
@@ -149,18 +165,19 @@ function UtamaSiswaOrtu() {
   }, [activeBills]);
 
   const sisaTagihanBulanIni = useMemo(() => {
-    const belumLunas = activeBills.filter((item) => item.status !== "Lunas");
-
-    return belumLunas.reduce(
-      (sum, item) => sum + Number(item.sisa || 0),
-      0
+    const belumLunas = activeBills.filter(
+      (item) => item.status !== "Sudah Bayar" && item.status !== "Lunas"
     );
+
+    return belumLunas.reduce((sum, item) => sum + Number(item.sisa || 0), 0);
   }, [activeBills]);
 
   const hasUnpaidBill = useMemo(() => {
     return activeBills.some(
       (item) =>
-        (item.status === "Belum Bayar" || item.status === "Belum Lunas") &&
+        (item.status === "Belum Bayar" ||
+          item.status === "Cicilan" ||
+          item.status === "Belum Lunas") &&
         Number(item.sisa || 0) > 0
     );
   }, [activeBills]);
@@ -177,21 +194,27 @@ function UtamaSiswaOrtu() {
   const renderStatusBadge = (status) => {
     let className = "status-badge";
 
-    if (status === "Lunas" || status === "Terverifikasi") {
+    if (
+      status === "Sudah Bayar" ||
+      status === "Lunas" ||
+      status === "Terverifikasi"
+    ) {
       className += " success";
     } else if (status === "Belum Bayar") {
       className += " danger";
-    } else if (status === "Belum Lunas") {
+    } else if (status === "Cicilan" || status === "Belum Lunas") {
       className += " info";
     } else if (status === "Menunggu Verifikasi") {
       className += " warning";
     }
 
-    return <span className={className}>{status}</span>;
+    const label = status === "Sudah Bayar" ? "Lunas" : status;
+
+    return <span className={className}>{label}</span>;
   };
 
   const renderActionButton = (status, billId) => {
-    if (status === "Lunas") {
+    if (status === "Lunas" || status === "Sudah Bayar") {
       return (
         <button className="action-btn action-btn-disabled" disabled>
           Lunas
@@ -220,7 +243,9 @@ function UtamaSiswaOrtu() {
   const handlePayNow = () => {
     const unpaidBill = activeBills.find(
       (item) =>
-        (item.status === "Belum Bayar" || item.status === "Belum Lunas") &&
+        (item.status === "Belum Bayar" ||
+          item.status === "Cicilan" ||
+          item.status === "Belum Lunas") &&
         Number(item.sisa || 0) > 0
     );
 
@@ -315,7 +340,9 @@ function UtamaSiswaOrtu() {
           </div>
 
           <button
-            className={`hero-button ${!hasUnpaidBill ? "hero-button-disabled" : ""}`}
+            className={`hero-button ${
+              !hasUnpaidBill ? "hero-button-disabled" : ""
+            }`}
             onClick={handlePayNow}
             disabled={!hasUnpaidBill}
           >
@@ -345,7 +372,7 @@ function UtamaSiswaOrtu() {
                   <thead>
                     <tr>
                       <th>No</th>
-                      <th>Tagihan</th>
+                      <th>Jenis Tagihan</th>
                       <th>Total Tagihan</th>
                       <th>Total Bayar</th>
                       <th>Sisa</th>
@@ -378,11 +405,14 @@ function UtamaSiswaOrtu() {
                 </table>
               </div>
 
-             {activeBills.length > 0 && (
+              {activeBills.length > 0 && (
                 <div className="portal-pagination">
                   <span className="portal-pagination-info">
                     Menampilkan {(activeBillPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
-                    {Math.min(activeBillPage * ITEMS_PER_PAGE, activeBills.length)}{" "}
+                    {Math.min(
+                      activeBillPage * ITEMS_PER_PAGE,
+                      activeBills.length
+                    )}{" "}
                     dari {activeBills.length} data
                   </span>
 
@@ -442,13 +472,13 @@ function UtamaSiswaOrtu() {
                           <td>
                             {(historyPage - 1) * ITEMS_PER_PAGE + index + 1}
                           </td>
-                          <td>{item.TGL_BAYAR || "-"}</td>
+                          <td>{formatTanggal(item.TGL_BAYAR)}</td>
                           <td>{formatRupiah(item.JUMLAH_BAYAR)}</td>
                           <td>
-                            {item?.jenis_pembayaran
-                              ?.DESKRIPSI_JENIS_PEMBAYARAN ||
-                              item?.jenisPembayaran
-                                ?.DESKRIPSI_JENIS_PEMBAYARAN ||
+                            {item?.metode_pembayaran
+                              ?.DESKRIPSI_METODE_PEMBAYARAN ||
+                              item?.metodePembayaran
+                                ?.DESKRIPSI_METODE_PEMBAYARAN ||
                               "-"}
                           </td>
                           <td>{item.ID_TAGIHAN_SISWA || "-"}</td>
@@ -467,8 +497,11 @@ function UtamaSiswaOrtu() {
                 <div className="portal-pagination">
                   <span className="portal-pagination-info">
                     Menampilkan {(historyPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
-                    {Math.min(historyPage * ITEMS_PER_PAGE, paymentHistory.length)} dari{" "}
-                    {paymentHistory.length} data
+                    {Math.min(
+                      historyPage * ITEMS_PER_PAGE,
+                      paymentHistory.length
+                    )}{" "}
+                    dari {paymentHistory.length} data
                   </span>
 
                   <div className="portal-pagination-actions">
@@ -476,7 +509,9 @@ function UtamaSiswaOrtu() {
                       type="button"
                       className="portal-page-btn"
                       disabled={historyPage === 1}
-                      onClick={() => setHistoryPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() =>
+                        setHistoryPage((prev) => Math.max(1, prev - 1))
+                      }
                     >
                       ‹
                     </button>
@@ -488,7 +523,9 @@ function UtamaSiswaOrtu() {
                       className="portal-page-btn"
                       disabled={historyPage === historyTotalPages}
                       onClick={() =>
-                        setHistoryPage((prev) => Math.min(historyTotalPages, prev + 1))
+                        setHistoryPage((prev) =>
+                          Math.min(historyTotalPages, prev + 1)
+                        )
                       }
                     >
                       ›
