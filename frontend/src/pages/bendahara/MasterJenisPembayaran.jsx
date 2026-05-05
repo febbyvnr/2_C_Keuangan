@@ -11,11 +11,11 @@ export default function MasterJenisPembayaran() {
     const [editId, setEditId] = useState(null); 
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({
-        key: "ID_JENIS_PEMBAYARAN",
+        key: "ID_METODE_PEMBAYARAN",
         direction: "desc"
     });
     const [form, setForm] = useState({
-        DESKRIPSI_JENIS_PEMBAYARAN: ""
+        DESKRIPSI_METODE_PEMBAYARAN: ""
     });
 
     const fetchData = async (keyword = "") => {
@@ -38,12 +38,13 @@ export default function MasterJenisPembayaran() {
         fetchData();
     }, []);
 
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
             setCurrentPage(1);
             fetchData(search);
-        }
-    };
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleSort = (key) => {
         let direction = "asc";
@@ -61,15 +62,15 @@ export default function MasterJenisPembayaran() {
     const filteredData = data.filter((item) => {
         const keyword = search.toLowerCase();
         return (
-            item.ID_JENIS_PEMBAYARAN?.toString().includes(keyword) ||
-            item.DESKRIPSI_JENIS_PEMBAYARAN?.toLowerCase().includes(keyword)
+            item.ID_METODE_PEMBAYARAN?.toString().includes(keyword) ||
+            item.DESKRIPSI_METODE_PEMBAYARAN?.toLowerCase().includes(keyword)
         );
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
         let valA = a[sortConfig.key] || "";
         let valB = b[sortConfig.key] || "";
-        if (sortConfig.key === "ID_JENIS_PEMBAYARAN") {
+        if (sortConfig.key === "ID_METODE_PEMBAYARAN") {
             valA = Number(valA);
             valB = Number(valB);
         } else {
@@ -90,9 +91,9 @@ export default function MasterJenisPembayaran() {
     
     const handleEdit = (item) => {
         setIsEdit(true);
-        setEditId(item.ID_JENIS_PEMBAYARAN);
+        setEditId(item.ID_METODE_PEMBAYARAN);
         setForm({
-            DESKRIPSI_JENIS_PEMBAYARAN: item.DESKRIPSI_JENIS_PEMBAYARAN || ""
+            DESKRIPSI_METODE_PEMBAYARAN: item.DESKRIPSI_METODE_PEMBAYARAN || ""
         });
         setShowModal(true);
     };
@@ -136,15 +137,15 @@ export default function MasterJenisPembayaran() {
         setIsEdit(false);
         setEditId(null);
         setForm({
-            DESKRIPSI_JENIS_PEMBAYARAN: ""
+            DESKRIPSI_METODE_PEMBAYARAN: ""
         });
     };
 
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
     const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
+    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+    const totalData = sortedData.length;
     const startData = totalData === 0 ? 0 : indexOfFirst + 1;
     const endData = Math.min(indexOfLast, totalData);
 
@@ -202,7 +203,6 @@ export default function MasterJenisPembayaran() {
                             placeholder="Cari jenis pembayaran..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
@@ -215,7 +215,7 @@ export default function MasterJenisPembayaran() {
                             setIsEdit(false);
                             setEditId(null);
                             setForm({
-                                DESKRIPSI_JENIS_PEMBAYARAN: ""
+                                DESKRIPSI_METODE_PEMBAYARAN: ""
                             });
                             setShowModal(true);
                         }}
@@ -228,11 +228,11 @@ export default function MasterJenisPembayaran() {
                 <table className="jenis-pembayaran-table">
                     <thead>
                         <tr>
-                            <th onClick={() => handleSort("ID_JENIS_PEMBAYARAN")}>
-                                ID <i className={getIcon("ID_JENIS_PEMBAYARAN")}></i>
+                            <th onClick={() => handleSort("ID_METODE_PEMBAYARAN")}>
+                                ID <i className={getIcon("ID_METODE_PEMBAYARAN")}></i>
                             </th>
-                            <th onClick={() => handleSort("DESKRIPSI_JENIS_PEMBAYARAN")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_JENIS_PEMBAYARAN")}></i>
+                            <th onClick={() => handleSort("DESKRIPSI_METODE_PEMBAYARAN")}>
+                                Deskripsi <i className={getIcon("DESKRIPSI_METODE_PEMBAYARAN")}></i>
                             </th>
                             <th>Aksi</th>
                         </tr>
@@ -252,9 +252,9 @@ export default function MasterJenisPembayaran() {
                             </tr>
                         ) : (
                             currentData.map((item) => (
-                                <tr key={item.ID_JENIS_PEMBAYARAN}>
-                                    <td>{item.ID_JENIS_PEMBAYARAN}</td>
-                                    <td>{item.DESKRIPSI_JENIS_PEMBAYARAN}</td>
+                                <tr key={item.ID_METODE_PEMBAYARAN}>
+                                    <td>{item.ID_METODE_PEMBAYARAN}</td>
+                                    <td>{item.DESKRIPSI_METODE_PEMBAYARAN}</td>
                                     <td className="aksi">
                                         <button className="btn-edit" onClick={() => handleEdit(item)}>
                                             <i className="bi bi-pencil"></i>
@@ -268,7 +268,7 @@ export default function MasterJenisPembayaran() {
                                                     : "Hapus Jenis Pembayaran"
                                             }
                                             onClick={() =>
-                                                handleDelete(item.ID_JENIS_PEMBAYARAN)
+                                                handleDelete(item.ID_METODE_PEMBAYARAN)
                                             }
                                         >
                                             <i className="bi bi-trash"></i>
@@ -320,8 +320,8 @@ export default function MasterJenisPembayaran() {
                             <label>Deskripsi Jenis Pembayaran</label>
                             <input
                                 type="text"
-                                name="DESKRIPSI_JENIS_PEMBAYARAN"
-                                value={form.DESKRIPSI_JENIS_PEMBAYARAN}
+                                name="DESKRIPSI_METODE_PEMBAYARAN"
+                                value={form.DESKRIPSI_METODE_PEMBAYARAN}
                                 onChange={handleChange}
                                 placeholder="Masukkan deskripsi"
                             />
