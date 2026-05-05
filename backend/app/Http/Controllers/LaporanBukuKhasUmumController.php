@@ -36,23 +36,15 @@ class LaporanBukuKhasUmumController extends Controller
             ], 403);
         }
 
-        
-
-        // =========================
-        // DATA PENERIMAAN
-        // =========================
-        $penerimaan = DB::table('TR_PENERIMAAN')
-            ->select(
-                'TANGGAL_TR_PENERIMAAN as tanggal',
-                DB::raw("DESKRIPSI_TR_PENERIMAAN as uraian"),
-                DB::raw("JUMLAH_TR_PENERIMAAN as debit"),
-                DB::raw("0 as kredit"),
-                DB::raw("'Bank' as metode")
-            );
-
-        // =========================
-        // DATA PEMBAYARAN (JOIN METODE)
-        // =========================
+        $penerimaan = DB::table('TR_PENERIMAAN as p')
+             ->select(
+        'p.TANGGAL_TR_PENERIMAAN as tanggal',
+        DB::raw("p.DESKRIPSI_TR_PENERIMAAN as uraian"),
+        DB::raw("p.JUMLAH_TR_PENERIMAAN as debit"),
+        DB::raw("0 as kredit"),
+        DB::raw("'Tunai' as metode") 
+    );
+      
         $pembayaran = DB::table('TR_PEMBAYARAN as p')
             ->join('REF_METODE_PEMBAYARAN as m', 'p.ID_JENIS_PEMBAYARAN', '=', 'm.ID_METODE_PEMBAYARAN')
             ->join('mst_karyawan as mk', 'p.NIP_VALIDATOR_PEMBAYARAN', '=', 'mk.NIP_KARYAWAN')
