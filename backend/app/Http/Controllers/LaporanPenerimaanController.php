@@ -38,13 +38,42 @@ class LaporanPenerimaanController extends Controller
             ], 403);
         }
 
+        // =========================
+        // 🔥 FIX: AMBIL DATA TTD DULU (WAJIB SEBELUM EXCEL)
+        // =========================
+        $ttd = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
+            ->select(
+                'rj.DESKRIPSI_JABATAN as role',
+                'mk.NAMA_LENGKAP_GELAR as nama',
+                'mk.NIP_KARYAWAN as nip'
+            )
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->whereIn('rj.DESKRIPSI_JABATAN', ['Bendahara', 'Kepala Sekolah'])
+            ->get();
+
+        $penandatangan = $ttd->first(function ($item) use ($role) {
+            return strtolower(trim($item->role)) === strtolower(trim($role));
+        });
+
+        // fallback aman
+        $nama = $penandatangan->nama ?? '-';
+        $nip_ttd = $penandatangan->nip ?? '-';
+
+        // =========================
+        // EXPORT EXCEL
+        // =========================
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanPenerimaanExport($start, $end, $sumberDana, $role, $nip),
+                new LaporanPenerimaanExport($start, $end, $sumberDana, $role, $nip, $nama, $nip_ttd),
                 'Laporan_Penerimaan.xlsx'
             );
         }
 
+        // =========================
+        // QUERY DATA
+        // =========================
         $query = DB::table('TR_PENERIMAAN as p')
             ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
             ->join('REF_SUMBER_DANA as rd', 'p.ID_REF_DANA', '=', 'rd.ID_REF_DANA')
@@ -67,27 +96,6 @@ class LaporanPenerimaanController extends Controller
 
         $data = $query->get();
         $total = $data->sum('jumlah');
-
-        $ttd = DB::table('tr_jabatan as tj')
-            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
-            ->select(
-                'rj.DESKRIPSI_JABATAN as role',
-                'mk.NAMA_LENGKAP_GELAR as nama',
-                'mk.NIP_KARYAWAN as nip'
-            )
-            ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->whereIn('rj.DESKRIPSI_JABATAN', ['Bendahara', 'Kepala Sekolah'])
-            ->get();
-
-        // ambil sesuai role login
-        $penandatangan = $ttd->first(function ($item) use ($role) {
-    return strtolower(trim($item->role)) === strtolower(trim($role));
-});
-
-        // fallback aman
-        $nama = $penandatangan->nama ?? '-';
-        $nip_ttd = $penandatangan->nip ?? '-';
 
         // =========================
         // EXPORT PDF
