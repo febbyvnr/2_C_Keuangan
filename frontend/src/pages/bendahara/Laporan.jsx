@@ -353,14 +353,20 @@ export default function Laporan() {
                         {new Date(item.tanggal).toLocaleDateString("id-ID")}
                       </td>
                       <td>{item.uraian}</td>
-                      <td>
-                        Rp {Number(item.debit ?? 0).toLocaleString("id-ID")}
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.debit ?? 0).toLocaleString("id-ID")}
                       </td>
-                      <td>
-                        Rp {Number(item.kredit ?? 0).toLocaleString("id-ID")}
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.kredit ?? 0).toLocaleString("id-ID")}
                       </td>
-                      <td>
-                        Rp {Number(item.saldo ?? 0).toLocaleString("id-ID")}
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.saldo ?? 0).toLocaleString("id-ID")}
                       </td>
                     </tr>
                   ))
