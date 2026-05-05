@@ -5,6 +5,7 @@
         body { 
             font-family: sans-serif; 
             position: relative;
+            font-size: 12px;
         }
 
         table { 
@@ -19,7 +20,27 @@
         }
 
         th { 
-            background: #f5f5f5; 
+            background: #e5e7eb; 
+            font-weight: bold;
+            color: #000000; 
+        }
+
+        td {
+            color: #1a1a1a;
+            font-weight: normal;
+        }
+
+        td:last-child {
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        tr:last-child td {
+            font-weight: bold;
+        }
+
+        tr:last-child td:first-child {
+            text-align: right;
         }
 
         .no-border td {
@@ -28,16 +49,24 @@
 
         .header-text {
             text-align: center;
+            width: 100%;
         }
 
         .title-main {
             font-size: 18px;
             font-weight: bold;
+            text-align: center;
         }
 
         .title-sub {
             font-size: 16px;
             font-weight: bold;
+            text-align: center;
+        }
+
+        .header-text span {
+            display: block;
+            text-align: center;
         }
 
         .watermark {
@@ -131,17 +160,9 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    //  NIP dari controller (DB)
-    $nip = $nip ?? '-';
+    $role = ucfirst($role ?? 'Bendahara');
+    $nama = $nama ?? '-';
+    $nip = $nip_ttd ?? '-';
 @endphp
 
 <!-- ===================== -->
