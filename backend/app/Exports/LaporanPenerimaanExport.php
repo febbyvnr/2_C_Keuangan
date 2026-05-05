@@ -17,13 +17,18 @@ class LaporanPenerimaanExport implements WithEvents
     protected $role = 'Bendahara';
     protected $nip;
 
-    public function __construct($start, $end, $sumberDana, $role = null, $nip = null)
+    protected $nama;
+    protected $nip_ttd;
+
+   public function __construct($start, $end, $sumberDana, $role = null, $nip = null, $nama = null, $nip_ttd = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
         $this->role = $role ?: 'Bendahara';
         $this->nip = $nip;
+        $this->nama = $nama;
+        $this->nip_ttd = $nip_ttd;
     }
 
     public function collection()
@@ -137,21 +142,8 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $role = strtolower(trim($this->role));
 
-                $ttd = DB::table('tr_jabatan as tj')
-                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-                    ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
-                    ->select(
-                        'rj.DESKRIPSI_JABATAN as role',
-                        'mk.NAMA_LENGKAP_GELAR as nama',
-                        'mk.NIP_KARYAWAN as nip'
-                    )
-                    ->whereNull('tj.TGL_SELESAI_JABATAN')
-                    ->get();
-
-                $penandatangan = $ttd->firstWhere('role', ucfirst($role));
-
-                $nama = $penandatangan->nama ?? '-';
-                $nip = $penandatangan->nip ?? '-';
+                $nama = $this->nama ?? '-';
+                $nip = $this->nip_ttd ?? '-';
 
                 $roleLabel = ucfirst($role);
 
