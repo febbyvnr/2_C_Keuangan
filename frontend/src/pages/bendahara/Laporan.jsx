@@ -292,10 +292,12 @@ export default function Laporan() {
           <div className="laporan-header">
             <div className="laporan-actions">
               <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
                 Export Excel
               </button>
 
               <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
                 Export PDF
               </button>
             </div>
@@ -304,8 +306,8 @@ export default function Laporan() {
             <div style={{ display: "flex", gap: "10px" }}>
               {[
                 { label: "BKU", value: "bku" },
-                { label: "Tunai (P1)", value: "p1" },
-                { label: "Bank (P2)", value: "p2" },
+                { label: "Tunai", value: "p1" },
+                { label: "Bank", value: "p2" },
               ].map((tab) => (
                 <button
                   key={tab.value}
