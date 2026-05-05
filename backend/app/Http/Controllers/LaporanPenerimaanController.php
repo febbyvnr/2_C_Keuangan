@@ -39,7 +39,7 @@ class LaporanPenerimaanController extends Controller
         }
 
         // =========================
-        // 🔥 FIX: AMBIL DATA TTD DULU (WAJIB SEBELUM EXCEL)
+        // AMBIL DATA TTD DULU (WAJIB SEBELUM EXCEL)
         // =========================
         $ttd = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
