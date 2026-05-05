@@ -36,43 +36,50 @@ class LaporanBukuKhasUmumController extends Controller
             ], 403);
         }
 
+        // =========================
+        // PENERIMAAN (DEBIT)
+        // =========================
         $penerimaan = DB::table('TR_PENERIMAAN as p')
-             ->select(
-        'p.TANGGAL_TR_PENERIMAAN as tanggal',
-        DB::raw("p.DESKRIPSI_TR_PENERIMAAN as uraian"),
-        DB::raw("p.JUMLAH_TR_PENERIMAAN as debit"),
-        DB::raw("0 as kredit"),
-        DB::raw("'Tunai' as metode") 
-    );
-      
-        $pembayaran = DB::table('TR_PEMBAYARAN as p')
-            ->join('REF_METODE_PEMBAYARAN as m', 'p.ID_JENIS_PEMBAYARAN', '=', 'm.ID_METODE_PEMBAYARAN')
-            ->join('mst_karyawan as mk', 'p.NIP_VALIDATOR_PEMBAYARAN', '=', 'mk.NIP_KARYAWAN')
             ->select(
-                'p.TGL_BAYAR as tanggal',
-                DB::raw("CONCAT('Pembayaran - ', mk.NAMA_KARYAWAN) as uraian"),
-                DB::raw("p.JUMLAH_BAYAR as debit"),
+                'p.TANGGAL_TR_PENERIMAAN as tanggal',
+                DB::raw("p.DESKRIPSI_TR_PENERIMAAN as uraian"),
+                DB::raw("p.JUMLAH_TR_PENERIMAAN as debit"),
                 DB::raw("0 as kredit"),
-                'm.DESKRIPSI_METODE_PEMBAYARAN as metode'
+                DB::raw("'Tunai' as metode")
             );
 
+        // =========================
+        // PEMBAYARAN 
+        // =========================
+     $pembayaran = DB::table('TR_PEMBAYARAN as p')
+    ->join('REF_METODE_PEMBAYARAN as m', 'p.ID_JENIS_PEMBAYARAN', '=', 'm.ID_METODE_PEMBAYARAN')
+    ->join('mst_siswa as ms', 'p.ID_SISWA_TETAP', '=', 'ms.ID_SISWA_TETAP')
+    ->select(
+        'p.TGL_BAYAR as tanggal',
+        DB::raw("CONCAT('Pembayaran - ', ms.NAMA_SISWA_TETAP) as uraian"),
+        DB::raw("0 as debit"), 
+        DB::raw("p.JUMLAH_BAYAR as kredit"), 
+        'm.DESKRIPSI_METODE_PEMBAYARAN as metode'
+    );
         // =========================
         // FILTER
         // =========================
         if ($start && $end) {
-            $penerimaan->whereBetween('TANGGAL_TR_PENERIMAAN', [$start, $end]);
+            $penerimaan->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
             $pembayaran->whereBetween('p.TGL_BAYAR', [$start, $end]);
         }
 
         // =========================
-        // GABUNG DATA
+        // GABUNG 
         // =========================
-        $data = $penerimaan->unionAll($pembayaran)
-            ->orderBy('tanggal')
-            ->get();
+        $data = collect()
+            ->merge($penerimaan->get())
+            ->merge($pembayaran->get())
+            ->sortBy('tanggal')
+            ->values();
 
         // =========================
-        // HITUNG SALDO
+        // HITUNG SALDO (REALTIME)
         // =========================
         $saldo = 0;
         $bku = [];
@@ -91,13 +98,18 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // PEMISAHAN TUNAI & BANK
+        // PEMISAHAN
         // =========================
-        $p1 = collect($bku)->filter(fn($x) => strtolower($x['metode']) == 'tunai')->values();
-        $p2 = collect($bku)->filter(fn($x) => strtolower($x['metode']) != 'tunai')->values();
+        $p1 = collect($bku)
+            ->filter(fn($x) => strtolower($x['metode']) == 'tunai')
+            ->values();
+
+        $p2 = collect($bku)
+            ->filter(fn($x) => strtolower($x['metode']) != 'tunai')
+            ->values();
 
         // =========================
-        // TTD 
+        // TTD
         // =========================
         $ttd = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
@@ -118,7 +130,7 @@ class LaporanBukuKhasUmumController extends Controller
         $nip_ttd = $penandatangan->nip ?? '-';
 
         // =========================
-        // EXPORT EXCEL
+        // EXCEL
         // =========================
         if ($type == 'excel') {
             return Excel::download(
@@ -128,7 +140,7 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // EXPORT PDF
+        // PDF
         // =========================
         if ($type == 'pdf') {
             $pdf = Pdf::loadView(
@@ -140,7 +152,7 @@ class LaporanBukuKhasUmumController extends Controller
         }
 
         // =========================
-        // RESPONSE JSON
+        // JSON
         // =========================
         return response()->json([
             'bku' => $bku,
