@@ -62,9 +62,6 @@ class LaporanPenerimaanExport implements WithEvents
                 $sheet->getColumnDimension('D')->setWidth(35);
                 $sheet->getColumnDimension('E')->setWidth(22);
 
-                // =====================
-                // TITLE
-                // =====================
                 $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
                 $sheet->setCellValue('A3', 'LAPORAN PENERIMAAN (KM)');
                 $sheet->setCellValue('A4', 'Periode: ' . ($this->start ?? 'AWAL') . ' s/d ' . ($this->end ?? 'AKHIR'));
@@ -79,9 +76,6 @@ class LaporanPenerimaanExport implements WithEvents
                 $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
 
-                // =====================
-                // HEADER (SAMA DENGAN FE)
-                // =====================
                 $headerRow = 6;
 
                 $sheet->setCellValue("A$headerRow", 'NO');
@@ -103,9 +97,6 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $sheet->setAutoFilter("A$headerRow:E$headerRow");
 
-                // =====================
-                // DATA
-                // =====================
                 $row = $headerRow + 1;
                 $no = 1;
                 $data = $this->collection();
@@ -121,7 +112,6 @@ class LaporanPenerimaanExport implements WithEvents
 
                 $endData = $row - 1;
 
-                // FORMAT
                 $sheet->getStyle("A$headerRow:E$endData")
                     ->getBorders()->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
@@ -133,9 +123,6 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getNumberFormat()
                     ->setFormatCode('"Rp" #,##0');
 
-                // =====================
-                // TOTAL (SAMA FE)
-                // =====================
                 $total = $data->sum('jumlah');
                 $totalRow = $endData + 2;
 
@@ -148,29 +135,37 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getNumberFormat()
                     ->setFormatCode('"Rp" #,##0');
 
+                $role = strtolower(trim($this->role));
+
+                $ttd = DB::table('tr_jabatan as tj')
+                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                    ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
+                    ->select(
+                        'rj.DESKRIPSI_JABATAN as role',
+                        'mk.NAMA_LENGKAP_GELAR as nama',
+                        'mk.NIP_KARYAWAN as nip'
+                    )
+                    ->whereNull('tj.TGL_SELESAI_JABATAN')
+                    ->get();
+
+                $penandatangan = $ttd->firstWhere('role', ucfirst($role));
+
+                $nama = $penandatangan->nama ?? '-';
+                $nip = $penandatangan->nip ?? '-';
+
+                $roleLabel = ucfirst($role);
+
                 // =====================
                 // FOOTER
                 // =====================
                 $footerRow = $totalRow + 4;
-
-                $role = strtolower(trim($this->role));
-
-                if ($role === 'kepala sekolah') {
-                    $nama = 'Drs. Budi Santoso';
-                    $role = 'Kepala Sekolah';
-                } else {
-                    $role = 'Bendahara';
-                    $nama = 'Rina Putri, S.E.';
-                }
-
-                $nip = $this->nip ?: '-';
 
                 $sheet->mergeCells("B" . ($footerRow+1) . ":D" . ($footerRow+1));
                 $sheet->mergeCells("B" . ($footerRow+3) . ":D" . ($footerRow+3));
                 $sheet->mergeCells("B" . ($footerRow+7) . ":D" . ($footerRow+7));
                 $sheet->mergeCells("B" . ($footerRow+8) . ":D" . ($footerRow+8));
 
-                $sheet->setCellValue("B" . ($footerRow+1), $role . ',');
+                $sheet->setCellValue("B" . ($footerRow+1), $roleLabel . ',');
                 $sheet->setCellValue("B" . ($footerRow+3), $nama);
                 $sheet->setCellValue("B" . ($footerRow+7), '-------------------------');
                 $sheet->setCellValue("B" . ($footerRow+8), 'NIP: ' . $nip);
