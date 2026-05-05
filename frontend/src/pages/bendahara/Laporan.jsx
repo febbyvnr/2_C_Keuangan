@@ -88,6 +88,8 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "Pengeluaran") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    } else if (active === "BKU") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     }
 
     const params = new URLSearchParams({
@@ -97,6 +99,9 @@ export default function Laporan() {
       type: "excel",
     });
 
+    if (active === "BKU") {
+      params.append("jenis", bkuTab);
+    }
     window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
@@ -107,6 +112,8 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
     } else if (active === "Pengeluaran") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+    } else if (active === "BKU") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
     }
 
     const params = new URLSearchParams({
@@ -115,6 +122,10 @@ export default function Laporan() {
       sumber_dana: sumberDana,
       type: "pdf",
     });
+
+    if (active === "BKU") {
+      params.append("jenis", bkuTab);
+    }
 
     window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
