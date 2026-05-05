@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\RefTarif;
 
 class RefTahunAnggaran extends Model
 {
@@ -12,7 +13,7 @@ class RefTahunAnggaran extends Model
 
     protected $primaryKey = 'ID_TA_ANGGARAN';
 
-    public $incrementing = true; 
+    public $incrementing = false; 
 
     protected $keyType = 'int'; 
 
@@ -36,6 +37,15 @@ class RefTahunAnggaran extends Model
     {
         return $this->hasMany(
             MstProgramKerja::class,
+            'ID_TA_ANGGARAN',
+            'ID_TA_ANGGARAN'
+        );
+    }
+
+    public function tarif(): HasMany
+    {
+        return $this->hasMany(
+            RefTarif::class,
             'ID_TA_ANGGARAN',
             'ID_TA_ANGGARAN'
         );
@@ -76,5 +86,14 @@ class RefTahunAnggaran extends Model
     public function getLabelAttribute(): string
     {
         return $this->DESKRIPSI_TAHUN_ANGGARAN;
+    }
+
+    public function tahunAnggaran()
+    {
+        return $this->belongsTo(
+            RefTahunAnggaran::class,
+            'KODE_TA',
+            'ID_TA_ANGGARAN'
+        );
     }
 }

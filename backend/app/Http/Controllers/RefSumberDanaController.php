@@ -12,18 +12,19 @@ class RefSumberDanaController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $data = RefSumberDana::all();
-
+            $data = RefSumberDana::withCount(['dtlProgramKerja', 'trPenerimaan'])->get();
+            $data->map(function ($item) {
+                $item->is_used =
+                    ($item->dtl_program_kerja_count > 0 ||
+                    $item->tr_penerimaan_count > 0) ||
+                $item->children()->exists();
+                return $item;
+            });
             return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data ref sumber dana tidak ditemukan'
-                    : 'Data ref sumber dana berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil data',
                 'error' => $e->getMessage(),
             ], 500);
@@ -34,18 +35,15 @@ class RefSumberDanaController extends Controller
     {
         try {
             $keyword = trim((string) $request->query('keyword', ''));
-
             $query = RefSumberDana::query();
-
             if ($keyword !== '') {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('ID_REF_DANA', 'like', "%{$keyword}%")
-                      ->orWhere('REF_ID_REF_DANA', 'like', "%{$keyword}%");
+                      ->orWhere('REF_ID_REF_DANA', 'like', "%{$keyword}%")
+                      ->orWhere('DESKRIPSI_SUMBER_DANA', 'like', "%{$keyword}%");
                 });
             }
-
             $data = $query->get();
-
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
@@ -67,23 +65,16 @@ class RefSumberDanaController extends Controller
         try {
             $id = (int) $id;
             $data = RefSumberDana::find($id);
-
             if (!$data) {
                 return response()->json([
-                    'success' => false,
                     'message' => 'Data tidak ditemukan',
-                    'data' => null,
                 ], 404);
             }
-
             return response()->json([
-                'success' => true,
-                'message' => 'Ref sumber dana berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage(),
             ], 500);
@@ -94,38 +85,30 @@ class RefSumberDanaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
+                'REF_ID_REF_DANA' => 'nullable|integer|exists:ref_sumber_dana,ID_REF_DANA',
+                'DESKRIPSI_SUMBER_DANA' => 'required|string|max:255',
             ], [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
+                // 'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
                 'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
                 'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'DESKRIPSI_SUMBER_DANA.required' => 'Deskripsi wajib diisi.',
+                'DESKRIPSI_SUMBER_DANA.string' => 'Deskripsi harus berupa teks.',
             ]);
-
             $lastId = RefSumberDana::max('ID_REF_DANA');
             $newId = $lastId ? $lastId + 1 : 1;
-
             $data = RefSumberDana::create([
-                'ID_REF_DANA' => $newId,
-                'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA']
+                'REF_ID_REF_DANA' => $validated['REF_ID_REF_DANA'],
+                'DESKRIPSI_SUMBER_DANA' => $validated['DESKRIPSI_SUMBER_DANA'],
             ]);
-
             return response()->json([
-                'success' => true,
-                'message' => 'Ref sumber dana berhasil ditambahkan',
                 'data' => $data,
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
-
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Error',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -136,40 +119,26 @@ class RefSumberDanaController extends Controller
         try {
             $id = (int) $id;
             $data = RefSumberDana::find($id);
-
             if (!$data) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
+                    'message' => 'Data tidak ditemukan'
                 ], 404);
             }
-
             $validated = $request->validate([
-                'REF_ID_REF_DANA' => 'required|integer|exists:ref_sumber_dana,ID_REF_DANA',
-            ],
-            [
-                'REF_ID_REF_DANA.required' => 'ID referensi sumber dana wajib diisi.',
-                'REF_ID_REF_DANA.integer' => 'ID referensi sumber dana harus berupa angka.',
-                'REF_ID_REF_DANA.exists' => 'ID referensi sumber dana tidak ditemukan di database.',
+                'REF_ID_REF_DANA' => 'nullable|integer|exists:ref_sumber_dana,ID_REF_DANA',
+                'DESKRIPSI_SUMBER_DANA' => 'required|string|max:255',
             ]);
-
             $data->update($validated);
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil diupdate',
                 'data' => $data,
             ]);
         } catch (ValidationException $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage(),
             ], 500);
@@ -181,25 +150,26 @@ class RefSumberDanaController extends Controller
         try {
             $id = (int) $id;
             $data = RefSumberDana::find($id);
-
             if (!$data) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan',
-                    'data' => null,
+                    'message' => 'Data tidak ditemukan'
                 ], 404);
             }
-
+            if (
+                $data->dtlProgramKerja()->exists() ||
+                $data->trPenerimaan()->exists() ||
+                $data->children()->exists()
+            ) {
+                return response()->json([
+                    'message' => 'Tidak bisa dihapus karena masih digunakan atau punya child'
+                ], 400);
+            }
             $data->delete();
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil dihapus',
-                'data' => null,
+                'message' => 'Data berhasil dihapus'
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus data',
                 'error' => $e->getMessage(),
             ], 500);

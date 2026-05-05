@@ -10,49 +10,73 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 
+use App\Exports\MstCoaExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+
 class MstCoaController extends Controller
 {
-    /**
-     * Menampilkan daftar COA
-     * Bisa search berdasarkan kode atau deskripsi/nama akun
-     */
     public function index(Request $request): JsonResponse
     {
-        $search = trim((string) $request->query('search', ''));
+        try {
+            $search = trim((string) $request->query('search', ''));
 
-        $query = MstCoa::query()
-            ->with(['children'])
-            ->where('IS_DELETE', 0)
-            ->whereNull('MST_ID_MASTER_COA')
-            ->orderBy('KODE_COA', 'asc');
+            $query = MstCoa::query()
+                ->with([
+                    'children' => function ($q) {
+                        $q->active()->orderBy('ID_MASTER_COA', 'desc');
+                    }
+                ])
+                ->active()
+                // ->whereNull('MST_ID_MASTER_COA')
+                ->orderBy('ID_MASTER_COA', 'desc');
 
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('KODE_COA', $search)
-                ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('KODE_COA', 'like', "%{$search}%")
+                      ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+                });
+            }
+
+            $data = $query->get()->map(function ($item) {
+                return [
+                    'ID_MASTER_COA' => $item->ID_MASTER_COA,
+                    'MST_ID_MASTER_COA' => $item->MST_ID_MASTER_COA,
+                    'KODE_COA' => $item->KODE_COA,
+                    'DESKRIPSI_COA' => $item->DESKRIPSI_COA,
+                    'is_used' => $this->isCoaUsed($item),
+                    'has_child' => $item->children()->active()->exists(),
+                ];
             });
+
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty()
+                    ? 'Data COA tidak ditemukan'
+                    : 'Data COA berhasil diambil',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data COA',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $data = $query->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => $data->isEmpty()
-                ? 'Data COA tidak ditemukan'
-                : 'Data COA berhasil diambil',
-            'data' => $data,
-        ]);
     }
 
-    /**
-     * Menampilkan detail COA
-     */
     public function show(int $id): JsonResponse
     {
         try {
             $data = MstCoa::query()
-                ->with(['parent', 'children', 'programKerja'])
-                ->where('IS_DELETE', 0)
+                ->with([
+                    'parent',
+                    'children' => function ($q) {
+                        $q->active()->orderBy('ID_MASTER_COA', 'desc');
+                    },
+                    'programKerja',
+                ])
+                ->active()
                 ->find($id);
 
             if (!$data) {
@@ -77,105 +101,56 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menambahkan COA baru
-     */
     public function store(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate(
-                [
-                    'MST_ID_MASTER_COA' => [
-                        'nullable',
-                        'integer',
-                        Rule::exists('mst_coa', 'ID_MASTER_COA')->where(function ($query) {
-                            $query->where('IS_DELETE', 0);
-                        }),
-                    ],
-                    'KODE_COA' => [
-                        'required',
-                        'string',
-                        'max:10',
-                        'unique:mst_coa,KODE_COA',
-                    ],
-                    'DESKRIPSI_COA' => [
-                        'required',
-                        'string',
-                        'max:100',
-                    ],
+            $validated = $request->validate([
+                'MST_ID_MASTER_COA' => [
+                    'nullable',
+                    'integer',
+                    Rule::exists('mst_coa', 'ID_MASTER_COA')
+                        ->where(fn ($q) => $q->where('IS_DELETE', 0)),
                 ],
-                [
-                    'MST_ID_MASTER_COA.exists' => 'Parent COA tidak valid.',
-                    'KODE_COA.required' => 'Kode COA wajib diisi.',
-                    'KODE_COA.unique' => 'Kode COA sudah digunakan.',
-                    'KODE_COA.max' => 'Kode COA maksimal 10 karakter.',
-                    'DESKRIPSI_COA.required' => 'Deskripsi COA wajib diisi.',
-                    'DESKRIPSI_COA.max' => 'Deskripsi COA maksimal 100 karakter.',
-                ]
-            );
+                'DESKRIPSI_COA' => ['nullable', 'string', 'max:100'],
+            ]);
 
-            $data = DB::transaction(function () use ($validated) {
-                $nextId = ((int) MstCoa::max('ID_MASTER_COA')) + 1;
+            DB::beginTransaction();
 
-                $coa = MstCoa::create([
-                    'ID_MASTER_COA' => $nextId,
-                    'MST_ID_MASTER_COA' => $validated['MST_ID_MASTER_COA'] ?? null,
-                    'KODE_COA' => $validated['KODE_COA'],
-                    'DESKRIPSI_COA' => $validated['DESKRIPSI_COA'],
-                    'IS_DELETE' => 0,
-                ]);
+            $coa = new MstCoa();
+            $coa->MST_ID_MASTER_COA = $validated['MST_ID_MASTER_COA'] ?? null;
+            $coa->DESKRIPSI_COA = $validated['DESKRIPSI_COA'];
+            $coa->IS_DELETE = 0;
+            $coa->save();
 
-                return $coa->fresh();
-            });
+            $id = $coa->ID_MASTER_COA;
+
+            $coa->KODE_COA = 'COA' . str_pad($id, 3, '0', STR_PAD_LEFT);
+            $coa->save();
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'COA berhasil ditambahkan',
-                'data' => $data,
+                'data' => $coa->fresh(['parent', 'children']),
             ], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (QueryException $e) {
-            if (
-                str_contains(strtolower($e->getMessage()), 'unique') ||
-                str_contains(strtolower($e->getMessage()), 'duplicate')
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'KODE_COA sudah digunakan',
-                    'errors' => [
-                        'KODE_COA' => ['Kode COA sudah digunakan.'],
-                    ],
-                ], 422);
-            }
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat menambahkan COA',
-                'error' => $e->getMessage(),
-            ], 500);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menambahkan COA',
+                'message' => 'Error',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Mengubah COA
-     * Tidak boleh jika COA sudah dipakai pada program kerja
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
             $coa = MstCoa::query()
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->find($id);
 
             if (!$coa) {
@@ -186,14 +161,14 @@ class MstCoaController extends Controller
                 ], 404);
             }
 
-            if ($this->isCoaUsed($coa)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
-                    'data' => null,
-                ], 422);
-            }
-
+            // kl klp sebelah ttp bisa edit walaupun uda dipake,asal ga memutus FK ke tabel lain aja
+            // if ($this->isCoaUsed($coa)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
+            //         'data' => null,
+            //     ], 422);
+            // }
             $validated = $request->validate(
                 [
                     'MST_ID_MASTER_COA' => [
@@ -203,51 +178,59 @@ class MstCoaController extends Controller
                             $query->where('IS_DELETE', 0);
                         }),
                     ],
-                    'KODE_COA' => [
-                        'required',
-                        'string',
-                        'max:10',
-                        Rule::unique('mst_coa', 'KODE_COA')->ignore($id, 'ID_MASTER_COA'),
-                    ],
                     'DESKRIPSI_COA' => [
-                        'required',
+                        'nullable',
                         'string',
                         'max:100',
                     ],
                 ],
                 [
                     'MST_ID_MASTER_COA.exists' => 'Parent COA tidak valid.',
-                    'KODE_COA.required' => 'Kode COA wajib diisi.',
-                    'KODE_COA.unique' => 'Kode COA sudah digunakan.',
-                    'KODE_COA.max' => 'Kode COA maksimal 10 karakter.',
-                    'DESKRIPSI_COA.required' => 'Deskripsi COA wajib diisi.',
                     'DESKRIPSI_COA.max' => 'Deskripsi COA maksimal 100 karakter.',
                 ]
             );
-
-            if (
-                isset($validated['MST_ID_MASTER_COA']) &&
-                (int) $validated['MST_ID_MASTER_COA'] === (int) $coa->ID_MASTER_COA
-            ) {
+            $newParentId = array_key_exists('MST_ID_MASTER_COA', $validated)
+                ? $validated['MST_ID_MASTER_COA']
+                : $coa->MST_ID_MASTER_COA;
+            if (!is_null($newParentId) && (int) $newParentId === (int) $coa->ID_MASTER_COA) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Parent COA tidak boleh dirinya sendiri',
                     'data' => null,
                 ], 422);
             }
-
-            $coa->update([
-                'MST_ID_MASTER_COA' => $validated['MST_ID_MASTER_COA'] ?? null,
-                'KODE_COA' => $validated['KODE_COA'],
+            if (
+                !is_null($newParentId) &&
+                $this->isDescendant((int) $newParentId, (int) $coa->ID_MASTER_COA)
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parent COA tidak valid karena menyebabkan struktur melingkar',
+                    'data' => null,
+                ], 422);
+            }
+            $parentChanged = (int) ($coa->MST_ID_MASTER_COA ?? 0) !== (int) ($newParentId ?? 0);
+            // if ($parentChanged) {
+            //     $hasActiveChildren = $coa->children()
+            //         ->active()
+            //         ->exists();
+            //     if ($hasActiveChildren) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'COA tidak boleh dipindah parent karena masih memiliki sub COA aktif',
+            //             'data' => null,
+            //         ], 422);
+            //     }
+            // }
+            $updateData = [
+                'MST_ID_MASTER_COA' => $newParentId,
                 'DESKRIPSI_COA' => $validated['DESKRIPSI_COA'],
-            ]);
-
-            $coa->refresh();
-
+            ];
+            $coa->update($updateData);
             return response()->json([
                 'success' => true,
                 'message' => 'COA berhasil diperbarui',
-                'data' => $coa,
+                'data' => $coa->fresh(['parent', 'children']),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -256,19 +239,6 @@ class MstCoaController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (QueryException $e) {
-            if (
-                str_contains(strtolower($e->getMessage()), 'unique') ||
-                str_contains(strtolower($e->getMessage()), 'duplicate')
-            ) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'KODE_COA sudah digunakan',
-                    'errors' => [
-                        'KODE_COA' => ['Kode COA sudah digunakan.'],
-                    ],
-                ], 422);
-            }
-
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan pada database saat mengubah COA',
@@ -283,16 +253,12 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menghapus COA (soft delete)
-     * Hanya boleh jika belum dipakai program kerja dan tidak punya child aktif
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
             $coa = MstCoa::query()
                 ->with('children')
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->find($id);
 
             if (!$coa) {
@@ -312,7 +278,7 @@ class MstCoaController extends Controller
             }
 
             $hasActiveChildren = $coa->children()
-                ->where('IS_DELETE', 0)
+                ->active()
                 ->exists();
 
             if ($hasActiveChildren) {
@@ -341,17 +307,24 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Menampilkan data parent COA untuk dropdown
-     */
     public function parents(): JsonResponse
     {
         try {
             $data = MstCoa::query()
-                ->where('IS_DELETE', 0)
-                ->whereNull('MST_ID_MASTER_COA')
-                ->orderBy('KODE_COA', 'asc')
-                ->get();
+                ->active()
+                ->orderBy('ID_MASTER_COA', 'desc')
+                ->get([
+                    'ID_MASTER_COA',
+                    'KODE_COA',
+                    'DESKRIPSI_COA',
+                ])
+                ->map(function ($item) {
+                    return [
+                        'value' => $item->ID_MASTER_COA,
+                        'label' => $item->KODE_COA . ' - ' . $item->DESKRIPSI_COA,
+                    ];
+                })
+                ->values();
 
             return response()->json([
                 'success' => true,
@@ -367,12 +340,161 @@ class MstCoaController extends Controller
         }
     }
 
-    /**
-     * Helper untuk cek apakah COA sudah dipakai ato belom
-     * Saat ini baru cek program kerja, harusnya besok masih ada cek laporan/transaksi
-     */
+    public function export(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstCoa::query()
+            ->with(['parent'])
+            ->active()
+            ->orderBy('ID_MASTER_COA', 'desc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('KODE_COA', 'like', "%{$search}%")
+                  ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $filename = 'mst_coa_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID_MASTER_COA',
+                'MST_ID_MASTER_COA',
+                'KODE_COA',
+                'DESKRIPSI_COA',
+                'PARENT_KODE_COA',
+                'PARENT_DESKRIPSI_COA',
+                'IS_DELETE',
+            ]);
+
+            foreach ($data as $item) {
+                fputcsv($handle, [
+                    $item->ID_MASTER_COA,
+                    $item->MST_ID_MASTER_COA,
+                    $item->KODE_COA,
+                    $item->DESKRIPSI_COA,
+                    optional($item->parent)->KODE_COA,
+                    optional($item->parent)->DESKRIPSI_COA,
+                    $item->IS_DELETE,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->only(['search']);
+
+        return Excel::download(new MstCoaExport($filters), 'mst_coa.xlsx');
+    }
+
+
+    public function exportPdf(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstCoa::query()
+            ->with(['parent'])
+            ->active()
+            ->orderBy('ID_MASTER_COA', 'desc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('KODE_COA', 'like', "%{$search}%")
+                ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $pdf = Pdf::loadView('exports.mst_coa_pdf', compact('data'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('mst_coa.pdf');
+    }
+
+    private function generateNextCoaCode(?int $parentId = null, ?int $excludeId = null): string
+    {
+        if (is_null($parentId)) {
+            $query = MstCoa::query()
+                ->active()
+                ->whereNull('MST_ID_MASTER_COA');
+
+            if (!is_null($excludeId)) {
+                $query->where('ID_MASTER_COA', '!=', $excludeId);
+            }
+
+            $lastRoot = $query->orderByDesc('ID_MASTER_COA')->first();
+
+            if (!$lastRoot) {
+                return '1';
+            }
+
+            return (string) (((int) $lastRoot->KODE_COA) + 1);
+        }
+
+        $parent = MstCoa::query()->active()->findOrFail($parentId);
+
+        $childrenQuery = MstCoa::query()
+            ->active()
+            ->where('MST_ID_MASTER_COA', $parentId);
+
+        if (!is_null($excludeId)) {
+            $childrenQuery->where('ID_MASTER_COA', '!=', $excludeId);
+        }
+
+        $children = $childrenQuery->orderBy('KODE_COA', 'asc')->get();
+
+        if ($children->isEmpty()) {
+            return $parent->KODE_COA . '.1';
+        }
+
+        $lastNumbers = $children->map(function ($item) {
+            $parts = explode('.', $item->KODE_COA);
+            return (int) end($parts);
+        });
+
+        $nextNumber = $lastNumbers->max() + 1;
+
+        return $parent->KODE_COA . '.' . $nextNumber;
+    }
+
+    private function isDescendant(int $parentCandidateId, int $currentNodeId): bool
+    {
+        $current = MstCoa::query()->find($parentCandidateId);
+
+        while ($current) {
+            if ((int) $current->ID_MASTER_COA === $currentNodeId) {
+                return true;
+            }
+
+            if (is_null($current->MST_ID_MASTER_COA)) {
+                return false;
+            }
+
+            $current = MstCoa::query()->find($current->MST_ID_MASTER_COA);
+        }
+
+        return false;
+    }
+
     private function isCoaUsed(MstCoa $coa): bool
     {
-        return method_exists($coa, 'programKerja') && $coa->programKerja()->exists();
+        return $coa->programKerja()->exists();
     }
 }

@@ -15,29 +15,24 @@ class RefTanController extends Controller
     {
         try {
             $search = trim((string) $request->query('search', ''));
-
             $query = RefTan::query()->orderBy('TAHUN', 'desc');
-
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
                     $q->where('TAHUN', 'like', "%{$search}%")
                       ->orWhere('DESKRIPSI_TAN', 'like', "%{$search}%");
                 });
             }
-
-            $data = $query->get();
-
+            $data = $query->get()->map(function ($item) {
+                $item->is_used = DB::table('mst_program_kerja')
+                    ->where('ID_TAN', $item->ID_TAN)
+                    ->exists();
+                return $item;
+            });
             return response()->json([
-                'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data TAN tidak ditemukan'
-                    : 'Data TAN berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -50,16 +45,11 @@ class RefTanController extends Controller
                 ->where('IS_CURRENT', 1)
                 ->orderBy('TAHUN', 'desc')
                 ->get();
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data TAN aktif berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data TAN aktif',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -69,24 +59,16 @@ class RefTanController extends Controller
     {
         try {
             $data = RefTan::find($id);
-
             if (!$data) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data TAN tidak ditemukan',
                     'data' => null,
                 ], 404);
             }
-
             return response()->json([
-                'success' => true,
-                'message' => 'Detail TAN berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil detail TAN',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -107,15 +89,11 @@ class RefTanController extends Controller
                     'DESKRIPSI_TAN.max' => 'Deskripsi TAN maksimal 100 karakter.',
                 ]
             );
-
             $isDuplicate = RefTan::query()
                 ->where('TAHUN', $validated['TAHUN'])
                 ->exists();
-
             if ($isDuplicate) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
                     'errors' => [
                         'TAHUN' => [
                             'Tahun sudah digunakan.',
@@ -123,7 +101,6 @@ class RefTanController extends Controller
                     ],
                 ], 422);
             }
-
             $data = DB::transaction(function () use ($validated) {
                 $nextId = ((int) RefTan::max('ID_TAN')) + 1;
 
@@ -132,38 +109,27 @@ class RefTanController extends Controller
                         'IS_CURRENT' => 0,
                     ]);
                 }
-
                 $tan = RefTan::create([
                     'ID_TAN' => $nextId,
                     'TAHUN' => $validated['TAHUN'],
                     'IS_CURRENT' => $validated['IS_CURRENT'] ?? 0,
                     'DESKRIPSI_TAN' => $validated['DESKRIPSI_TAN'] ?? null,
                 ]);
-
                 return $tan->fresh();
             });
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data TAN berhasil ditambahkan',
                 'data' => $data,
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
         } catch (QueryException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat menambahkan data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menambahkan data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -173,15 +139,11 @@ class RefTanController extends Controller
     {
         try {
             $tan = RefTan::find($id);
-
             if (!$tan) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data TAN tidak ditemukan',
                     'data' => null,
                 ], 404);
             }
-
             $validated = $request->validate(
                 [
                     'TAHUN' => ['required', 'string', 'size:4'],
@@ -194,16 +156,12 @@ class RefTanController extends Controller
                     'DESKRIPSI_TAN.max' => 'Deskripsi TAN maksimal 100 karakter.',
                 ]
             );
-
             $isDuplicate = RefTan::query()
                 ->where('TAHUN', $validated['TAHUN'])
                 ->where('ID_TAN', '!=', $id)
                 ->exists();
-
             if ($isDuplicate) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Validasi gagal',
                     'errors' => [
                         'TAHUN' => [
                             'Tahun sudah digunakan.',
@@ -211,7 +169,6 @@ class RefTanController extends Controller
                     ],
                 ], 422);
             }
-
             DB::transaction(function () use ($validated, $tan) {
                 if (($validated['IS_CURRENT'] ?? false) == true) {
                     RefTan::query()
@@ -220,37 +177,26 @@ class RefTanController extends Controller
                             'IS_CURRENT' => 0,
                         ]);
                 }
-
                 $tan->update([
                     'TAHUN' => $validated['TAHUN'],
                     'IS_CURRENT' => $validated['IS_CURRENT'] ?? 0,
                     'DESKRIPSI_TAN' => $validated['DESKRIPSI_TAN'] ?? null,
                 ]);
             });
-
             $tan->refresh();
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data TAN berhasil diperbarui',
                 'data' => $tan,
             ]);
         } catch (ValidationException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
                 'errors' => $e->errors(),
             ], 422);
         } catch (QueryException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat mengubah data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengubah data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -260,52 +206,34 @@ class RefTanController extends Controller
     {
         try {
             $tan = RefTan::find($id);
-
             if (!$tan) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data TAN tidak ditemukan',
-                    'data' => null,
+                    'message' => 'Data TAN tidak ditemukan, gagal menghapus ref tan'
                 ], 404);
             }
-
             if ($tan->IS_CURRENT) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data TAN aktif tidak boleh dihapus',
-                    'data' => null,
+                    'message' => 'Data TAN yang aktif tidak dapat dihapus'
                 ], 422);
             }
-
             $isUsed = DB::table('mst_program_kerja')
                 ->where('ID_TAN', $tan->ID_TAN)
                 ->exists();
-
             if ($isUsed) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Data TAN tidak dapat dihapus karena sudah digunakan pada program kerja',
-                    'data' => null,
+                    'message' => 'Data TAN yang sedang digunakan tidak dapat dihapus'
                 ], 422);
             }
-
             $tan->delete();
-
             return response()->json([
-                'success' => true,
-                'message' => 'Data TAN berhasil dihapus',
-                'data' => null,
+                'message' => 'Data TAN berhasil dihapus'
             ]);
         } catch (QueryException $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada database saat menghapus data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         } catch (\Throwable $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat menghapus data TAN',
                 'error' => $e->getMessage(),
             ], 500);
         }

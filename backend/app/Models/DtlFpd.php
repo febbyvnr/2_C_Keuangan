@@ -9,11 +9,20 @@ class DtlFpd extends Model
 {
     protected $table = 'dtl_fpd';
     protected $primaryKey = 'ID_DT_FPD';
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
 
-    protected $guarded = []; 
+    protected $fillable = [
+        'ID_FPD',
+        'ID_DT_PROGKER',
+        'QTY',
+        'HARGA_SATUAN',
+        'VOLUME',
+        'SATUAN',
+        'TOTAL',
+        'LINK_BUKTI_NOTA_FPD',
+    ];
 
     protected $casts = [
         'ID_DT_FPD' => 'integer',
@@ -24,18 +33,6 @@ class DtlFpd extends Model
         'VOLUME' => 'integer',
         'TOTAL' => 'double',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (!$model->ID_DT_FPD) {
-                $maxId = static::max('ID_DT_FPD') ?? 0;
-                $model->ID_DT_FPD = $maxId + 1;
-            }
-        });
-    }
 
     public function fpd(): BelongsTo
     {

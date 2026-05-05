@@ -10,13 +10,12 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 
+use App\Exports\MstKegiatanExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+
 class MstKegiatanController extends Controller
 {
-    /**
-     * Menampilkan daftar kegiatan aktif
-     * Search berdasarkan deskripsi kegiatan
-     * List utama hanya parent, child ada di dalam children
-     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -24,9 +23,15 @@ class MstKegiatanController extends Controller
 
             $query = MstKegiatan::query()
                 ->with(['children'])
+                ->withCount([
+                    'children as has_child' => function ($q) {
+                        $q->where('IS_DELETE', 0);
+                    },
+                    'programKerja as is_used'
+                ])
                 ->where('IS_DELETE', 0)
-                ->whereNull('MST_ID_KEGIATAN')
-                ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+                // ->whereNull('MST_ID_KEGIATAN') //kl null ga ditampilin, child ga ketampil
+                ->orderBy('ID_KEGIATAN', 'desc');
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -55,9 +60,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menampilkan detail kegiatan
-     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -88,10 +90,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menambahkan kegiatan baru
-     * Untuk kondisi sekarang: deskripsi kegiatan dibuat unik pada data aktif
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -173,10 +171,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Mengubah kegiatan
-     * Tidak boleh jika sudah dipakai pada program kerja
-     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -192,13 +186,14 @@ class MstKegiatanController extends Controller
                 ], 404);
             }
 
-            if ($this->isKegiatanUsed($kegiatan)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kegiatan tidak boleh diubah karena sudah dipakai pada program kerja',
-                    'data' => null,
-                ], 422);
-            }
+            // klp sblh bs edit walaupun uda dipake tabel lain, asal ga memutus FK aja
+            // if ($this->isKegiatanUsed($kegiatan)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Kegiatan tidak boleh diubah karena sudah dipakai pada program kerja',
+            //         'data' => null,
+            //     ], 422);
+            // }
 
             $validated = $request->validate(
                 [
@@ -284,10 +279,6 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menghapus kegiatan (soft delete)
-     * Hanya boleh jika belum dipakai program kerja dan tidak punya child aktif
-     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -342,16 +333,13 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Menampilkan parent kegiatan untuk dropdown
-     */
     public function parents(): JsonResponse
     {
         try {
             $data = MstKegiatan::query()
                 ->where('IS_DELETE', 0)
                 ->whereNull('MST_ID_KEGIATAN')
-                ->orderBy('DESKRIPSI_KEGIATAN', 'asc')
+                ->orderBy('ID_KEGIATAN', 'desc')
                 ->get();
 
             return response()->json([
@@ -370,10 +358,98 @@ class MstKegiatanController extends Controller
         }
     }
 
-    /**
-     * Helper cek apakah kegiatan sudah dipakai
-     * Saat ini relasi yang tersedia baru programKerja
-     */
+    public function export(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstKegiatan::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $filename = 'mst_kegiatan_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID_KEGIATAN',
+                'MST_ID_KEGIATAN',
+                'DESKRIPSI_KEGIATAN',
+                'PARENT_DESKRIPSI_KEGIATAN',
+                'IS_DELETE',
+            ]);
+
+            foreach ($data as $item) {
+                fputcsv($handle, [
+                    $item->ID_KEGIATAN,
+                    $item->MST_ID_KEGIATAN,
+                    $item->DESKRIPSI_KEGIATAN,
+                    optional($item->parent)->DESKRIPSI_KEGIATAN,
+                    $item->IS_DELETE,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstKegiatanExport($filters), 'mst_kegiatan.xlsx');
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+        ]);
+
+        return Excel::download(new MstKegiatanExport($filters), 'mst_kegiatan.csv');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $query = MstKegiatan::query()
+            ->with(['parent'])
+            ->where('IS_DELETE', 0)
+            ->orderBy('DESKRIPSI_KEGIATAN', 'asc');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->get();
+
+        $pdf = Pdf::loadView('exports.mst_kegiatan_pdf', compact('data'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('mst_kegiatan.pdf');
+    }
+
     private function isKegiatanUsed(MstKegiatan $kegiatan): bool
     {
         return method_exists($kegiatan, 'programKerja') && $kegiatan->programKerja()->exists();

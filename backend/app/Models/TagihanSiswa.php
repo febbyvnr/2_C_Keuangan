@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+// use App\Models\RefJenisTagihan;
 
 class TagihanSiswa extends Model
 {
@@ -14,43 +15,46 @@ class TagihanSiswa extends Model
 
     protected $fillable = [
         'ID_SISWA_TETAP',
-        'ID_JENIS_PEMBAYARAN',
+        'ID_JENIS_TAGIHAN',
         'BULAN_TAGIHAN_SISWA',
         'TAHUN_TAGIHAN_SISWA',
         'JUMLAH_TAGIHAN_SISWA',
         'STATUS_TAGIHAN_SISWA',
-        'DUEDATE_TAGIHAN_SISWA',
+        'DUEDATETIME_TAGIHAN_SISWA',
     ];
 
     protected $casts = [
         'ID_TAGIHAN_SISWA' => 'integer',
         'ID_SISWA_TETAP' => 'integer',
-        'ID_JENIS_PEMBAYARAN' => 'integer',
+        'ID_JENIS_TAGIHAN' => 'integer',
         'JUMLAH_TAGIHAN_SISWA' => 'double',
-        'DUEDATE_TAGIHAN_SISWA' => 'date',
+        'DUEDATETIME_TAGIHAN_SISWA' => 'datetime',
     ];
 
-    /**
-     * Relasi ke mst_siswa
-     */
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(MstSiswa::class, 'ID_SISWA_TETAP', 'ID_SISWA_TETAP');
+        return $this->belongsTo(
+            MstSiswa::class,
+            'ID_SISWA_TETAP',
+            'ID_SISWA_TETAP'
+        );
     }
 
-    /**
-     * Relasi ke ref_jenis_pembayaran
-     */
-    public function jenisPembayaran(): BelongsTo
+    public function jenisTagihan(): BelongsTo
     {
-        return $this->belongsTo(RefJenisPembayaran::class, 'ID_JENIS_PEMBAYARAN', 'ID_JENIS_PEMBAYARAN');
+        return $this->belongsTo(
+            RefJenisTagihan::class,
+            'ID_JENIS_TAGIHAN',
+            'ID_JENIS_TAGIHAN'
+        );
     }
 
-    /**
-     * Relasi ke tr_pembayaran
-     */
     public function pembayaran(): HasMany
     {
-        return $this->hasMany(TrPembayaran::class, 'ID_TAGIHAN_SISWA', 'ID_TAGIHAN_SISWA');
+        return $this->hasMany(
+            TrPembayaran::class,
+            'ID_TAGIHAN_SISWA',
+            'ID_TAGIHAN_SISWA'
+        );
     }
 }

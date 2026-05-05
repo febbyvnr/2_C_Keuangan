@@ -12,17 +12,16 @@ class MstProgramKerja extends Model
     protected $table = 'mst_program_kerja';
     protected $primaryKey = 'ID_PROGRAM_KERJA';
     public $timestamps = false;
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'ID_PROGRAM_KERJA',
         'ID_TA_ANGGARAN',
         'ID_UNIT',
         'ID_TAN',
         'ID_MASTER_COA',
         'ID_KEGIATAN',
-        'NOMINAL',
+        'TOTAL_PROGKER',
         'INDIKATOR',
         'SASARAN',
         'WAKTU_AWAL',
@@ -30,6 +29,7 @@ class MstProgramKerja extends Model
         'KELUARAN_PROGKER',
         'PROGRAM_KERJA',
         'NIP_PENANGGUNG_JAWAB',
+        'NIP_VALIDATOR_PROGKER',
         'IS_DELETE',
     ];
 
@@ -40,9 +40,9 @@ class MstProgramKerja extends Model
         'ID_TAN' => 'integer',
         'ID_MASTER_COA' => 'integer',
         'ID_KEGIATAN' => 'integer',
-        'NOMINAL' => 'float',
-        'WAKTU_AWAL' => 'date',
-        'WAKTU_AKHIR' => 'date',
+        'TOTAL_PROGKER' => 'float',
+        'WAKTU_AWAL' => 'datetime',
+        'WAKTU_AKHIR' => 'datetime',
         'IS_DELETE' => 'boolean',
     ];
 
