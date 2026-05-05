@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LaporanBukuKhasUmumController extends Controller
 {
-    public function index(Request $request)
+    public function bku(Request $request)
     {
         $start = $request->start;
         $end = $request->end;
@@ -35,6 +35,8 @@ class LaporanBukuKhasUmumController extends Controller
                 'message' => 'Role tidak diizinkan mengakses laporan'
             ], 403);
         }
+
+        
 
         // =========================
         // DATA PENERIMAAN

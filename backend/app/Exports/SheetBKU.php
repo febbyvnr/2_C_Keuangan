@@ -99,17 +99,17 @@ class SheetBKU implements WithEvents, WithTitle
                 $no = 1;
                 $saldoAkhir = 0;
 
-                foreach ($this->data as $item) {
-                    $sheet->setCellValue("A$row", $no++);
-                    $sheet->setCellValue("B$row", $item->tanggal);
-                    $sheet->setCellValue("C$row", $item->uraian);
-                    $sheet->setCellValue("D$row", $item->debit);
-                    $sheet->setCellValue("E$row", $item->kredit);
-                    $sheet->setCellValue("F$row", $item->saldo);
+               foreach ($this->data as $item) {
+                $sheet->setCellValue("A$row", $no++);
+                $sheet->setCellValue("B$row", $item['tanggal']); 
+                $sheet->setCellValue("C$row", $item['uraian']);
+                $sheet->setCellValue("D$row", $item['debit']);
+                $sheet->setCellValue("E$row", $item['kredit']);
+                $sheet->setCellValue("F$row", $item['saldo']);
 
-                    $saldoAkhir = $item->saldo;
-                    $row++;
-                }
+    $saldoAkhir = $item['saldo'];
+    $row++;
+}
 
                 $endData = $row - 1;
 
