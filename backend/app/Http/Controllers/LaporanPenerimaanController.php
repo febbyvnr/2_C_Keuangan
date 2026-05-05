@@ -81,7 +81,9 @@ class LaporanPenerimaanController extends Controller
             ->get();
 
         // ambil sesuai role login
-        $penandatangan = $ttd->firstWhere('role', ucfirst($role));
+        $penandatangan = $ttd->first(function ($item) use ($role) {
+    return strtolower(trim($item->role)) === strtolower(trim($role));
+});
 
         // fallback aman
         $nama = $penandatangan->nama ?? '-';
