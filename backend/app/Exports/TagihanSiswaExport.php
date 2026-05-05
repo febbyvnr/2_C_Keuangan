@@ -21,16 +21,16 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
     {
         $query = TagihanSiswa::with([
             'siswa',
-            'jenisPembayaran',
-            'pembayaran',
+            'jenisTagihan',
+            'pembayaran.metodePembayaran',
         ]);
 
         if (!empty($this->filters['ID_SISWA_TETAP'])) {
             $query->where('ID_SISWA_TETAP', $this->filters['ID_SISWA_TETAP']);
         }
 
-        if (!empty($this->filters['ID_JENIS_PEMBAYARAN'])) {
-            $query->where('ID_JENIS_PEMBAYARAN', $this->filters['ID_JENIS_PEMBAYARAN']);
+        if (!empty($this->filters['ID_JENIS_TAGIHAN'])) {
+            $query->where('ID_JENIS_TAGIHAN', $this->filters['ID_JENIS_TAGIHAN']);
         }
 
         if (!empty($this->filters['BULAN_TAGIHAN_SISWA'])) {
@@ -50,7 +50,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                  ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                    ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -68,7 +68,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'ID_SISWA_TETAP' => $tagihan->ID_SISWA_TETAP,
                 'NAMA_SISWA_TETAP' => optional($tagihan->siswa)->NAMA_SISWA_TETAP,
                 'NISN_SISWA' => optional($tagihan->siswa)->NISN_SISWA,
-                'JENIS_PEMBAYARAN' => optional($tagihan->jenisPembayaran)->DESKRIPSI_JENIS_PEMBAYARAN,
+                'JENIS_TAGIHAN' => optional($tagihan->jenisTagihan)->DESKRIPSI_JENIS_TAGIHAN,
                 'BULAN_TAGIHAN_SISWA' => $tagihan->BULAN_TAGIHAN_SISWA,
                 'TAHUN_TAGIHAN_SISWA' => $tagihan->TAHUN_TAGIHAN_SISWA,
                 'JUMLAH_TAGIHAN_SISWA' => (float) $tagihan->JUMLAH_TAGIHAN_SISWA,
@@ -76,7 +76,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'SISA_TAGIHAN' => $sisaTagihan,
                 'STATUS_TAGIHAN_SISWA' => $tagihan->STATUS_TAGIHAN_SISWA,
                 'ADA_TUNGGAKAN' => $sisaTagihan > 0 ? 'Ya' : 'Tidak',
-                'DUEDATE_TAGIHAN_SISWA' => $tagihan->DUEDATE_TAGIHAN_SISWA,
+                'DUEDATETIME_TAGIHAN_SISWA' => $tagihan->DUEDATETIME_TAGIHAN_SISWA,
             ];
         });
 
@@ -102,7 +102,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
             'ID_SISWA_TETAP',
             'NAMA_SISWA_TETAP',
             'NISN_SISWA',
-            'JENIS_PEMBAYARAN',
+            'JENIS_TAGIHAN',
             'BULAN_TAGIHAN_SISWA',
             'TAHUN_TAGIHAN_SISWA',
             'JUMLAH_TAGIHAN_SISWA',
@@ -110,7 +110,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
             'SISA_TAGIHAN',
             'STATUS_TAGIHAN_SISWA',
             'ADA_TUNGGAKAN',
-            'DUEDATE_TAGIHAN_SISWA',
+            'DUEDATETIME_TAGIHAN_SISWA',
         ];
     }
 }

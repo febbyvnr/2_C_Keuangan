@@ -41,7 +41,7 @@
             <tr>
                 <th>ID Tagihan</th>
                 <th>ID Siswa</th>
-                <th>Jenis Pembayaran</th>
+                <th>Jenis Tagihan</th>
                 <th>Bulan</th>
                 <th>Tahun</th>
                 <th>Jumlah Tagihan</th>
@@ -54,7 +54,7 @@
                 <tr>
                     <td>{{ $item['ID_TAGIHAN_SISWA'] }}</td>
                     <td>{{ $item['ID_SISWA_TETAP'] }}</td>
-                    <td>{{ $item['JENIS_PEMBAYARAN']['DESKRIPSI_JENIS_PEMBAYARAN'] ?? '-' }}</td>
+                    <td>{{ $item['JENIS_TAGIHAN']['DESKRIPSI_JENIS_TAGIHAN'] ?? '-' }}</td>
                     <td>{{ $item['BULAN_TAGIHAN_SISWA'] }}</td>
                     <td>{{ $item['TAHUN_TAGIHAN_SISWA'] }}</td>
                     <td>Rp {{ number_format($item['JUMLAH_TAGIHAN_SISWA'], 0, ',', '.') }}</td>
