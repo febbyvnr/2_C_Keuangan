@@ -146,17 +146,9 @@
 
 @php
     \Carbon\Carbon::setLocale('id');
-
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    $nip = $nip ?? '-';
+    $role = ucfirst($role ?? 'Bendahara');
+    $nama = $nama ?? '-';
+    $nip = $nip_ttd ?? '-';
 @endphp
 
 <!-- ===================== -->
