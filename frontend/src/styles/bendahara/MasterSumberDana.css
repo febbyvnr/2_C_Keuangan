@@ -18,20 +18,19 @@
 .btn-primary {
     background-color: #1F4E82;
     color: #ffffff;
-    border: 2px solid transparent;
+    border: 2px solid #1F4E82;
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     font-size: 14px;
-    transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
     background-color: #f6f7f9;
     color: #1F4E82;
-    font-weight: 700;
-    border: 2px solid #1F4E82;
+    font-weight: 500 !important;
+    border: 2px solid #1F4E82 !important;
 }
 
 .sumber-dana-table-wrapper {
@@ -188,7 +187,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 9999 !important;
 }
 
 .modal-box {
