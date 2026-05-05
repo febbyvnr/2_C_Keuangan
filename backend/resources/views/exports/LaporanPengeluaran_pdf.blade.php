@@ -5,6 +5,7 @@
         body { 
             font-family: sans-serif; 
             position: relative;
+            font-size: 12px; 
         }
 
         table { 
@@ -19,7 +20,12 @@
         }
 
         th { 
-            background: #f5f5f5; 
+            background: #e5e7eb; 
+            font-weight: bold;
+        }
+
+        td {
+            color: #1a1a1a;
         }
 
         .no-border td {
@@ -28,6 +34,7 @@
 
         .header-text {
             text-align: center;
+            width: 100%;
         }
 
         .title-main {
@@ -86,6 +93,7 @@
 
 <img src="{{ public_path('logo.png') }}" class="watermark" width="400">
 
+<!-- HEADER -->
 <table class="no-border">
     <tr class="no-border">
         <td class="header-text">
@@ -100,6 +108,7 @@
 
 <br>
 
+<!-- TABLE -->
 <table>
     <thead>
         <tr>
@@ -131,25 +140,19 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
-    // Menentukan Role dan Nama secara dinamis
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    // Mengambil NIP dari Controller
-    $nip = $nip ?? '-';
+    $role_ttd = ucfirst($role ?? 'Bendahara');
+    $nama_ttd = $nama ?? '-';
+    $nip_ttd = $nip_ttd ?? '-';
 @endphp
 
+
 <div class="ttd-center">
-    <p class="ttd-role">{{ $role }},</p>
-    <p class="ttd-nama"><b>{{ $nama }}</b></p>
+    <p class="ttd-role">{{ $role_ttd }},</p>
+
+    <p class="ttd-nama"><b>{{ $nama_ttd }}</b></p>
+
     <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip }}</p>
+    <p class="ttd-nip">NIP: {{ $nip_ttd }}</p>
 </div>
 
 <div class="tanggal-kanan">
