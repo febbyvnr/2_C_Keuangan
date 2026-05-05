@@ -11,15 +11,17 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class LaporanPengeluaranExport implements WithEvents
 {
-    protected $start, $end, $sumberDana, $role, $nip;
+    protected $start, $end, $sumberDana, $role, $nip, $nama, $nip_ttd;
 
-    public function __construct($start, $end, $sumberDana, $role = null, $nip = null)
+    public function __construct($start, $end, $sumberDana, $role = null, $nip = null, $nama = null, $nip_ttd = null)
     {
         $this->start = $start;
         $this->end = $end;
         $this->sumberDana = $sumberDana;
         $this->role = $role ?: 'Bendahara';
-        $this->nip = $nip;
+        $this->nip = $nip; // NIP user pengakses
+        $this->nama = $nama; // Nama pejabat TTD (Dinamis)
+        $this->nip_ttd = $nip_ttd; // NIP pejabat TTD (Dinamis)
     }
 
     public function collection()
@@ -111,19 +113,20 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->getStyle("E$totalRow:F$totalRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFE699');
 
                 $footerRow = $totalRow + 4;
-                $role = $this->role;
-                $nama = ($role === 'Kepala Sekolah') ? 'Drs. Budi Santoso' : 'Rina Putri, S.E.';
-                $nip = $this->nip ?: '-';
+            
+                $roleLabel = ucfirst(strtolower(trim($this->role)));
+                $namaPejabat = $this->nama ?? '-';
+                $nipPejabat = $this->nip_ttd ?? '-';
                 
                 $sheet->mergeCells("C" . ($footerRow+1) . ":E" . ($footerRow+1));
                 $sheet->mergeCells("C" . ($footerRow+3) . ":E" . ($footerRow+3));
                 $sheet->mergeCells("C" . ($footerRow+7) . ":E" . ($footerRow+7));
                 $sheet->mergeCells("C" . ($footerRow+8) . ":E" . ($footerRow+8));
 
-                $sheet->setCellValue("C" . ($footerRow+1), $role . ',');
-                $sheet->setCellValue("C" . ($footerRow+3), $nama);
+                $sheet->setCellValue("C" . ($footerRow+1), $roleLabel . ',');
+                $sheet->setCellValue("C" . ($footerRow+3), $namaPejabat);
                 $sheet->setCellValue("C" . ($footerRow+7), '-------------------------');
-                $sheet->setCellValue("C" . ($footerRow+8), 'NIP: ' . $nip);
+                $sheet->setCellValue("C" . ($footerRow+8), 'NIP: ' . $nipPejabat);
 
                 $sheet->getStyle("C" . ($footerRow+1) . ":E" . ($footerRow+8))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 

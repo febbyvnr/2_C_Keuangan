@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\LaporanPengeluaranExport;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanPengeluaranController extends Controller
 {
@@ -17,14 +18,45 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        $jabatan = DB::table('tr_jabatan as tj')
-            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-            ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->select('tj.NIP_KARYAWAN', 'rj.DESKRIPSI_JABATAN')
-            ->first();
+        $nip = $request->nip
+            ?? (Auth::check() ? Auth::user()->nip : null)
+            ?? DB::table('mst_karyawan')->value('NIP_KARYAWAN'); 
 
-        $nip = $jabatan ? $jabatan->NIP_KARYAWAN : '-';
-        $role = $jabatan ? ucwords(strtolower($jabatan->DESKRIPSI_JABATAN)) : 'Bendahara';
+        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        $dbRole = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('tj.NIP_KARYAWAN', $nip)
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->value('rj.DESKRIPSI_JABATAN');
+
+        $role = $dbRole ?? $authRole ?? 'bendahara'; 
+        $role = strtolower(trim($role));
+
+        if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
+            return response()->json([
+                'message' => 'Role tidak diizinkan mengakses laporan'
+            ], 403);
+        }
+
+        $ttd = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
+            ->select(
+                'rj.DESKRIPSI_JABATAN as role_ttd',
+                'mk.NAMA_LENGKAP_GELAR as nama',
+                'mk.NIP_KARYAWAN as nip'
+            )
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->whereIn('rj.DESKRIPSI_JABATAN', ['Bendahara', 'Kepala Sekolah'])
+            ->get();
+
+        $penandatangan = $ttd->first(function ($item) use ($role) {
+            return strtolower(trim($item->role_ttd)) === strtolower(trim($role));
+        });
+
+        $nama = $penandatangan->nama ?? '-';
+        $nip_ttd = $penandatangan->nip ?? '-';
 
         $query = DB::table('tr_pm as tp')
             ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
@@ -47,14 +79,22 @@ class LaporanPengeluaranController extends Controller
         $total = $data->sum('nominal');
 
         if ($type === 'excel') {
-            return Excel::download(new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip), 'Laporan_Pengeluaran.xlsx');
+            return Excel::download(
+                new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip, $nama, $nip_ttd), 
+                'Laporan_Pengeluaran.xlsx'
+            );
         } 
         
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('exports.LaporanPengeluaran_pdf', compact('data', 'total', 'start', 'end', 'role', 'nip'));
+            $pdf = Pdf::loadView('exports.LaporanPengeluaran_pdf', compact(
+                'data', 'total', 'start', 'end', 'role', 'nama', 'nip_ttd'
+            ));
             return $pdf->download('Laporan_Pengeluaran.pdf');
         }
 
-        return response()->json(['message' => 'Format tidak valid.'], 400);
+        return response()->json([
+            'data' => $data,
+            'total' => $total
+        ]);
     }
 }
