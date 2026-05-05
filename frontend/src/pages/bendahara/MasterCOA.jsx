@@ -25,6 +25,7 @@ export default function MasterCOA() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
+            setCurrentPage(1);
             const url = keyword
                 ? `http://localhost:8000/api/coa?search=${keyword}`
                 : "http://localhost:8000/api/coa";
@@ -50,6 +51,14 @@ export default function MasterCOA() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleSort = (key) => {
         let direction = "asc";
@@ -230,10 +239,12 @@ export default function MasterCOA() {
     const addNumbering = (nodes, prefix = "") => {
         return nodes.map((node, index) => {
             const number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const currentNumber = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
             const isLast = index === nodes.length - 1;
             return {
                 ...node,
                 number,
+                path: node.path || currentNumber,
                 isLast,
                 children: addNumbering(node.children, number)
             };
@@ -293,7 +304,6 @@ export default function MasterCOA() {
                             placeholder="Cari deskripsi / kode COA..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button
@@ -344,7 +354,9 @@ export default function MasterCOA() {
                                     {item.level > 0 && (
                                         <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
                                     )}
-                                    <span className="tree-number">{item.number}</span>
+                                    {/* <span className="tree-number">{item.number}</span>
+                                    <span className="tree-text">{item.KODE_COA} | {item.DESKRIPSI_COA}</span> */}
+                                    <span className="tree-number">{item.path}</span>
                                     <span className="tree-text">{item.KODE_COA} | {item.DESKRIPSI_COA}</span>
                                 </div>
                                 <div className="tree-actions">

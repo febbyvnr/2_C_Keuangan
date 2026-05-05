@@ -21,15 +21,17 @@ export default function MasterRefPM() {
         DESKRIPSI_PM: ""
     });
 
-    const fetchData = async () => {
+    const fetchData = async (searchKeyword = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/ref-pm");
+            const url = searchKeyword 
+                ? `http://localhost:8000/api/ref-pm?search=${searchKeyword}`
+                : "http://localhost:8000/api/ref-pm";
+            const res = await fetch(url);
             const json = await res.json();
-            const result = json.data || []; 
-            setData(result);
-            setParentList(result);
+            setData(json.data || []);
+            setParentList(json.data || []);
         } catch (err) {
-            console.error(err);
+            console.error("Fetch error:", err);
         }
     };
 
@@ -59,20 +61,19 @@ export default function MasterRefPM() {
     useEffect(() => {
         const initData = async () => {
             setLoading(true);
-            try {
-                const res = await fetch("http://localhost:8000/api/ref-pm");
-                const json = await res.json();
-                const result = json.data || [];
-                setData(result);
-                setParentList(result);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+            await fetchData();
+            setLoading(false);
         };
         initData();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleChange = (e) => {
         setForm({
@@ -297,14 +298,14 @@ export default function MasterRefPM() {
                                 setCurrentPage(1);
                             }}
                         />
-                        <button className="search-btn" onClick={() => { setCurrentPage(1); }}>
+                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(); }}>
                             Search
                         </button>
                     </div>
                     <button className="btn-primary" onClick={() => {
                         setIsEdit(false);
                         setEditId(null);
-                        setForm({ REF_ID_REF_PM: "", DESKRIPSI_PM: "" });
+                        setForm({ REF_ID_REF_PM: "", NAMA_PM: "", DESKRIPSI_PM: "" });
                         setShowModal(true);
                     }}>
                         Tambah Referensi PM
@@ -314,42 +315,65 @@ export default function MasterRefPM() {
             <div className="ref-pm-table-wrapper">
                 <div className="tree-list">
                     {loading ? (
-                        <div className="text-center" style={{padding: "20px"}}>Loading...</div>
+                        <div className="text-center" style={{ padding: "20px" }}>Loading...</div>
                     ) : currentRows.length === 0 ? (
-                        <div className="text-center" style={{padding: "20px"}}>Tidak ada data</div>
+                        <div className="text-center" style={{ padding: "20px" }}>Tidak ada data</div>
                     ) : (
-                        currentRows.map((item) => (
-                            <div 
-                                className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
-                                key={item.ID_REF_PM}
-                            >
-                                <div className="tree-left" style={{ paddingLeft: "10px" }}>
-                                    {item.parentLines.map((hasActiveLine, idx) => (
-                                        <div 
-                                            key={idx} 
-                                            className={`tree-line ${hasActiveLine ? "active" : ""}`} 
-                                        />
-                                    ))}
-                                    {item.level > 0 && (
-                                        <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
-                                    )}
-                                    <span className="tree-number">{item.number}</span>
-                                    <span className="tree-text">{item.NAMA_PM} | {item.DESKRIPSI_PM}</span>
+                        currentRows.map((item) => {
+                            const isLocked = !!item.NIP_VALIDATOR_PM;
+                            const hasChild = item.children && item.children.length > 0;
+                            const isUsed = item.is_used > 0;
+                            const disableEdit = isLocked;
+                            const disableDelete = isLocked || hasChild || isUsed;
+                            const getDeleteTooltip = () => {
+                                if (isLocked) return "Data sudah divalidasi, tidak bisa dihapus";
+                                if (hasChild) return "Data memiliki child, tidak bisa dihapus";
+                                if (isUsed) return "Data sedang digunakan";
+                                return "";
+                            };
+                            const getEditTooltip = () => {
+                                if (isLocked) return "Data sudah divalidasi, tidak bisa diedit";
+                                return "";
+                            };
+                            return (
+                                <div 
+                                    className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
+                                    key={item.ID_REF_PM}
+                                >
+                                    <div className="tree-left" style={{ paddingLeft: "10px" }}>
+                                        {item.parentLines.map((hasActiveLine, idx) => (
+                                            <div 
+                                                key={idx} 
+                                                className={`tree-line ${hasActiveLine ? "active" : ""}`} 
+                                            />
+                                        ))}
+                                        {item.level > 0 && (
+                                            <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
+                                        )}
+                                        <span className="tree-number">{item.nomor_urut}</span>
+                                        <span className="tree-text">{item.NAMA_PM} | {item.DESKRIPSI_PM}</span>
+                                    </div>
+                                    <div className="tree-actions">
+                                        <button 
+                                            className="btn-edit" 
+                                            disabled={disableEdit} 
+                                            title={getEditTooltip()} 
+                                            onClick={() => handleEdit(item)}
+                                        >
+                                            <i className="bi bi-pencil"></i>
+                                        </button>
+                                        <button
+                                            className="btn-delete"
+                                            disabled={disableDelete}
+                                            title={getDeleteTooltip()}
+                                            onClick={() => setConfirmDeleteId(item.ID_REF_PM)}
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="tree-actions">
-                                    <button className="btn-edit" onClick={() => handleEdit(item)}>
-                                        <i className="bi bi-pencil"></i>
-                                    </button>
-                                    <button
-                                        className="btn-delete"
-                                        disabled={item.is_used > 0 || (item.children && item.children.length > 0)}
-                                        onClick={() => setConfirmDeleteId(item.ID_REF_PM)}
-                                    >
-                                        <i className="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>

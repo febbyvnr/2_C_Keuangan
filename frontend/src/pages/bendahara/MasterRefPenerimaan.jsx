@@ -20,13 +20,27 @@ export default function MasterRefPenerimaan() {
         DESKRIPSI_REF_PENERIMAAN: ""
     });
 
-    const fetchData = async () => {
+    const fetchData = async (keyword = "") => {
+        setLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/ref-penerimaan");
+            const url = keyword 
+                ? `http://localhost:8000/api/ref-penerimaan/search?DESKRIPSI_REF_PENERIMAAN=${keyword}`
+                : "http://localhost:8000/api/ref-penerimaan";
+            const res = await fetch(url);
             const json = await res.json();
-            setData(json.data || []);
+            if (res.ok) {
+                const resultData = Array.isArray(json) ? json : (json.data || []);
+                setData(resultData);
+            } else {
+                if (res.status === 404) {
+                    setData([]);
+                }
+                console.error(json.message);
+            }
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching data:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -57,6 +71,10 @@ export default function MasterRefPenerimaan() {
         fetchData();
         fetchParent();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
 
     const handleChange = (e) => {
         setForm({
@@ -123,6 +141,20 @@ export default function MasterRefPenerimaan() {
             DESKRIPSI_REF_PENERIMAAN: ""
         });
     };
+
+    const filteredData = data.filter((item) =>
+        (item.DESKRIPSI_REF_PENERIMAAN || "").toLowerCase().includes(search.toLowerCase()) ||
+        (item.nomor_urut + "").includes(search)
+    );
+    
+    const processedData = filteredData.map(item => {
+        const dots = (item.nomor_urut.match(/\./g) || []).length;
+        return {
+            ...item,
+            level: dots,
+            parentLines: item.parentLines || []
+        };
+    });
 
     const sortedData = [...data]
         .filter((item) =>
@@ -264,7 +296,9 @@ export default function MasterRefPenerimaan() {
     const totalPages = Math.ceil(totalData / itemsPerPage);
     const indexOfLast = currentPage * itemsPerPage;
     const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentRows = allFlatRows.slice(indexOfFirst, indexOfLast);
+    const indexOfLastRow = currentPage * itemsPerPage;
+    const indexOfFirstRow = indexOfLastRow - itemsPerPage;
+    const currentRows = processedData.slice(indexOfFirstRow, indexOfLastRow);
     const startData = totalData === 0 ? 0 : indexOfFirst + 1;
     const endData = Math.min(indexOfLast, totalData);
 
@@ -318,7 +352,7 @@ export default function MasterRefPenerimaan() {
                                     {item.level > 0 && (
                                         <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
                                     )}
-                                    <span className="tree-number">{item.number}</span>
+                                    <span className="tree-number">{item.nomor_urut}</span>
                                     <span className="tree-text">{item.DESKRIPSI_REF_PENERIMAAN}</span>
                                 </div>
                                 <div className="tree-actions">

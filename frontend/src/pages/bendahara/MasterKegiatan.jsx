@@ -23,6 +23,7 @@ export default function MasterKegiatan() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
+            if (keyword !== "") setCurrentPage(1);
             const url = keyword
                 ? `http://localhost:8000/api/kegiatan?search=${keyword}`
                 : "http://localhost:8000/api/kegiatan";
@@ -41,6 +42,14 @@ export default function MasterKegiatan() {
         fetchData();
         fetchParent();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const fetchParent = async () => {
         try {
@@ -180,14 +189,9 @@ export default function MasterKegiatan() {
             map[item.ID_KEGIATAN] = { ...item, children: [] };
         });
         nodes.forEach(item => {
-            const isParent = !item.MST_ID_KEGIATAN || item.MST_ID_KEGIATAN === 0;
-            if (!isParent) {
-                if (map[item.MST_ID_KEGIATAN]) {
-                    map[item.MST_ID_KEGIATAN].children.push(map[item.ID_KEGIATAN]);
-                } else {
-                    // Jika parent tidak ditemukan (misal terfilter search), anggap sebagai root
-                    roots.push(map[item.ID_KEGIATAN]);
-                }
+            const parentId = item.MST_ID_KEGIATAN;
+            if (parentId && map[parentId]) {
+                map[parentId].children.push(map[item.ID_KEGIATAN]);
             } else {
                 roots.push(map[item.ID_KEGIATAN]);
             }
@@ -267,7 +271,6 @@ export default function MasterKegiatan() {
                             placeholder="Cari kegiatan..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
@@ -296,7 +299,7 @@ export default function MasterKegiatan() {
                                 {item.level > 0 && (
                                     <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
                                 )}
-                                <span className="tree-number">{item.number}</span>
+                                <span className="tree-number">{item.nomor_urut}</span>
                                 <span className="tree-text">{item.DESKRIPSI_KEGIATAN}</span>
                             </div>
                             <div className="tree-actions">

@@ -27,10 +27,7 @@ export default function MasterSumberDana() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
-            const url = keyword
-                ? `http://localhost:8000/api/ref-sumber-dana?search=${keyword}`
-                : "http://localhost:8000/api/ref-sumber-dana";
-
+            const url = `http://localhost:8000/api/ref-sumber-dana?search=${keyword}`;
             const res = await fetch(url);
             const json = await res.json();
             setData(json.data || []);
@@ -55,6 +52,14 @@ export default function MasterSumberDana() {
         fetchData();
         fetchParent();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -242,7 +247,6 @@ export default function MasterSumberDana() {
                             placeholder="Cari sumber dana..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
@@ -276,7 +280,7 @@ export default function MasterSumberDana() {
                                     {item.level > 0 && (
                                         <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
                                     )}
-                                    <span className="tree-number">{item.number}</span>
+                                    <span className="tree-number">{item.nomor_urut}</span>
                                     <span className="tree-text">{item.DESKRIPSI_SUMBER_DANA}</span>
                                 </div>
                                 <div className="tree-actions">

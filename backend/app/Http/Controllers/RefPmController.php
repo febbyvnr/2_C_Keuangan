@@ -25,28 +25,63 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class RefPmController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = RefPm::with(['trPm.programKerja'])
-                ->orderBy('REF_ID_REF_PM', 'asc')
-                ->orderBy('NAMA_PM', 'asc')
+            $search = trim((string) $request->query('search', ''));
+            $allData = RefPm::query()
+                ->withCount(['children as has_child', 'trPm'])
+                ->orderBy('REF_ID_REF_PM', 'asc') 
+                ->orderBy('ID_REF_PM', 'asc')
                 ->get();
-
+            $allData->map(function ($item) {
+                $item->is_used = ($item->tr_pm_count > 0 || $item->has_child > 0);
+                return $item;
+            });
+            $formattedData = $this->generatePmHierarchy($allData);
+            if ($search !== '') {
+                $formattedData = collect($formattedData)->filter(function ($item) use ($search) {
+                    $s = strtolower($search);
+                    return str_contains(strtolower($item['NAMA_PM'] ?? ''), $s) ||
+                        str_contains(strtolower($item['nomor_urut'] ?? ''), $s) ||
+                        str_contains(strtolower($item['DESKRIPSI_PM'] ?? ''), $s);
+                })->values();
+            }
             return response()->json([
                 'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data ref PM tidak ditemukan'
-                    : 'Data ref PM berhasil diambil',
-                'data' => $data,
+                'message' => count($formattedData) === 0 ? 'Data tidak ditemukan' : 'Data berhasil diambil',
+                'data' => $formattedData,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data',
-                'error' => $e->getMessage(),
+                'message' => 'Error: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function generatePmHierarchy($nodes, $parentId = null, $prefix = "")
+    {
+        $result = [];
+        $index = 1;
+        $children = $nodes->where('REF_ID_REF_PM', $parentId);
+        foreach ($children as $child) {
+            $currentNumber = $prefix ? $prefix . "." . $index : (string)$index;
+            $result[] = [
+                'ID_REF_PM'     => $child->ID_REF_PM,
+                'REF_ID_REF_PM' => $child->REF_ID_REF_PM,
+                'NAMA_PM'       => $child->NAMA_PM,
+                'DESKRIPSI_PM'       => $child->DESKRIPSI_PM,
+                'nomor_urut'    => $currentNumber,
+                'has_child'     => $child->has_child > 0,
+                'is_used'       => $child->is_used,
+                'tr_pm'         => $child->trPm 
+            ];
+            $subResults = $this->generatePmHierarchy($nodes, $child->ID_REF_PM, $currentNumber);
+            $result = array_merge($result, $subResults);
+            $index++;
+        }
+        return $result;
     }
 
     public function search(Request $request): JsonResponse
@@ -131,8 +166,12 @@ class RefPmController extends Controller
         try {
             $validated = $request->validate([
                 'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
-                'NAMA_PM' => 'required|string|max:100',
+                'NAMA_PM' => 'required|string|max:255',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
+            ], [
+                'NAMA_PM.required' => 'Nama PM tidak boleh kosong',
+                'NAMA_PM.max' => 'Nama PM maksimal 255 karakter',
+                'DESKRIPSI_PM.max' => 'Deskripsi maksimal 500 karakter',
             ]);
             $data = RefPm::create($validated);
             return response()->json([
@@ -140,11 +179,10 @@ class RefPmController extends Controller
                 'message' => 'Ref PM berhasil ditambahkan',
                 'data' => $data,
             ], 201);
-        } catch (ValidationException $e) {
+        }catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
+                'message' => collect($e->errors())->flatten()->first(),
             ], 422);
         } catch (\Throwable $e) {
             return response()->json([
@@ -161,15 +199,26 @@ class RefPmController extends Controller
             $id = (int) $id;
             $data = RefPm::find($id);
             if (!$data) {
-                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
             }
-           $validated = $request->validate([
-                'REF_ID_REF_PM' => "nullable|integer|exists:ref_pm,ID_REF_PM|different:ID_REF_PM",
+            $validated = $request->validate([
+                'REF_ID_REF_PM' => 'nullable|integer|exists:ref_pm,ID_REF_PM',
                 'NAMA_PM' => 'required|string|max:100',
                 'DESKRIPSI_PM' => 'nullable|string|max:500',
             ], [
-                'REF_ID_REF_PM.different' => 'Referensi Parent tidak boleh menunjuk ke diri sendiri.'
+                'NAMA_PM.required' => 'Nama PM tidak boleh kosong',
+                'NAMA_PM.max' => 'Nama PM maksimal 100 karakter',
+                'DESKRIPSI_PM.max' => 'Deskripsi maksimal 500 karakter',
             ]);
+            if ($request->REF_ID_REF_PM == $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Referensi Parent tidak boleh menunjuk ke diri sendiri.',
+                ], 422);
+            }
             $data->update($validated);
             return response()->json([
                 'success' => true,
@@ -179,8 +228,7 @@ class RefPmController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors(),
+                'message' => collect($e->errors())->flatten()->first(),
             ], 422);
         } catch (\Throwable $e) {
             return response()->json([

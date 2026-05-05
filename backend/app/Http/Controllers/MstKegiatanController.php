@@ -20,9 +20,7 @@ class MstKegiatanController extends Controller
     {
         try {
             $search = trim((string) $request->query('search', ''));
-
-            $query = MstKegiatan::query()
-                ->with(['children'])
+            $allData = MstKegiatan::query()
                 ->withCount([
                     'children as has_child' => function ($q) {
                         $q->where('IS_DELETE', 0);
@@ -30,34 +28,51 @@ class MstKegiatanController extends Controller
                     'programKerja as is_used'
                 ])
                 ->where('IS_DELETE', 0)
-                // ->whereNull('MST_ID_KEGIATAN') //kl null ga ditampilin, child ga ketampil
-                ->orderBy('ID_KEGIATAN', 'desc');
-
+                ->orderBy('MST_ID_KEGIATAN', 'asc') 
+                ->orderBy('ID_KEGIATAN', 'asc')
+                ->get();
+            $formattedData = $this->generateHierarchy($allData);
             if ($search !== '') {
-                $query->where(function ($q) use ($search) {
-                    $q->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%")
-                      ->orWhereHas('children', function ($sub) use ($search) {
-                          $sub->where('DESKRIPSI_KEGIATAN', 'like', "%{$search}%");
-                      });
-                });
+                $formattedData = collect($formattedData)->filter(function ($item) use ($search) {
+                    return str_contains(strtolower($item['DESKRIPSI_KEGIATAN']), strtolower($search)) ||
+                        str_contains($item['nomor_urut'], $search);
+                })->values();
             }
-
-            $data = $query->get();
-
             return response()->json([
                 'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data kegiatan tidak ditemukan'
-                    : 'Data kegiatan berhasil diambil',
-                'data' => $data,
+                'message' => count($formattedData) === 0 ? 'Data tidak ditemukan' : 'Data berhasil diambil',
+                'data' => $formattedData,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data kegiatan',
+                'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function generateHierarchy($nodes, $parentId = null, $prefix = "")
+    {
+        $result = [];
+        $index = 1;
+        $children = $nodes->where('MST_ID_KEGIATAN', $parentId);
+        foreach ($children as $child) {
+            $currentNumber = $prefix ? $prefix . "." . $index : (string)$index;
+            $result[] = [
+                'ID_KEGIATAN' => $child->ID_KEGIATAN,
+                'MST_ID_KEGIATAN' => $child->MST_ID_KEGIATAN,
+                'DESKRIPSI_KEGIATAN' => $child->DESKRIPSI_KEGIATAN,
+                'nomor_urut' => $currentNumber,
+                'has_child' => $child->has_child,
+                'is_used' => $child->is_used,
+            ];
+            $subResults = $this->generateHierarchy($nodes, $child->ID_KEGIATAN, $currentNumber);
+            $result = array_merge($result, $subResults);
+        
+            $index++;
+        }
+        return $result;
     }
 
     public function show(int $id): JsonResponse
