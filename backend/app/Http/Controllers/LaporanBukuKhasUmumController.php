@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LaporanBukuKhasUmumController extends Controller
 {
-    public function bku(Request $request)
+    public function index(Request $request)
     {
         $start = $request->start;
         $end = $request->end;
@@ -28,134 +28,130 @@ class LaporanBukuKhasUmumController extends Controller
             ->value('rj.DESKRIPSI_JABATAN');
 
         $role = $dbRole ?? $authRole;
-        $role = trim($role);
+        $role = strtolower(trim($role));
 
-        if ($type == 'excel' && !in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
+        if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
             return response()->json([
-                'message' => 'Role tidak diizinkan generate laporan'
+                'message' => 'Role tidak diizinkan mengakses laporan'
             ], 403);
         }
 
         // =========================
-        // 1. PENERIMAAN SISWA
+        // DATA PENERIMAAN
+        // =========================
+        $penerimaan = DB::table('TR_PENERIMAAN')
+            ->select(
+                'TANGGAL_TR_PENERIMAAN as tanggal',
+                DB::raw("DESKRIPSI_TR_PENERIMAAN as uraian"),
+                DB::raw("JUMLAH_TR_PENERIMAAN as debit"),
+                DB::raw("0 as kredit"),
+                DB::raw("'Bank' as metode")
+            );
+
+        // =========================
+        // DATA PEMBAYARAN (JOIN METODE)
         // =========================
         $pembayaran = DB::table('TR_PEMBAYARAN as p')
-            ->join('MST_SISWA as s', 'p.ID_SISWA_TETAP', '=', 's.ID_SISWA_TETAP')
-
-            ->leftJoin('REF_METODE_PEMBAYARAN as rmp', 'p.REF_ID_JENIS_PEMBAYARAN', '=', 'rmp.ID_METODE_PEMBAYARAN')
-
+            ->join('REF_METODE_PEMBAYARAN as m', 'p.ID_JENIS_PEMBAYARAN', '=', 'm.ID_METODE_PEMBAYARAN')
+            ->join('mst_karyawan as mk', 'p.NIP_VALIDATOR_PEMBAYARAN', '=', 'mk.NIP_KARYAWAN')
             ->select(
                 'p.TGL_BAYAR as tanggal',
-                DB::raw("CONCAT('Pembayaran - ', s.NAMA_SISWA_TETAP) as uraian"),
-                'p.JUMLAH_BAYAR as debit',
-                DB::raw('0 as kredit'),
-                'rmp.DESKRIPSI_METODE_PEMBAYARAN as metode'
-            );
-
-        // =========================
-        // 2. PENERIMAAN LAIN
-        // =========================
-        $penerimaan = DB::table('TR_PENERIMAAN as p')
-            ->join('REF_PENERIMAAN as rp', 'p.ID_REF_PENERIMAAN', '=', 'rp.ID_REF_PENERIMAAN')
-            ->select(
-                'p.TANGGAL_TR_PENERIMAAN as tanggal',
-                'p.DESKRIPSI_TR_PENERIMAAN as uraian',
-                'p.JUMLAH_TR_PENERIMAAN as debit',
-                DB::raw('0 as kredit'),
-                DB::raw("'Bank' as metode")
-            );
-
-        // =========================
-        // 3. PENGELUARAN
-        // =========================
-        $pengeluaran = DB::table('DTL_FPD as d')
-            ->join('FPD_ANGGARAN as f', 'd.ID_FPD', '=', 'f.ID_FPD')
-            ->join('MST_PROGRAM_KERJA as pk', 'f.ID_PROGRAM_KERJA', '=', 'pk.ID_PROGRAM_KERJA')
-            ->select(
-                'f.TGL_FPD as tanggal',
-                DB::raw("CONCAT('Pengeluaran - ', pk.PROGRAM_KERJA) as uraian"),
-                DB::raw('0 as debit'),
-                'd.TOTAL as kredit',
-                DB::raw("'Bank' as metode")
+                DB::raw("CONCAT('Pembayaran - ', mk.NAMA_KARYAWAN) as uraian"),
+                DB::raw("p.JUMLAH_BAYAR as debit"),
+                DB::raw("0 as kredit"),
+                'm.DESKRIPSI_METODE_PEMBAYARAN as metode'
             );
 
         // =========================
         // FILTER
         // =========================
         if ($start && $end) {
+            $penerimaan->whereBetween('TANGGAL_TR_PENERIMAAN', [$start, $end]);
             $pembayaran->whereBetween('p.TGL_BAYAR', [$start, $end]);
-            $penerimaan->whereBetween('p.TANGGAL_TR_PENERIMAAN', [$start, $end]);
-            $pengeluaran->whereBetween('f.TGL_FPD', [$start, $end]);
         }
 
         // =========================
-        // UNION
+        // GABUNG DATA
         // =========================
-        $data = DB::query()
-            ->fromSub(
-                $pembayaran
-                    ->unionAll($penerimaan)
-                    ->unionAll($pengeluaran),
-                'trx'
-            )
-            ->orderBy('tanggal', 'asc')
+        $data = $penerimaan->unionAll($pembayaran)
+            ->orderBy('tanggal')
             ->get();
 
         // =========================
-        // SALDO
+        // HITUNG SALDO
         // =========================
         $saldo = 0;
-        foreach ($data as $item) {
-            $saldo += $item->debit - $item->kredit;
-            $item->saldo = $saldo;
+        $bku = [];
+
+        foreach ($data as $row) {
+            $saldo += ($row->debit - $row->kredit);
+
+            $bku[] = [
+                'tanggal' => $row->tanggal,
+                'uraian' => $row->uraian,
+                'debit' => $row->debit,
+                'kredit' => $row->kredit,
+                'metode' => $row->metode,
+                'saldo' => $saldo
+            ];
         }
 
         // =========================
-        // SPLIT
+        // PEMISAHAN TUNAI & BANK
         // =========================
-        $p1 = collect($data)->filter(function ($item) {
-            return $item->metode === 'Tunai';
-        })->values();
-
-        $p2 = collect($data)->filter(function ($item) {
-            return $item->metode !== 'Tunai';
-        })->values();
+        $p1 = collect($bku)->filter(fn($x) => strtolower($x['metode']) == 'tunai')->values();
+        $p2 = collect($bku)->filter(fn($x) => strtolower($x['metode']) != 'tunai')->values();
 
         // =========================
-        // EXCEL
+        // TTD 
+        // =========================
+        $ttd = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
+            ->select(
+                'rj.DESKRIPSI_JABATAN as role',
+                'mk.NAMA_LENGKAP_GELAR as nama',
+                'mk.NIP_KARYAWAN as nip'
+            )
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->get();
+
+        $penandatangan = $ttd->first(function ($item) use ($role) {
+            return strtolower(trim($item->role)) === strtolower(trim($role));
+        });
+
+        $nama = $penandatangan->nama ?? '-';
+        $nip_ttd = $penandatangan->nip ?? '-';
+
+        // =========================
+        // EXPORT EXCEL
         // =========================
         if ($type == 'excel') {
             return Excel::download(
-                new LaporanBukuKhasUmumExport($data, $p1, $p2, $role, $nip),
+                new LaporanBukuKhasUmumExport($bku, $p1, $p2, $role, $nip, $nama, $nip_ttd),
                 'Laporan_BKU.xlsx'
             );
         }
 
         // =========================
-        // PDF
+        // EXPORT PDF
         // =========================
-        if (strtolower(trim($type)) === 'pdf') {
-
+        if ($type == 'pdf') {
             $pdf = Pdf::loadView(
                 'exports.LaporanBukuKhasUmum',
-                [
-                    'bku' => $data,
-                    'p1' => $p1,
-                    'p2' => $p2,
-                    'start' => $start,
-                    'end' => $end,
-                    'role' => $role,
-                    'nip' => $nip
-                ]
+                compact('bku', 'role', 'nama', 'nip_ttd')
             );
 
             return $pdf->download('Laporan_BKU.pdf');
         }
 
+        // =========================
+        // RESPONSE JSON
+        // =========================
         return response()->json([
-            'bku' => $data,
-            'p1' => $p1,
-            'p2' => $p2
+            'bku' => $bku,
+            'tunai' => $p1,
+            'bank' => $p2
         ]);
     }
 }
