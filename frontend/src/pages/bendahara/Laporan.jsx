@@ -20,13 +20,13 @@ export default function Laporan() {
     let baseUrl = "";
 
     if (active === "Penerimaan") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+      baseUrl = "http://localhost:8000/api/laporan/penerimaan";
     } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
+      baseUrl = "http://localhost:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+      baseUrl = "http://localhost:8000/api/laporan/bku";
     } else if (active === "Yayasan") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan";
+      baseUrl = "http://localhost:8000/api/laporan/yayasan";
     } else {
       setData([]);
       setTotal(0);
@@ -38,14 +38,25 @@ export default function Laporan() {
     if (end) params.append("end", end);
     if (sumberDana) params.append("sumber_dana", sumberDana);
 
-    fetch(`${baseUrl}?${params.toString()}`)
-      .then((res) => res.json())
+    fetch(`${baseUrl}?${params.toString()}`, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Unauthorized / Forbidden");
+        }
+        return res.json();
+      })
       .then((res) => {
         setData(res.data || []);
         setTotal(res.total || 0);
-        setPage(1); // reset page
+        setPage(1);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("ERROR:", err);
         setData([]);
         setTotal(0);
       });
