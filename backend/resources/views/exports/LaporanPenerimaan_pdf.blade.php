@@ -160,7 +160,7 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
-    $role = ucfirst($role ?? 'Bendahara');
+    $role = 'Bendahara';
     $nama = $nama ?? '-';
     $nip = $nip_ttd ?? '-';
 @endphp
