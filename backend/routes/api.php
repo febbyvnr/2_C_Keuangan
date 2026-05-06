@@ -219,15 +219,16 @@ Route::prefix('ref-visi-misi')->group(function () {
 });
 
 Route::prefix('ref-pm')->group(function () {
-    Route::get('/', [RefPmController::class, 'index']);
-    Route::put('/evaluasi/{id}', [RefPmController::class, 'updateEvaluasi']);
-    Route::post('/store', [RefPmController::class, 'store']);
+    Route::get('/export/excel', [RefPmController::class, 'exportExcel']);
+    Route::get('/export/pdf', [RefPmController::class, 'exportPdf']);
     Route::get('/search', [RefPmController::class, 'search']);
+    Route::get('/', [RefPmController::class, 'index']);
+    Route::post('/store', [RefPmController::class, 'store']);
     Route::get('/{id}', [RefPmController::class, 'show']);
+    Route::put('/evaluasi/{id}', [RefPmController::class, 'updateEvaluasi']);
     Route::put('/update/{id}', [RefPmController::class, 'update']);
     Route::delete('/delete/{id}', [RefPmController::class, 'destroy']);
-    Route::get('/export/excel', [RefPmController::class, 'exportExcel']);
-    // Route::get('/export/pdf', [RefPmController::class, 'exportPdf']);
+    
 });
 
 Route::prefix('jenis-tarif')->group(function () {
