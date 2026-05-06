@@ -359,6 +359,93 @@ class FpdAnggaranController extends Controller
             ], 500);
         }
     }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_FPD' => 'required|string|max:20',
+        ]);
+
+        try {
+            $fpd = FpdAnggaran::findOrFail($id);
+
+            //  Ambil data user
+            $user = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_FPD)
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validator tidak ditemukan',
+                ], 404);
+            }
+
+            $jabatan = strtolower($user->JABATAN_FUNGSIONAL ?? '');
+
+            //  Tentukan step sekarang
+            if (is_null($fpd->NIP_VALIDATOR_FPD)) {
+                $currentStep = 0;
+            } else {
+                $lastUser = DB::table('mst_karyawan')
+                    ->where('NIP_KARYAWAN', $fpd->NIP_VALIDATOR_FPD)
+                    ->first();
+
+                $lastJabatan = strtolower($lastUser->JABATAN_FUNGSIONAL ?? '');
+
+                if (str_contains($lastJabatan, 'bendahara')) {
+                    $currentStep = 1;
+                } elseif (str_contains($lastJabatan, 'waka')) {
+                    $currentStep = 2;
+                } elseif (str_contains($lastJabatan, 'kepala sekolah')) {
+                    $currentStep = 3;
+                } else {
+                    $currentStep = 0;
+                }
+            }
+
+            //  Mapping siapa boleh di step mana
+            $allowed = false;
+
+            if ($currentStep === 0 && str_contains($jabatan, 'bendahara')) {
+                $allowed = true;
+            } elseif ($currentStep === 1 && str_contains($jabatan, 'waka')) {
+                $allowed = true;
+            } elseif ($currentStep === 2 && str_contains($jabatan, 'kepala sekolah')) {
+                $allowed = true;
+            }
+
+            if (!$allowed) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak berhak approve pada tahap ini',
+                ], 403);
+            }
+
+            //  Update (lanjut ke tahap berikutnya)
+            $fpd->update([
+                'NIP_VALIDATOR_FPD' => $request->NIP_VALIDATOR_FPD,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'FPD berhasil diverifikasi',
+                'data' => $fpd
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FPD tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve FPD',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
     
     public function export($id): JsonResponse|StreamedResponse
     {
