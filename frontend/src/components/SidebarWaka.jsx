@@ -61,7 +61,7 @@ export default function SidebarBendahara() {
                 }
             } catch (error) {
                 console.error("Gagal mengambil profil:", error);
-                setUserData({ nama: "Bendahara", email: "bendahara@gmail.com" });
+                setUserData({ nama: "Waka", email: "waka@gmail.com" });
             }
         };
 
