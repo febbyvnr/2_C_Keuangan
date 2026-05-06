@@ -89,7 +89,6 @@ class SheetBKU implements WithEvents, WithTitle
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFont()
                     ->getColor()->setARGB('FFFFFFFF');
 
-                // FILTER (DITAMBAHKAN SESUAI REFERENSI)
                 $sheet->setAutoFilter("A$headerRow:F$headerRow");
 
                 // =====================
@@ -100,16 +99,16 @@ class SheetBKU implements WithEvents, WithTitle
                 $saldoAkhir = 0;
 
                foreach ($this->data as $item) {
-    $sheet->setCellValue("A$row", $no++);
-    $sheet->setCellValue("B$row", date('d-m-Y', strtotime($item['tanggal'])));
-    $sheet->setCellValue("C$row", $item['uraian'] ?? '-');
-    $sheet->setCellValue("D$row", $item['debit'] ?? 0);
-    $sheet->setCellValue("E$row", $item['kredit'] ?? 0);
-    $sheet->setCellValue("F$row", $item['saldo'] ?? 0);
+                $sheet->setCellValue("A$row", $no++);
+                $sheet->setCellValue("B$row", date('d-m-Y', strtotime($item['tanggal'])));
+                $sheet->setCellValue("C$row", $item['uraian'] ?? '-');
+                $sheet->setCellValue("D$row", $item['debit'] ?? 0);
+                $sheet->setCellValue("E$row", $item['kredit'] ?? 0);
+                $sheet->setCellValue("F$row", $item['saldo'] ?? 0);
 
-    $saldoAkhir = $item['saldo'] ?? 0;
-    $row++;
-}
+                $saldoAkhir = $item['saldo'] ?? 0;
+                $row++;
+            }
 
                 $endData = $row - 1;
 
@@ -150,7 +149,8 @@ class SheetBKU implements WithEvents, WithTitle
                 // =====================
                 $footerRow = $totalRow + 4;
 
-                $role = ucfirst($this->role ?? 'Bendahara');
+                $role = 'Bendahara';
+
                 $nama = $this->nama ?? '-';
                 $nip = $this->nip_ttd ?? '-';
 
