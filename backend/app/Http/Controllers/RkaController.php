@@ -374,4 +374,99 @@ class RkaController extends Controller
             ]);
         }
     }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PROGKER' => 'required|string|max:20',
+        ]);
+
+        try {
+            $rka = Rka::findOrFail($id);
+
+            // Cek validator (Kepala Sekolah)
+            $validator = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PROGKER)
+                ->first();
+
+            if (!$validator || !str_contains(strtolower($validator->JABATAN_FUNGSIONAL ?? ''), 'kepala sekolah')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya Kepala Sekolah yang boleh approve RKA',
+                ], 403);
+            }
+
+            // Cek sudah pernah approve atau belum
+            if ($rka->NIP_VALIDATOR_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RKA sudah disetujui',
+                ], 400);
+            }
+
+            // cek pernah diajukan
+            $lastPm = DB::table('tr_pm')
+                ->where('ID_PROGRAM_KERJA', $id)
+                ->orderByDesc('ID_PM')
+                ->first();
+
+            if ($lastPm && str_starts_with(strtolower($lastPm->DESKRIPSI_TR_PM ?? ''), 'ditolak')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data sebelumnya ditolak, tidak bisa di-approve',
+                ], 400);
+            }
+
+            // Cek FPD (anggaran tersedia)
+            $fpd = DB::table('fpd_anggaran')
+                ->where('ID_PROGRAM_KERJA', $rka->ID_PROGRAM_KERJA)
+                ->first();
+
+            if (!$fpd) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data anggaran FPD tidak ditemukan',
+                ], 400);
+            }
+
+            // Cek sisa dana
+            if ($fpd->NOMINAL_SISA <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dana sudah habis',
+                ], 400);
+            }
+
+            // Cek total tidak melebihi sisa dana
+            if ($rka->TOTAL_PROGKER > $fpd->NOMINAL_SISA) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Total melebihi sisa dana FPD',
+                ], 400);
+            }
+
+            // Approve
+            $rka->update([
+                'NIP_VALIDATOR_PROGKER' => $request->NIP_VALIDATOR_PROGKER,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'RKA berhasil disetujui',
+                'data' => $rka
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve RKA',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
