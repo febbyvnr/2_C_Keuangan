@@ -98,8 +98,12 @@ export default function MonitoringWaka() {
     }, [rkt]);
 
     const pctTerpakai = stats.totalBudget > 0
-        ? ((stats.totalTerpakai / stats.totalBudget) * 100).toFixed(1)
-        : 0;
+    ? Math.min((stats.totalTerpakai / stats.totalBudget) * 100, 100)
+    : 0;
+
+    const pctLabel = `${pctTerpakai.toFixed(1)}%`;
+    const pctMarkerLeft = Math.min(Math.max(pctTerpakai, 6), 94);
+
 
     return (
         <div className="mon-shell">
@@ -122,39 +126,27 @@ export default function MonitoringWaka() {
                     </div>
                 </div>
 
-                {/* KPI */}
+                {/* KPI - CLEAN (border kiri, no icon) */}
                 <div className="mon-kpi-grid">
                     <div className="mon-kpi-card primary">
-                        <div className="mon-kpi-top">
-                            <span className="mon-kpi-icon"><i className="bi bi-journals" /></span>
-                            <span className="mon-kpi-tag">Program Kerja</span>
-                        </div>
+                        <div className="mon-kpi-label">Total Program Kerja</div>
                         <div className="mon-kpi-val">{stats.total}</div>
-                        <div className="mon-kpi-sub">Total program terdaftar</div>
+                        <div className="mon-kpi-pct">{stats.total > 0 ? "100%" : "0%"}</div>
                     </div>
                     <div className="mon-kpi-card green">
-                        <div className="mon-kpi-top">
-                            <span className="mon-kpi-icon"><i className="bi bi-check2-all" /></span>
-                            <span className="mon-kpi-tag">Disetujui</span>
-                        </div>
+                        <div className="mon-kpi-label">Disetujui</div>
                         <div className="mon-kpi-val">{stats.byStatus.disetujui || 0}</div>
-                        <div className="mon-kpi-sub">{stats.total > 0 ? (((stats.byStatus.disetujui || 0)/stats.total)*100).toFixed(0) : 0}% dari total</div>
+                        <div className="mon-kpi-pct">{stats.total > 0 ? (((stats.byStatus.disetujui || 0)/stats.total)*100).toFixed(0) : 0}%</div>
                     </div>
                     <div className="mon-kpi-card yellow">
-                        <div className="mon-kpi-top">
-                            <span className="mon-kpi-icon"><i className="bi bi-hourglass-split" /></span>
-                            <span className="mon-kpi-tag">Menunggu</span>
-                        </div>
+                        <div className="mon-kpi-label">Menunggu</div>
                         <div className="mon-kpi-val">{stats.byStatus.diajukan || 0}</div>
-                        <div className="mon-kpi-sub">Perlu review segera</div>
+                        <div className="mon-kpi-pct">Perlu review</div>
                     </div>
                     <div className="mon-kpi-card red">
-                        <div className="mon-kpi-top">
-                            <span className="mon-kpi-icon"><i className="bi bi-arrow-return-left" /></span>
-                            <span className="mon-kpi-tag">Revisi</span>
-                        </div>
+                        <div className="mon-kpi-label">Perlu Perbaikan</div>
                         <div className="mon-kpi-val">{(stats.byStatus.revisi || 0) + (stats.byStatus.ditolak || 0)}</div>
-                        <div className="mon-kpi-sub">Perlu tindak lanjut</div>
+                        <div className="mon-kpi-pct">Revisi / ditolak</div>
                     </div>
                 </div>
 
@@ -180,19 +172,23 @@ export default function MonitoringWaka() {
                     </div>
                     <ProgressBar value={stats.totalTerpakai} max={stats.totalBudget} color="#265f9c" />
                     <div className="mon-budget-pct-row">
-                        <span>0%</span>
-                        <span className="mon-budget-marker" style={{ left: `${pctTerpakai}%` }}>{pctTerpakai}%</span>
-                        <span>100%</span>
-                    </div>
-                </div>
+                      <span>0%</span>
+                        {pctTerpakai > 0 && (
+                         <span className="mon-budget-marker" style={{ left: `${pctMarkerLeft}%` }}>
+                            {pctLabel}
+                                </span>
+                        )}
+                            <span>100%</span>
+                        </div>
+                         </div>
 
-                {/* Tabs */}
+                {/* Tabs (no icon) */}
                 <div className="mon-tabs">
                     {["overview","program","unit"].map(tab => (
                         <button key={tab} className={`mon-tab ${activeTab === tab ? "active" : ""}`} onClick={() => setActiveTab(tab)}>
-                            {tab === "overview" && <><i className="bi bi-grid-3x3-gap" /> Ringkasan</>}
-                            {tab === "program"  && <><i className="bi bi-list-ul" /> Daftar Program</>}
-                            {tab === "unit"     && <><i className="bi bi-building" /> Per Unit</>}
+                            {tab === "overview" && "Ringkasan"}
+                            {tab === "program"  && "Daftar Program"}
+                            {tab === "unit"     && "Per Unit"}
                         </button>
                     ))}
                 </div>

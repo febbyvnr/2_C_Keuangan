@@ -129,8 +129,10 @@ export default function App() {
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
         <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
 
-        {/* ✅ BARU: Status Pengajuan */}
+        {/* Status Pengajuan */}
         <Route path="/pic/guru/status-pengajuan" element={<StatusPengajuan />} />
+        <Route path="/pic/guru/StatusPengajuan" element={<StatusPengajuan />} />
+        <Route path="/pic/guru/statuspengajuan" element={<StatusPengajuan />} />
 
         {/* WAKA */}
         <Route path="/waka" element={<DashboardWaka />} />
@@ -139,7 +141,7 @@ export default function App() {
         <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
         <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
 
-        {/* ✅ BARU: Monitoring Waka (replace lama) */}
+        {/* Monitoring Waka  */}
         <Route path="/waka/monitoring" element={<MonitoringWaka />} />
 
         {/* YAYASAN */}
@@ -150,7 +152,7 @@ export default function App() {
           <Route path="monitoring" element={<MonitoringYayasan />} />
         </Route>
 
-        {/* ✅ BARU: Tim PM */}
+        {/*  Tim PM */}
         <Route path="/pm/monitoring-mutu" element={<MonitoringMutu />} />
       </Routes>
     </BrowserRouter>

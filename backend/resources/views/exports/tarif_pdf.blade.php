@@ -12,30 +12,27 @@
             padding: 28px 36px;
         }
 
-        /* --- STYLING WATERMARK PUDAR --- */
-       #watermark {
+        #watermark {
             position: fixed;
-            top: 25%;      
-            left: 35%;     
-            width: 30%;    
+            top: 25%;
+            left: 35%;
+            width: 30%;
             opacity: 0.15;
             z-index: -1000;
             text-align: center;
         }
-        #watermark img {
-            width: 100%;
-        }
+        #watermark img { width: 100%; }
 
         .header { text-align: center; margin-bottom: 16px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
         .header h2 { font-size: 13px; font-weight: bold; text-transform: uppercase; }
-        .header .periode { font-size: 11px; }
         .header-line {
             border-top: 3px solid #000;
             border-bottom: 1px solid #000;
             height: 4px;
             margin-bottom: 14px;
         }
+
         table { width: 100%; border-collapse: collapse; margin-top: 6px; }
         thead tr th {
             font-weight: bold;
@@ -51,28 +48,41 @@
             vertical-align: top;
             font-size: 11px;
         }
-        .col-no        { width: 5%;  text-align: center; }
-        .col-jenis     { width: 22%; }
-        .col-tahun     { width: 13%; text-align: center; }
-        .col-deskripsi { width: 27%; }
-        .col-nominal   { width: 17%; text-align: right; }
-        .col-tgl       { width: 16%; text-align: center; }
-        .total-row td  { font-weight: bold; border-top: 2px solid #000; }
-        .total-label   { text-align: right; padding-right: 8px; }
-        .total-nominal { text-align: right; }
-        .empty-row td  { text-align: center; font-style: italic; padding: 14px; }
+        .col-no { width: 5%; text-align: center; }
+        .col-nominal { width: 17%; text-align: right; }
+        .total-row td { font-weight: bold; border-top: 2px solid #000; }
         
-        .footer { margin-top: 36px; width: 100%; }
-        .footer-right  { float: right; text-align: center; font-size: 11px; min-width: 200px; }
-        .jabatan       { margin-bottom: 50px; }
-        .nama-ttd      { font-weight: bold; border-top: 1px solid #000; padding-top: 3px; display: inline-block; min-width: 180px; }
-        .nip           { font-size: 10px; margin-top: 2px; }
-        .clearfix::after { content: ""; display: table; clear: both; }
+        /* --- FOOTER PERSIS SS KE-2 --- */
+        .footer { 
+            margin-top: 40px; 
+            width: 100%; 
+        }
+        .signature-block {
+            text-align: center; /* Posisikan ke Tengah */
+            width: 100%;
+        }
+        .nama-ttd {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .signature-gap {
+            height: 80px; /* Jarak lega buat TTD basah */
+        }
+        .dashed-line {
+            border-bottom: 1.5px dashed #000; /* Garis putus-putus sesuai SS */
+            width: 250px;
+            margin: 0 auto 5px auto;
+        }
+        .date-right {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGO WATERMARK DIPANGGIL DI SINI -->
     @php
         $logoPath = public_path('logo.png');
         $logoData = '';
@@ -83,14 +93,14 @@
 
     @if($logoData)
     <div id="watermark">
-        <img src="data:image/png;base64,{{ $logoData }}" alt="Watermark BOPKRI">
+        <img src="data:image/png;base64,{{ $logoData }}" alt="Logo">
     </div>
     @endif
 
     <div class="header">
         <h1>SMK BOPKRI 2 YOGYAKARTA</h1>
         <h2>DATA TARIF</h2>
-        <p class="periode">Dicetak: {{ $tanggalCetak ?? date('d F Y') }}</p>
+        <p style="font-size: 10px;">Dicetak: {{ $tanggalCetak ?? date('d F Y') }}</p>
     </div>
     <div class="header-line"></div>
 
@@ -98,45 +108,53 @@
         <thead>
             <tr>
                 <th class="col-no">No</th>
-                <th class="col-jenis">Jenis Tarif</th>
-                <th class="col-tahun">TA Anggaran</th>
-                <th class="col-deskripsi">Deskripsi Tarif</th>
+                <th>Jenis Tarif</th>
+                <th>TA Anggaran</th>
+                <th>Deskripsi Tarif</th>
                 <th class="col-nominal">Nominal</th>
-                <th class="col-tgl">Tgl Penetapan</th>
+                <th>Tgl Penetapan</th>
             </tr>
         </thead>
         <tbody>
             @if(!isset($data) || collect($data)->isEmpty())
-                <tr class="empty-row"><td colspan="6">Tidak ada data tarif.</td></tr>
+                <tr><td colspan="6" style="text-align:center; padding:15px;">Data Kosong</td></tr>
             @else
                 @php $totalNominal = 0; @endphp
                 @foreach($data as $index => $item)
                     @php $totalNominal += $item['nominal']; @endphp
                     <tr>
                         <td class="col-no">{{ $index + 1 }}</td>
-                        <td class="col-jenis">{{ $item['jenis_tarif'] }}</td>
-                        <td class="col-tahun">{{ $item['tahun_anggaran'] }}</td>
-                        <td class="col-deskripsi">{{ $item['deskripsi'] }}</td>
+                        <td>{{ $item['jenis_tarif'] }}</td>
+                        <td>{{ $item['tahun_anggaran'] }}</td>
+                        <td>{{ $item['deskripsi'] }}</td>
                         <td class="col-nominal">{{ number_format($item['nominal'], 0, ',', '.') }}</td>
-                        <td class="col-tgl">{{ $item['tgl_penetapan'] }}</td>
+                        <td style="text-align:center">{{ $item['tgl_penetapan'] }}</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
-                    <td colspan="4" class="total-label">TOTAL NOMINAL</td>
-                    <td class="total-nominal">{{ number_format($totalNominal, 0, ',', '.') }}</td>
+                    <td colspan="4" style="text-align: right; padding-right: 10px;">TOTAL NOMINAL</td>
+                    <td style="text-align: right;">{{ number_format($totalNominal, 0, ',', '.') }}</td>
                     <td></td>
                 </tr>
             @endif
         </tbody>
     </table>
 
-    <div class="footer clearfix">
-        <div class="footer-right">
-            <p>Yogyakarta, {{ $tanggalCetak ?? date('d F Y') }}</p>
-            <p class="jabatan">{{ $role ?? 'Bendahara' }},</p>
-            <br><br><br>
+    <div class="footer">
+        <!-- Blok Tanda Tangan di Tengah -->
+        <div class="signature-block">
+            <p>Bendahara,</p>
             <p class="nama-ttd">Siti Aminah, S.E</p>
-            <p class="nip">NIP. 19850505 201001 2 002</p>
+            
+            <div class="signature-gap"></div> <!-- Space Kosong -->
+            
+            <div class="dashed-line"></div>
+            <p>NIP. 19850505 201001 2 002</p>
+        </div>
+        
+        <!-- Tanggal di Kanan Bawah -->
+        <div class="date-right">
+            <p>Yogyakarta, {{ $tanggalCetak ?? date('d F Y') }}</p>
         </div>
     </div>
 </body>

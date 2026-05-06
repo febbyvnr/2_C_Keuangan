@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import "../../styles/pm/MonitoringMutu.css";
+import "../../styles/PM/MonitoringMutu.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 const fmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
@@ -29,18 +29,16 @@ function ScoreMeter({ value, max = 100 }) {
     );
 }
 
-function MutuCard({ title, value, icon, color, sub }) {
+function MutuCard({ title, value, color, sub }) {
     return (
-        <div className="pm-kpi-card" style={{ borderTopColor: color }}>
-            <div className="pm-kpi-icon" style={{ color, background: color + "18" }}>
-                <i className={icon} />
-            </div>
+        <div className="pm-kpi-card" style={{ borderLeftColor: color }}>
             <div className="pm-kpi-val">{value}</div>
             <div className="pm-kpi-title">{title}</div>
             {sub && <div className="pm-kpi-sub">{sub}</div>}
         </div>
     );
 }
+
 
 export default function MonitoringMutu() {
     const [rkt, setRkt] = useState([]);
@@ -197,11 +195,12 @@ export default function MonitoringMutu() {
 
                     {/* KPI Cards */}
                     <div className="pm-kpi-row">
-                        <MutuCard title="Total Program" value={stats.total} icon="bi bi-journals" color="#265f9c" sub="Seluruh unit" />
-                        <MutuCard title="Memenuhi Mutu" value={stats.disetujui} icon="bi bi-check-circle-fill" color="#16a34a" sub="Sudah disetujui" />
-                        <MutuCard title="Perlu Review" value={stats.menunggu} icon="bi bi-hourglass-split" color="#2563eb" sub="Menunggu review PM" />
-                        <MutuCard title="Perlu Perbaikan" value={stats.butuhRevisi} icon="bi bi-exclamation-triangle-fill" color="#dc2626" sub="Revisi / ditolak" />
-                    </div>
+                     <MutuCard title="Total Program" value={stats.total} color="#265f9c" sub="Seluruh unit" />
+                     <MutuCard title="Memenuhi Mutu" value={stats.disetujui} color="#2e7d32" sub="Sudah disetujui" />
+                     <MutuCard title="Perlu Review" value={stats.menunggu} color="#265f9c" sub="Menunggu review PM" />
+                     <MutuCard title="Perlu Perbaikan" value={stats.butuhRevisi} color="#c62828" sub="Revisi / ditolak" />
+                        </div>
+
 
                     {/* Content Grid */}
                     <div className="pm-content-grid">

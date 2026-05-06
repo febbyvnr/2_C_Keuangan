@@ -12,9 +12,11 @@ const MENU_ITEMS = [
   { label: "Page Realisasi RKT", icon: "bi bi-bar-chart-steps" },
   { label: "Page Bridging RKT", icon: "bi bi-diagram-2" },
   { label: "Page Pengajuan Dana", to: "/pic/guru/fpd", icon: "bi bi-cash-coin" },
+  { label: "Status Pengajuan", to: "/pic/guru/status-pengajuan", icon: "bi bi-hourglass-split" },
   { label: "Page LPJ", icon: "bi bi-file-earmark-text" },
   { label: "Page Evaluasi RKT", icon: "bi bi-clipboard2-pulse" },
 ];
+
 
 export default function SidebarPic() {
   const navigate = useNavigate();
