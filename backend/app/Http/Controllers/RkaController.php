@@ -480,7 +480,7 @@ class RkaController extends Controller
         try {
             $rka = Rka::findOrFail($id);
 
-            // 🔹 1. Cek validator (Kepala Sekolah)
+            // Cek validator (Kepala Sekolah)
             $validator = DB::table('mst_karyawan')
                 ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PROGKER)
                 ->first();
@@ -492,7 +492,7 @@ class RkaController extends Controller
                 ], 403);
             }
 
-            // 🔹 2. Cek sudah di-approve atau belum
+            // Cek sudah di-approve atau belum
             if ($rka->NIP_VALIDATOR_PROGKER) {
                 return response()->json([
                     'success' => false,
@@ -500,7 +500,7 @@ class RkaController extends Controller
                 ], 400);
             }
 
-            // 🔹 3. Ambil log terakhir (opsional, biar nyambung)
+            // Ambil log terakhir 
             $lastPm = DB::table('tr_pm')
                 ->where('ID_PROGRAM_KERJA', $id)
                 ->orderByDesc('ID_PM')
@@ -508,10 +508,10 @@ class RkaController extends Controller
 
             $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
 
-            // 🔹 4. Format deskripsi
+            // Format deskripsi
             $deskripsiBaru = $baseDesc . ' : Ditolak: ' . $request->DESKRIPSI_TR_PM;
 
-            // 🔹 5. Simpan ke tr_pm
+            // Simpan ke tr_pm
             DB::table('tr_pm')->insert([
                 'ID_PROGRAM_KERJA' => $rka->ID_PROGRAM_KERJA,
                 'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PROGKER,
