@@ -22,6 +22,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RefPmController extends Controller
 {
@@ -334,11 +335,9 @@ class RefPmController extends Controller
             public function map($mst): array
             {
                 $this->rowNum++;
-                
-                // Ambil semua transaksi terkait Progker ini sekaligus
+
                 $transaksi = TrPm::where('ID_PROGRAM_KERJA', $mst->ID_PROGRAM_KERJA)->get();
 
-                // Fungsi pembantu menggunakan firstWhere berdasarkan ID gambar terbaru
                 $getTrVal = function($idRef) use ($transaksi) {
                     $item = $transaksi->firstWhere('ID_REF_PM', $idRef);
                     return $item ? $item->DESKRIPSI_TR_PM : '';
@@ -355,14 +354,12 @@ class RefPmController extends Controller
                     '-',
                     ($mst->WAKTU_AWAL ?? '') . ' s/d ' . ($mst->WAKTU_AKHIR ?? ''),
                     $mst->KELUARAN_PROGKER ?? '-', 
-                    
-                    // RELEVANSI - Sesuai urutan ID di database baru (15-22)
+ 
                     $getTrVal(15), $getTrVal(16),   // VISI (M) & (K)
                     $getTrVal(17), $getTrVal(18),   // MISI (M) & (K)
                     $getTrVal(19), $getTrVal(20),   // NILAI (M) & (K)
                     $getTrVal(21), $getTrVal(22),   // TUJUAN (M) & (K)
-                    
-                    // EVALUASI & LAINNYA - Sesuai urutan ID (23-29)
+
                     $getTrVal(23), // EFEKTIF
                     $getTrVal(24), // EFISIEN
                     $getTrVal(25), // USULAN PERUBAHAN
@@ -375,7 +372,7 @@ class RefPmController extends Controller
 
             public function styles(Worksheet $sheet)
             {
-                // Judul Atas
+
                 $sheet->mergeCells('A1:Y1');
                 $sheet->setCellValue('A1', 'EVALUASI RKT TAHUN 2026');
                 $sheet->mergeCells('A2:Y2');
@@ -383,7 +380,6 @@ class RefPmController extends Controller
                 $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Tabel Tujuan & Indikator (Statis)
                 $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'TUJUAN');
                 $sheet->mergeCells('C4:Y4'); $sheet->setCellValue('C4', 'INDIKATOR');
                 $sheet->getStyle('A4:Y4')->applyFromArray([
@@ -410,7 +406,6 @@ class RefPmController extends Controller
                     $row++;
                 }
 
-                // Header Utama Tabel Evaluasi (Baris 12-14)
                 $sheet->getStyle('A12:Y14')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F81BD']],
@@ -447,8 +442,64 @@ class RefPmController extends Controller
         }, 'evaluasi-rkt-2026.xlsx');
     }
 
-    public function exportPdf()
+   public function exportPdf()
     {
-        //sini
+        try {
+            if (ob_get_contents()) ob_end_clean();
+
+            $mstData = MstProgramKerja::where('IS_DELETE', 0)
+                ->orderBy('ID_PROGRAM_KERJA', 'asc')
+                ->get();
+
+            $reportData = $mstData->map(function ($mst) {
+                $transaksi = TrPm::where('ID_PROGRAM_KERJA', $mst->ID_PROGRAM_KERJA)->get();
+                
+                $getTrVal = function($idRef) use ($transaksi) {
+                    $item = $transaksi->firstWhere('ID_REF_PM', $idRef);
+                    return $item ? $item->DESKRIPSI_TR_PM : '';
+                };
+
+                return [
+                    'program_utama'     => 'PROGRAM UTAMA',
+                    'program_kerja'     => $mst->PROGRAM_KERJA ?? '-',
+                    'sasaran'           => $mst->SASARAN ?? '-',
+                    'indikator'         => $mst->INDIKATOR ?? '-',
+                    'nip_pj'            => $mst->NIP_PENANGGUNG_JAWAB ?? '-',
+                    'anggaran'          => (int)($mst->TOTAL_PROGKER ?? 0),
+                    'pos_anggaran'      => '-',
+                    'waktu'             => ($mst->WAKTU_AWAL ?? '') . ' s/d ' . ($mst->WAKTU_AKHIR ?? ''),
+                    'keluaran'          => $mst->KELUARAN_PROGKER ?? '-',
+                    
+                    'v_m' => $getTrVal(15), 'v_k' => $getTrVal(16),
+                    'm_m' => $getTrVal(17), 'm_k' => $getTrVal(18),
+                    'n_m' => $getTrVal(19), 'n_k' => $getTrVal(20),
+                    't_m' => $getTrVal(21), 't_k' => $getTrVal(22),
+                    
+                    'efektif'           => $getTrVal(23),
+                    'efisien'           => $getTrVal(24),
+                    'usulan'            => $getTrVal(25),
+                    'koreksi'           => $getTrVal(26),
+                    'tanggapan'         => $getTrVal(27),
+                    'evaluasi_total'    => $getTrVal(28),
+                    'rekomendasi'       => $getTrVal(29),
+                ];
+            });
+
+            $pdf = Pdf::loadView('exports.RefPm_pdf', [
+                'data'  => $reportData,
+                'title' => 'EVALUASI RKT (REF PM)'
+            ]);
+
+            $pdf->setPaper('a3', 'landscape');
+
+            return $pdf->stream('Laporan-Evaluasi-RKT-2026.pdf');
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate PDF',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }
