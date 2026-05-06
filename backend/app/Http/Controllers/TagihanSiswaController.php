@@ -16,6 +16,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
 
+use App\Models\Karyawan;
+use Illuminate\Support\Facades\Crypt;
+
 class TagihanSiswaController extends Controller
 {
     private const ALLOWED_STATUS = [
@@ -621,41 +624,58 @@ class TagihanSiswaController extends Controller
             }
         }
 
-        $user = $request->user();
+        $token = $request->bearerToken();
 
-        $roleUser = strtolower($user->role ?? $user->ROLE ?? 'bendahara');
-
-        if ($roleUser === 'kepala_sekolah' || $roleUser === 'kepala sekolah') {
-            $roleTtd = 'Kepala Sekolah';
-        } else {
-            $roleTtd = 'Bendahara';
+        if (!$token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak ditemukan. Silakan login ulang.',
+            ], 401);
         }
 
-        $namaTtd = $user->name
-            ?? $user->nama
-            ?? $user->NAMA_USER
-            ?? $user->NAMA_PEGAWAI
-            ?? '-';
+        try {
+            $tokenData = json_decode(Crypt::decryptString($token), true);
 
-        $nipTtd = $user->nip
-            ?? $user->NIP
-            ?? $user->NIP_PEGAWAI
-            ?? '-';
+            $nipLogin = $tokenData['nip'] ?? null;
+            $roleLogin = $tokenData['role'] ?? 'Bendahara';
 
-        $periode = '-';
+            if (!$nipLogin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'NIP user tidak ditemukan di token.',
+                ], 401);
+            }
 
-        if (!empty($filters['BULAN_TAGIHAN_SISWA']) && !empty($filters['TAHUN_TAGIHAN_SISWA'])) {
-            $periode = $filters['BULAN_TAGIHAN_SISWA'] . ' ' . $filters['TAHUN_TAGIHAN_SISWA'];
-        } elseif (!empty($filters['TAHUN_TAGIHAN_SISWA'])) {
-            $periode = $filters['TAHUN_TAGIHAN_SISWA'];
+            $userLogin = Karyawan::where('NIP_KARYAWAN', $nipLogin)->first();
+
+            if (!$userLogin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data karyawan tidak ditemukan.',
+                ], 404);
+            }
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak valid.',
+            ], 401);
         }
 
-        $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
+
+        $roleTtd = 'Bendahara';
+
+        $namaTtd = $userLogin->NAMA_LENGKAP_GELAR
+            ?? $userLogin->NAMA_KARYAWAN
+            ?? $userLogin->NAMA_PEGAWAI
+            ?? '-';
+
+        $nipTtd = $userLogin->NIP_KARYAWAN ?? '-';
+                $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
             'data' => $data,
+            'periode' => $periode ?? '-',
             'role' => $roleTtd,
             'nama' => $namaTtd,
             'nip_ttd' => $nipTtd,
-            'periode' => $periode,
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('tagihan_siswa.pdf');

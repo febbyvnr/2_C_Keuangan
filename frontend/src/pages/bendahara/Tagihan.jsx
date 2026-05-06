@@ -465,10 +465,28 @@ function Tagihan() {
     window.open(url, "_blank");
   };
 
-  const handleExportPdf = () => {
-    const query = buildExportParams();
-    const url = `${API_BASE_URL}/tagihan-siswa/export/pdf${query ? `?${query}` : ""}`;
-    window.open(url, "_blank");
+  const handleExportPdf = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/api/tagihan-siswa/export/pdf",
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/pdf",
+          },
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Gagal export PDF:", error);
+    }
   };
 
   return (
