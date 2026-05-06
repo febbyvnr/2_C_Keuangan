@@ -537,4 +537,70 @@ class RkaController extends Controller
         }
     }
     
+    public function revisi(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PROGKER' => 'required|string|max:20',
+            'DESKRIPSI_TR_PM' => 'required|string', // alasan revisi
+        ]);
+
+        try {
+            $rka = Rka::findOrFail($id);
+
+            // Cek validator (Kepala Sekolah)
+            $validator = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PROGKER)
+                ->first();
+
+            if (!$validator || !str_contains(strtolower($validator->JABATAN_FUNGSIONAL ?? ''), 'kepala sekolah')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya Kepala Sekolah yang boleh revisi RKA',
+                ], 403);
+            }
+
+            // Cek sudah di-approve atau belum
+            if ($rka->NIP_VALIDATOR_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RKA sudah disetujui, tidak bisa direvisi',
+                ], 400);
+            }
+
+            // Ambil log terakhir
+            $lastPm = DB::table('tr_pm')
+                ->where('ID_PROGRAM_KERJA', $id)
+                ->orderByDesc('ID_PM')
+                ->first();
+
+            $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
+
+            // Format deskripsi revisi
+            $deskripsiBaru = $baseDesc . ' : Revisi: ' . $request->DESKRIPSI_TR_PM;
+
+            // Simpan ke tr_pm
+            DB::table('tr_pm')->insert([
+                'ID_PROGRAM_KERJA' => $rka->ID_PROGRAM_KERJA,
+                'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PROGKER,
+                'DESKRIPSI_TR_PM' => $deskripsiBaru,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'RKA masuk tahap revisi',
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan revisi',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
