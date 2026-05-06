@@ -45,6 +45,9 @@ export default function Login() {
             if (roleText.includes("yayasan")) {
                 navigate("/yayasan");
             }
+            else if (roleText.includes("penjaminan mutu") || roleText.includes("pm")) {
+                navigate("/pm/dashboard");
+            }
             else if (roleText.includes("bendahara") || roleText.includes("keuangan")) {
                 navigate("/bendahara");
             }
