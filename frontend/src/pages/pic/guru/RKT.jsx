@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/bendahara/SidebarBendahara.css";
 import "../../../styles/pic/guru/RKT.css";
-import { Plus, Download } from "lucide-react";
+import { Plus} from "lucide-react";
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -347,8 +347,12 @@ export default function RKT() {
             </div>
 
             <div className="rkt-header-actions">
-              <button className="btn-warning-custom" onClick={handleExport}>
-                <Download size={16} />
+              <button
+                type="button"
+                className="rkt-export-btn rkt-export-excel"
+                onClick={handleExport}
+              >
+                <i className="bi bi-filetype-xlsx"></i>
                 Export Excel
               </button>
 
@@ -684,7 +688,7 @@ export default function RKT() {
                         </button>
 
                         <button className="btn-light-custom rkt-detail-btn" disabled>
-                          Menunggu Approval Kepala Sekolah
+                          Menunggu Approval
                         </button>
                       </>
                     )}
@@ -720,7 +724,7 @@ export default function RKT() {
                           disabled={!canSubmit}
                           onClick={() => handleAjukan(selectedItem.ID_PROGRAM_KERJA)}
                         >
-                          Ajukan RKT
+                          Ajukan
                         </button>
 
                         <button
@@ -736,7 +740,7 @@ export default function RKT() {
                 </>
               ) : (
                 <div className="rkt-detail-empty">
-                  <div className="rkt-detail-empty-icon">📋</div>
+                  <i className="bi bi-clipboard-check rkt-detail-empty-icon"></i>
                   <p>Klik baris pada tabel untuk melihat detail program kerja.</p>
                 </div>
               )}

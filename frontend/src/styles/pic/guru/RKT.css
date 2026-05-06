@@ -114,6 +114,47 @@
   display: flex;
   gap: 10px;
 }
+.rkt-export-btn {
+  height: 42px;
+  min-width: 150px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #2e7d32;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  color: #2e7d32;
+  cursor: pointer;
+  transition: 0.2s ease;
+  white-space: nowrap;
+  line-height: 1;
+}
+.rkt-export-excel {
+  color: #2e7d32;
+  border-color: #2e7d32;
+  background: transparent;
+}
+
+.rkt-export-excel:hover,
+.rkt-export-excel:focus {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #ffffff;
+}
+
+.rkt-export-excel:hover i,
+.rkt-export-excel:focus i {
+  color: #ffffff;
+}
+
+.rkt-export-btn i {
+  font-size: 14px;
+  line-height: 1;
+}
 
 .btn-primary-custom,
 .btn-light-custom,
@@ -557,7 +598,10 @@
 }
 
 .rkt-detail-empty-icon {
-  font-size: 36px;
+  font-size: 40px;
+  color: #cbd5f5;
+  line-height: 1;
+  margin-bottom: 10px;
 }
 
 .rkt-search-group {
@@ -1010,7 +1054,31 @@ body:has(.sidebar-container.collapsed) .rkt-wrapper {
   }
 
   .rkt-header-actions {
-    grid-template-columns: 1fr;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .rkt-header-actions button {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .rkt-export-btn {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .rkt-export-btn i {
+    font-size: 13px;
   }
 
   .rkt-filter-actions {
@@ -1029,7 +1097,8 @@ body:has(.sidebar-container.collapsed) .rkt-wrapper {
   }
 
   .rkt-input-group input,
-  .rkt-input-group select {
+  .rkt-input-group select,
+  .rkt-custom-select-btn {
     height: 42px;
     font-size: 13px;
   }
@@ -1038,7 +1107,7 @@ body:has(.sidebar-container.collapsed) .rkt-wrapper {
   .btn-light-custom,
   .btn-warning-custom {
     height: 42px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .rkt-table {
