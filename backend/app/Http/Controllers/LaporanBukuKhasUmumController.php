@@ -124,12 +124,12 @@ class LaporanBukuKhasUmumController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->get();
 
-        $penandatangan = $ttd->first(function ($item) use ($role) {
-            return strtolower(trim($item->role)) === strtolower(trim($role));
+       $penandatangan = $ttd->first(function ($item) {
+            return strtolower(trim($item->role)) === 'bendahara';
         });
 
-        $nama = $penandatangan->nama ?? '-';
-        $nip_ttd = $penandatangan->nip ?? '-';
+       $nama = $penandatangan->nama ?? '-';
+       $nip_ttd = $penandatangan->nip ?? '-';
 
         // =========================
         // EXCEL
