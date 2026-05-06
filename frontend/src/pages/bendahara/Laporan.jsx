@@ -36,6 +36,12 @@ export default function Laporan() {
     }
 
     const params = new URLSearchParams();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
+
+    if (nip) {
+      params.append("nip", nip);
+    }
     if (start) params.append("start", start);
     if (end) params.append("end", end);
     if (sumberDana) params.append("sumber_dana", sumberDana);
@@ -99,6 +105,13 @@ export default function Laporan() {
       type: "excel",
     });
 
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
+
+    if (nip) {
+      params.append("nip", nip);
+    }
+
     if (active === "BKU") {
       params.append("jenis", bkuTab);
     }
@@ -122,6 +135,13 @@ export default function Laporan() {
       sumber_dana: sumberDana,
       type: "pdf",
     });
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
+
+    if (nip) {
+      params.append("nip", nip);
+    }
 
     if (active === "BKU") {
       params.append("jenis", bkuTab);
