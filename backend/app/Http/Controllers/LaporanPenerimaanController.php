@@ -18,9 +18,8 @@ class LaporanPenerimaanController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-       $nip = $request->nip
-    ?? (Auth::check() ? Auth::user()->nip : null)
-    ?? DB::table('mst_karyawan')->value('NIP_KARYAWAN'); 
+    $nip = $request->nip
+    ?? (Auth::check() ? Auth::user()->nip : null);
 
         $authRole = Auth::check() ? Auth::user()->role : null;
 
@@ -30,7 +29,7 @@ class LaporanPenerimaanController extends Controller
             ->whereNull('tj.TGL_SELESAI_JABATAN')
             ->value('rj.DESKRIPSI_JABATAN');
 
-        $role = $dbRole ?? $authRole ?? 'bendahara'; 
+        $role = $dbRole ?? $authRole;
         $role = strtolower(trim($role));
 
         if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
