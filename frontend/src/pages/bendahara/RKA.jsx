@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "../../styles/bendahara/RKA.css";
-import { Plus, FileSpreadsheet, FileText, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -311,18 +311,34 @@ const handleSubmitDetail = async (e) => {
               </p>
             </div>
 
-            <div className="rka-header-actions">
-              <button className="btn-success-custom" onClick={handleExportExcel}>
-                <FileSpreadsheet size={16} />
-                    Export Excel
-              </button>
+           <div className="rka-header-actions">
+              <div className="export-wrapper">
+                <a
+                  href="http://127.0.0.1:8000/api/rka/export"
+                  className="btn btn-outline-success custom-btn"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <i className="bi bi-filetype-xlsx"></i>
+                  Export Excel
+                </a>
 
-              <button className="btn-warning-custom" onClick={handleExportPdf}>
-                <FileText size={16} />
-                    Export PDF
-              </button>
+                <a
+                  href="http://127.0.0.1:8000/api/rka/export/pdf"
+                  className="btn btn-outline-danger custom-btn"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <i className="bi bi-file-earmark-pdf"></i>
+                  Export PDF
+                </a>
+              </div>
 
-              <button className="btn-primary-custom" type="button" onClick={handleOpenDetailModal}>
+              <button
+                className="btn-primary-custom"
+                type="button"
+                onClick={handleOpenDetailModal}
+              >
                 <Plus size={16} />
                 Tambah Detail RKA
               </button>
@@ -615,7 +631,9 @@ const handleSubmitDetail = async (e) => {
                 </>
               ) : (
                 <div className="rka-detail-empty-state">
-                  <div className="rka-detail-empty-icon">💰</div>
+                  <div className="rka-detail-empty-icon">
+                    <i className="bi bi-receipt"></i>
+                  </div>
                   <p>Klik baris pada tabel untuk melihat detail RKA.</p>
                 </div>
               )}
