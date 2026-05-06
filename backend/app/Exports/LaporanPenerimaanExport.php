@@ -140,12 +140,10 @@ class LaporanPenerimaanExport implements WithEvents
                     ->getNumberFormat()
                     ->setFormatCode('"Rp" #,##0');
 
-                $role = strtolower(trim($this->role));
-
                 $nama = $this->nama ?? '-';
                 $nip = $this->nip_ttd ?? '-';
 
-                $roleLabel = ucfirst($role);
+                $roleLabel = 'Bendahara';
 
                 // =====================
                 // FOOTER
