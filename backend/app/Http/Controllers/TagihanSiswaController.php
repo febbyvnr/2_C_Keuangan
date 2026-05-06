@@ -621,41 +621,28 @@ class TagihanSiswaController extends Controller
             }
         }
 
-        $user = $request->user();
+        $penandatangan = DB::table('mst_karyawan')
+            ->select(
+                'NAMA_LENGKAP_GELAR as nama',
+                'NIP_KARYAWAN as nip',
+                'JABATAN_FUNGSIONAL as jabatan'
+            )
+            ->where(function ($query) {
+                $query->where('JABATAN_FUNGSIONAL', 'like', '%Bendahara%')
+                    ->orWhere('JABATAN_FUNGSIONAL', 'like', '%Keuangan%');
+            })
+            ->orderByDesc('TANGGAL_MASUK')
+            ->first();
 
-        $roleUser = strtolower($user->role ?? $user->ROLE ?? 'bendahara');
-
-        if ($roleUser === 'kepala_sekolah' || $roleUser === 'kepala sekolah') {
-            $roleTtd = 'Kepala Sekolah';
-        } else {
-            $roleTtd = 'Bendahara';
-        }
-
-        $namaTtd = $user->name
-            ?? $user->nama
-            ?? $user->NAMA_USER
-            ?? $user->NAMA_PEGAWAI
-            ?? '-';
-
-        $nipTtd = $user->nip
-            ?? $user->NIP
-            ?? $user->NIP_PEGAWAI
-            ?? '-';
-
-        $periode = '-';
-
-        if (!empty($filters['BULAN_TAGIHAN_SISWA']) && !empty($filters['TAHUN_TAGIHAN_SISWA'])) {
-            $periode = $filters['BULAN_TAGIHAN_SISWA'] . ' ' . $filters['TAHUN_TAGIHAN_SISWA'];
-        } elseif (!empty($filters['TAHUN_TAGIHAN_SISWA'])) {
-            $periode = $filters['TAHUN_TAGIHAN_SISWA'];
-        }
-
+        $roleTtd = 'Bendahara';
+        $namaTtd = $penandatangan->nama ?? '-';
+        $nipTtd = $penandatangan->nip ?? '-';
         $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
             'data' => $data,
+            'periode' => $periode ?? '-',
             'role' => $roleTtd,
             'nama' => $namaTtd,
             'nip_ttd' => $nipTtd,
-            'periode' => $periode,
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('tagihan_siswa.pdf');
