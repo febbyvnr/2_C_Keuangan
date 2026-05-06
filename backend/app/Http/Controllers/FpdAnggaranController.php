@@ -362,6 +362,49 @@ class FpdAnggaranController extends Controller
     }
     */
 
+    // belum diuji jadi gak tau jalan atau tidak
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_FPD' => 'required|string|max:20',
+            'DESKRIPSI_TR_PM' => 'required|string',
+        ]);
+
+        try {
+            $fpd = FpdAnggaran::findOrFail($id);
+
+            //  Cek user
+            $user = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_FPD)
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validator tidak ditemukan',
+                ], 404);
+            }
+
+            //  Simpan log ke tr_pm (pakai ID_PROGRAM_KERJA)
+            DB::table('tr_pm')->insert([
+                'ID_PROGRAM_KERJA' => $fpd->ID_PROGRAM_KERJA,
+                'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_FPD,
+                'DESKRIPSI_TR_PM' => 'Ditolak: ' . $request->DESKRIPSI_TR_PM,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'FPD berhasil ditolak',
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject FPD',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function approve(Request $request, int $id): JsonResponse
     {
