@@ -16,9 +16,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
 
-use App\Models\Karyawan;
-use Illuminate\Support\Facades\Crypt;
-
 class TagihanSiswaController extends Controller
 {
     private const ALLOWED_STATUS = [
@@ -624,53 +621,23 @@ class TagihanSiswaController extends Controller
             }
         }
 
-        $token = $request->bearerToken();
-
-        if (!$token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token tidak ditemukan. Silakan login ulang.',
-            ], 401);
-        }
-
-        try {
-            $tokenData = json_decode(Crypt::decryptString($token), true);
-
-            $nipLogin = $tokenData['nip'] ?? null;
-            $roleLogin = $tokenData['role'] ?? 'Bendahara';
-
-            if (!$nipLogin) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'NIP user tidak ditemukan di token.',
-                ], 401);
-            }
-
-            $userLogin = Karyawan::where('NIP_KARYAWAN', $nipLogin)->first();
-
-            if (!$userLogin) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data karyawan tidak ditemukan.',
-                ], 404);
-            }
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token tidak valid.',
-            ], 401);
-        }
-
+        $penandatangan = DB::table('mst_karyawan')
+            ->select(
+                'NAMA_LENGKAP_GELAR as nama',
+                'NIP_KARYAWAN as nip',
+                'JABATAN_FUNGSIONAL as jabatan'
+            )
+            ->where(function ($query) {
+                $query->where('JABATAN_FUNGSIONAL', 'like', '%Bendahara%')
+                    ->orWhere('JABATAN_FUNGSIONAL', 'like', '%Keuangan%');
+            })
+            ->orderByDesc('TANGGAL_MASUK')
+            ->first();
 
         $roleTtd = 'Bendahara';
-
-        $namaTtd = $userLogin->NAMA_LENGKAP_GELAR
-            ?? $userLogin->NAMA_KARYAWAN
-            ?? $userLogin->NAMA_PEGAWAI
-            ?? '-';
-
-        $nipTtd = $userLogin->NIP_KARYAWAN ?? '-';
-                $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
+        $namaTtd = $penandatangan->nama ?? '-';
+        $nipTtd = $penandatangan->nip ?? '-';
+        $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
             'data' => $data,
             'periode' => $periode ?? '-',
             'role' => $roleTtd,
