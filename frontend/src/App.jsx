@@ -52,6 +52,7 @@ import RKT from "./pages/pic/guru/RKT.jsx";
 import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 
 import SidebarKepsek from "./components/SidebarKepsek";
+import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
@@ -96,6 +97,17 @@ function KepsekLayout() {
   return (
     <div className="layout" style={{ display: "flex" }}>
       <SidebarKepsek />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
+function PmLayout() {
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarPm />
       <div className="content-wrapper" style={{ flex: 1 }}>
         <Outlet />
       </div>
@@ -181,6 +193,15 @@ export default function App() {
           <Route path="laporan" element={<LaporanYayasan />} />
           <Route path="monitoring" element={<MonitoringYayasan />} />
         </Route>
+
+        {/* --- RUTE PENJAMINAN MUTU --- */}
+        <Route path="/pm" element={<PmLayout />}>
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<div><h1>Dashboard PM</h1></div>} />
+          <Route path="monitoring-mutu" element={<div><h1>Monitoring Mutu</h1></div>} />
+          <Route path="evaluasi-rkt" element={<div><h1>Evaluasi RKT</h1></div>} />
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );
