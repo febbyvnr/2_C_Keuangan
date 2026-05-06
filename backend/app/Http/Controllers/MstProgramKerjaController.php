@@ -490,20 +490,21 @@ class MstProgramKerjaController extends Controller
                     ->active()
                     ->findOrFail($id);
 
-                $validator = DB::table('mst_karyawan')
-                    ->where('NIP_KARYAWAN', $validated['NIP_VALIDATOR_PROGKER'])
+                $validator = DB::table('mst_karyawan as mk')
+                    ->join('tr_jabatan as tj', 'mk.NIP_KARYAWAN', '=', 'tj.NIP_KARYAWAN')
+                    ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                    ->where('mk.NIP_KARYAWAN', $validated['NIP_VALIDATOR_PROGKER'])
+                    ->whereNull('tj.TGL_SELESAI_JABATAN')
+                    ->where('rj.DESKRIPSI_JABATAN', 'Kepala Sekolah')
+                    ->select(
+                        'mk.NIP_KARYAWAN',
+                        'mk.NAMA_LENGKAP_GELAR',
+                        'mk.JABATAN_FUNGSIONAL',
+                        'rj.DESKRIPSI_JABATAN as ROLE_AKSES'
+                    )
                     ->first();
 
                 if (!$validator) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Validator tidak ditemukan.',
-                    ], 404);
-                }
-
-                $jabatan = strtolower($validator->JABATAN_FUNGSIONAL ?? '');
-
-                if (!str_contains($jabatan, 'kepala sekolah')) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Hanya Kepala Sekolah yang boleh menyetujui RKT.',
