@@ -440,8 +440,25 @@ export default function Laporan() {
               </button>
             </div>
 
-            {/* FILTER DIKOSONGKAN DULU */}
-            <div></div>
+            {/* FILTER */}
+            <div className="laporan-filter">
+              {/* PROGRAM KERJA */}
+              <select
+                value={sumberDana}
+                onChange={(e) => setSumberDana(e.target.value)}
+              >
+                <option value="">Semua Program</option>
+
+                {/* sementara dummy dulu */}
+                <option value="1">Program BKM</option>
+                <option value="2">Program Ekskul</option>
+                <option value="3">Program Workshop</option>
+              </select>
+
+              <button className="btn btn-primary" onClick={loadData}>
+                Filter
+              </button>
+            </div>
           </div>
 
           {/* ================= TABLE ================= */}
