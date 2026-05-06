@@ -159,7 +159,7 @@ export default function WakaRKA() {
 
     return (
         <div className="waka-rka-shell">
-            <SidebarWaka />
+            {/* <SidebarWaka /> */}
             <main className="waka-rka-main">
                 {toast && (
                     <div className={`waka-rka-toast ${toast.type}`}>{toast.msg}</div>

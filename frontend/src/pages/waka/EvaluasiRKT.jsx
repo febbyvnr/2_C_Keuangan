@@ -281,7 +281,7 @@ export default function WakaEvaluasiRKT() {
 
     return (
         <div className="waka-evaluasi-shell">
-            <SidebarWaka />
+            {/* <SidebarWaka /> */}
 
             <main className="waka-evaluasi-main">
                 <section className="waka-evaluasi-stats">
