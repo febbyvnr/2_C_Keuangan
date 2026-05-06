@@ -24,20 +24,23 @@ class LaporanPengeluaranExport implements WithEvents
         $this->nip_ttd = $nip_ttd; // NIP pejabat TTD (Dinamis)
     }
 
+    /**
+     * Mengambil data berdasarkan struktur database asli:
+     * tr_pm -> dtl_program_kerja -> mst_program_kerja
+     */
     public function collection()
     {
         $query = DB::table('tr_pm as tp')
-            ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
-            ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
-            ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
+            
+            ->join('dtl_program_kerja as dpk', 'tp.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
             ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
             ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
             ->select(
                 'tp.TGL_PM as tanggal',
-                'mpk.PROGRAM_KERJA as program',
+                'mpk.PROGRAM_KERJA as program',      // Nama Program dari Master
                 'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana',
                 'tp.DESKRIPSI_TR_PM as uraian',
-                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal')
+                'dpk.NOMINAL as nominal'             // Nominal dari tabel detail
             );
 
         if ($this->start && $this->end) {
@@ -59,7 +62,7 @@ class LaporanPengeluaranExport implements WithEvents
 
                 $sheet->getColumnDimension('A')->setWidth(6);
                 $sheet->getColumnDimension('B')->setWidth(15);
-                $sheet->getColumnDimension('C')->setWidth(25);
+                $sheet->getColumnDimension('C')->setWidth(40); 
                 $sheet->getColumnDimension('D')->setWidth(25);
                 $sheet->getColumnDimension('E')->setWidth(35);
                 $sheet->getColumnDimension('F')->setWidth(22);
@@ -87,13 +90,12 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
                 $sheet->getStyle("A$headerRow:F$headerRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF2E75B6');
                 $sheet->getStyle("A$headerRow:F$headerRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->setAutoFilter("A$headerRow:F$headerRow");
 
                 $row = $headerRow + 1; $no = 1;
                 foreach ($data as $item) {
                     $sheet->setCellValue("A$row", $no++);
                     $sheet->setCellValue("B$row", $item->tanggal);
-                    $sheet->setCellValue("C$row", $item->program);
+                    $sheet->setCellValue("C$row", $item->program); 
                     $sheet->setCellValue("D$row", $item->sumber_dana);
                     $sheet->setCellValue("E$row", $item->uraian);
                     $sheet->setCellValue("F$row", $item->nominal);
@@ -112,26 +114,20 @@ class LaporanPengeluaranExport implements WithEvents
                 $sheet->getStyle("F$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
                 $sheet->getStyle("E$totalRow:F$totalRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFE699');
 
-                $footerRow = $totalRow + 4;
-            
+                // Bagian Tanda Tangan
+                $footerRow = $totalRow + 3;
                 $roleLabel = ucfirst(strtolower(trim($this->role)));
                 $namaPejabat = $this->nama ?? '-';
                 $nipPejabat = $this->nip_ttd ?? '-';
                 
-                $sheet->mergeCells("C" . ($footerRow+1) . ":E" . ($footerRow+1));
-                $sheet->mergeCells("C" . ($footerRow+3) . ":E" . ($footerRow+3));
-                $sheet->mergeCells("C" . ($footerRow+7) . ":E" . ($footerRow+7));
-                $sheet->mergeCells("C" . ($footerRow+8) . ":E" . ($footerRow+8));
+                $sheet->setCellValue("F" . ($footerRow), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("F" . ($footerRow))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->setCellValue("C" . ($footerRow+1), $roleLabel . ',');
-                $sheet->setCellValue("C" . ($footerRow+3), $namaPejabat);
-                $sheet->setCellValue("C" . ($footerRow+7), '-------------------------');
-                $sheet->setCellValue("C" . ($footerRow+8), 'NIP: ' . $nipPejabat);
-
-                $sheet->getStyle("C" . ($footerRow+1) . ":E" . ($footerRow+8))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->setCellValue("F" . ($footerRow + 10), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("F" . ($footerRow + 10))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->setCellValue("F" . ($footerRow + 1), $roleLabel . ',');
+                $sheet->setCellValue("F" . ($footerRow + 5), $namaPejabat);
+                $sheet->setCellValue("F" . ($footerRow + 6), 'NIP: ' . $nipPejabat);
+                $sheet->getStyle("F" . ($footerRow + 1) . ":F" . ($footerRow + 6))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("F" . ($footerRow + 5))->getFont()->setBold(true)->setUnderline(true);
 
                 $sheet->freezePane("A7");
             },

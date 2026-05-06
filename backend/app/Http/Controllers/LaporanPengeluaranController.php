@@ -18,12 +18,14 @@ class LaporanPengeluaranController extends Controller
         $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
+        // Ambil NIP dari request atau session user login
         $nip = $request->nip
             ?? (Auth::check() ? Auth::user()->nip : null)
             ?? DB::table('mst_karyawan')->value('NIP_KARYAWAN'); 
 
         $authRole = Auth::check() ? Auth::user()->role : null;
 
+        // Deteksi Role berdasarkan jabatan aktif
         $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
             ->where('tj.NIP_KARYAWAN', $nip)
@@ -39,6 +41,7 @@ class LaporanPengeluaranController extends Controller
             ], 403);
         }
 
+        // Ambil data penandatangan (Bendahara & Kepsek)
         $ttd = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
             ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
@@ -52,16 +55,16 @@ class LaporanPengeluaranController extends Controller
             ->get();
 
         $penandatangan = $ttd->first(function ($item) use ($role) {
-            return strtolower(trim($item->role_ttd)) === strtolower(trim($role));
+            return strtolower(trim($item->role_ttd)) === $role;
         });
 
-        $nama = $penandatangan->nama ?? '-';
+        $nama_ttd = $penandatangan->nama ?? '-';
         $nip_ttd = $penandatangan->nip ?? '-';
 
         $query = DB::table('tr_pm as tp')
-            ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
-            ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
-            ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
+            // tr_pm -> dtl_program_kerja (via ID_PROGRAM_KERJA)
+            ->join('dtl_program_kerja as dpk', 'tp.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
+            // dtl_program_kerja -> mst_program_kerja (via ID_PROGRAM_KERJA)
             ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
             ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
             ->select(
@@ -69,7 +72,7 @@ class LaporanPengeluaranController extends Controller
                 'mpk.PROGRAM_KERJA as program', 
                 'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana', 
                 'tp.DESKRIPSI_TR_PM as uraian', 
-                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal')
+                'dpk.NOMINAL as nominal' // Ambil dari NOMINAL di tabel detail
             );
 
         if ($start && $end) $query->whereBetween('tp.TGL_PM', [$start, $end]);
@@ -78,16 +81,17 @@ class LaporanPengeluaranController extends Controller
         $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
         $total = $data->sum('nominal');
 
+        // Handling Output
         if ($type === 'excel') {
             return Excel::download(
-                new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip, $nama, $nip_ttd), 
+                new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip, $nama_ttd, $nip_ttd), 
                 'Laporan_Pengeluaran.xlsx'
             );
         } 
         
         if ($type === 'pdf') {
             $pdf = Pdf::loadView('exports.LaporanPengeluaran_pdf', compact(
-                'data', 'total', 'start', 'end', 'role', 'nama', 'nip_ttd'
+                'data', 'total', 'start', 'end', 'role', 'nama_ttd', 'nip_ttd'
             ));
             return $pdf->download('Laporan_Pengeluaran.pdf');
         }
