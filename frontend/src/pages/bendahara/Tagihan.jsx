@@ -738,17 +738,19 @@ function Tagihan() {
             <div className="tagihan-export-group">
               <button
                 type="button"
-                className="tagihan-btn tagihan-btn-export-excel"
+                className="tagihan-export-btn tagihan-export-excel"
                 onClick={handleExportExcel}
               >
+                <i className="bi bi-filetype-xlsx"></i>
                 Export Excel
               </button>
 
               <button
                 type="button"
-                className="tagihan-btn tagihan-btn-export-pdf"
+                className="tagihan-export-btn tagihan-export-pdf"
                 onClick={handleExportPdf}
               >
+                <i className="bi bi-file-earmark-pdf"></i>
                 Export PDF
               </button>
             </div>
@@ -837,7 +839,7 @@ function Tagihan() {
                         <div className="tagihan-action-group">
                           <button
                             type="button"
-                            className="tagihan-btn tagihan-btn-secondary tagihan-btn-sm"
+                            className="tagihan-icon-btn tagihan-icon-edit"
                             onClick={() => handleEdit(item)}
                             disabled={hasPayment}
                             title={
@@ -845,13 +847,14 @@ function Tagihan() {
                                 ? "Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
                                 : "Edit tagihan"
                             }
+                            aria-label="Edit tagihan"
                           >
-                            Edit
+                            <i className="bi bi-pencil"></i>
                           </button>
 
                           <button
                             type="button"
-                            className="tagihan-btn tagihan-btn-danger tagihan-btn-sm"
+                            className="tagihan-icon-btn tagihan-icon-delete"
                             onClick={() => handleDelete(item)}
                             disabled={hasPayment}
                             title={
@@ -859,8 +862,9 @@ function Tagihan() {
                                 ? "Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
                                 : "Hapus tagihan"
                             }
+                            aria-label="Hapus tagihan"
                           >
-                            Hapus
+                            <i className="bi bi-trash"></i>
                           </button>
                         </div>
                       </td>
