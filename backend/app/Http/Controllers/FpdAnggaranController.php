@@ -328,6 +328,7 @@ class FpdAnggaranController extends Controller
         }
     }
 
+    /* sepertinya tidak dipakai dahulu karena kayaknya gak jalan semestinya / ada yang salah
     public function reject(Request $request, int $id): JsonResponse
     {
         try {
@@ -359,6 +360,8 @@ class FpdAnggaranController extends Controller
             ], 500);
         }
     }
+    */
+
 
     public function approve(Request $request, int $id): JsonResponse
     {
