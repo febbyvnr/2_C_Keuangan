@@ -278,7 +278,6 @@ export default function WakaFPD() {
 
     return (
         <div className="waka-fpd-shell">
-            <SidebarWaka />
             <main className="waka-fpd-main">
                 {toast && (
                     <div className={`waka-fpd-toast ${toast.type}`}>{toast.msg}</div>

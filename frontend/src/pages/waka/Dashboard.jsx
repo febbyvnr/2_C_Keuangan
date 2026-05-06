@@ -151,9 +151,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
-      <div className={`sidebar ${open ? "active" : ""}`}>
+      {/* <div className={`sidebar ${open ? "active" : ""}`}>
         <SidebarWaka />
-      </div>
+      </div> */}
 
       <main className="waka-container">
         <div className="header-card welcome-card">

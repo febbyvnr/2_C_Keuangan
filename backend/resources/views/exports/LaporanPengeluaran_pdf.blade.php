@@ -5,7 +5,6 @@
         body { 
             font-family: sans-serif; 
             position: relative;
-            font-size: 12px; 
         }
 
         table { 
@@ -20,12 +19,7 @@
         }
 
         th { 
-            background: #e5e7eb; 
-            font-weight: bold;
-        }
-
-        td {
-            color: #1a1a1a;
+            background: #f5f5f5; 
         }
 
         .no-border td {
@@ -34,7 +28,6 @@
 
         .header-text {
             text-align: center;
-            width: 100%;
         }
 
         .title-main {
@@ -76,7 +69,7 @@
         }
 
         .ttd-garis {
-            margin-top: 50px;    
+            margin-top: 50px;   
         }
 
         .ttd-nip {
@@ -93,7 +86,6 @@
 
 <img src="{{ public_path('logo.png') }}" class="watermark" width="400">
 
-<!-- HEADER -->
 <table class="no-border">
     <tr class="no-border">
         <td class="header-text">
@@ -108,15 +100,14 @@
 
 <br>
 
-<!-- TABLE -->
 <table>
     <thead>
         <tr>
             <th>Tanggal</th>
-            <th>Program</th>
-            <th>Sumber Dana</th>
+            <th>Program Kerja</th>
+            <th>Indikator</th>
             <th>Uraian</th>
-            <th>Nominal</th>
+            <th>NOMINAL</th>
         </tr>
     </thead>
     <tbody>
@@ -124,15 +115,15 @@
         <tr>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
             <td>{{ $row->program }}</td>
-            <td>{{ $row->sumber_dana }}</td>
+            <td>{{ $row->indikator }}</td>
             <td style="text-align:left;">{{ $row->uraian }}</td>
-            <td style="text-align:right;">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
         </tr>
         @endforeach
 
         <tr>
-            <td colspan="4"><b>TOTAL PENGELUARAN</b></td>
-            <td style="text-align:right;"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+            <td colspan="4"><b>TOTAL</b></td>
+            <td><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
@@ -140,19 +131,25 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
-    $role_ttd = ucfirst($role ?? 'Bendahara');
-    $nama_ttd = $nama ?? '-';
-    $nip_ttd = $nip_ttd ?? '-';
+    $role = $role ?? 'Bendahara';
+
+    if ($role === 'Kepala Sekolah') {
+        $nama = 'Drs. Budi Santoso';
+    } else {
+        $role = 'Bendahara';
+        $nama = 'Rina Putri, S.E.';
+    }
+
+    $nip = $nip ?? '-';
 @endphp
 
-
 <div class="ttd-center">
-    <p class="ttd-role">{{ $role_ttd }},</p>
+    <p class="ttd-role">{{ $role }},</p>
 
-    <p class="ttd-nama"><b>{{ $nama_ttd }}</b></p>
+    <p class="ttd-nama"><b>{{ $nama }}</b></p>
 
     <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip_ttd }}</p>
+    <p class="ttd-nip">NIP: {{ $nip }}</p>
 </div>
 
 <div class="tanggal-kanan">

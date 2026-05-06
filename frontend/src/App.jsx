@@ -31,6 +31,8 @@ import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
 import PicGuruFPD from "./pages/pic/guru/FPD";
 import WakaRKT from "./pages/waka/RKT";
+import WakaRKA from "./pages/waka/RKA";
+import WakaFPD from "./pages/waka/FPD";
 import WakaEvaluasiRKT from "./pages/waka/EvaluasiRKT";
 import WakaApprovalCenter from "./pages/waka/ApprovalCenter";
 import WakaMonitoring from "./pages/waka/Monitoring";
@@ -126,36 +128,22 @@ export default function App() {
           <Route path="penerimaan" element={<Penerimaan />} />
           <Route path="log" element={<Log />} />
 
+          {/* BENDAHARA MASTER DATA */}
           <Route path="master/coa" element={<MasterCOA />} />
           <Route path="master/kegiatan" element={<MasterKegiatan />} />
-          <Route
-            path="master/tahun-anggaran"
-            element={<MasterTahunAnggaran />}
-          />
-          <Route
-            path="master/tahun-akademik"
-            element={<MasterTahunAkademik />}
-          />
+          <Route path="master/tahun-anggaran" element={<MasterTahunAnggaran />} />
+          <Route path="master/tahun-akademik" element={<MasterTahunAkademik />} />
           <Route path="master/sumber-dana" element={<MasterSumberDana />} />
-          <Route
-            path="master/ref-penerimaan"
-            element={<MasterRefPenerimaan />}
-          />
+          <Route path="master/ref-penerimaan" element={<MasterRefPenerimaan />} />
           <Route path="master/ref-pm" element={<MasterRefPM />} />
           <Route path="master/tarif" element={<MasterTarif />} />
           <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
-          <Route
-            path="master/jenis-pembayaran"
-            element={<MasterJenisPembayaran />}
-          />
+          <Route path="master/jenis-pembayaran" element={<MasterJenisPembayaran />} />
         </Route>
 
-        {/* SISWA ORTU */}
+        {/* SISWA ORTU TANPA SIDEBAR*/}
         <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
-        <Route
-          path="/siswa-ortu/pembayaran/:id"
-          element={<PembayaranTagihanSiswaOrtu />}
-        />
+        <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
@@ -173,18 +161,20 @@ export default function App() {
           <Route path="monitoring" element={<KepsekMonitoring />} />
         </Route>
 
-        
         {/* WAKA */}
-        {/* dijadiin outlet aja kyk bendahara layout biar gampang kl update nnti */}
-        {/* <Route path="/waka" element={<WakaLayout />}> */}
-        <Route path="/waka" element={<DashboardWaka />} />
-        <Route path="/waka/rkt" element={<WakaRKT />} />
-        <Route path="/waka/evaluasi" element={<WakaEvaluasiRKT />} />
-        <Route path="/waka/evaluasi-rkt" element={<WakaEvaluasiRKT />} />
-        <Route path="/waka/approval-center" element={<WakaApprovalCenter />} />
-        <Route path="/waka/monitoring" element={<WakaMonitoring />} />
-        {/* </Route> */}
+        <Route path="/waka" element={<WakaLayout />}>
+          <Route path="" element={<DashboardWaka />} />
+          <Route path="dashboard" element={<DashboardWaka />} />
+          <Route path="rkt" element={<WakaRKT />} />
+          <Route path="rka" element={<WakaRKA />} />
+          <Route path="fpd" element={<WakaFPD />} />
+          <Route path="evaluasi" element={<WakaEvaluasiRKT />} />
+          <Route path="evaluasi-rkt" element={<WakaEvaluasiRKT />} />
+          <Route path="approval-center" element={<WakaApprovalCenter />} />
+          <Route path="monitoring" element={<WakaMonitoring />} />
+        </Route>
 
+        {/* YAYASAN GAJADI PAKE */}
         <Route path="/yayasan" element={<YayasanLayout />}>
           <Route path="dashboard" element={<DashboardYayasan />} />
           <Route path="approval" element={<ApprovalYayasan />} />
