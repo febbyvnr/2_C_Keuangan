@@ -128,28 +128,13 @@
     </tbody>
 </table>
 
-@php
-    \Carbon\Carbon::setLocale('id');
-
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    $nip = $nip ?? '-';
-@endphp
-
 <div class="ttd-center">
-    <p class="ttd-role">{{ $role }},</p>
+    <p class="ttd-role">Bendahara,</p>
 
-    <p class="ttd-nama"><b>{{ $nama }}</b></p>
+    <p class="ttd-nama"><b>{{ $nama_ttd }}</b></p>
 
     <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip }}</p>
+    <p class="ttd-nip">NIP: {{ $nip_ttd }}</p>
 </div>
 
 <div class="tanggal-kanan">
