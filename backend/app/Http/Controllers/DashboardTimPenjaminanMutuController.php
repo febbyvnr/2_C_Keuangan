@@ -15,22 +15,26 @@ class DashboardTimPenjaminanMutuController extends Controller
             // 1. Ambil Total Program Kerja RKT
             $totalProgram = MstProgramKerja::where('IS_DELETE', 0)->count();
 
+            // 2. Ambil Rincian Mutu (Gunakan NAMA_PM sebagai pengganti DESKRIPSI_REF_PM)
             $dataMutu = DB::table('tr_pm as tp')
                 ->join('ref_pm as rp', 'tp.ID_REF_PM', '=', 'rp.ID_REF_PM')
-                ->select('rp.DESKRIPSI_REF_PM as kategori', DB::raw('count(DISTINCT tp.ID_PROGRAM_KERJA) as jumlah'))
+                ->select('rp.NAMA_PM as kategori', DB::raw('count(DISTINCT tp.ID_PROGRAM_KERJA) as jumlah'))
                 ->whereIn('tp.ID_REF_PM', [25, 26, 28, 29])
-                ->groupBy('rp.DESKRIPSI_REF_PM')
+                ->groupBy('rp.NAMA_PM')
                 ->get();
 
-            $realisasi = $dataMutu->where('kategori', 'Evaluasi')->first()->jumlah ?? 0;
+            // 3. Ambil nilai Realisasi dari kategori 'Evaluasi'
+            // Catatan: Pastikan di database NAMA_PM untuk ID 28 adalah 'Evaluasi'
+            $realisasi = $dataMutu->where('kategori', 'EVALUASI TOTAL')->first()->jumlah ?? 0;
        
+            // 4. Hitung Deviasi (ID 25 & 26)
             $deviasi = TrPm::whereIn('ID_REF_PM', [25, 26])
                 ->distinct('ID_PROGRAM_KERJA')
                 ->count();
 
             return response()->json([
                 'status' => true,
-                'message' => 'DashboardTimPenjaminanMutu berhasil dimuat',
+                'message' => 'Dashboard Tim Penjaminan Mutu berhasil dimuat',
                 'data' => [
                     'total_rkt' => $totalProgram,
                     'realisasi' => (int)$realisasi,
@@ -43,7 +47,7 @@ class DashboardTimPenjaminanMutuController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal memproses DashboardTimPenjaminanMutu',
+                'message' => 'Gagal memproses Dashboard Tim Penjaminan Mutu',
                 'error' => $e->getMessage()
             ], 500);
         }

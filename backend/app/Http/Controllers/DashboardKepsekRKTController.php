@@ -16,26 +16,25 @@ class DashboardKepsekRKTController extends Controller
             $totalProgram = MstProgramKerja::where('IS_DELETE', 0)->count();
 
             // 2. Realisasi Indikator (Berdasarkan ID_REF_PM 28 - Evaluasi Total)
-            // Mengasumsikan program yang sudah ada data evaluasinya berarti indikatornya sudah terealisasi/terukur
             $realisasi = TrPm::where('ID_REF_PM', 28)
                 ->whereNotNull('DESKRIPSI_TR_PM')
                 ->distinct('ID_PROGRAM_KERJA')
                 ->count();
 
             // 3. Menghitung Deviasi (Hambatan atau Perubahan)
-            // Mengambil data dari ID 25 (Usulan Perubahan) dan 26 (Koreksi Yayasan)
+            // ID 25: Usulan Perubahan, ID 26: Koreksi Yayasan
             $deviasi = TrPm::whereIn('ID_REF_PM', [25, 26])
                 ->whereNotNull('DESKRIPSI_TR_PM')
                 ->distinct('ID_PROGRAM_KERJA')
                 ->count();
 
             // 4. Detail Kategori Mutu khusus untuk Kepsek
-            // Mengelompokkan data berdasarkan jenis evaluasi agar Kepsek bisa melihat peta hambatan
+            // PERBAIKAN: Menggunakan kolom 'NAMA_PM' sesuai struktur tabel asli
             $rincianKepsek = DB::table('tr_pm as tp')
                 ->join('ref_pm as rp', 'tp.ID_REF_PM', '=', 'rp.ID_REF_PM')
-                ->select('rp.DESKRIPSI_REF_PM as label', DB::raw('count(DISTINCT tp.ID_PROGRAM_KERJA) as nilai'))
+                ->select('rp.NAMA_PM as label', DB::raw('count(DISTINCT tp.ID_PROGRAM_KERJA) as nilai'))
                 ->whereIn('tp.ID_REF_PM', [25, 26, 28, 29])
-                ->groupBy('rp.DESKRIPSI_REF_PM')
+                ->groupBy('rp.NAMA_PM')
                 ->get();
 
             // 5. Hitung Persentase Capaian RKT
