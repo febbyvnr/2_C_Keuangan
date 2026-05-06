@@ -128,6 +128,7 @@ export default function App() {
           <Route path="penerimaan" element={<Penerimaan />} />
           <Route path="log" element={<Log />} />
 
+          {/* BENDAHARA MASTER DATA */}
           <Route path="master/coa" element={<MasterCOA />} />
           <Route path="master/kegiatan" element={<MasterKegiatan />} />
           <Route path="master/tahun-anggaran" element={<MasterTahunAnggaran />} />
@@ -140,12 +141,9 @@ export default function App() {
           <Route path="master/jenis-pembayaran" element={<MasterJenisPembayaran />} />
         </Route>
 
-        {/* SISWA ORTU */}
+        {/* SISWA ORTU TANPA SIDEBAR*/}
         <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
-        <Route
-          path="/siswa-ortu/pembayaran/:id"
-          element={<PembayaranTagihanSiswaOrtu />}
-        />
+        <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
@@ -163,7 +161,6 @@ export default function App() {
           <Route path="monitoring" element={<KepsekMonitoring />} />
         </Route>
 
-        
         {/* WAKA */}
         <Route path="/waka" element={<WakaLayout />}>
           <Route path="" element={<DashboardWaka />} />
@@ -177,6 +174,7 @@ export default function App() {
           <Route path="monitoring" element={<WakaMonitoring />} />
         </Route>
 
+        {/* YAYASAN GAJADI PAKE */}
         <Route path="/yayasan" element={<YayasanLayout />}>
           <Route path="dashboard" element={<DashboardYayasan />} />
           <Route path="approval" element={<ApprovalYayasan />} />

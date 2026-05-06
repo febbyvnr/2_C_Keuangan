@@ -1,6 +1,5 @@
 .kepsek-monitoring-shell {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
+    display: flex;
     min-height: 100vh;
     background: #f3f6fb;
     color: #1f2937;
@@ -8,6 +7,7 @@
 
 .kepsek-monitoring-main {
     padding: 28px 34px 40px;
+    width: 100%;
 }
 
 .kepsek-monitoring-header {

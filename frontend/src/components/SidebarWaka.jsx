@@ -4,7 +4,7 @@ import profile from "../assets/user-profile.jpg";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-export default function SidebarBendahara() {
+export default function SidebarWaka() {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -19,18 +19,6 @@ export default function SidebarBendahara() {
         nama: "Loading...",
         email: "Loading..."
     });
-
-    const MENU_ITEMS = [
-        { label: "Dashboard", to: "/waka", icon: "bi bi-columns-gap", end: true },
-        { label: "RKT", to: "/waka/rkt", icon: "bi bi-journal-text" },
-        { label: "RKA", to: "/waka/rka", icon: "bi bi-cash-coin" },
-        { label: "FPD", to: "/waka/fpd", icon: "bi bi-cash-stack" },
-        { label: "Realisasi RKT", icon: "bi bi-bar-chart-line" },
-        { label: "Bridging RKT", icon: "bi bi-diagram-3" },
-        { label: "Evaluasi RKT", to: "/waka/evaluasi-rkt", icon: "bi bi-clipboard-data" },
-        { label: "Approval Center", to: "/waka/approval-center", icon: "bi bi-check2-square" },
-        { label: "Monitoring", to: "/waka/monitoring", icon: "bi bi-binoculars" },
-    ];
 
     useEffect(() => {
         const handleResize = () => {
@@ -129,7 +117,7 @@ export default function SidebarBendahara() {
                                 <div className="sidebar-logo"><img src={logo} alt="logo"/></div>
                                 <div className="header-text">
                                     <div className="sidebar-title">SIBOKU</div>
-                                    <div className="sidebar-subtitle">Ruang Bendahara</div>
+                                    <div className="sidebar-subtitle">Ruang Waka</div>
                                 </div>
                                 <button className="hamburger-btn inside" onClick={() => isMobile ? setIsOpen(false) : setIsCollapsed(true)}>
                                     <i className="bi bi-list"></i>
