@@ -42,7 +42,8 @@ use App\Http\Controllers\DashboardBendaharaController;
 use App\Http\Controllers\DashboardKepsekKeuanganController;
 use App\Http\Controllers\RefJenisTagihanController;
 use App\Http\Controllers\RefMetodePembayaranController;
-
+use App\Http\Controllers\DashboardTimPenjaminanMutuController;
+use App\Http\Controllers\DashboardKepsekRKTController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -344,3 +345,7 @@ Route::get('/dashboard-bendahara', [DashboardBendaharaController::class, 'index'
 
 
 Route::get('/dashboard-kepsek', [DashboardKepsekKeuanganController::class, 'index']);
+
+Route::get('/dashboardtimpenjaminanmutu', [DashboardTimPenjaminanMutuController::class, 'index']);
+
+Route::get('/dashboard-kepsekrkt', [DashboardKepsekRKTController::class, 'index']);
