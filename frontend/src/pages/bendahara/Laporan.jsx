@@ -424,8 +424,115 @@ export default function Laporan() {
         </>
       )}
 
+      {/* ================= PENGELUARAN ================= */}
+      {active === "Pengeluaran" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            {/* FILTER DIKOSONGKAN DULU */}
+            <div></div>
+          </div>
+
+          {/* ================= TABLE ================= */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Program</th>
+                  <th>Uraian</th>
+                  <th>Nominal</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+
+                      <td>
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </td>
+
+                      <td>{item.program}</td>
+
+                      <td>{item.uraian}</td>
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.nominal ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= FOOTER ================= */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ================= SISANYA ================= */}
-      {!["Penerimaan", "BKU"].includes(active) && (
+      {!["Penerimaan", "BKU", "Pengeluaran"].includes(active) && (
         <div className="laporan-content">
           <div style={{ flex: 1 }}>
             <div className="laporan-table">
@@ -435,6 +542,7 @@ export default function Laporan() {
                     <th>{active}</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr>
                     <td style={{ textAlign: "center" }}>
