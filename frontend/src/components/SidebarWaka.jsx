@@ -162,7 +162,7 @@ export default function SidebarBendahara() {
                             </li>
 
                             <li className="nav-item">
-                                <NavLink to="/waka/rkt" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                <NavLink to="/waka/rka" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-cash-coin"></i>RKA
                                 </NavLink>
                             </li>
