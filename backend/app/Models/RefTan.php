@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefTan extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_tan';
     protected $primaryKey = 'ID_TAN';
     public $timestamps = false;
