@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RkaDetail extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'dtl_program_kerja';
     protected $primaryKey = 'ID_DT_PROGKER';
     public $incrementing = true;

@@ -12,6 +12,7 @@ export default function Laporan() {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
+  const [tahun, setTahun] = useState("");
 
   const [programKerja, setProgramKerja] = useState("");
 
@@ -29,6 +30,8 @@ export default function Laporan() {
       baseUrl = "http://localhost:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://localhost:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://localhost:8000/api/laporan/rkas";
     } else if (active === "Yayasan") {
       baseUrl = "http://localhost:8000/api/laporan/yayasan";
     } else {
@@ -50,6 +53,10 @@ export default function Laporan() {
     if (active === "Pengeluaran") {
       if (programKerja) {
         params.append("program_kerja", programKerja);
+      }
+    } else if (active === "Yayasan") {
+      if (tahun) {
+        params.append("tahun", tahun);
       }
     } else {
       if (sumberDana) {
@@ -107,12 +114,17 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas/export";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan/export-excel";
     }
 
     const params = new URLSearchParams({
       start,
       end,
       sumber_dana: sumberDana,
+      tahun: active === "Yayasan" ? tahun : "",
       type: "excel",
     });
 
@@ -138,12 +150,17 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas/export-pdf";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan/export-pdf";
     }
 
     const params = new URLSearchParams({
       start,
       end,
       sumber_dana: sumberDana,
+      tahun: active === "Yayasan" ? tahun : "",
       type: "pdf",
     });
 
@@ -586,8 +603,322 @@ export default function Laporan() {
         </>
       )}
 
+      {/* ================= RKAS ================= */}
+      {active === "RKAS" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div></div>
+          </div>
+
+          {/* TABLE */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Program</th>
+                  <th>Sumber Dana</th>
+                  <th>Anggaran</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+
+                      <td>{item.program_kerja}</td>
+
+                      <td>{item.sumber_dana}</td>
+
+                      <td className="nominal">
+                        Rp{" "}
+                        {Number(item.anggaran_disetujui ?? 0).toLocaleString(
+                          "id-ID",
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= YAYASAN ================= */}
+      {active === "Yayasan" && (
+        <div className="yayasan-container">
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div className="laporan-filter">
+              {/* Filter Tahun dengan custom panah */}
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
+                <input
+                  type="text"
+                  value={tahun}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || /^\d+$/.test(value)) {
+                      setTahun(value);
+                    }
+                  }}
+                  placeholder="Pilih Tahun"
+                  style={{
+                    width: "130px",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid #ddd",
+                    fontSize: "14px",
+                    paddingRight: "30px"
+                  }}
+                />
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  gap: "2px"
+                }}>
+                  <button
+                    onClick={() => {
+                      const currentYear = parseInt(tahun) || new Date().getFullYear();
+                      const newYear = currentYear + 1;
+                      if (newYear <= 2100) setTahun(newYear);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#2c3e50",
+                      fontSize: "10px",
+                      padding: "0",
+                      lineHeight: "1",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => {
+                      const currentYear = parseInt(tahun) || new Date().getFullYear();
+                      const newYear = currentYear - 1;
+                      if (newYear >= 2000) setTahun(newYear);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#2c3e50",
+                      fontSize: "10px",
+                      padding: "0",
+                      lineHeight: "1",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setPage(1);
+                  loadData();
+                }}
+              >
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {/* TABLE */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Kode Akun</th>
+                  <th>Nama Akun</th>
+                  <th>Penerimaan</th>
+                  <th>Pengeluaran</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => {
+                    const penerimaan = Number(item.TOTAL_MASUK ?? 0);
+                    const pengeluaran = Number(item.TOTAL_KELUAR ?? 0);
+                    const saldo = penerimaan - pengeluaran;
+                    
+                    return (
+                      <tr key={i}>
+                        <td>{startIndex + i + 1}</td>
+                        <td>{item.KODE_COA}</td>
+                        <td>{item.NAMA_COA}</td>
+                        
+                        <td className="nominal">
+                          {penerimaan === 0 
+                            ? "-" 
+                            : `Rp ${penerimaan.toLocaleString("id-ID")}`}
+                        </td>
+                        
+                        <td className="nominal">
+                          {pengeluaran === 0 
+                            ? "-" 
+                            : `Rp ${pengeluaran.toLocaleString("id-ID")}`}
+                        </td>
+                        
+                        <td className="nominal">
+                          {saldo === 0 
+                            ? "-" 
+                            : `Rp ${saldo.toLocaleString("id-ID")}`}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>
+                {(() => {
+                  // Hitung total saldo dari semua data
+                  const totalSaldo = data.reduce((acc, item) => {
+                    const penerimaan = Number(item.TOTAL_MASUK ?? 0);
+                    const pengeluaran = Number(item.TOTAL_KELUAR ?? 0);
+                    return acc + (penerimaan - pengeluaran);
+                  }, 0);
+                  return `Rp ${totalSaldo.toLocaleString("id-ID")}`;
+                })()}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ================= SISANYA ================= */}
-      {!["Penerimaan", "BKU", "Pengeluaran"].includes(active) && (
+      {!["Penerimaan", "BKU", "Pengeluaran", "RKAS", "Yayasan"].includes(active) && (
         <div className="laporan-content">
           <div style={{ flex: 1 }}>
             <div className="laporan-table">

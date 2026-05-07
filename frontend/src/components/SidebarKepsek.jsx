@@ -143,8 +143,18 @@ export default function SidebarKepsek() {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
+                                <NavLink to="/kepsek/approval-center" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-check2-square"></i>Approval Center
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
                                 <NavLink to="/kepsek/monitoring" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-binoculars"></i>Monitoring
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink to="/kepsek/laporan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-file-earmark"></i>Laporan
                                 </NavLink>
                             </li>
                         </ul>

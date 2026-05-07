@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TrPenerimaan;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefPm extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_pm';
     protected $primaryKey = 'ID_REF_PM';
     public $incrementing = false;
