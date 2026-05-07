@@ -146,7 +146,7 @@ export default function SidebarPm() {
                                 <div className="header-text">
                                     <div className="sidebar-title">SIBOKU</div>
                                     <div className="sidebar-subtitle">
-                                        Ruang Penjaminan Mutu
+                                        Penjaminan Mutu
                                     </div>
                                 </div>
                                 <button
@@ -207,21 +207,7 @@ export default function SidebarPm() {
                                     }
                                 >
                                     <i className="bi bi-journal-text"></i>
-                                    Referensi
-                                </NavLink>
-                            </li>
-
-                            <li className="nav-item">
-                                <NavLink
-                                    to="/pm/monitoring-mutu"
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "nav-link sidebar-active"
-                                            : "nav-link text-dark"
-                                    }
-                                >
-                                    <i className="bi bi-graph-up-arrow"></i>
-                                    Monitoring Mutu
+                                    Referensi PM
                                 </NavLink>
                             </li>
 
