@@ -45,4 +45,9 @@ class EvaluasiRkt extends Model
     {
         return $this->belongsTo(RefPm::class, 'ID_REF_PM', 'ID_REF_PM');
     }
+
+    public function validator()
+    {
+        return $this->belongsTo(Karyawan::class, 'NIP_VALIDATOR_PM', 'NIP_KARYAWAN');
+    }
 }
