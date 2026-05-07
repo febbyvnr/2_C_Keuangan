@@ -213,14 +213,7 @@ export default function App() {
         {/* --- RUTE PENJAMINAN MUTU --- */}
         <Route path="/pm" element={<PmLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
-          <Route
-            path="dashboard"
-            element={
-              <div>
-                <h1>Dashboard PM</h1>
-              </div>
-            }
-          />
+          <Route path="dashboard" element={<DashboardPM />} />
           <Route
             path="monitoring-mutu"
             element={
