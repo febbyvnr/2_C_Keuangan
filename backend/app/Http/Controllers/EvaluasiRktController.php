@@ -250,7 +250,7 @@ class EvaluasiRktController extends Controller
         ]);
 
         try {
-            // 🔹 Cari evaluasi
+            //  Cari evaluasi
             $evaluasi = EvaluasiRkt::findOrFail($id);
 
             // Cek validator
@@ -271,7 +271,7 @@ class EvaluasiRktController extends Controller
                 ], 403);
             }
 
-            // 🔹 Cek sudah approve atau belum
+            //  Cek sudah approve atau belum
             if ($evaluasi->NIP_VALIDATOR_PM) {
                 return response()->json([
                     'success' => false,
@@ -279,7 +279,7 @@ class EvaluasiRktController extends Controller
                 ], 400);
             }
 
-            // 🔹 Approve
+            //  Approve
             $evaluasi->update([
                 'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
             ]);
@@ -312,10 +312,10 @@ class EvaluasiRktController extends Controller
         ]);
 
         try {
-            // 🔹 Cari evaluasi
+            //  Cari evaluasi
             $evaluasi = EvaluasiRkt::findOrFail($id);
 
-            // 🔹 Cek validator
+            //  Cek validator
             $validator = DB::table('mst_karyawan')
                 ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
                 ->first();
@@ -333,7 +333,7 @@ class EvaluasiRktController extends Controller
                 ], 403);
             }
 
-            // 🔹 Cek sudah approve atau belum
+            //  Cek sudah approve atau belum
             if ($evaluasi->NIP_VALIDATOR_PM) {
                 return response()->json([
                     'success' => false,
@@ -341,7 +341,7 @@ class EvaluasiRktController extends Controller
                 ], 400);
             }
 
-            // 🔹 Update deskripsi jadi penolakan
+            //  Update deskripsi jadi penolakan
             $evaluasi->update([
                 'DESKRIPSI_TR_PM' => 'Ditolak: ' . $request->DESKRIPSI_TR_PM,
             ]);
