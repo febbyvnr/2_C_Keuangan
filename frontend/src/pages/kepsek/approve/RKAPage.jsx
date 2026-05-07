@@ -27,44 +27,29 @@ export default function RKAPage({ setHasPending }) {
     }, []);
 
     const fetchData = async (searchValue = "") => {
-        try {
-            const url = searchValue
-                ? `http://localhost:8000/api/rka/search?keyword=${searchValue}`
-                : "http://localhost:8000/api/rka";
-
-            const res = await fetch(url);
-            const json = await res.json();
-
-            const result = json.data || [];
-
-            const grouped = Object.values(
-                result.reduce((acc, item) => {
-                    const key = item.ID_PROGRAM_KERJA;
-
-                    if (!acc[key]) {
-                        acc[key] = {
-                            ...item,
-                            details: [],
-                        };
-                    }
-
-                    acc[key].details.push(item);
-
-                    return acc;
-                }, {})
-            );
-
-            setData(grouped);
-
-            if (grouped.length > 0) {
-                setSelected(grouped[0]);
-            }
-
-            setHasPending && setHasPending(grouped.length > 0);
-        } catch (err) {
-            console.error(err);
+    try {
+        const url = searchValue
+            ? `http://localhost:8000/api/rka/search?keyword=${searchValue}`
+            : "http://localhost:8000/api/rka";
+        const res = await fetch(url);
+        const json = await res.json();
+        const result = json.data || [];
+        const formattedData = result.map(program => {
+            return {
+                ...program, 
+                rkt: program, 
+                details: program.rka || [] 
+            };
+        });
+        setData(formattedData);
+        if (formattedData.length > 0) {
+            setSelected(formattedData[0]);
         }
-    };
+        setHasPending && setHasPending(formattedData.length > 0);
+    } catch (err) {
+        console.error("Fetch Error:", err);
+    }
+};
 
     const handleSearch = (value) => {
         setSearch(value);

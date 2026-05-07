@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rka;
+use App\Models\MstProgramKerja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,23 +27,50 @@ class RkaController extends Controller
             ->first();
     }
 
+    // public function index(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $data = Rka::with(['rkt', 'refDana'])
+    //             ->whereHas('rkt', function ($q) {
+    //                 $q->where(function ($sub) {
+    //                     $sub->where('IS_DELETE', '!=', 1)
+    //                         ->orWhereNull('IS_DELETE');
+    //                 });
+    //                 $q->whereNotNull('NIP_VALIDATOR_PROGKER');
+    //             })
+    //             ->get();
+    //         return response()->json([
+    //             'success' => true,
+    //             'count' => $data->count(),
+    //             'data' => $data,
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function index(Request $request): JsonResponse
     {
         try {
-            $data = Rka::with(['rkt', 'refDana'])
-                ->whereHas('rkt', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->where('IS_DELETE', '!=', 1)
-                            ->orWhereNull('IS_DELETE');
-                    });
-                    $q->whereNotNull('NIP_VALIDATOR_PROGKER');
-                })
-                ->get();
+            $data = MstProgramKerja::with([
+                'Rka.refDana'
+            ])
+            ->where(function ($q) {
+                $q->where('IS_DELETE', '!=', 1)
+                ->orWhereNull('IS_DELETE');
+            })
+            ->whereNotNull('NIP_VALIDATOR_PROGKER')
+            ->get();
+
             return response()->json([
                 'success' => true,
                 'count' => $data->count(),
                 'data' => $data,
             ]);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
