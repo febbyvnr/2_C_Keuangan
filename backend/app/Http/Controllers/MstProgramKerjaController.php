@@ -490,6 +490,20 @@ class MstProgramKerjaController extends Controller
                     ->active()
                     ->findOrFail($id);
 
+                $bendaharaValidator = false;
+
+                if ($programKerja->NIP_VALIDATOR_PROGKER) {
+                    $bendahara = DB::table('mst_karyawan as mk')
+                        ->join('tr_jabatan as tj', 'mk.NIP_KARYAWAN', '=', 'tj.NIP_KARYAWAN')
+                        ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                        ->where('mk.NIP_KARYAWAN', $programKerja->NIP_VALIDATOR_PROGKER)
+                        ->whereNull('tj.TGL_SELESAI_JABATAN')
+                        ->where('rj.DESKRIPSI_JABATAN', 'like', '%Bendahara%')
+                        ->exists();
+
+                    $bendaharaValidator = $bendahara;
+                }
+
                 $validator = DB::table('mst_karyawan as mk')
                     ->join('tr_jabatan as tj', 'mk.NIP_KARYAWAN', '=', 'tj.NIP_KARYAWAN')
                     ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
@@ -511,13 +525,12 @@ class MstProgramKerjaController extends Controller
                     ], 422);
                 }
 
-                if ($programKerja->NIP_VALIDATOR_PROGKER) {
+                if ($programKerja->NIP_VALIDATOR_PROGKER && !$bendaharaValidator) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Program kerja sudah disetujui Kepala Sekolah.',
                     ], 422);
                 }
-
                 $lastPm = $programKerja->trPm
                     ->sortByDesc('ID_PM')
                     ->first();
@@ -525,8 +538,10 @@ class MstProgramKerjaController extends Controller
                 $lastNote = strtolower($lastPm->DESKRIPSI_TR_PM ?? '');
 
                 $isSubmitted =
-                    str_starts_with($lastNote, 'diajukan') ||
-                    str_starts_with($lastNote, 'pengajuan');
+                    str_contains($lastNote, 'diajukan') ||
+                    str_contains($lastNote, 'pengajuan') ||
+                    str_contains($lastNote, 'disetujui') ||
+                    !empty($programKerja->NIP_VALIDATOR_PROGKER);
 
                 if (!$isSubmitted) {
                     return response()->json([

@@ -64,6 +64,13 @@ import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
+import KepsekMasterCOA from "./pages/kepsek/master/MasterCOA.jsx";
+import KepsekMasterKegiatan from "./pages/kepsek/master/MasterKegiatan.jsx";
+import KepsekMasterTahunAnggaran from "./pages/kepsek/master/MasterTahunAnggaran.jsx";
+import KepsekMasterSumberDana from "./pages/kepsek/master/MasterSumberDana.jsx";
+import KepsekMasterRefPenerimaan from "./pages/kepsek/master/MasterRefPenerimaan.jsx";
+import KepsekMasterRefPM from "./pages/kepsek/master/MasterRefPM.jsx";
+import KepsekMasterTarif from "./pages/kepsek/master/MasterTarif.jsx";
 import "./index.css";
 import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
 
@@ -201,6 +208,13 @@ export default function App() {
           <Route path="dashboard" element={<KepsekDashboard />} />
           <Route path="monitoring" element={<KepsekMonitoring />} />
           <Route path="approval-center" element={<KepsekApproval />} />
+          <Route path="master/coa" element={<KepsekMasterCOA />} />
+          <Route path="master/kegiatan" element={<KepsekMasterKegiatan />} />
+          <Route path="master/tahun-anggaran" element={<KepsekMasterTahunAnggaran />} />
+          <Route path="master/sumber-dana" element={<KepsekMasterSumberDana />} />
+          <Route path="master/ref-penerimaan" element={<KepsekMasterRefPenerimaan />} />
+          <Route path="master/ref-pm" element={<KepsekMasterRefPM />} />
+          <Route path="master/tarif" element={<KepsekMasterTarif />} />
         </Route>
 
         {/* WAKA */}
