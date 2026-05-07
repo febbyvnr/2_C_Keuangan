@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RkasExport;
 
 class RkaController extends Controller
 {
@@ -248,6 +250,21 @@ class RkaController extends Controller
         }
     }
 
+    public function export()
+    {
+        try {
+            return Excel::download(
+                new RkasExport(),
+                'Laporan_RKA.xlsx'
+            );
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function exportPdf(Request $request)
     {
         try {
@@ -256,14 +273,12 @@ class RkaController extends Controller
                     $q->where(function ($sub) {
                         $sub->where('IS_DELETE', '!=', 1)
                             ->orWhereNull('IS_DELETE');
-                    });
-                    $q->whereNotNull('NIP_VALIDATOR_PROGKER');
+                    })
+                    ->whereNotNull('NIP_VALIDATOR_PROGKER');
                 })
                 ->get();
             $pdf = app('dompdf.wrapper')
-                ->loadView('exports.rka_pdf', [
-                    'data' => $data
-                ]);
+                ->loadView('exports.rka_pdf', compact('data'));
             $pdf->setPaper('a4', 'landscape');
             return $pdf->download('Laporan_RKA.pdf');
         } catch (\Throwable $e) {
