@@ -123,18 +123,20 @@
 /* HEADER */
 .program-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
   gap: 10px;
+
+  margin-bottom: 8px;
 }
 
+/* JUDUL PROGRAM */
 /* JUDUL PROGRAM */
 .program-header strong {
   font-size: 13px;
   font-weight: 600;
   color: #1e293b;
-  flex: 1;
+
+  flex: unset;
 }
 
 /* TEXT BODY */
@@ -145,13 +147,17 @@
 }
 
 /* STATUS BADGE */
+/* STATUS BADGE */
 .status {
   font-size: 11px;
   padding: 5px 10px;
   border-radius: 999px;
+
   background: #eef2ff;
   color: #235399;
   font-weight: 500;
+
+  margin-left: auto;
 }
 
 /* PROGRESS BAR IMPROVE */
@@ -187,9 +193,15 @@
   background: #f1f5f9;
 }
 
+.progress-label {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
 .progress-text {
-  color: #eda60f; /* kuning */
-  font-weight: 600;
+  color: #eda60f !important;
+  font-weight: 700;
 }
 
 /* ===== ACTIVITY LIST ===== */
