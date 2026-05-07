@@ -224,6 +224,20 @@ export default function SidebarPm() {
                                     Evaluasi RKT
                                 </NavLink>
                             </li>
+
+                            <li className="nav-item">
+                                <NavLink
+                                    to="/pm/laporan"
+                                    className={({ isActive }) =>
+                                        isActive
+                                            ? "nav-link sidebar-active"
+                                            : "nav-link text-dark"
+                                    }
+                                >
+                                    <i className="bi bi-file-earmark-bar-graph"></i>
+                                    Laporan
+                                </NavLink>
+                            </li>
                         </ul>
 
                         <div className="logout">

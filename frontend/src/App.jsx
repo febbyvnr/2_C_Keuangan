@@ -63,6 +63,7 @@ import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
+import LaporanPM from "./pages/PM/Laporan";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import KepsekMasterCOA from "./pages/kepsek/master/MasterCOA.jsx";
@@ -245,6 +246,7 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardPM />} />
           <Route path="referensi" element={<ReferensiPm />} />
+          <Route path="laporan" element={<LaporanPM />} />
           <Route
             path="monitoring-mutu"
             element={
