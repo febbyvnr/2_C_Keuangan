@@ -13,6 +13,8 @@ export default function Laporan() {
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
 
+  const [programKerja, setProgramKerja] = useState("");
+
   const [page, setPage] = useState(1);
   const perPage = 10;
 
@@ -44,7 +46,16 @@ export default function Laporan() {
     }
     if (start) params.append("start", start);
     if (end) params.append("end", end);
-    if (sumberDana) params.append("sumber_dana", sumberDana);
+
+    if (active === "Pengeluaran") {
+      if (programKerja) {
+        params.append("program_kerja", programKerja);
+      }
+    } else {
+      if (sumberDana) {
+        params.append("sumber_dana", sumberDana);
+      }
+    }
 
     fetch(`${baseUrl}?${params.toString()}`, {
       headers: {
@@ -460,22 +471,29 @@ export default function Laporan() {
               </button>
             </div>
 
-            {/* FILTER */}
             <div className="laporan-filter">
               {/* PROGRAM KERJA */}
               <select
-                value={sumberDana}
-                onChange={(e) => setSumberDana(e.target.value)}
+                value={programKerja}
+                onChange={(e) => setProgramKerja(e.target.value)}
               >
                 <option value="">Semua Program</option>
 
-                {/* sementara dummy dulu */}
+                {/* dummy sementara */}
                 <option value="1">Program BKM</option>
                 <option value="2">Program Ekskul</option>
-                <option value="3">Program Workshop</option>
+                <option value="3">Program Ujian</option>
+                <option value="4">Program Tour</option>
+                <option value="5">Program Lomba</option>
               </select>
 
-              <button className="btn btn-primary" onClick={loadData}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setPage(1);
+                  loadData();
+                }}
+              >
                 Filter
               </button>
             </div>
