@@ -17,6 +17,7 @@ class FpdAnggaranController extends Controller
         try {
             $data = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
@@ -45,6 +46,7 @@ class FpdAnggaranController extends Controller
 
             $query = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
@@ -84,6 +86,7 @@ class FpdAnggaranController extends Controller
             $id = (int) $id;
             $data = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
@@ -275,6 +278,7 @@ class FpdAnggaranController extends Controller
                 'message' => 'Data berhasil diperbarui',
                 'data' => $data->load([
                     'programKerja',
+                    'validator.jabatan.refJabatan',
                     'programKerja.detailProgramKerja.sumberDana',
                     'detailFpd.detailProgram',
                     'detailFpd.detailProgram.sumberDana',

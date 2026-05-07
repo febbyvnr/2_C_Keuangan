@@ -105,9 +105,9 @@ export default function RKTPage({ setHasPending }) {
             valA = a.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
             valB = b.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
         } 
-        else if (sortConfig.key === "NOMINAL") {
-            valA = Number(a.NOMINAL || 0);
-            valB = Number(b.NOMINAL || 0);
+        else if (sortConfig.key === "TOTAL_PROGKER") {
+            valA = Number(a.TOTAL_PROGKER || 0);
+            valB = Number(b.TOTAL_PROGKER || 0);
         } 
         else {
             valA = a[sortConfig.key] ?? "";
@@ -292,8 +292,8 @@ export default function RKTPage({ setHasPending }) {
                                     <th onClick={() => handleSort("tahun_anggaran")}>
                                         Tahun <i className={getIcon("tahun_anggaran")}></i>
                                     </th>
-                                    <th onClick={() => handleSort("NOMINAL")}>
-                                        Anggaran <i className={getIcon("NOMINAL")}></i>
+                                    <th onClick={() => handleSort("TOTAL_PROGKER")}>
+                                        Anggaran <i className={getIcon("TOTAL_PROGKER")}></i>
                                     </th>
                                     <th onClick={() => handleSort("status")}>
                                         Status <i className={getIcon("status")}></i>
@@ -309,13 +309,13 @@ export default function RKTPage({ setHasPending }) {
                                             selected?.ID_PROGRAM_KERJA === item.ID_PROGRAM_KERJA
                                                 ? "active-row"
                                                 : ""
-                                        }
+                                        }z
                                     >
                                         <td>{item.ID_PROGRAM_KERJA}</td>
                                         <td>{item.PROGRAM_KERJA}</td>
                                         <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN}</td>
                                         <td>
-                                            Rp {Number(item.NOMINAL || 0).toLocaleString("id-ID")}
+                                            Rp {Number(item.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
                                         </td>
                                         <td>
                                             {(() => {
@@ -336,51 +336,51 @@ export default function RKTPage({ setHasPending }) {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="pagination-wrapper">
-                            <div className="pagination-info">
-                                Menampilkan {startData} - {endData} dari {totalData} data
-                            </div>
-                            <div className="pagination">
+                    </div>
+                    <div className="pagination-wrapper">
+                        <div className="pagination-info">
+                            Menampilkan {startData} - {endData} dari {totalData} data
+                        </div>
+                        <div className="pagination">
+                            <button
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                }
+                                disabled={currentPage === 1}
+                            >
+                                <i className="bi bi-chevron-left"></i>
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => (
                                 <button
-                                    className="page-btn"
-                                    onClick={() =>
-                                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                                    }
-                                    disabled={currentPage === 1}
+                                    key={i + 1}
+                                    onClick={() => changePage(i + 1)}
+                                    className={`page-btn ${
+                                        currentPage === i + 1 ? "active" : ""
+                                    }`}
                                 >
-                                    <i className="bi bi-chevron-left"></i>
+                                    {i + 1}
                                 </button>
-                                {Array.from({ length: totalPages }, (_, i) => (
-                                    <button
-                                        key={i + 1}
-                                        onClick={() => changePage(i + 1)}
-                                        className={`page-btn ${
-                                            currentPage === i + 1 ? "active" : ""
-                                        }`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
-                                <button
-                                    className="page-btn"
-                                    onClick={() =>
-                                        setCurrentPage((prev) =>
-                                            Math.min(prev + 1, totalPages)
-                                        )
-                                    }
-                                    disabled={currentPage === totalPages}
-                                >
-                                    <i className="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
-                            <div className="export-wrapper">
-                                <a href={`http://localhost:8000/api/rkt/export/excel/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-success custom-btn-excel">
-                                    <i className="bi bi-filetype-xlsx"></i> Export Excel
-                                </a>
-                                <a href={`http://localhost:8000/api/rkt/export/pdf/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-success custom-btn-pdf">
-                                    <i className="bi bi-filetype-pdf"></i> Export PDF
-                                </a>
-                            </div>
+                            ))}
+                            <button
+                                className="page-btn"
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages)
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <i className="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div className="export-wrapper">
+                            <a href={`http://localhost:8000/api/rkt/export/excel/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-success custom-btn-excel">
+                                <i className="bi bi-filetype-xlsx"></i> Export Excel
+                            </a>
+                            <a href={`http://localhost:8000/api/rkt/export/pdf/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-success custom-btn-pdf">
+                                <i className="bi bi-filetype-pdf"></i> Export PDF
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -416,8 +416,8 @@ export default function RKTPage({ setHasPending }) {
                                     <span>{selected.kegiatan?.DESKRIPSI_KEGIATAN}</span>
                                 </div>
                                 <div className="detail-row">
-                                    <span>Nominal</span>
-                                    <span>Rp {selected.NOMINAL}</span>
+                                    <span>Anggaran</span>
+                                    <span>Rp {selected.TOTAL_PROGKER}</span>
                                 </div>
                                 <div className="detail-row">
                                     <span>Sasaran</span>

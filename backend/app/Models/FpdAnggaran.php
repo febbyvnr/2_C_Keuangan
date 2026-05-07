@@ -44,4 +44,9 @@ class FpdAnggaran extends Model
     {
         return $this->belongsTo(MstProgramKerja::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
+
+    public function validator()
+    {
+        return $this->belongsTo(MstKaryawan::class, 'NIP_VALIDATOR_FPD', 'NIP_KARYAWAN');
+    }
 }

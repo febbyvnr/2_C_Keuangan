@@ -16,4 +16,9 @@ class TrJabatan extends Model
         'TGL_MULAI_MENJABAT',
         'TGL_AKHIR_MENJABAT'
     ];
+
+    public function refJabatan()
+    {
+        return $this->belongsTo(RefJabatanStr::class, 'ID_JABATAN', 'ID_JABATAN');
+    }
 }
