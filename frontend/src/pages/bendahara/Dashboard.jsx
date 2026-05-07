@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../api/api";
 import "../../styles/bendahara/Dashboard.css";
 
@@ -32,19 +32,18 @@ export default function Dashboard() {
 
   return (
     <main className="bendahara-dashboard-main">
-      {/* Hero Section */}
+      {/* Hero Section Sesuai Gambar 1 */}
       <section className="bendahara-hero">
-        <div>
-          <p className="bendahara-eyebrow">Bendahara Sekolah</p>
-          <h1>Manajemen Arus Kas</h1>
-          <p className="bendahara-hero-text">
-            Pantau ringkasan anggaran, realisasi, dan pembayaran siswa secara real-time.
-          </p>
-        </div>
-        <div className="bendahara-hero-date">
-           <i className="bi bi-calendar3 me-2"></i>
-           {new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-        </div>
+        <h1>Selamat Datang</h1>
+        <p className="bendahara-hero-subtitle">Bendahara Sekolah</p>
+        <p className="bendahara-hero-date">
+          {new Date().toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
       </section>
 
       {loading ? (
@@ -86,7 +85,10 @@ export default function Dashboard() {
                 <span>Target: 100%</span>
               </div>
               <div className="bendahara-progress-track">
-                <div className="bendahara-progress-fill" style={{ width: `${data?.persentase_serapan}%` }} />
+                <div
+                  className="bendahara-progress-fill"
+                  style={{ width: `${data?.persentase_serapan}%` }}
+                />
               </div>
               <p className="bendahara-panel-note">
                 Rasio antara realisasi belanja terhadap total pagu anggaran yang telah ditetapkan.
@@ -94,19 +96,19 @@ export default function Dashboard() {
             </div>
 
             <div className="bendahara-panel">
-               <div className="bendahara-panel-head">
-                  <h3>Status Keuangan</h3>
-               </div>
-               <div className="bendahara-status-summary">
-                  <div className="status-item">
-                    <i className="bi bi-arrow-up-circle-fill text-success"></i>
-                    <span>Arus Masuk Aman</span>
-                  </div>
-                  <div className="status-item">
-                    <i className="bi bi-check-circle-fill text-primary"></i>
-                    <span>Sinkronisasi Berhasil</span>
-                  </div>
-               </div>
+              <div className="bendahara-panel-head">
+                <h3>Status Keuangan</h3>
+              </div>
+              <div className="bendahara-status-summary">
+                <div className="status-item">
+                  <i className="bi bi-arrow-up-circle-fill text-success"></i>
+                  <span>Arus Masuk Aman</span>
+                </div>
+                <div className="status-item">
+                  <i className="bi bi-check-circle-fill text-primary"></i>
+                  <span>Sinkronisasi Berhasil</span>
+                </div>
+              </div>
             </div>
           </section>
         </>
