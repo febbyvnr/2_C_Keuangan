@@ -54,6 +54,7 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 import SidebarKepsek from "./components/SidebarKepsek";
 import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
+import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
@@ -188,6 +189,7 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<KepsekDashboard />} />
           <Route path="monitoring" element={<KepsekMonitoring />} />
+          <Route path="approval-center" element={<KepsekApproval />} />
         </Route>
 
         {/* WAKA */}
