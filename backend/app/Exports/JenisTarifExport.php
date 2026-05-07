@@ -70,8 +70,8 @@ class JenisTarifExport implements WithEvents
                 $sheet->setShowGridlines(false);
 
                 // WIDTH
-                $sheet->getColumnDimension('A')->setWidth(8);
-                $sheet->getColumnDimension('B')->setWidth(55);
+                $sheet->getColumnDimension('A')->setWidth(16);
+                $sheet->getColumnDimension('B')->setWidth(48);
 
                 // =====================
                 // DATA
@@ -126,23 +126,19 @@ class JenisTarifExport implements WithEvents
                 $nip = $this->nip ?: '-';
 
                 // TTD
-                $sheet->mergeCells("A" . ($footerRow + 2) . ":B" . ($footerRow + 2));
-                $sheet->mergeCells("A" . ($footerRow + 4) . ":B" . ($footerRow + 4));
-                $sheet->mergeCells("A" . ($footerRow + 8) . ":B" . ($footerRow + 8));
-                $sheet->mergeCells("A" . ($footerRow + 9) . ":B" . ($footerRow + 9));
+                $dateRow = $footerRow + 2;
+                $roleRow = $footerRow + 3;
+                $nameRow = $footerRow + 7;
+                $lineRow = $footerRow + 8;
+                $nipRow = $footerRow + 9;
 
-                $sheet->setCellValue("A" . ($footerRow + 2), $role . ',');
-                $sheet->setCellValue("A" . ($footerRow + 4), $nama);
-                $sheet->setCellValue("A" . ($footerRow + 8), '-------------------------');
-                $sheet->setCellValue("A" . ($footerRow + 9), 'NIP: ' . $nip);
+                $sheet->setCellValue("B$dateRow", 'Yogyakarta, ' . date('d F Y'));
+                $sheet->setCellValue("B$roleRow", $role . ',');
+                $sheet->setCellValue("B$nameRow", $nama);
+                $sheet->setCellValue("B$lineRow", '-------------------------');
+                $sheet->setCellValue("B$nipRow", 'NIP: ' . $nip);
 
-                $sheet->getStyle("A" . ($footerRow + 2) . ":A" . ($footerRow + 9))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $dateRow = $footerRow + 11;
-                $sheet->mergeCells("A$dateRow:B$dateRow");
-                $sheet->setCellValue("A$dateRow", 'Yogyakarta, ' . date('d F Y'));
-                $sheet->getStyle("A$dateRow")
+                $sheet->getStyle("B$dateRow:B$nipRow")
                     ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
             },

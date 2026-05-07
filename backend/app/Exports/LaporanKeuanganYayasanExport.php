@@ -42,29 +42,32 @@ class LaporanKeuanganYayasanExport implements WithEvents
                 $sheet->mergeCells('A3:E3');
                 $sheet->mergeCells('A4:E4');
 
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(17);
-                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(15);
-                $sheet->getStyle('A4')->getFont()->setSize(11);
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A4')->getFont()->setItalic(true)->setSize(11);
 
                 $sheet->getStyle('A2:A4')->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->getRowDimension(2)->setRowHeight(26);
-                $sheet->getRowDimension(3)->setRowHeight(24);
-                $sheet->getRowDimension(4)->setRowHeight(22);
+                $sheet->getRowDimension(2)->setRowHeight(24);
+                $sheet->getRowDimension(3)->setRowHeight(22);
+                $sheet->getRowDimension(4)->setRowHeight(20);
+                $sheet->getDefaultRowDimension()->setRowHeight(-1);
 
                 // HEADER TABEL
                 $headerRow = 6;
                 $sheet->setCellValue('A' . $headerRow, 'KODE AKUN');
                 $sheet->setCellValue('B' . $headerRow, 'NAMA AKUN');
-                $sheet->setCellValue('C' . $headerRow, 'PENERIMAAN (Rp)');
-                $sheet->setCellValue('D' . $headerRow, 'PENGELUARAN (Rp)');
-                $sheet->setCellValue('E' . $headerRow, 'SALDO (Rp)');
+                $sheet->setCellValue('C' . $headerRow, 'PENERIMAAN');
+                $sheet->setCellValue('D' . $headerRow, 'PENGELUARAN');
+                $sheet->setCellValue('E' . $headerRow, 'SALDO');
 
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->setBold(true);
+                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->setBold(true)->getColor()->setARGB('FF000000');
                 $sheet->getStyle("A$headerRow:E$headerRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFont()->getColor()->setARGB('FFFFFFFF');
-                $sheet->getStyle("A$headerRow:E$headerRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF2E75B6');
+                $sheet->getStyle("A$headerRow:E$headerRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getStyle("A$headerRow:E$headerRow")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("A$headerRow:E$headerRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+                $sheet->getRowDimension($headerRow)->setRowHeight(-1);
 
                 $sheet->setAutoFilter("A$headerRow:E$headerRow");
 
@@ -81,8 +84,11 @@ class LaporanKeuanganYayasanExport implements WithEvents
                     $sheet->setCellValue("D$row", $item->TOTAL_KELUAR);
                     $sheet->setCellValue("E$row", $item->TOTAL_MASUK - $item->TOTAL_KELUAR);
 
-                    // Format Angka
-                    $sheet->getStyle("C$row:E$row")->getNumberFormat()->setFormatCode('"Rp" #,##0');
+                    // Format Angka (0 => '-')
+                    $sheet->getStyle("C$row:E$row")->getNumberFormat()->setFormatCode('"Rp" #,##0;[Red]"Rp" -#,##0;"-"');
+                    $sheet->getStyle("A$row:E$row")->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                    $sheet->getStyle("A$row:E$row")->getAlignment()->setWrapText(true);
+                    $sheet->getRowDimension($row)->setRowHeight(-1);
                     
                     $totalMasuk += $item->TOTAL_MASUK;
                     $totalKeluar += $item->TOTAL_KELUAR;
@@ -96,12 +102,13 @@ class LaporanKeuanganYayasanExport implements WithEvents
                 $sheet->setCellValue("D$totalRow", $totalKeluar);
                 $sheet->setCellValue("E$totalRow", $totalMasuk - $totalKeluar);
                 
-                $sheet->getStyle("A$totalRow:E$totalRow")->getFont()->setBold(true);
+                $sheet->getStyle("A$totalRow:E$totalRow")->getFont()->setBold(true)->getColor()->setARGB('FF000000');
                 $sheet->getStyle("A$totalRow:E$totalRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFE699');
-                $sheet->getStyle("C$totalRow:E$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
+                $sheet->getStyle("C$totalRow:E$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0;[Red]"Rp" -#,##0;"-"');
 
                 // BORDER
                 $sheet->getStyle("A$headerRow:E" . ($row - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("A$headerRow:E" . ($row - 1))->getFont()->getColor()->setARGB('FF000000');
 
                 // Wrap nama akun agar tidak melebar di PDF.
                 if ($row > ($headerRow + 1)) {
@@ -110,25 +117,26 @@ class LaporanKeuanganYayasanExport implements WithEvents
                 }
 
                 // FOOTER
-                $footerRow = $totalRow + 4;
+                $footerRow = $totalRow + 3;
                 $role = $this->role ?: 'Bendahara';
                 $nama = $this->nama ?: '-';
                 $nip = $this->nip ?: '-';
 
-                $sheet->mergeCells("D" . ($footerRow + 1) . ":E" . ($footerRow + 1));
-                $sheet->mergeCells("D" . ($footerRow + 2) . ":E" . ($footerRow + 2));
-                $sheet->mergeCells("D" . ($footerRow + 4) . ":E" . ($footerRow + 4));
-                $sheet->mergeCells("D" . ($footerRow + 8) . ":E" . ($footerRow + 8));
-                $sheet->mergeCells("D" . ($footerRow + 9) . ":E" . ($footerRow + 9));
+                $sheet->setCellValue("E" . ($footerRow), 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("E" . ($footerRow))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                $sheet->setCellValue("D" . ($footerRow + 1), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->setCellValue("D" . ($footerRow + 2), $role . ',');
-                $sheet->setCellValue("D" . ($footerRow + 4), $nama);
-                $sheet->setCellValue("D" . ($footerRow + 8), '-------------------------');
-                $sheet->setCellValue("D" . ($footerRow + 9), 'NIP: ' . $nip);
+                $sheet->setCellValue("E" . ($footerRow + 1), $role . ',');
+                $sheet->getStyle("E" . ($footerRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                $sheet->getStyle("D" . ($footerRow + 1) . ":E" . ($footerRow + 9))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->setCellValue("E" . ($footerRow + 7), $nama);
+                $sheet->getStyle("E" . ($footerRow + 7))->getFont()->setBold(true);
+                $sheet->getStyle("E" . ($footerRow + 7))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                $sheet->setCellValue("E" . ($footerRow + 8), '-------------------------');
+                $sheet->getStyle("E" . ($footerRow + 8))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                $sheet->setCellValue("E" . ($footerRow + 9), 'NIP: ' . $nip);
+                $sheet->getStyle("E" . ($footerRow + 9))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 // PDF SETUP
                 $sheet->getPageSetup()->setOrientation(
@@ -149,23 +157,23 @@ class LaporanKeuanganYayasanExport implements WithEvents
                 
                 // Column Width
                 if ($isPdf) {
-                    $sheet->getColumnDimension('A')->setWidth(11);
-                    $sheet->getColumnDimension('B')->setWidth(27);
-                    $sheet->getColumnDimension('C')->setWidth(16);
-                    $sheet->getColumnDimension('D')->setWidth(16);
-                    $sheet->getColumnDimension('E')->setWidth(16);
                     $sheet->getStyle('A:E')->getFont()->setSize(9);
-                } else {
-                    $sheet->getColumnDimension('A')->setWidth(15);
-                    $sheet->getColumnDimension('B')->setWidth(35);
-                    $sheet->getColumnDimension('C')->setWidth(20);
-                    $sheet->getColumnDimension('D')->setWidth(20);
-                    $sheet->getColumnDimension('E')->setWidth(20);
                 }
+
+                $sheet->getColumnDimension('A')->setWidth(12);
+                $sheet->getColumnDimension('B')->setWidth(36);
+                $sheet->getColumnDimension('C')->setWidth(22);
+                $sheet->getColumnDimension('D')->setWidth(22);
+                $sheet->getColumnDimension('E')->setWidth(22);
 
                 $sheet->freezePane('A7');
             },
         ];
+    }
+
+    public function getData()
+    {
+        return $this->getDataKeuangan();
     }
     
     private function getDataKeuangan()
