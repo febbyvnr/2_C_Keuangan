@@ -114,37 +114,55 @@ export default function DashboardPM() {
         </div>
       </div>
 
-      {/* TABLE RINCIAN MUTU */}
-      <div className="pm-table">
+      {/* PROGRESS MONITORING MUTU */}
+      <div className="pm-progress-section">
         <div className="table-header">
-          <h3>Rincian Monitoring Mutu</h3>
+          <h3>Progress Monitoring Mutu</h3>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Kategori Mutu</th>
-              <th>Jumlah Program</th>
-            </tr>
-          </thead>
+        <div className="pm-progress-wrapper">
+          {dashboard.rincian_mutu && dashboard.rincian_mutu.length > 0 ? (
+            dashboard.rincian_mutu.map((item, index) => {
+              const percentage =
+                dashboard.total_rkt > 0
+                  ? Math.round((item.jumlah / dashboard.total_rkt) * 100)
+                  : 0;
 
-          <tbody>
-            {dashboard.rincian_mutu && dashboard.rincian_mutu.length > 0 ? (
-              dashboard.rincian_mutu.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.kategori}</td>
-                  <td>{item.jumlah}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="2" className="empty-data">
-                  Tidak ada data monitoring mutu
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              return (
+                <div className="progress-card" key={index}>
+                  <div className="progress-header">
+                    <h4>
+                      {item.kategori
+                        .toLowerCase()
+                        .replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </h4>
+
+                    <span className="progress-status">
+                      {percentage >= 100 ? "Selesai" : "Monitoring"}
+                    </span>
+                  </div>
+
+                  <p className="progress-text">
+                    Progress:
+                    <span className="progress-percent"> {percentage}%</span>
+                  </p>
+
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${percentage}%`,
+                        backgroundColor: "#EDA60F",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="empty-data">Tidak ada data monitoring mutu</div>
+          )}
+        </div>
       </div>
 
       {/* ANALISIS MONITORING */}

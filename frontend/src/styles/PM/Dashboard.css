@@ -143,15 +143,15 @@
 /* WARNA CARD */
 
 .card.success {
-  border-left-color: #16a34a;
+  border-left-color: #265f9c;
 }
 
 .card.warning {
-  border-left-color: #eda60f;
+  border-left-color: #265f9c;
 }
 
 .card.info {
-  border-left-color: #0284c7;
+  border-left-color: #265f9c;
 }
 
 /* isi card */
@@ -201,7 +201,7 @@
 .table-header h3 {
   margin: 0;
 
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 700;
 
   color: #1f2937;
@@ -374,4 +374,123 @@
   .card h3 {
     font-size: 26px;
   }
+}
+
+/* ========================= */
+/* PROGRESS MONITORING */
+/* ========================= */
+
+.pm-progress-section {
+  background: #ffffff;
+
+  border-radius: 14px;
+  padding: 12px 14px;
+
+  border: 1px solid #e5e7eb;
+
+  margin-bottom: 24px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.pm-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+/* CARD */
+
+.progress-card {
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  padding: 16px 18px;
+
+  border: 1px solid #edf2f7;
+  border-left: 4px solid #265f9c;
+
+  transition: all 0.2s ease;
+}
+
+.progress-card:hover {
+  transform: translateY(-1px);
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* HEADER */
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 10px;
+}
+
+.progress-header h4 {
+  margin: 0;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #1f2937;
+
+  letter-spacing: -0.2px;
+}
+
+/* BADGE */
+
+.progress-status {
+  background: #eff6ff;
+
+  color: #265f9c;
+
+  padding: 4px 10px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* TEXT */
+
+.progress-text {
+  margin-bottom: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #6b7280;
+}
+
+.progress-percent {
+  color: #eda60f !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* BAR */
+
+.progress-bar {
+  width: 100%;
+  height: 7px;
+
+  background: #e5e7eb;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+
+  border-radius: 999px;
+
+  transition: width 0.4s ease;
 }
