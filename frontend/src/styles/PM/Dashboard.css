@@ -494,3 +494,147 @@
 
   transition: width 0.4s ease;
 }
+
+/* ========================= */
+/* PERSENTASE MONITORING */
+/* ========================= */
+
+.pm-chart-section {
+  background: #ffffff;
+
+  border-radius: 14px;
+  padding: 18px 20px;
+
+  border: 1px solid #e5e7eb;
+
+  margin-bottom: 28px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* GRID */
+
+.pm-chart-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+}
+
+/* CARD */
+
+.chart-card {
+  background: #ffffff;
+
+  border-radius: 14px;
+
+  padding: 24px 20px;
+
+  border: 1px solid #edf2f7;
+
+  text-align: center;
+
+  transition: all 0.2s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+}
+
+/* CIRCLE */
+
+.chart-circle {
+  width: 110px;
+  height: 110px;
+
+  margin: 0 auto 16px auto;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* INNER WHITE */
+
+.chart-circle::before {
+  content: "";
+
+  position: absolute;
+
+  width: 78px;
+  height: 78px;
+
+  background: #ffffff;
+
+  border-radius: 50%;
+}
+
+/* TEXT PERCENT */
+
+.chart-circle span {
+  position: relative;
+
+  z-index: 2;
+
+  color: #eda60f;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ========================= */
+/* SEMUA WARNA LINGKARAN */
+/* ========================= */
+
+.success-chart {
+  background: conic-gradient(
+    #265f9c 0deg,
+    #265f9c 300deg,
+    #e5e7eb 300deg,
+    #e5e7eb 360deg
+  );
+}
+
+.warning-chart {
+  background: conic-gradient(
+    #265f9c 0deg,
+    #265f9c 260deg,
+    #e5e7eb 260deg,
+    #e5e7eb 360deg
+  );
+}
+
+.info-chart {
+  background: conic-gradient(#265f9c 0deg, #265f9c 360deg, #e5e7eb 360deg);
+}
+
+/* TITLE */
+
+.chart-card h4 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+
+@media (max-width: 1100px) {
+  .pm-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}

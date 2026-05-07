@@ -71,6 +71,18 @@ export default function DashboardPM() {
     );
   }
 
+  /* ========================= */
+  /* PERSENTASE */
+  /* ========================= */
+
+  const totalRkt = dashboard.total_rkt || 0;
+
+  const realisasiPercentage =
+    totalRkt > 0 ? Math.round((dashboard.realisasi / totalRkt) * 100) : 0;
+
+  const deviasiPercentage =
+    totalRkt > 0 ? Math.round((dashboard.deviasi / totalRkt) * 100) : 0;
+
   return (
     <div className="pm-container">
       {/* HEADER */}
@@ -95,21 +107,25 @@ export default function DashboardPM() {
       <div className="pm-kpi">
         <div className="card primary">
           <p>Total Program RKT</p>
+
           <h3>{dashboard.total_rkt}</h3>
         </div>
 
         <div className="card success">
           <p>Realisasi Evaluasi</p>
+
           <h3>{dashboard.realisasi}</h3>
         </div>
 
         <div className="card warning">
           <p>Total Deviasi</p>
+
           <h3>{dashboard.deviasi}</h3>
         </div>
 
         <div className="card info">
           <p>Persentase Capaian</p>
+
           <h3>{dashboard.persentase_capaian}%</h3>
         </div>
       </div>
@@ -124,8 +140,8 @@ export default function DashboardPM() {
           {dashboard.program_rkt && dashboard.program_rkt.length > 0 ? (
             dashboard.program_rkt.map((item, index) => {
               const percentage =
-                dashboard.total_rkt > 0
-                  ? Math.round((item.realisasi / dashboard.total_rkt) * 100)
+                totalRkt > 0
+                  ? Math.round((item.realisasi / totalRkt) * 100)
                   : 0;
 
               return (
@@ -139,8 +155,7 @@ export default function DashboardPM() {
                   </div>
 
                   <p className="progress-text">
-                    Progress:
-                    <span className="progress-percent"> {percentage}%</span>
+                    <span className="progress-percent">{percentage}%</span>
                   </p>
 
                   <div className="progress-bar">
@@ -158,6 +173,42 @@ export default function DashboardPM() {
           ) : (
             <div className="empty-data">Tidak ada data RKT</div>
           )}
+        </div>
+      </div>
+
+      {/* PERSENTASE MONITORING */}
+      <div className="pm-chart-section">
+        <div className="table-header">
+          <h3>Persentase Monitoring</h3>
+        </div>
+
+        <div className="pm-chart-grid">
+          {/* TOTAL PROGRAM RKT */}
+          <div className="chart-card">
+            <div className="chart-circle info-chart">
+              <span>100%</span>
+            </div>
+
+            <h4>Total Program RKT</h4>
+          </div>
+
+          {/* REALISASI */}
+          <div className="chart-card">
+            <div className="chart-circle success-chart">
+              <span>{realisasiPercentage}%</span>
+            </div>
+
+            <h4>Realisasi Evaluasi</h4>
+          </div>
+
+          {/* DEVIASI */}
+          <div className="chart-card">
+            <div className="chart-circle warning-chart">
+              <span>{deviasiPercentage}%</span>
+            </div>
+
+            <h4>Total Deviasi</h4>
+          </div>
         </div>
       </div>
 
