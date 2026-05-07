@@ -100,6 +100,15 @@ export default function SidebarBendahara() {
                 <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
             )}
 
+            {!isMobile && isCollapsed && (
+                <button
+                    className="hamburger-btn outside"
+                    onClick={() => setIsCollapsed(false)}
+                >
+                    <i className="bi bi-list"></i>
+                </button>
+            )}
+
             <div className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${isCollapsed && !isMobile ? "collapsed" : ""}`}>
                 {(isMobile || !isCollapsed) && (
                     <>
@@ -147,23 +156,23 @@ export default function SidebarBendahara() {
                             </li>
 
                             <li className="nav-item" onMouseEnter={() => setOpenMaster(true)} onMouseLeave={() => !isMasterActive && setOpenMaster(false)}>
-                                <div className={`nav-link text-dark master-menu ${isMasterActive ? "sidebar-active" : ""}`}>
+                                <div className="nav-link text-dark master-menu">
                                     <i className="bi bi-database"></i>
                                     Master Data
                                     <i className={`bi bi-chevron-right ms-auto transition-transform ${openMaster ? 'rotate-90' : ''}`} style={{ fontSize: '10px' }}></i>
                                 </div>
                                 {openMaster && (
                                     <ul className="submenu">
-                                        <li><NavLink to="/bendahara/master/coa" className="nav-link">Master COA</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/kegiatan" className="nav-link">Master Kegiatan</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/tahun-anggaran" className="nav-link">Master Tahun Anggaran</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/tahun-akademik" className="nav-link">Master Tahun Akademik</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/sumber-dana" className="nav-link">Master Sumber Dana</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/ref-penerimaan" className="nav-link">Master Ref Penerimaan</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/ref-pm" className="nav-link">Master Ref PM</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/tarif" className="nav-link">Master Tarif</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/jenis-tarif" className="nav-link">Master Jenis Tarif</NavLink></li>
-                                        <li><NavLink to="/bendahara/master/jenis-pembayaran" className="nav-link">Master Jenis Pembayaran</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/coa" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master COA</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/kegiatan" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Kegiatan</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tahun-anggaran" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Tahun Anggaran</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tahun-akademik" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Tahun Akademik</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/sumber-dana" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Sumber Dana</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/ref-penerimaan" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Ref Penerimaan</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/ref-pm" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Ref PM</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/tarif" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Tarif</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/jenis-tarif" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Jenis Tarif</NavLink></li>
+                                        <li><NavLink to="/bendahara/master/jenis-pembayaran" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Master Jenis Pembayaran</NavLink></li>
                                     </ul>
                                 )}
                             </li>
@@ -233,3 +242,5 @@ const styles = {
         cursor: "pointer", fontWeight: "bold"
     }
 };
+
+

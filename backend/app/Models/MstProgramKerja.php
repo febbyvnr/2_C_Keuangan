@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstProgramKerja extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'mst_program_kerja';
     protected $primaryKey = 'ID_PROGRAM_KERJA';
     public $timestamps = false;
@@ -79,6 +82,11 @@ class MstProgramKerja extends Model
     public function trPm(): HasMany
     {
         return $this->hasMany(TrPm::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
+    }
+
+    public function Rka(): HasMany
+    {
+        return $this->hasMany(Rka::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
 
     public function scopeActive(Builder $query): Builder

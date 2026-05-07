@@ -1,32 +1,39 @@
 import { useState, useEffect } from "react";
 import "../../styles/bendahara/Laporan.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 export default function Laporan() {
   const tabs = ["Penerimaan", "Pengeluaran", "RKAS", "BKU", "Yayasan"];
 
   const [active, setActive] = useState("Penerimaan");
   const [data, setData] = useState([]);
-
-  // TAMBAHAN TOTAL
   const [total, setTotal] = useState(0);
-
-  // TAMBAHAN BKU TYPE
-  const [bkuType, setBkuType] = useState(0);
-  const bkuList = ["BKU", "Tunai", "Bank"];
 
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [sumberDana, setSumberDana] = useState("");
+  const [tahun, setTahun] = useState("");
+
+  const [programKerja, setProgramKerja] = useState("");
+
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const [bkuTab, setBkuTab] = useState("bku");
 
   const loadData = () => {
     let baseUrl = "";
 
     if (active === "Penerimaan") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
-    } else if (active === "BKU") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+      baseUrl = "http://localhost:8000/api/laporan/penerimaan";
     } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
+      baseUrl = "http://localhost:8000/api/laporan/pengeluaran";
+    } else if (active === "BKU") {
+      baseUrl = "http://localhost:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://localhost:8000/api/laporan/rkas";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://localhost:8000/api/laporan/yayasan";
     } else {
       setData([]);
       setTotal(0);
@@ -34,24 +41,65 @@ export default function Laporan() {
     }
 
     const params = new URLSearchParams();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
 
+    if (nip) {
+      params.append("nip", nip);
+    }
     if (start) params.append("start", start);
     if (end) params.append("end", end);
-    if (sumberDana) params.append("sumber_dana", sumberDana);
 
-    fetch(`${baseUrl}?${params.toString()}`)
-      .then((res) => res.json())
+    if (active === "Pengeluaran") {
+      if (programKerja) {
+        params.append("program_kerja", programKerja);
+      }
+    } else if (active === "Yayasan") {
+      if (tahun) {
+        params.append("tahun", tahun);
+      }
+    } else {
+      if (sumberDana) {
+        params.append("sumber_dana", sumberDana);
+      }
+    }
+
+    fetch(`${baseUrl}?${params.toString()}`, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
       .then((res) => {
-        if (active === "BKU") {
-          if (bkuType === 0) setData(res.bku || []);
-          if (bkuType === 1) setData(res.p1 || []);
-          if (bkuType === 2) setData(res.p2 || []);
-        } else {
-          setData(res.data || []);
-          setTotal(res.total || 0);
+        if (!res.ok) {
+          throw new Error("Unauthorized / Forbidden");
         }
+        return res.json();
       })
-      .catch(() => {
+      .then((res) => {
+        let selectedData = res.data || [];
+        let computedTotal = res.total || 0;
+
+        if (active === "BKU") {
+          if (bkuTab === "bku") {
+            selectedData = res.bku || [];
+          } else if (bkuTab === "p1") {
+            selectedData = res.tunai || [];
+          } else if (bkuTab === "p2") {
+            selectedData = res.bank || [];
+          }
+
+          computedTotal = selectedData.reduce((acc, item) => {
+            return acc + (item.saldo ?? item.jumlah ?? 0);
+          }, 0);
+        }
+
+        setData(selectedData);
+        setTotal(computedTotal);
+        setPage(1);
+      })
+      .catch((err) => {
+        console.error("ERROR:", err);
         setData([]);
         setTotal(0);
       });
@@ -62,20 +110,35 @@ export default function Laporan() {
 
     if (active === "Penerimaan") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+    } else if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas/export";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan/export-excel";
     }
 
     const params = new URLSearchParams({
       start,
       end,
       sumber_dana: sumberDana,
+      tahun: active === "Yayasan" ? tahun : "",
       type: "excel",
     });
 
-    if (baseUrl) window.open(`${baseUrl}?${params.toString()}`, "_blank");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
+
+    if (nip) {
+      params.append("nip", nip);
+    }
+
+    if (active === "BKU") {
+      params.append("jenis", bkuTab);
+    }
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
   const handleExportPDF = () => {
@@ -83,35 +146,58 @@ export default function Laporan() {
 
     if (active === "Penerimaan") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/penerimaan";
+    } else if (active === "Pengeluaran") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
-    } else if (active === "Pengeluaran") {
-      baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran"; // 🔥 TAMBAHAN
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas/export-pdf";
+    } else if (active === "Yayasan") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/yayasan/export-pdf";
     }
 
     const params = new URLSearchParams({
       start,
       end,
       sumber_dana: sumberDana,
+      tahun: active === "Yayasan" ? tahun : "",
       type: "pdf",
     });
 
-    if (baseUrl) window.open(`${baseUrl}?${params.toString()}`, "_blank");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const nip = user?.NIP_KARYAWAN;
+
+    if (nip) {
+      params.append("nip", nip);
+    }
+
+    if (active === "BKU") {
+      params.append("jenis", bkuTab);
+    }
+
+    window.open(`${baseUrl}?${params.toString()}`, "_blank");
   };
 
   useEffect(() => {
     loadData();
-  }, [active, bkuType]);
+  }, [active]);
 
-  const nextBku = () => {
-    setBkuType((prev) => (prev + 1) % bkuList.length);
-  };
+  useEffect(() => {
+    if (active === "BKU") {
+      loadData();
+    }
+  }, [bkuTab]);
 
-  const prevBku = () => {
-    setBkuType((prev) => (prev === 0 ? bkuList.length - 1 : prev - 1));
-  };
+  // =========================
+  // PAGINATION LOGIC
+  // =========================
+  const totalData = data.length;
+  const totalPage = Math.ceil(totalData / perPage);
 
-  const saldoAkhir = data.length > 0 ? data[data.length - 1].saldo || 0 : 0;
+  const startIndex = (page - 1) * perPage;
+  const endIndex = startIndex + perPage;
+
+  const currentData = data.slice(startIndex, endIndex);
 
   return (
     <div style={{ padding: "30px" }}>
@@ -129,103 +215,207 @@ export default function Laporan() {
         ))}
       </div>
 
-      <div className="laporan-content">
-        <div style={{ flex: 1 }}>
-          {active === "BKU" && (
-            <div className="bku-switch">
-              <button onClick={prevBku}>&lt;</button>
-              <span>{bkuList[bkuType]}</span>
-              <button onClick={nextBku}>&gt;</button>
+      {active === "Penerimaan" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
             </div>
-          )}
+
+            <div className="laporan-filter">
+              <input
+                type="date"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+              <input
+                type="date"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+              />
+
+              <select
+                value={sumberDana}
+                onChange={(e) => setSumberDana(e.target.value)}
+              >
+                <option value="">Semua Dana</option>
+                <option value="1">Pemerintah</option>
+                <option value="2">Komite</option>
+              </select>
+
+              <button className="btn btn-primary" onClick={loadData}>
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {/* ================= TABLE ================= */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Kategori</th>
+                  <th>Keterangan</th>
+                  <th>Nominal</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+                      <td>
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </td>
+                      <td>{item.jenis}</td>
+                      <td>{item.uraian}</td>
+                      <td className="nominal">
+                        Rp {Number(item.jumlah ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= FOOT AREA ================= */}
+          <div className="laporan-footer">
+            {/* kiri */}
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            {/* tengah */}
+            <div className="laporan-pagination">
+              {/* kiri */}
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {/* angka */}
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              {/* kanan */}
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            {/* kanan */}
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= BKU ================= */}
+      {active === "BKU" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions bku-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            {/* TAB BKU */}
+            <div className="bku-tab-container">
+              {[
+                { label: "BKU", value: "bku" },
+                { label: "Tunai", value: "p1" },
+                { label: "Bank", value: "p2" },
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  className={`bku-tab ${bkuTab === tab.value ? "active" : ""}`}
+                  onClick={() => setBkuTab(tab.value)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="laporan-table">
             <table>
               <thead>
                 <tr>
-                  {active === "BKU" ? (
-                    <>
-                      <th>No</th>
-                      <th>Tanggal</th>
-                      <th>Uraian</th>
-                      <th>Debit</th>
-                      <th>Kredit</th>
-                      <th>Saldo</th>
-                    </>
-                  ) : active === "Penerimaan" ? (
-                    <>
-                      <th>No</th>
-                      <th>Tanggal</th>
-                      <th>Jenis</th>
-                      <th>Uraian</th>
-                      <th>Jumlah</th>
-                    </>
-                  ) : active === "Pengeluaran" ? (
-                    <>
-                      <th>No</th>
-                      <th>Tanggal</th>
-                      <th>Program Kerja</th>
-                      <th>Sumber Dana</th>
-                      <th>Uraian</th>
-                      <th>Nominal</th>
-                    </>
-                  ) : (
-                    <>
-                      <th>-</th>
-                      <th>-</th>
-                      <th>-</th>
-                      <th>-</th>
-                      <th>-</th>
-                    </>
-                  )}
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Uraian</th>
+                  <th>Debit</th>
+                  <th>Kredit</th>
+                  <th>Saldo</th>
                 </tr>
               </thead>
 
               <tbody>
-                {data.length > 0 ? (
-                  data.map((item, i) => (
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
                     <tr key={i}>
-                      <td>{i + 1}</td>
-
+                      <td>{startIndex + i + 1}</td>
                       <td>
-                        {item.tanggal
-                          ? new Date(item.tanggal).toLocaleString("sv-SE")
-                          : "-"}
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </td>
+                      <td>{item.uraian}</td>
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.debit ?? 0).toLocaleString("id-ID")}
                       </td>
 
-                      {active === "BKU" ? (
-                        <>
-                          <td>{item.uraian}</td>
-                          <td>
-                            Rp {Number(item.debit).toLocaleString("id-ID")}
-                          </td>
-                          <td>
-                            Rp {Number(item.kredit).toLocaleString("id-ID")}
-                          </td>
-                          <td>
-                            Rp {Number(item.saldo).toLocaleString("id-ID")}
-                          </td>
-                        </>
-                      ) : active === "Pengeluaran" ? (
-                        <>
-                          <td>{item.program}</td>
-                          <td>{item.sumber_dana}</td>
-                          <td>{item.uraian}</td>
-                          <td>
-                            Rp{" "}
-                            {Number(item.nominal ?? 0).toLocaleString("id-ID")}
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td>{item.jenis || "-"}</td>
-                          <td>{item.uraian || item.keterangan}</td>
-                          <td>
-                            Rp{" "}
-                            {Number(item.jumlah ?? 0).toLocaleString("id-ID")}
-                          </td>
-                        </>
-                      )}
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.kredit ?? 0).toLocaleString("id-ID")}
+                      </td>
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.saldo ?? 0).toLocaleString("id-ID")}
+                      </td>
                     </tr>
                   ))
                 ) : (
@@ -238,84 +428,519 @@ export default function Laporan() {
               </tbody>
             </table>
           </div>
-        </div>
 
-        <div className="laporan-side">
-          {active === "Penerimaan" && (
-            <>
-              <div className="laporan-filter">
-                <div className="filter-range">
-                  <label>Periode</label>
-                  <div className="range-input">
-                    <input
-                      type="date"
-                      value={start}
-                      onChange={(e) => setStart(e.target.value)}
-                    />
-                    <span className="range-separator">—</span>
-                    <input
-                      type="date"
-                      value={end}
-                      onChange={(e) => setEnd(e.target.value)}
-                    />
-                  </div>
-                </div>
+          {/* FOOTER SAMA */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
 
-                <div className="filter-sumber">
-                  <label>Sumber Dana</label>
-                  <select
-                    value={sumberDana}
-                    onChange={(e) => setSumberDana(e.target.value)}
-                  >
-                    <option value="">Semua Dana</option>
-                    <option value="1">Pemerintah</option>
-                    <option value="2">Komite Sekolah</option>
-                    <option value="3">Pemerintah Daerah</option>
-                  </select>
-                </div>
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
 
-                <button className="btn btn-primary" onClick={loadData}>
-                  Filter
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
                 </button>
-              </div>
+              ))}
 
-              <div className="laporan-total-card">
-                <div className="laporan-total-title">Total Penerimaan</div>
-                <div className="laporan-total-value">
-                  Rp {Number(total).toLocaleString("id-ID")}
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= PENGELUARAN ================= */}
+      {active === "Pengeluaran" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div className="laporan-filter">
+              {/* PROGRAM KERJA */}
+              <select
+                value={programKerja}
+                onChange={(e) => setProgramKerja(e.target.value)}
+              >
+                <option value="">Semua Program</option>
+
+                {/* dummy sementara */}
+                <option value="1">Program BKM</option>
+                <option value="2">Program Ekskul</option>
+                <option value="3">Program Ujian</option>
+                <option value="4">Program Tour</option>
+                <option value="5">Program Lomba</option>
+              </select>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setPage(1);
+                  loadData();
+                }}
+              >
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {/* ================= TABLE ================= */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Program</th>
+                  <th>Uraian</th>
+                  <th>Nominal</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+
+                      <td>
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </td>
+
+                      <td>{item.program}</td>
+
+                      <td>{item.uraian}</td>
+
+                      <td className="nominal">
+                        Rp&nbsp;
+                        {Number(item.nominal ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= FOOTER ================= */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= RKAS ================= */}
+      {active === "RKAS" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div></div>
+          </div>
+
+          {/* TABLE */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Program</th>
+                  <th>Sumber Dana</th>
+                  <th>Anggaran</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+
+                      <td>{item.program_kerja}</td>
+
+                      <td>{item.sumber_dana}</td>
+
+                      <td className="nominal">
+                        Rp{" "}
+                        {Number(item.anggaran_disetujui ?? 0).toLocaleString(
+                          "id-ID",
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================= YAYASAN ================= */}
+      {active === "Yayasan" && (
+        <div className="yayasan-container">
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div className="laporan-filter">
+              {/* Filter Tahun dengan custom panah */}
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", position: "relative" }}>
+                <input
+                  type="text"
+                  value={tahun}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || /^\d+$/.test(value)) {
+                      setTahun(value);
+                    }
+                  }}
+                  placeholder="Pilih Tahun"
+                  style={{
+                    width: "130px",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid #ddd",
+                    fontSize: "14px",
+                    paddingRight: "30px"
+                  }}
+                />
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  gap: "2px"
+                }}>
+                  <button
+                    onClick={() => {
+                      const currentYear = parseInt(tahun) || new Date().getFullYear();
+                      const newYear = currentYear + 1;
+                      if (newYear <= 2100) setTahun(newYear);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#2c3e50",
+                      fontSize: "10px",
+                      padding: "0",
+                      lineHeight: "1",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => {
+                      const currentYear = parseInt(tahun) || new Date().getFullYear();
+                      const newYear = currentYear - 1;
+                      if (newYear >= 2000) setTahun(newYear);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#2c3e50",
+                      fontSize: "10px",
+                      padding: "0",
+                      lineHeight: "1",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    ▼
+                  </button>
                 </div>
               </div>
-            </>
-          )}
 
-          {active === "Pengeluaran" && (
-            <div className="laporan-total-card">
-              <div className="laporan-total-title">Total Pengeluaran</div>
-              <div className="laporan-total-value">
-                Rp {Number(total).toLocaleString("id-ID")}
-              </div>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setPage(1);
+                  loadData();
+                }}
+              >
+                Filter
+              </button>
             </div>
-          )}
+          </div>
 
-          {active === "BKU" && (
-            <div className="laporan-total-card">
-              <div className="laporan-total-title">Saldo Akhir</div>
-              <div className="laporan-total-value">
-                Rp {Number(saldoAkhir).toLocaleString("id-ID")}
-              </div>
+          {/* TABLE */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Kode Akun</th>
+                  <th>Nama Akun</th>
+                  <th>Penerimaan</th>
+                  <th>Pengeluaran</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => {
+                    const penerimaan = Number(item.TOTAL_MASUK ?? 0);
+                    const pengeluaran = Number(item.TOTAL_KELUAR ?? 0);
+                    const saldo = penerimaan - pengeluaran;
+                    
+                    return (
+                      <tr key={i}>
+                        <td>{startIndex + i + 1}</td>
+                        <td>{item.KODE_COA}</td>
+                        <td>{item.NAMA_COA}</td>
+                        
+                        <td className="nominal">
+                          {penerimaan === 0 
+                            ? "-" 
+                            : `Rp ${penerimaan.toLocaleString("id-ID")}`}
+                        </td>
+                        
+                        <td className="nominal">
+                          {pengeluaran === 0 
+                            ? "-" 
+                            : `Rp ${pengeluaran.toLocaleString("id-ID")}`}
+                        </td>
+                        
+                        <td className="nominal">
+                          {saldo === 0 
+                            ? "-" 
+                            : `Rp ${saldo.toLocaleString("id-ID")}`}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
             </div>
-          )}
 
-          <div className="laporan-actions">
-            <button className="btn-export excel" onClick={handleExportExcel}>
-              Excel
-            </button>
-            <button className="btn-export pdf" onClick={handleExportPDF}>
-              PDF
-            </button>
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>
+                {(() => {
+                  // Hitung total saldo dari semua data
+                  const totalSaldo = data.reduce((acc, item) => {
+                    const penerimaan = Number(item.TOTAL_MASUK ?? 0);
+                    const pengeluaran = Number(item.TOTAL_KELUAR ?? 0);
+                    return acc + (penerimaan - pengeluaran);
+                  }, 0);
+                  return `Rp ${totalSaldo.toLocaleString("id-ID")}`;
+                })()}
+              </strong>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ================= SISANYA ================= */}
+      {!["Penerimaan", "BKU", "Pengeluaran", "RKAS", "Yayasan"].includes(active) && (
+        <div className="laporan-content">
+          <div style={{ flex: 1 }}>
+            <div className="laporan-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{active}</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td style={{ textAlign: "center" }}>
+                      Fitur {active} belum dibuat
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

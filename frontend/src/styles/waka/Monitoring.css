@@ -541,3 +541,35 @@
     gap: 16px;
   }
 }
+
+@media (min-width: 769px) {
+  body:has(.mon-main) {
+    overflow: hidden;
+  }
+
+  .layout:has(.mon-main) {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+    align-items: stretch;
+  }
+
+  .layout:has(.mon-main) .content-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  .layout:has(.mon-main) .sidebar-container {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .mon-main {
+    min-height: 100vh;
+  }
+}

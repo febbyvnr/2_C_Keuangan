@@ -552,3 +552,31 @@
     font-size: 11px;
   }
 }
+
+@media (min-width: 769px) {
+  body:has(.sp-shell) {
+    overflow: hidden;
+  }
+
+  .sp-shell {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+    align-items: stretch;
+  }
+
+  .sp-shell .sidebar-container {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sp-main {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}

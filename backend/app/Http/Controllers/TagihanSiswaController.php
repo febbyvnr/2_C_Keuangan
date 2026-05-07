@@ -43,16 +43,16 @@ class TagihanSiswaController extends Controller
     {
         $query = TagihanSiswa::with([
             'siswa',
-            'jenisPembayaran',
-            'pembayaran',
+            'jenisTagihan',
+            'pembayaran.metodePembayaran',
         ]);
 
         if ($request->filled('ID_SISWA_TETAP')) {
             $query->where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP);
         }
 
-        if ($request->filled('ID_JENIS_PEMBAYARAN')) {
-            $query->where('ID_JENIS_PEMBAYARAN', $request->ID_JENIS_PEMBAYARAN);
+        if ($request->filled('ID_JENIS_TAGIHAN')) {
+            $query->where('ID_JENIS_TAGIHAN', $request->ID_JENIS_TAGIHAN);
         }
 
         if ($request->filled('BULAN_TAGIHAN_SISWA')) {
@@ -72,7 +72,7 @@ class TagihanSiswaController extends Controller
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                    ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -129,7 +129,7 @@ class TagihanSiswaController extends Controller
         try {
             $this->validateDuplicate(
                 $validated['ID_SISWA_TETAP'],
-                $validated['ID_JENIS_PEMBAYARAN'],
+                $validated['ID_JENIS_TAGIHAN'],
                 $validated['BULAN_TAGIHAN_SISWA'],
                 $validated['TAHUN_TAGIHAN_SISWA']
             );
@@ -139,7 +139,7 @@ class TagihanSiswaController extends Controller
             $tagihan = TagihanSiswa::create([
                 'ID_TAGIHAN_SISWA' => $nextId,
                 'ID_SISWA_TETAP' => $validated['ID_SISWA_TETAP'],
-                'ID_JENIS_PEMBAYARAN' => $validated['ID_JENIS_PEMBAYARAN'],
+                'ID_JENIS_TAGIHAN' => $validated['ID_JENIS_TAGIHAN'],
                 'BULAN_TAGIHAN_SISWA' => $validated['BULAN_TAGIHAN_SISWA'],
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
@@ -147,7 +147,7 @@ class TagihanSiswaController extends Controller
                 'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
-            $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
+            $tagihan->load(['siswa', 'jenisTagihan', 'pembayaran.metodePembayaran']);
 
             DB::commit();
 
@@ -176,8 +176,8 @@ class TagihanSiswaController extends Controller
     {
         $tagihan = TagihanSiswa::with([
             'siswa',
-            'jenisPembayaran',
-            'pembayaran',
+            'jenisTagihan',
+            'pembayaran.metodePembayaran',
         ])->find($id);
 
         if (!$tagihan) {
@@ -212,7 +212,7 @@ class TagihanSiswaController extends Controller
         try {
             $this->validateDuplicate(
                 $validated['ID_SISWA_TETAP'],
-                $validated['ID_JENIS_PEMBAYARAN'],
+                $validated['ID_JENIS_TAGIHAN'],
                 $validated['BULAN_TAGIHAN_SISWA'],
                 $validated['TAHUN_TAGIHAN_SISWA'],
                 $id
@@ -229,10 +229,10 @@ class TagihanSiswaController extends Controller
                     ], 422);
                 }
 
-                if ((int) $validated['ID_JENIS_PEMBAYARAN'] !== (int) $tagihan->ID_JENIS_PEMBAYARAN) {
+                if ((int) $validated['ID_JENIS_TAGIHAN'] !== (int) $tagihan->ID_JENIS_TAGIHAN) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Jenis pembayaran tidak boleh diubah jika sudah ada pembayaran.',
+                        'message' => 'Jenis tagihan tidak boleh diubah jika sudah ada pembayaran.',
                     ], 422);
                 }
 
@@ -254,7 +254,7 @@ class TagihanSiswaController extends Controller
 
             $tagihan->update([
                 'ID_SISWA_TETAP' => $validated['ID_SISWA_TETAP'],
-                'ID_JENIS_PEMBAYARAN' => $validated['ID_JENIS_PEMBAYARAN'],
+                'ID_JENIS_TAGIHAN' => $validated['ID_JENIS_TAGIHAN'],
                 'BULAN_TAGIHAN_SISWA' => $validated['BULAN_TAGIHAN_SISWA'],
                 'TAHUN_TAGIHAN_SISWA' => $validated['TAHUN_TAGIHAN_SISWA'],
                 'JUMLAH_TAGIHAN_SISWA' => $validated['JUMLAH_TAGIHAN_SISWA'],
@@ -262,7 +262,7 @@ class TagihanSiswaController extends Controller
                 'DUEDATETIME_TAGIHAN_SISWA' => $validated['DUEDATETIME_TAGIHAN_SISWA'],
             ]);
 
-            $tagihan->load(['siswa', 'jenisPembayaran', 'pembayaran']);
+            $tagihan->load(['siswa', 'jenisTagihan', 'pembayaran.metodePembayaran']);
 
             DB::commit();
 
@@ -321,10 +321,10 @@ class TagihanSiswaController extends Controller
                 'integer',
                 'exists:mst_siswa,ID_SISWA_TETAP',
             ],
-            'ID_JENIS_PEMBAYARAN' => [
+            'ID_JENIS_TAGIHAN' => [
                 'required',
                 'integer',
-                'exists:ref_jenis_pembayaran,ID_JENIS_PEMBAYARAN',
+                'exists:ref_jenis_tagihan,ID_JENIS_TAGIHAN',
             ],
             'BULAN_TAGIHAN_SISWA' => [
                 'required',
@@ -354,13 +354,13 @@ class TagihanSiswaController extends Controller
 
     private function validateDuplicate(
         int $idSiswa,
-        int $idJenisPembayaran,
+        int $idJenisTagihan,
         string $bulan,
         string $tahun,
         ?int $exceptId = null
     ): void {
         $query = TagihanSiswa::where('ID_SISWA_TETAP', $idSiswa)
-            ->where('ID_JENIS_PEMBAYARAN', $idJenisPembayaran)
+            ->where('ID_JENIS_TAGIHAN', $idJenisTagihan)
             ->where('BULAN_TAGIHAN_SISWA', $bulan)
             ->where('TAHUN_TAGIHAN_SISWA', $tahun);
 
@@ -370,7 +370,7 @@ class TagihanSiswaController extends Controller
 
         if ($query->exists()) {
             throw ValidationException::withMessages([
-                'duplicate' => ['Tagihan siswa untuk siswa, jenis pembayaran, bulan, dan tahun tersebut sudah ada.'],
+                'duplicate' => ['Tagihan siswa untuk siswa, jenis tagihan, bulan, dan tahun tersebut sudah ada.'],
             ]);
         }
     }
@@ -383,7 +383,7 @@ class TagihanSiswaController extends Controller
         $result = [
             'ID_TAGIHAN_SISWA' => (int) $tagihan->ID_TAGIHAN_SISWA,
             'ID_SISWA_TETAP' => (int) $tagihan->ID_SISWA_TETAP,
-            'ID_JENIS_PEMBAYARAN' => (int) $tagihan->ID_JENIS_PEMBAYARAN,
+            'ID_JENIS_TAGIHAN' => (int) $tagihan->ID_JENIS_TAGIHAN,
             'BULAN_TAGIHAN_SISWA' => $tagihan->BULAN_TAGIHAN_SISWA,
             'TAHUN_TAGIHAN_SISWA' => $tagihan->TAHUN_TAGIHAN_SISWA,
             'JUMLAH_TAGIHAN_SISWA' => (float) $tagihan->JUMLAH_TAGIHAN_SISWA,
@@ -397,9 +397,9 @@ class TagihanSiswaController extends Controller
                 'KODE_TA' => optional($tagihan->siswa)->KODE_TA,
             ],
 
-            'JENIS_PEMBAYARAN' => [
-                'ID_JENIS_PEMBAYARAN' => optional($tagihan->jenisPembayaran)->ID_JENIS_PEMBAYARAN,
-                'DESKRIPSI_JENIS_PEMBAYARAN' => optional($tagihan->jenisPembayaran)->DESKRIPSI_JENIS_PEMBAYARAN,
+            'JENIS_TAGIHAN' => [
+                'ID_JENIS_TAGIHAN' => optional($tagihan->jenisTagihan)->ID_JENIS_TAGIHAN,
+                'DESKRIPSI_JENIS_TAGIHAN' => optional($tagihan->jenisTagihan)->DESKRIPSI_JENIS_TAGIHAN,
             ],
 
             'TOTAL_PEMBAYARAN' => $totalPembayaran,
@@ -415,6 +415,10 @@ class TagihanSiswaController extends Controller
                     'TGL_BAYAR' => $pembayaran->TGL_BAYAR ?? null,
                     'JUMLAH_BAYAR' => isset($pembayaran->JUMLAH_BAYAR) ? (float) $pembayaran->JUMLAH_BAYAR : 0,
                     'NIP_VALIDATOR_PEMBAYARAN' => $pembayaran->NIP_VALIDATOR_PEMBAYARAN ?? null,
+                    'METODE_PEMBAYARAN' => [
+                        'ID_METODE_PEMBAYARAN' => optional($pembayaran->metodePembayaran)->ID_METODE_PEMBAYARAN,
+                        'DESKRIPSI_METODE_PEMBAYARAN' => optional($pembayaran->metodePembayaran)->DESKRIPSI_METODE_PEMBAYARAN,
+                    ],
                 ];
             })->values();
         }
@@ -422,22 +426,20 @@ class TagihanSiswaController extends Controller
         return $result;
     }
 
-    
-
     public function export(Request $request)
     {
         $query = TagihanSiswa::with([
             'siswa',
-            'jenisPembayaran',
-            'pembayaran',
+            'jenisTagihan',
+            'pembayaran.metodePembayaran',
         ]);
 
         if ($request->filled('ID_SISWA_TETAP')) {
             $query->where('ID_SISWA_TETAP', $request->ID_SISWA_TETAP);
         }
 
-        if ($request->filled('ID_JENIS_PEMBAYARAN')) {
-            $query->where('ID_JENIS_PEMBAYARAN', $request->ID_JENIS_PEMBAYARAN);
+        if ($request->filled('ID_JENIS_TAGIHAN')) {
+            $query->where('ID_JENIS_TAGIHAN', $request->ID_JENIS_TAGIHAN);
         }
 
         if ($request->filled('BULAN_TAGIHAN_SISWA')) {
@@ -457,7 +459,7 @@ class TagihanSiswaController extends Controller
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                    ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -492,7 +494,6 @@ class TagihanSiswaController extends Controller
         return response()->stream(function () use ($data) {
             $handle = fopen('php://output', 'w');
 
-            // BOM UTF-8 agar Excel membaca karakter dengan benar
             fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($handle, [
@@ -500,8 +501,8 @@ class TagihanSiswaController extends Controller
                 'ID_SISWA_TETAP',
                 'NAMA_SISWA_TETAP',
                 'NISN_SISWA',
-                'ID_JENIS_PEMBAYARAN',
-                'JENIS_PEMBAYARAN',
+                'ID_JENIS_TAGIHAN',
+                'JENIS_TAGIHAN',
                 'BULAN_TAGIHAN_SISWA',
                 'TAHUN_TAGIHAN_SISWA',
                 'JUMLAH_TAGIHAN_SISWA',
@@ -519,8 +520,8 @@ class TagihanSiswaController extends Controller
                     $item['ID_SISWA_TETAP'],
                     $item['SISWA']['NAMA_SISWA_TETAP'] ?? null,
                     $item['SISWA']['NISN_SISWA'] ?? null,
-                    $item['ID_JENIS_PEMBAYARAN'],
-                    $item['JENIS_PEMBAYARAN']['DESKRIPSI_JENIS_PEMBAYARAN'] ?? null,
+                    $item['ID_JENIS_TAGIHAN'],
+                    $item['JENIS_TAGIHAN']['DESKRIPSI_JENIS_TAGIHAN'] ?? null,
                     $item['BULAN_TAGIHAN_SISWA'],
                     $item['TAHUN_TAGIHAN_SISWA'],
                     $item['JUMLAH_TAGIHAN_SISWA'],
@@ -541,7 +542,7 @@ class TagihanSiswaController extends Controller
     {
         $filters = $request->only([
             'ID_SISWA_TETAP',
-            'ID_JENIS_PEMBAYARAN',
+            'ID_JENIS_TAGIHAN',
             'BULAN_TAGIHAN_SISWA',
             'TAHUN_TAGIHAN_SISWA',
             'STATUS_TAGIHAN_SISWA',
@@ -556,7 +557,7 @@ class TagihanSiswaController extends Controller
     {
         $filters = $request->only([
             'ID_SISWA_TETAP',
-            'ID_JENIS_PEMBAYARAN',
+            'ID_JENIS_TAGIHAN',
             'BULAN_TAGIHAN_SISWA',
             'TAHUN_TAGIHAN_SISWA',
             'STATUS_TAGIHAN_SISWA',
@@ -566,16 +567,16 @@ class TagihanSiswaController extends Controller
 
         $query = TagihanSiswa::with([
             'siswa',
-            'jenisPembayaran',
-            'pembayaran',
+            'jenisTagihan',
+            'pembayaran.metodePembayaran',
         ]);
 
         if (!empty($filters['ID_SISWA_TETAP'])) {
             $query->where('ID_SISWA_TETAP', $filters['ID_SISWA_TETAP']);
         }
 
-        if (!empty($filters['ID_JENIS_PEMBAYARAN'])) {
-            $query->where('ID_JENIS_PEMBAYARAN', $filters['ID_JENIS_PEMBAYARAN']);
+        if (!empty($filters['ID_JENIS_TAGIHAN'])) {
+            $query->where('ID_JENIS_TAGIHAN', $filters['ID_JENIS_TAGIHAN']);
         }
 
         if (!empty($filters['BULAN_TAGIHAN_SISWA'])) {
@@ -595,7 +596,7 @@ class TagihanSiswaController extends Controller
 
             $query->whereHas('siswa', function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
+                    ->orWhere('NISN_SISWA', 'like', '%' . $search . '%');
             });
         }
 
@@ -620,8 +621,29 @@ class TagihanSiswaController extends Controller
             }
         }
 
-        $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', compact('data'))
-            ->setPaper('a4', 'landscape');
+        $penandatangan = DB::table('mst_karyawan')
+            ->select(
+                'NAMA_LENGKAP_GELAR as nama',
+                'NIP_KARYAWAN as nip',
+                'JABATAN_FUNGSIONAL as jabatan'
+            )
+            ->where(function ($query) {
+                $query->where('JABATAN_FUNGSIONAL', 'like', '%Bendahara%')
+                    ->orWhere('JABATAN_FUNGSIONAL', 'like', '%Keuangan%');
+            })
+            ->orderByDesc('TANGGAL_MASUK')
+            ->first();
+
+        $roleTtd = 'Bendahara';
+        $namaTtd = $penandatangan->nama ?? '-';
+        $nipTtd = $penandatangan->nip ?? '-';
+        $pdf = Pdf::loadView('exports.tagihan_siswa_pdf', [
+            'data' => $data,
+            'periode' => $periode ?? '-',
+            'role' => $roleTtd,
+            'nama' => $namaTtd,
+            'nip_ttd' => $nipTtd,
+        ])->setPaper('a4', 'portrait');
 
         return $pdf->download('tagihan_siswa.pdf');
     }
@@ -693,8 +715,8 @@ class TagihanSiswaController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('NAMA_SISWA_TETAP', 'like', '%' . $search . '%')
-                ->orWhere('NISN_SISWA', 'like', '%' . $search . '%')
-                ->orWhere('ID_SISWA_TETAP', 'like', '%' . $search . '%');
+                    ->orWhere('NISN_SISWA', 'like', '%' . $search . '%')
+                    ->orWhere('ID_SISWA_TETAP', 'like', '%' . $search . '%');
             });
         }
 

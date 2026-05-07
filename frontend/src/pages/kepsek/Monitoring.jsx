@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import SidebarKepsek from "../../components/SidebarKepsek";
+// import SidebarKepsek from "../../components/SidebarKepsek";
 import { apiFetch } from "../../api/api";
 import "../../styles/kepsek/Monitoring.css";
 
@@ -152,7 +152,6 @@ export default function Monitoring() {
 
     return (
         <div className="kepsek-monitoring-shell">
-            <SidebarKepsek />
             <main className="kepsek-monitoring-main">
                 <header className="kepsek-monitoring-header">
                     <h1>Monitoring</h1>

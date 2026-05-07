@@ -44,10 +44,10 @@ export default function Verifikasi() {
                 valA = a.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
                 valB = b.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || "";
                 break;
-            case "jenis":
+            case "metode":
                 const order = { "Bank": 1, "Tunai": 2 };
-                valA = order[a.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN] || 99;
-                valB = order[b.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN] || 99;
+                valA = order[a.metode_pembayaran?.DESKRIPSI_METODE_PEMBAYARAN] || 99;
+                valB = order[b.metode_pembayaran?.DESKRIPSI_METODE_PEMBAYARAN] || 99;
                 break;
             case "bulan":
                 const bulanOrder = {
@@ -163,8 +163,8 @@ export default function Verifikasi() {
                                     <th onClick={() => handleSort("bulan")}>
                                         Bulan <i className={getIcon("bulan")}></i>
                                     </th>
-                                    <th onClick={() => handleSort("jenis")}>
-                                        Jenis <i className={getIcon("jenis")}></i>
+                                    <th onClick={() => handleSort("metode")}>
+                                        Metode <i className={getIcon("metode")}></i>
                                     </th>
                                     <th onClick={() => handleSort("tanggal")}>
                                         Tanggal <i className={getIcon("tanggal")}></i>
@@ -188,7 +188,7 @@ export default function Verifikasi() {
                                         <td>{item.siswa?.NAMA_SISWA_TETAP || '-'}</td>
                                         <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN || '-'}</td>
                                         <td>{item.tagihan?.BULAN_TAGIHAN_SISWA || "-"}</td>
-                                        <td>{item.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}</td>
+                                        <td>{item.metode_pembayaran?.DESKRIPSI_METODE_PEMBAYARAN || "-"}</td>
                                         <td>
                                             {new Date(item.TGL_BAYAR).toLocaleDateString("id-ID", {day: "numeric", month: "long", year: "numeric"})}
                                         </td>
@@ -266,8 +266,8 @@ export default function Verifikasi() {
                                 <span className="value">{selected.siswa?.NAMA_SISWA_TETAP || "-"}</span>
                             </div>
                             <div className="detail-row">
-                                <span className="label">Jenis</span>
-                                <span className="value">{selected.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN}</span>
+                                <span className="label">Metode Pembayaran</span>
+                                <span className="value">{selected.metode_pembayaran?.DESKRIPSI_METODE_PEMBAYARAN}</span>
                             </div>
                             <div className="detail-row">
                                 <span className="label">Tahun Anggaran</span>

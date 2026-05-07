@@ -9,26 +9,66 @@ use Illuminate\Validation\ValidationException;
 
 class RefSumberDanaController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = RefSumberDana::withCount(['dtlProgramKerja', 'trPenerimaan'])->get();
-            $data->map(function ($item) {
-                $item->is_used =
-                    ($item->dtl_program_kerja_count > 0 ||
-                    $item->tr_penerimaan_count > 0) ||
-                $item->children()->exists();
+            $search = trim((string) $request->query('search', ''));
+            $allData = RefSumberDana::query()
+                ->withCount([
+                    'children as has_child', 
+                    'dtlProgramKerja',
+                    'trPenerimaan'
+                ])
+                ->orderBy('REF_ID_REF_DANA', 'asc') 
+                ->orderBy('ID_REF_DANA', 'asc')
+                ->get();
+            $allData->map(function ($item) {
+                $item->is_used = ($item->dtl_program_kerja_count > 0 || 
+                                $item->tr_penerimaan_count > 0 || 
+                                $item->has_child > 0);
                 return $item;
             });
+            $formattedData = $this->generateHierarchy($allData);
+            if ($search !== '') {
+                $formattedData = collect($formattedData)->filter(function ($item) use ($search) {
+                    return str_contains(strtolower($item['DESKRIPSI_SUMBER_DANA']), strtolower($search)) ||
+                        str_contains((string)$item['nomor_urut'], $search);
+                })->values();
+            }
             return response()->json([
-                'data' => $data,
+                'success' => true,
+                'message' => count($formattedData) === 0 ? 'Data tidak ditemukan' : 'Data berhasil diambil',
+                'data' => $formattedData,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil data',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function generateHierarchy($nodes, $parentId = null, $prefix = "")
+    {
+        $result = [];
+        $index = 1;
+        $children = $nodes->where('REF_ID_REF_DANA', $parentId);
+        foreach ($children as $child) {
+            $currentNumber = $prefix ? $prefix . "." . $index : (string)$index;
+            $result[] = [
+                'ID_REF_DANA'           => $child->ID_REF_DANA,
+                'REF_ID_REF_DANA'       => $child->REF_ID_REF_DANA,
+                'DESKRIPSI_SUMBER_DANA' => $child->DESKRIPSI_SUMBER_DANA,
+                'nomor_urut'            => $currentNumber,
+                'has_child'             => $child->has_child > 0,
+                'is_used'               => $child->is_used,
+            ];
+            $subResults = $this->generateHierarchy($nodes, $child->ID_REF_DANA, $currentNumber);
+            $result = array_merge($result, $subResults);
+            $index++;
+        }
+        return $result;
     }
 
     public function search(Request $request): JsonResponse

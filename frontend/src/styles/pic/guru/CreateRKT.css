@@ -1,20 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+
 .create-rkt-shell {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
   min-height: 100vh;
   background: #f3f6fb;
   color: #1f2937;
+  overflow-x: hidden;
+}
+
+.create-rkt-shell > .sidebar-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 220px;
+  height: 100vh !important;
+  z-index: 20;
 }
 
 .create-rkt-main {
+  margin-left: 220px;
+  width: calc(100vw - 220px);
+  max-width: calc(100vw - 220px);
+  min-width: 0;
+  min-height: 100vh;
   padding: 28px 34px 40px;
   background: #f3f6fb;
+  overflow-x: hidden;
 }
 
 .create-rkt-card {
   width: 100%;
   max-width: none;
-  padding: 24px;
+  padding: 24px 26px;
   margin-bottom: 22px;
   background: #fff;
   border: 1px solid #dfe7f1;
@@ -24,6 +42,9 @@
 
 .create-rkt-card h2 {
   margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .create-rkt-card-head {
@@ -31,12 +52,13 @@
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .create-rkt-card-head p {
   margin: 10px 0 0;
-  color: #6b7280;
+  color: #64748b;
+  font-size: 16px;
 }
 
 .create-rkt-actions-top,
@@ -46,28 +68,28 @@
   flex-wrap: wrap;
 }
 
+.create-rkt-form {
+  width: 100%;
+}
+
 .create-rkt-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 16px 18px;
 }
 
 .create-rkt-master-grid {
   display: grid;
   grid-template-columns: 0.8fr 1.1fr 0.9fr 1.1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.create-rkt-field-pj input {
-  background: #f8fafc;
-  color: #475569;
-  cursor: not-allowed;
+  gap: 16px 18px;
+  margin-bottom: 18px;
 }
 
 .create-rkt-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .create-rkt-field-full {
@@ -75,8 +97,9 @@
 }
 
 .create-rkt-field span {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .create-rkt-field input,
@@ -86,7 +109,7 @@
   min-height: 48px;
   padding: 12px 14px;
   border: 1px solid #d5deea;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
   color: #111827;
   outline: none;
@@ -98,7 +121,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-
+  padding-right: 44px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
@@ -113,16 +136,22 @@
 .create-rkt-field input:focus,
 .create-rkt-field select:focus,
 .create-rkt-field textarea:focus {
-  border-color: #1f4e82;
-  box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+  border-color: #245a95;
+  box-shadow: 0 0 0 3px rgba(36, 90, 149, 0.12);
 }
 
 .create-rkt-field select:invalid {
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .create-rkt-field select option {
   color: #111827;
+}
+
+.create-rkt-field-pj input {
+  background: #f8fafc;
+  color: #475569;
+  cursor: not-allowed;
 }
 
 .create-rkt-date-input {
@@ -138,12 +167,12 @@
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 10px;
   background: #eef3ff;
-  color: #1f4e82;
+  color: #245a95;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -157,40 +186,46 @@
 
 .create-rkt-submit {
   justify-content: flex-end;
-  margin-top: 22px;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e9eef5;
 }
 
 .create-rkt-button {
-  min-height: 48px;
+  min-height: 44px;
   padding: 0 18px;
   border-radius: 12px;
   border: 1px solid transparent;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .create-rkt-button.primary {
-  background: #1f4e82;
+  background: #245a95;
   color: #fff;
 }
 
 .create-rkt-button.primary:hover {
-  background: #173e69;
+  background: #1f4d80;
 }
 
 .create-rkt-button.secondary {
-  background: #dbeafe;
-  color: #1f4e82;
+  background: #e8eff7;
+  color: #274160;
 }
 
 .create-rkt-button.secondary:hover {
-  background: #cfe2ff;
+  background: #dbe7f3;
 }
 
 .create-rkt-button.ghost {
   background: #fff;
-  color: #1f4e82;
+  color: #245a95;
   border-color: #cfdce8;
 }
 
@@ -231,40 +266,206 @@
 
 .create-rkt-hint {
   width: 100%;
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 13px;
   color: #64748b;
   text-align: right;
 }
 
-@media (max-width: 1080px) {
-  .create-rkt-shell {
-    grid-template-columns: 1fr;
+body:has(.sidebar-container.collapsed) .create-rkt-main {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (max-width: 1200px) {
+  .create-rkt-master-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .create-rkt-main {
+    padding: 24px;
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 1024px) {
+  .create-rkt-shell > .sidebar-container {
+    width: 200px;
+  }
+
   .create-rkt-main {
-    padding: 22px 16px 30px;
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    max-width: calc(100% - 200px);
+  }
+}
+
+@media (max-width: 768px) {
+  .create-rkt-shell {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .create-rkt-shell > .sidebar-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 220px !important;
+    height: 100vh !important;
+    z-index: 999 !important;
+    transition: left 0.3s ease;
+  }
+
+  .create-rkt-shell > .sidebar-container.active {
+    left: 0 !important;
+  }
+
+  .create-rkt-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px;
+    overflow-x: hidden;
   }
 
   .create-rkt-card {
     padding: 18px;
+    border-radius: 18px;
   }
 
   .create-rkt-card-head {
     flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
   }
 
+  .create-rkt-card h2 {
+    font-size: 22px;
+    padding-left: 58px;
+    line-height: 1.25;
+  }
+
+  .create-rkt-card-head p {
+    padding-left: 58px;
+    font-size: 14px;
+  }
+
+  .create-rkt-actions-top {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: auto;
+  }
+
+  .create-rkt-actions-top .create-rkt-button {
+    width: auto;
+    min-width: 120px;
+  }
+
+  .create-rkt-master-grid,
   .create-rkt-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .create-rkt-field span {
+    font-size: 14px;
+  }
+
+  .create-rkt-field input,
+  .create-rkt-field select,
+  .create-rkt-field textarea {
+    min-height: 46px;
+    font-size: 14px;
   }
 
   .create-rkt-submit {
-    flex-direction: column;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .create-rkt-submit .create-rkt-button {
+    width: auto;
+    min-width: 130px;
+  }
+
+  .create-rkt-submit .create-rkt-button.primary {
+    min-width: 150px;
   }
 
   .create-rkt-button {
+    min-height: 42px;
+    font-size: 14px;
+    border-radius: 12px;
+    padding: 0 14px;
+  }
+
+  .create-rkt-hint {
     width: 100%;
+    text-align: left;
+  }
+}
+@media (max-width: 480px) {
+  .create-rkt-main {
+    padding: 12px;
+  }
+
+  .create-rkt-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .create-rkt-card h2 {
+    font-size: 20px;
+  }
+
+  .create-rkt-actions-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .create-rkt-actions-top .create-rkt-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .create-rkt-field input,
+  .create-rkt-field select,
+  .create-rkt-field textarea {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .create-rkt-button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .create-rkt-submit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .create-rkt-submit .create-rkt-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .create-rkt-submit .create-rkt-button.primary {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .create-rkt-hint {
+    grid-column: 1 / -1;
+    width: 100%;
+    text-align: left;
+    font-size: 12px;
   }
 }

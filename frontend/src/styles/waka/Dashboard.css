@@ -1,7 +1,7 @@
 /* Layout Dasar */
 .dashboard-wrapper {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
   overflow: auto;
   background: #f4f6f9;
@@ -486,4 +486,81 @@
 .progress-status span {
   font-weight: 600;
   color: #265f9c;
+}
+
+@media (max-width: 768px) {
+  /* 1. SEMBUNYIKAN SIDEBAR TOTAL */
+  aside,
+  .sidebar {
+    position: fixed !important;
+    left: -100% !important;
+    top: 0;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: #fff !important;
+    transition: 0.3s ease-in-out !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  aside.active,
+  .sidebar.active {
+    left: 0 !important;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-wrapper {
+      flex-direction: row !important;
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    .waka-container {
+      flex: 1;
+      width: calc(100% - 240px);
+    }
+  }
+
+  .waka-container {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    padding: 16px !important;
+    flex: none !important;
+  }
+
+  .header-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px;
+    padding: 15px !important;
+    height: auto !important;
+  }
+
+  .welcome-left {
+    width: 100%;
+  }
+
+  .header-filter {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Overlay saat sidebar aktif */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9998;
+  }
 }

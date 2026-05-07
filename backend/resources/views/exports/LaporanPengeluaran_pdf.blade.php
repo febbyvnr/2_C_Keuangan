@@ -69,7 +69,7 @@
         }
 
         .ttd-garis {
-            margin-top: 50px;    
+            margin-top: 50px;   
         }
 
         .ttd-nip {
@@ -104,10 +104,10 @@
     <thead>
         <tr>
             <th>Tanggal</th>
-            <th>Program</th>
-            <th>Sumber Dana</th>
+            <th>Program Kerja</th>
+            <th>Indikator</th>
             <th>Uraian</th>
-            <th>Nominal</th>
+            <th>NOMINAL</th>
         </tr>
     </thead>
     <tbody>
@@ -115,41 +115,26 @@
         <tr>
             <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
             <td>{{ $row->program }}</td>
-            <td>{{ $row->sumber_dana }}</td>
+            <td>{{ $row->indikator }}</td>
             <td style="text-align:left;">{{ $row->uraian }}</td>
-            <td style="text-align:right;">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
+            <td>Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
         </tr>
         @endforeach
 
         <tr>
-            <td colspan="4"><b>TOTAL PENGELUARAN</b></td>
-            <td style="text-align:right;"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+            <td colspan="4"><b>TOTAL</b></td>
+            <td><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
-@php
-    \Carbon\Carbon::setLocale('id');
-
-    // Menentukan Role dan Nama secara dinamis
-    $role = $role ?? 'Bendahara';
-
-    if ($role === 'Kepala Sekolah') {
-        $nama = 'Drs. Budi Santoso';
-    } else {
-        $role = 'Bendahara';
-        $nama = 'Rina Putri, S.E.';
-    }
-
-    // Mengambil NIP dari Controller
-    $nip = $nip ?? '-';
-@endphp
-
 <div class="ttd-center">
-    <p class="ttd-role">{{ $role }},</p>
-    <p class="ttd-nama"><b>{{ $nama }}</b></p>
+    <p class="ttd-role">Bendahara,</p>
+
+    <p class="ttd-nama"><b>{{ $nama_ttd }}</b></p>
+
     <p class="ttd-garis">-------------------------</p>
-    <p class="ttd-nip">NIP: {{ $nip }}</p>
+    <p class="ttd-nip">NIP: {{ $nip_ttd }}</p>
 </div>
 
 <div class="tanggal-kanan">

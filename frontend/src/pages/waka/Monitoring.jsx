@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Monitoring.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
@@ -105,10 +104,8 @@ export default function MonitoringWaka() {
     const pctMarkerLeft = Math.min(Math.max(pctTerpakai, 6), 94);
 
 
-    return (
-        <div className="mon-shell">
-            <SidebarWaka />
-            <main className="mon-main">
+     return (
+        <main className="mon-main">
                 {/* Header */}
                 <div className="mon-topbar">
                     <div>
@@ -335,6 +332,5 @@ export default function MonitoringWaka() {
                     </div>
                 )}
             </main>
-        </div>
     );
 }

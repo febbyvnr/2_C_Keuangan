@@ -17,13 +17,15 @@ class RkasExport implements WithEvents
     protected $nip;
     protected $nama;
     protected $filters;
+    protected $filterText;
 
-    public function __construct($filters = [], $role = null, $nip = null, $nama = null)
+    public function __construct($filters = [], $role = null, $nip = null, $nama = null, $filterText = null)
     {
         $this->filters = $filters;
         $this->role = $role ?? (Auth::user()->role ?? 'Bendahara');
         $this->nip = $nip ?? (Auth::user()->nip ?? null);
-        $this->nama = $nama ?? (Auth::user()->name ?? '-');
+        $this->nama = $nama ?? '-';
+        $this->filterText = $filterText ?? 'Semua Data';
     }
 
     public function registerEvents(): array
@@ -32,55 +34,53 @@ class RkasExport implements WithEvents
             AfterSheet::class => function ($event) {
                 $sheet = $event->sheet;
 
-                // =====================
-                // TITLE
-                // =====================
-                $sheet->setCellValue('A1', 'SMK BOPKRI 2 YOGYAKARTA');
-                $sheet->setCellValue('A2', 'LAPORAN RKAS (RENCANA KERJA DAN ANGGARAN SEKOLAH)');
-                $sheet->setCellValue('A3', 'Berdasarkan RKA yang Disetujui');
+                // Set column widths to match PDF proportions
+                $sheet->getColumnDimension('A')->setWidth(6);        // Wider for NO
+                $sheet->getColumnDimension('B')->setWidth(22);       // Wider for Tahun Anggaran
+                $sheet->getColumnDimension('C')->setWidth(10.8);     // 12%
+                $sheet->getColumnDimension('D')->setWidth(20.7);     // 23%
+                $sheet->getColumnDimension('E')->setWidth(18);       // 20%
+                $sheet->getColumnDimension('F')->setWidth(18);       // Wider for TOTAL ANGGARAN
+                $sheet->getColumnDimension('G')->setWidth(16);       // Increased for Rp format
+                $sheet->getColumnDimension('H')->setWidth(9);        // 10%
 
-                $sheet->mergeCells('A1:H1');
+                $sheet->setCellValue('A2', 'SMK BOPKRI 2 YOGYAKARTA');
+                $sheet->setCellValue('A3', 'LAPORAN RKAS (RENCANA KERJA DAN ANGGARAN SEKOLAH)');
+                $sheet->setCellValue('A4', 'Berdasarkan RKA yang Disetujui');
+
                 $sheet->mergeCells('A2:H2');
                 $sheet->mergeCells('A3:H3');
+                $sheet->mergeCells('A4:H4');
 
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(17);
-                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(15);
-                $sheet->getStyle('A3')->getFont()->setSize(11)->setItalic(true);
+                $sheet->getStyle('A2:H4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
+                $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A4')->getFont()->setItalic(true)->setSize(11);
 
-                $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getRowDimension(1)->setRowHeight(26);
                 $sheet->getRowDimension(2)->setRowHeight(24);
                 $sheet->getRowDimension(3)->setRowHeight(22);
+                $sheet->getRowDimension(4)->setRowHeight(20);
+                $sheet->getDefaultRowDimension()->setRowHeight(-1);
 
-                // =====================
-                // FILTER INFO
-                // =====================
                 $filterRow = 5;
-                $filterText = '';
-                if (!empty($this->filters['ID_TA_ANGGARAN'])) {
-                    $filterText .= 'Tahun: ' . $this->filters['ID_TA_ANGGARAN'];
-                }
-                
-                if (!empty($this->filters['ID_REF_DANA'])) {
-                    if (!empty($this->filters['ID_TA_ANGGARAN'])) {
-                        $filterText .= ' | ';
-                    }
-                    $filterText .= 'Sumber Dana: ' . $this->filters['ID_REF_DANA'];
-                }
+                $filterText = $this->filterText ?? 'Semua Data';
 
                 if (!empty($filterText)) {
                     $sheet->setCellValue("A$filterRow", $filterText);
-                    $sheet->getStyle("A$filterRow")->getFont()->setItalic(true)->setSize(10);
                     $sheet->mergeCells("A$filterRow:H$filterRow");
+                    $sheet->getStyle("A$filterRow")->getFont()->setItalic(true)->setSize(10);
                 }
 
-                // =====================
-                // HEADER TABLE
-                // =====================
                 $headerRow = 7;
                 $headers = [
-                    'A' => 'NO', 'B' => 'TAHUN ANGGARAN', 'C' => 'UNIT', 'D' => 'PROGRAM KERJA',
-                    'E' => 'KEGIATAN', 'F' => 'SUMBER DANA', 'G' => 'ANGGARAN (Rp)', 'H' => 'KET',
+                    'A' => 'NO',
+                    'B' => 'TAHUN ANGGARAN',
+                    'C' => 'UNIT',
+                    'D' => 'PROGRAM KERJA',
+                    'E' => 'KEGIATAN',
+                    'F' => 'SUMBER DANA',
+                    'G' => 'ANGGARAN',
+                    'H' => 'KET',
                 ];
 
                 foreach ($headers as $col => $header) {
@@ -88,26 +88,16 @@ class RkasExport implements WithEvents
                 }
 
                 $headerStyle = $sheet->getStyle("A$headerRow:H$headerRow");
-                $headerStyle->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+                $headerStyle->getFont()->setBold(true)->getColor()->setARGB('FF000000');
                 $headerStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $headerStyle->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $headerStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF2E75B6');
+                $headerStyle->getAlignment()->setWrapText(true);
+                $headerStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
+                $sheet->getRowDimension($headerRow)->setRowHeight(-1);
 
                 $sheet->setAutoFilter("A$headerRow:H$headerRow");
 
-                // Column width
-                $sheet->getColumnDimension('A')->setWidth(6);
-                $sheet->getColumnDimension('B')->setWidth(15);
-                $sheet->getColumnDimension('C')->setWidth(18);
-                $sheet->getColumnDimension('D')->setWidth(30);
-                $sheet->getColumnDimension('E')->setWidth(22);
-                $sheet->getColumnDimension('F')->setWidth(22);
-                $sheet->getColumnDimension('G')->setWidth(18);
-                $sheet->getColumnDimension('H')->setWidth(12);
-
-                // =====================
-                // DATA
-                // =====================
                 $data = $this->getData();
                 $startData = $headerRow + 1;
                 $row = $startData;
@@ -125,8 +115,12 @@ class RkasExport implements WithEvents
                     $sheet->setCellValue("H$row", $item['keterangan'] ?? '');
 
                     $sheet->getStyle("A$row")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle("A$row")->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                    $sheet->getStyle("B$row:H$row")->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                    $sheet->getStyle("B$row:H$row")->getAlignment()->setWrapText(true);
+                    $sheet->getRowDimension($row)->setRowHeight(-1);
                     $sheet->getStyle("G$row")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode('#,##0');
+                    $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode('"Rp" #,##0');
 
                     $totalAnggaran += $item['anggaran_disetujui'];
                     $row++; $no++;
@@ -135,44 +129,55 @@ class RkasExport implements WithEvents
                 $endData = $row - 1;
                 if ($endData >= $startData) {
                     $sheet->getStyle("A$headerRow:H$endData")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $sheet->getStyle("A$headerRow:H$endData")->getFont()->getColor()->setARGB('FF000000');
                 }
 
-                // =====================
-                // TOTAL ROW
-                // =====================
                 $totalRow = $endData + 2;
                 $sheet->setCellValue("F$totalRow", 'TOTAL ANGGARAN');
                 $sheet->setCellValue("G$totalRow", $totalAnggaran);
                 $sheet->getStyle("F$totalRow:G$totalRow")->getFont()->setBold(true);
-                $sheet->getStyle("G$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
                 $sheet->getStyle("F$totalRow:G$totalRow")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFE699');
+                $sheet->getStyle("G$totalRow")->getNumberFormat()->setFormatCode('"Rp" #,##0');
 
-                // =====================
-                // FOOTER
-                // =====================
                 $footerRow = $totalRow + 3;
-                $role = $this->role ?: 'Bendahara';
+                $role = trim((string) ($this->role ?: 'Bendahara'));
                 $nama = $this->nama ?: '-';
                 $nip = $this->nip ?: '-';
+                $roleLabel = ucwords(strtolower($role));
 
-                $sheet->mergeCells("G" . ($footerRow + 1) . ":H" . ($footerRow + 1));
-                $sheet->mergeCells("G" . ($footerRow + 2) . ":H" . ($footerRow + 2));
-                $sheet->mergeCells("G" . ($footerRow + 4) . ":H" . ($footerRow + 4));
-                $sheet->mergeCells("G" . ($footerRow + 8) . ":H" . ($footerRow + 8));
-                $sheet->mergeCells("G" . ($footerRow + 9) . ":H" . ($footerRow + 9));
+                // TTD section - right aligned at column H (Keterangan column)
+                $ttdRow = $footerRow;
+                
+                // Date
+                $sheet->mergeCells("F" . $ttdRow . ":H" . $ttdRow);
+                $sheet->setCellValue("F" . $ttdRow, 'Yogyakarta, ' . date('d F Y'));
+                $sheet->getStyle("F" . $ttdRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("F" . $ttdRow)->getFont()->setSize(11);
+                
+                // Role/Jabatan (with spacing for vertical gap)
+                $ttdRow += 1;  // Tight spacing from date (keeps date visible)
+                $sheet->setCellValue("H" . $ttdRow, $roleLabel . ',');
+                $sheet->getStyle("H" . $ttdRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("H" . $ttdRow)->getFont()->setSize(11);
+                
+                // Name (bold) - add wider spacing before name for signature space
+                $ttdRow += 6;  // Wider space between jabatan and nama
+                $sheet->setCellValue("H" . $ttdRow, $nama);
+                $sheet->getStyle("H" . $ttdRow)->getFont()->setBold(true)->setSize(11);
+                $sheet->getStyle("H" . $ttdRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                
+                // Signature line (dashed)
+                $ttdRow += 1;
+                $sheet->setCellValue("H" . $ttdRow, str_repeat('-', 20));
+                $sheet->getStyle("H" . $ttdRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("H" . $ttdRow)->getFont()->setSize(10);
+                
+                // NIP
+                $ttdRow += 1;
+                $sheet->setCellValue("H" . $ttdRow, 'NIP: ' . $nip);
+                $sheet->getStyle("H" . $ttdRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("H" . $ttdRow)->getFont()->setSize(11);
 
-                $sheet->setCellValue("G" . ($footerRow + 1), 'Yogyakarta, ' . date('d F Y'));
-                $sheet->setCellValue("G" . ($footerRow + 2), $role . ',');
-                $sheet->setCellValue("G" . ($footerRow + 4), $nama);
-                $sheet->setCellValue("G" . ($footerRow + 8), '-------------------------');
-                $sheet->setCellValue("G" . ($footerRow + 9), 'NIP: ' . $nip);
-
-                $sheet->getStyle("G" . ($footerRow + 1) . ":H" . ($footerRow + 9))
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                // =====================
-                // PDF SETUP (Agar tidak terpotong)
-                // =====================
                 $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
                 $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
                 $sheet->getPageSetup()->setFitToWidth(1);
@@ -183,7 +188,7 @@ class RkasExport implements WithEvents
         ];
     }
 
-    private function getData(): array
+    public function getData(): array
     {
         $query = MstProgramKerja::query()
             ->with(['tahunAnggaran', 'unit', 'kegiatan', 'detailProgramKerja.sumberDana'])

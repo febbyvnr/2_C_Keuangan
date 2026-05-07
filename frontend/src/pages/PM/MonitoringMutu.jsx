@@ -109,51 +109,7 @@ export default function MonitoringMutu() {
     }, [rkt]);
 
     return (
-        <div className="pm-shell">
-            {/* Top Nav (placeholder for sidebar-less layout) */}
-            <div className="pm-topnav">
-                <div className="pm-topnav-brand">
-                    <div className="pm-topnav-logo">
-                        <i className="bi bi-shield-check" />
-                    </div>
-                    <div>
-                        <div className="pm-topnav-title">SIBOKU</div>
-                        <div className="pm-topnav-sub">Tim Penjaminan Mutu</div>
-                    </div>
-                </div>
-                <div className="pm-topnav-user">
-                    <div className="pm-topnav-avatar">PM</div>
-                    <div className="pm-topnav-info">
-                        <div className="pm-topnav-name">Tim PM</div>
-                        <div className="pm-topnav-role">Penjaminan Mutu</div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="pm-body">
-                {/* Sidebar mini */}
-                <aside className="pm-sidebar">
-                    <nav className="pm-sidenav">
-                        <a href="#" className="pm-sidenav-item active">
-                            <i className="bi bi-bar-chart-line" />
-                            <span>Monitoring Mutu</span>
-                        </a>
-                        <a href="#" className="pm-sidenav-item">
-                            <i className="bi bi-clipboard-data" />
-                            <span>Evaluasi RKT</span>
-                        </a>
-                        <a href="#" className="pm-sidenav-item">
-                            <i className="bi bi-file-earmark-check" />
-                            <span>Review Program</span>
-                        </a>
-                        <a href="#" className="pm-sidenav-item">
-                            <i className="bi bi-graph-up-arrow" />
-                            <span>Laporan Mutu</span>
-                        </a>
-                    </nav>
-                </aside>
-
-                <main className="pm-main">
+        <main className="pm-main">
                     <div className="pm-header">
                         <div>
                             <h1 className="pm-page-title">Monitoring Mutu</h1>
@@ -368,7 +324,5 @@ export default function MonitoringMutu() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
     );
 }

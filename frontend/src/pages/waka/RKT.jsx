@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "../../styles/waka/RKT.css";
-import SidebarWaka from "../../components/SidebarWaka";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
@@ -300,8 +299,8 @@ export default function WakaRKT() {
 
     return (
         <div className="waka-rkt-shell">
-            <SidebarWaka />
-
+            {/* <SidebarWaka /> */}
+            <></>
             <main className="waka-rkt-main">
                 <section className="waka-rkt-card">
                     <div className="waka-rkt-card-head">

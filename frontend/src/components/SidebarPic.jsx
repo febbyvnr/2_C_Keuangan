@@ -1,4 +1,4 @@
-import "../styles/pic/guru/SidebarPic.css";
+import "../styles/bendahara/SidebarBendahara.css";
 import logo from "../assets/logo.png";
 import profile from "../assets/user-profile.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -17,22 +17,22 @@ const MENU_ITEMS = [
   { label: "Page Evaluasi RKT", icon: "bi bi-clipboard2-pulse" },
 ];
 
-
 export default function SidebarPic() {
   const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-const userName = user.NAMA_KARYAWAN || "PIC Guru";
-const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
+  const userName = user.NAMA_KARYAWAN || "PIC Guru";
+  const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
+
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-      if (window.innerWidth > MOBILE_BREAKPOINT) {
-        setIsOpen(false);
-      }
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) setIsOpen(false);
     };
 
     window.addEventListener("resize", handleResize);
@@ -51,7 +51,7 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
         },
       });
     } catch (error) {
-      console.error("Gagal lapor logout ke backend:", error);
+      console.error("Logout gagal:", error);
     } finally {
       localStorage.clear();
       setShowLogoutConfirm(false);
@@ -64,9 +64,11 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
       {showLogoutConfirm && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalBox}>
-            <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>Konfirmasi Keluar</h4>
+            <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>
+              Konfirmasi Keluar
+            </h4>
             <p style={{ margin: "0 0 20px 0", color: "#666" }}>
-              Apakah Anda yakin ingin logout dari sistem?
+              Apakah Anda yakin ingin logout?
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
               <button onClick={() => setShowLogoutConfirm(false)} style={styles.btnTidak}>
@@ -84,23 +86,26 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
         <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
       )}
 
-      {(isCollapsed || isMobile) && !isOpen && (
+      {isMobile && !isOpen && (
         <button
           className="hamburger-btn floating-global"
-          onClick={() => {
-            if (isMobile) {
-              setIsOpen(true);
-            } else {
-              setIsCollapsed(false);
-            }
-          }}
+          onClick={() => setIsOpen(true)}
+        >
+          <i className="bi bi-list"></i>
+        </button>
+      )}
+
+      {!isMobile && isCollapsed && (
+        <button
+          className="hamburger-btn outside"
+          onClick={() => setIsCollapsed(false)}
         >
           <i className="bi bi-list"></i>
         </button>
       )}
 
       <div
-        className={`pic-sidebar-container ${isMobile && isOpen ? "active" : ""} ${
+        className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${
           isCollapsed && !isMobile ? "collapsed" : ""
         }`}
       >
@@ -111,19 +116,17 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
                 <div className="sidebar-logo">
                   <img src={logo} alt="logo" />
                 </div>
+
                 <div className="header-text">
                   <div className="sidebar-title">SIBOKU</div>
                   <div className="sidebar-subtitle">Ruang PIC Guru</div>
                 </div>
+
                 <button
                   className="hamburger-btn inside"
-                  onClick={() => {
-                    if (isMobile) {
-                      setIsOpen(false);
-                    } else {
-                      setIsCollapsed(true);
-                    }
-                  }}
+                  onClick={() =>
+                    isMobile ? setIsOpen(false) : setIsCollapsed(true)
+                  }
                 >
                   <i className="bi bi-list"></i>
                 </button>
@@ -134,49 +137,110 @@ const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
                   <img src={profile} alt="profile" />
                 </div>
                 <div className="user-info">
-                  <div className="user-role">{userName}</div>
-                  <div className="user-email">{userEmail}</div>
+                  <div className="user-role" style={{ fontWeight: "bold" }}>
+                    {userName}
+                  </div>
+                  <div className="user-email" style={{ fontSize: "11px" }}>
+                    {userEmail}
+                  </div>
                 </div>
               </div>
             </div>
 
             <ul className="nav flex-column sidebar-menu">
-              {MENU_ITEMS.map((item) => (
-                <li key={item.label} className="nav-item">
-                  {item.to ? (
-                    <NavLink
-                      to={item.to}
-                      end={item.end}
-                      className={({ isActive }) =>
-                        isActive ? "nav-link sidebar-active" : "nav-link text-dark"
-                      }
-                    >
-                      <i className={item.icon}></i>
-                      {item.label}
-                    </NavLink>
-                  ) : (
-                    <button
-                      type="button"
-                      className="nav-link text-dark"
-                      style={{
-                        width: "100%",
-                        opacity: 0.55,
-                        cursor: "default",
-                        background: "transparent",
-                        border: "none",
-                      }}
-                    >
-                      <i className={item.icon}></i>
-                      {item.label}
-                    </button>
-                  )}
-                </li>
-              ))}
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru"
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-columns-gap"></i>
+                  Dashboard
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/rkt"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-journal-check"></i>
+                  Page RKT
+                </NavLink>
+              </li>
+
+              
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/rka"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-calculator"></i>
+                  RKA
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/fpd"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-cash-coin"></i>
+                  Pengajuan Dana
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/lpj"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-file-earmark-text"></i>
+                  Page LPJ
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/evaluasi-rkt"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-clipboard2-pulse"></i>
+                  Evaluasi RKT
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/status-pengajuan"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-clipboard2-pulse"></i>
+                  Status Pengajuan
+                </NavLink>
+              </li>
             </ul>
 
             <div className="logout">
               <div className="logout-button">
-                <button className="btn-logout" onClick={() => setShowLogoutConfirm(true)}>
+                <button
+                  className="btn-logout"
+                  onClick={() => setShowLogoutConfirm(true)}
+                >
                   <i className="bi bi-box-arrow-right"></i>
                   <span>Logout</span>
                 </button>

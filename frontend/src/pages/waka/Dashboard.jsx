@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { HiMenu } from "react-icons/hi";
 import SidebarWaka from "../../components/SidebarWaka";
 import "../../styles/waka/Dashboard.css";
 import {
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [rkt, setRkt] = useState([]);
   const [rka, setRka] = useState([]);
   const [fpd, setFpd] = useState([]);
+  const [open, setOpen] = useState(false);
 
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
@@ -149,7 +151,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-wrapper">
-      <SidebarWaka />
+      {/* <div className={`sidebar ${open ? "active" : ""}`}>
+        <SidebarWaka />
+      </div> */}
 
       <main className="waka-container">
         <div className="header-card welcome-card">

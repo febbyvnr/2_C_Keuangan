@@ -13,7 +13,7 @@ export default function MasterRefPM() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({ 
         key: "ID_REF_PM", 
-        direction: "desc" 
+        direction: "asc" 
     });
     const [form, setForm] = useState({
         REF_ID_REF_PM: "",
@@ -21,15 +21,17 @@ export default function MasterRefPM() {
         DESKRIPSI_PM: ""
     });
 
-    const fetchData = async () => {
+    const fetchData = async (searchKeyword = "") => {
         try {
-            const res = await fetch("http://localhost:8000/api/ref-pm");
+            const url = searchKeyword 
+                ? `http://localhost:8000/api/ref-pm?search=${searchKeyword}`
+                : "http://localhost:8000/api/ref-pm";
+            const res = await fetch(url);
             const json = await res.json();
-            const result = json.data || []; 
-            setData(result);
-            setParentList(result);
+            setData(json.data || []);
+            setParentList(json.data || []);
         } catch (err) {
-            console.error(err);
+            console.error("Fetch error:", err);
         }
     };
 
@@ -59,20 +61,19 @@ export default function MasterRefPM() {
     useEffect(() => {
         const initData = async () => {
             setLoading(true);
-            try {
-                const res = await fetch("http://localhost:8000/api/ref-pm");
-                const json = await res.json();
-                const result = json.data || [];
-                setData(result);
-                setParentList(result);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+            await fetchData();
+            setLoading(false);
         };
         initData();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleChange = (e) => {
         setForm({
@@ -153,14 +154,6 @@ export default function MasterRefPM() {
             return 0;
         });
 
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const totalData = sortedData.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
-
     const changePage = (page) => {
         setCurrentPage(page);
     };
@@ -202,6 +195,89 @@ export default function MasterRefPM() {
             setConfirmDeleteId(null);
         }
     };
+    
+    const buildTree = (nodes) => {
+        const map = {};
+        const roots = [];
+        nodes.forEach(item => {
+            map[item.ID_REF_PM] = { ...item, children: [] };
+        });
+        nodes.forEach(item => {
+            const parentId = item.REF_ID_REF_PM;
+            const isParent = !parentId || parentId === 0 || parentId === "0";
+            if (!isParent) {
+                if (map[parentId]) {
+                    map[parentId].children.push(map[item.ID_REF_PM]);
+                } else {
+                    roots.push(map[item.ID_REF_PM]);
+                }
+            } else {
+                roots.push(map[item.ID_REF_PM]);
+            }
+        });
+        return roots;
+    };
+
+    const sortTree = (nodes) => {
+        return nodes
+            .sort((a, b) => {
+                const valA = isNaN(a[sortConfig.key]) ? (a[sortConfig.key] || "").toString().toLowerCase() : Number(a[sortConfig.key]);
+                const valB = isNaN(b[sortConfig.key]) ? (b[sortConfig.key] || "").toString().toLowerCase() : Number(b[sortConfig.key]);
+                
+                if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
+            })
+            .map(node => ({
+                ...node,
+                children: sortTree(node.children)
+            }));
+    };
+
+    const addNumbering = (nodes, prefix = "") => {
+        return nodes.map((node, index) => {
+            const number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const isLast = index === nodes.length - 1;
+            return {
+                ...node,
+                number,
+                isLast,
+                children: addNumbering(node.children, number)
+            };
+        });
+    };
+
+    const flattenTree = (nodes, level = 0, parentLines = []) => {
+        let result = [];
+        nodes.forEach(node => {
+            result.push({
+                ...node,
+                level,
+                parentLines: level === 0 ? [] : parentLines 
+            });
+            if (node.children.length > 0) {
+                result = result.concat(
+                    flattenTree(
+                        node.children,
+                        level + 1,
+                        level === 0 ? [] : [...parentLines, !node.isLast]
+                    )
+                );
+            }
+        });
+        return result;
+    };
+
+    const tree = sortTree(buildTree(data));
+    const numbered = addNumbering(tree);
+    const allFlatRows = flattenTree(numbered); 
+    const totalData = allFlatRows.length;
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentRows = allFlatRows.slice(indexOfFirst, indexOfLast);
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
 
     return (
         <div className="ref-pm-container">
@@ -222,14 +298,14 @@ export default function MasterRefPM() {
                                 setCurrentPage(1);
                             }}
                         />
-                        <button className="search-btn" onClick={() => { setCurrentPage(1); }}>
+                        <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(); }}>
                             Search
                         </button>
                     </div>
                     <button className="btn-primary" onClick={() => {
                         setIsEdit(false);
                         setEditId(null);
-                        setForm({ REF_ID_REF_PM: "", DESKRIPSI_PM: "" });
+                        setForm({ REF_ID_REF_PM: "", NAMA_PM: "", DESKRIPSI_PM: "" });
                         setShowModal(true);
                     }}>
                         Tambah Referensi PM
@@ -237,66 +313,69 @@ export default function MasterRefPM() {
                 </div>
             </div>
             <div className="ref-pm-table-wrapper">
-                <table className="ref-pm-table">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort("ID_REF_PM")}>
-                                ID <i className={getIcon("ID_REF_PM")}></i>
-                            </th>
-                            <th onClick={() => handleSort("REF_ID_REF_PM")}>
-                                REF ID <i className={getIcon("REF_ID_REF_PM")}></i>
-                            </th>
-                            <th onClick={() => handleSort("NAMA_PM")}>
-                                Nama PM <i className={getIcon("NAMA_PM")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_PM")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_PM")}></i>
-                            </th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Loading...
-                                </td>
-                            </tr>
-                        ) : currentData.length === 0 ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Tidak ada data
-                                </td>
-                            </tr>
-                        ) : (
-                            currentData.map((item) => (
-                                <tr key={item.ID_REF_PM}>
-                                    <td>{item.ID_REF_PM}</td>
-                                    <td>{item.REF_ID_REF_PM}</td>
-                                    <td>{item.NAMA_PM}</td>
-                                    <td>{item.DESKRIPSI_PM}</td>
-                                    <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
+                <div className="tree-list">
+                    {loading ? (
+                        <div className="text-center" style={{ padding: "20px" }}>Loading...</div>
+                    ) : currentRows.length === 0 ? (
+                        <div className="text-center" style={{ padding: "20px" }}>Tidak ada data</div>
+                    ) : (
+                        currentRows.map((item) => {
+                            const isLocked = !!item.NIP_VALIDATOR_PM;
+                            const hasChild = item.children && item.children.length > 0;
+                            const isUsed = item.is_used > 0;
+                            const disableEdit = isLocked;
+                            const disableDelete = isLocked || hasChild || isUsed;
+                            const getDeleteTooltip = () => {
+                                if (isLocked) return "Data sudah divalidasi, tidak bisa dihapus";
+                                if (hasChild) return "Data memiliki child, tidak bisa dihapus";
+                                if (isUsed) return "Data sedang digunakan";
+                                return "";
+                            };
+                            const getEditTooltip = () => {
+                                if (isLocked) return "Data sudah divalidasi, tidak bisa diedit";
+                                return "";
+                            };
+                            return (
+                                <div 
+                                    className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
+                                    key={item.ID_REF_PM}
+                                >
+                                    <div className="tree-left" style={{ paddingLeft: "10px" }}>
+                                        {item.parentLines.map((hasActiveLine, idx) => (
+                                            <div 
+                                                key={idx} 
+                                                className={`tree-line ${hasActiveLine ? "active" : ""}`} 
+                                            />
+                                        ))}
+                                        {item.level > 0 && (
+                                            <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
+                                        )}
+                                        <span className="tree-number">{item.nomor_urut}</span>
+                                        <span className="tree-text">{item.NAMA_PM} | {item.DESKRIPSI_PM}</span>
+                                    </div>
+                                    <div className="tree-actions">
+                                        <button 
+                                            className="btn-edit" 
+                                            disabled={disableEdit} 
+                                            title={getEditTooltip()} 
+                                            onClick={() => handleEdit(item)}
+                                        >
                                             <i className="bi bi-pencil"></i>
                                         </button>
                                         <button
                                             className="btn-delete"
-                                            disabled={item.is_used} 
-                                            title={
-                                                item.is_used
-                                                    ? "Data sudah digunakan di Transaksi PM atau memiliki child"
-                                                    : "Hapus Referensi PM"
-                                            }
-                                            onClick={() => handleDelete(item.ID_REF_PM)}
+                                            disabled={disableDelete}
+                                            title={getDeleteTooltip()}
+                                            onClick={() => setConfirmDeleteId(item.ID_REF_PM)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">
@@ -321,7 +400,14 @@ export default function MasterRefPM() {
                         <i className="bi bi-chevron-right"></i>
                     </button>
                 </div>
-                <div></div>
+                <div className="export-wrapper">
+                    <a href={`http://localhost:8000/api/ref-pm/export/excel?search=${search}`} className="btn-outline-success custom-btn">
+                        <i className="bi bi-filetype-xlsx"></i> Export Excel
+                    </a>
+                    <a href={`http://localhost:8000/api/ref-pm/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                        <i className="bi bi-file-earmark-pdf"></i> Export PDF
+                    </a>
+                </div>
             </div>
             {showModal && (
                 <div className="modal-overlay">

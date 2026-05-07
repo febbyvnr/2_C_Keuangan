@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EvaluasiRkt extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'tr_pm';
     protected $primaryKey = 'ID_PM';
     public $incrementing = false;

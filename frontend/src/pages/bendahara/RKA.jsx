@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "../../styles/bendahara/RKA.css";
-import { Plus, FileSpreadsheet, FileText, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -17,19 +17,15 @@ function formatDate(value) {
 }
 
 function getDetails(item) {
-  return item?.details || item?.detail_program_kerja || item?.detailProgramKerja || [];
+  return item ? [item] : [];
 }
 
 function getAnggaranRkt(item) {
-  return Number(item?.TOTAL_PROGKER || 0);
+  return Number(item?.rkt?.TOTAL_PROGKER || 0);
 }
 
 function getTotalRincian(item) {
-  const details = getDetails(item);
-
-  return details.reduce((total, detail) => {
-    return total + Number(detail.NOMINAL || 0);
-  }, 0);
+  return Number(item?.NOMINAL || 0);
 }
 
 function getStatusRka(item) {
@@ -67,6 +63,7 @@ export default function RKA() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [editingDetail, setEditingDetail] = useState(null);
+  const [openStatus, setOpenStatus] = useState(false);
 
   const [sumberDanaList, setSumberDanaList] = useState([]);
   const [sumberDanaKeyword, setSumberDanaKeyword] = useState("");
@@ -92,9 +89,9 @@ export default function RKA() {
             const status = getStatusRka(item).label;
             const matchSearch =
                 !keyword ||
-                String(item.PROGRAM_KERJA || "").toLowerCase().includes(keyword) ||
-                String(item.INDIKATOR || "").toLowerCase().includes(keyword) ||
-                String(item.SASARAN || "").toLowerCase().includes(keyword);
+                String(item.rkt?.PROGRAM_KERJA || "").toLowerCase().includes(keyword) ||
+                String(item.rkt?.INDIKATOR || "").toLowerCase().includes(keyword) ||
+                String(item.rkt?.SASARAN || "").toLowerCase().includes(keyword);
 
             const matchStatus = !statusFilter || status === statusFilter;
 
@@ -310,18 +307,34 @@ const handleSubmitDetail = async (e) => {
               </p>
             </div>
 
-            <div className="rka-header-actions">
-              <button className="btn-success-custom" onClick={handleExportExcel}>
-                <FileSpreadsheet size={16} />
-                    Export Excel
-              </button>
+           <div className="rka-header-actions">
+              <div className="export-wrapper">
+                <a
+                  href="http://127.0.0.1:8000/api/rka/export"
+                  className="btn btn-outline-success custom-btn"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <i className="bi bi-filetype-xlsx"></i>
+                  Export Excel
+                </a>
 
-              <button className="btn-warning-custom" onClick={handleExportPdf}>
-                <FileText size={16} />
-                    Export PDF
-              </button>
+                <a
+                  href="http://127.0.0.1:8000/api/rka/export/pdf"
+                  className="btn btn-outline-danger custom-btn"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <i className="bi bi-file-earmark-pdf"></i>
+                  Export PDF
+                </a>
+              </div>
 
-              <button className="btn-primary-custom" type="button" onClick={handleOpenDetailModal}>
+              <button
+                className="btn-primary-custom"
+                type="button"
+                onClick={handleOpenDetailModal}
+              >
                 <Plus size={16} />
                 Tambah Detail RKA
               </button>
@@ -340,7 +353,7 @@ const handleSubmitDetail = async (e) => {
                 />
               </div>
 
-              <div className="rka-input-group rka-status-filter">
+              {/* <div className="rka-input-group rka-status-filter">
                 <label>Status</label>
                 <select
                     value={statusFilter}
@@ -351,6 +364,41 @@ const handleSubmitDetail = async (e) => {
                     <option value="Sesuai Anggaran">Sesuai Anggaran</option>
                     <option value="Melebihi Anggaran">Melebihi Anggaran</option>
                 </select>
+              </div> */}
+              <div className="rka-input-group rka-status-filter">
+                <label>Status</label>
+
+                <div className="rka-custom-select">
+                  <button
+                    type="button"
+                    className={`rka-custom-select-btn ${!statusFilter ? "placeholder" : ""}`}
+                    onClick={() => setOpenStatus((prev) => !prev)}
+                  >
+                    {statusFilter || "Semua Status"}
+                  </button>
+
+                  {openStatus && (
+                    <div className="rka-custom-select-menu">
+                      {[
+                        "",
+                        "Belum Ada Rincian",
+                        "Sesuai Anggaran",
+                        "Melebihi Anggaran",
+                      ].map((status) => (
+                        <button
+                          type="button"
+                          key={status || "Semua Status"}
+                          onClick={() => {
+                            setStatusFilter(status);
+                            setOpenStatus(false);
+                          }}
+                        >
+                          {status || "Semua Status"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="rka-filter-actions">
@@ -375,9 +423,9 @@ const handleSubmitDetail = async (e) => {
                       <tr>
                         <th>No</th>
                         <th>Program Kerja</th>
-                        <th>Waktu</th>
-                        <th>Anggaran RKT</th>
+                        <th>Sumber Dana</th>
                         <th>Total Rincian</th>
+                        <th>Anggaran RKT</th>
                         <th>Selisih</th>
                         <th>Status</th>
                       </tr>
@@ -387,7 +435,6 @@ const handleSubmitDetail = async (e) => {
                       {filteredData.length > 0 ? (
                         filteredData.map((item, index) => {
                           const status = getStatusRka(item);
-
                           return (
                             <tr
                               key={item.ID_PROGRAM_KERJA}
@@ -399,30 +446,36 @@ const handleSubmitDetail = async (e) => {
                               onClick={() => setSelectedId(item.ID_PROGRAM_KERJA)}
                             >
                               <td>{index + 1}</td>
-
                               <td className="rka-program">
-                                {item.PROGRAM_KERJA || "-"}
+                                {item.rkt?.PROGRAM_KERJA || "-"}
                               </td>
-
                               <td>
-                                <div>{formatDate(item.WAKTU_AWAL)}</div>
-                                <div className="rka-date-sub">
-                                  s.d {formatDate(item.WAKTU_AKHIR)}
-                                </div>
+                                {getDetails(item).length > 0
+                                  ? getDetails(item)
+                                      .map(
+                                        (d) =>
+                                          d.DESKRIPSI_SUMBER_DANA ||
+                                          d.ref_dana?.DESKRIPSI_SUMBER_DANA
+                                      )
+                                      .filter(Boolean)
+                                      .join(", ")
+                                  : "-"}
                               </td>
-
-                              <td className="rka-amount">
-                                {formatRupiah(getAnggaranRkt(item))}
-                              </td>
-
                               <td className="rka-amount">
                                 {formatRupiah(getTotalRincian(item))}
                               </td>
-
-                              <td className={getSisaAnggaran(item) < 0 ? "rka-amount danger" : "rka-amount"}>
+                              <td className="rka-amount">
+                                {formatRupiah(getAnggaranRkt(item))}
+                              </td>
+                              <td
+                                className={
+                                  getSisaAnggaran(item) < 0
+                                    ? "rka-amount danger"
+                                    : "rka-amount"
+                                }
+                              >
                                 {formatRupiah(getSisaAnggaran(item))}
                               </td>
-
                               <td>
                                 <span className={status.className}>
                                   {status.label}
@@ -449,7 +502,7 @@ const handleSubmitDetail = async (e) => {
                 <>
                   <div className="rka-detail-header">
                     <h2 className="rka-detail-title">
-                      {selectedItem.PROGRAM_KERJA || "Detail RKA"}
+                      {selectedItem.rkt?.PROGRAM_KERJA || "Detail RKA"}
                     </h2>
                     <p className="rka-detail-subtitle">
                       Klik baris pada tabel untuk melihat detail RKA.
@@ -463,61 +516,51 @@ const handleSubmitDetail = async (e) => {
                   <div className="rka-detail-body">
                     <div className="rka-detail-grid">
                       <div className="rka-detail-item full">
-                        <span className="rka-detail-label">Indikator</span>
+                        <span className="rka-detail-label">Program Kerja</span>
                         <span className="rka-detail-value">
-                          {selectedItem.INDIKATOR || "-"}
+                          {selectedItem.rkt?.PROGRAM_KERJA || "-"}
                         </span>
                       </div>
-
+                      <div className="rka-detail-item full">
+                        <span className="rka-detail-label">Indikator</span>
+                        <span className="rka-detail-value">
+                          {selectedItem.rkt?.INDIKATOR || "-"}
+                        </span>
+                      </div>
                       <div className="rka-detail-item full">
                         <span className="rka-detail-label">Sasaran</span>
                         <span className="rka-detail-value">
-                          {selectedItem.SASARAN || "-"}
+                          {selectedItem.rkt?.SASARAN || "-"}
                         </span>
                       </div>
-
                       <div className="rka-detail-item">
                         <span className="rka-detail-label">Anggaran RKT</span>
                         <span className="rka-detail-value strong">
                           {formatRupiah(getAnggaranRkt(selectedItem))}
                         </span>
                       </div>
-
                       <div className="rka-detail-item">
                         <span className="rka-detail-label">Total Rincian</span>
                         <span className="rka-detail-value strong">
                           {formatRupiah(getTotalRincian(selectedItem))}
                         </span>
                       </div>
-
                       <div className="rka-detail-item">
-                        <span className="rka-detail-label">Selisih Anggaran</span>
-                            <span
-                                className={
-                                getSisaAnggaran(selectedItem) < 0
-                                    ? "rka-detail-value strong danger"
-                                    : "rka-detail-value strong"
-                                }
-                            >
-                             {formatRupiah(getSisaAnggaran(selectedItem))}
+                        <span className="rka-detail-label">Sisa Anggaran</span>
+                        <span
+                          className={
+                            getSisaAnggaran(selectedItem) < 0
+                              ? "rka-detail-value strong danger"
+                              : "rka-detail-value strong"
+                          }
+                        >
+                          {formatRupiah(getSisaAnggaran(selectedItem))}
                         </span>
                       </div>
-
                       <div className="rka-detail-item">
                         <span className="rka-detail-label">Jumlah Detail</span>
                         <span className="rka-detail-value">
                           {getDetails(selectedItem).length} item
-                        </span>
-                      </div>
-
-                      <div className="rka-detail-item">
-                        <span className="rka-detail-label">Disetujui Oleh</span>
-                        <span className="rka-detail-value">
-                          {selectedItem.NIP_VALIDATOR_PROGKER
-                            ? `${selectedItem.NIP_VALIDATOR_PROGKER} - ${
-                                selectedItem.NAMA_VALIDATOR || "Kepala Sekolah"
-                              }`
-                            : "Belum ada validator"}
                         </span>
                       </div>
                     </div>
@@ -579,7 +622,9 @@ const handleSubmitDetail = async (e) => {
                 </>
               ) : (
                 <div className="rka-detail-empty-state">
-                  <div className="rka-detail-empty-icon">💰</div>
+                  <div className="rka-detail-empty-icon">
+                    <i className="bi bi-receipt"></i>
+                  </div>
                   <p>Klik baris pada tabel untuk melihat detail RKA.</p>
                 </div>
               )}
@@ -592,12 +637,12 @@ const handleSubmitDetail = async (e) => {
             <div className="rka-modal-box">
             <div className="rka-modal-header">
                 <div>
-                <h3>Tambah Detail RKA</h3>
-                <p>{selectedItem?.PROGRAM_KERJA}</p>
-                <p>
-                    Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
-                    {formatRupiah(getTotalRincian(selectedItem))}
-                </p>
+                  <h3>Tambah Detail RKA</h3>
+                  <p>{selectedItem?.rkt?.PROGRAM_KERJA}</p>
+                  <p>
+                      Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
+                      {formatRupiah(getTotalRincian(selectedItem))}
+                  </p>
                 </div>
 
                 <button
@@ -606,7 +651,7 @@ const handleSubmitDetail = async (e) => {
                 onClick={() => setShowDetailModal(false)}
                 disabled={savingDetail}
                 >
-                ×
+                x
                 </button>
             </div>
 
@@ -615,19 +660,19 @@ const handleSubmitDetail = async (e) => {
                 <span>Sumber Dana</span>
 
                 <input
-                    type="text"
-                    value={sumberDanaKeyword}
-                    onChange={(e) => {
+                  type="text"
+                  value={detailForm.ID_REF_DANA ? sumberDanaKeyword : ""}
+                  onChange={(e) => {
                     setSumberDanaKeyword(e.target.value);
                     setShowSumberDanaDropdown(true);
                     setDetailForm((prev) => ({
-                        ...prev,
-                        ID_REF_DANA: "",
+                      ...prev,
+                      ID_REF_DANA: "",
                     }));
-                    }}
-                    onFocus={() => setShowSumberDanaDropdown(true)}
-                    placeholder="Cari sumber dana..."
-                    required
+                  }}
+                  onFocus={() => setShowSumberDanaDropdown(true)}
+                  placeholder="Cari sumber dana..."
+                  required
                 />
 
                 {showSumberDanaDropdown && (

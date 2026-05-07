@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SidebarPic from "../../../components/SidebarPic";
-import "../../../styles/pic/guru/SidebarPic.css";
+import "../../../styles/bendahara/SidebarBendahara.css";
 import "../../../styles/pic/guru/RKT.css";
-import { Plus, Download } from "lucide-react";
+import { Plus} from "lucide-react";
+
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -96,6 +97,8 @@ export default function RKT() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -127,6 +130,21 @@ export default function RKT() {
       return matchStatus && matchSearch;
     });
   }, [data, search, statusFilter]);
+
+  const totalFilteredData = filteredData.length;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalFilteredData / pagination.perPage)
+  );
+
+  const startIndex = (pagination.currentPage - 1) * pagination.perPage;
+  const endIndex = startIndex + pagination.perPage;
+
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  const showingStart = totalFilteredData === 0 ? 0 : startIndex + 1;
+  const showingEnd = Math.min(endIndex, totalFilteredData);
 
   const fetchRkt = async (customSearch = search, page = 1) => {
     try {
@@ -169,10 +187,10 @@ export default function RKT() {
 
       setData(rows);
       setPagination({
-        currentPage,
-        lastPage,
+        currentPage: page,
+        lastPage: Math.max(1, Math.ceil(rows.length / perPage)),
         perPage,
-        total,
+        total: rows.length,
       });
 
       setSelectedId((prev) => {
@@ -223,6 +241,24 @@ export default function RKT() {
     setSearch("");
     setStatusFilter("");
     fetchRkt("", 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleChangePage = (nextPage) => {
+    if (nextPage < 1 || nextPage > totalPages) return;
+
+    setPagination((current) => ({
+      ...current,
+      currentPage: nextPage,
+      lastPage: totalPages,
+      total: totalFilteredData,
+    }));
+
+    const nextStartIndex = (nextPage - 1) * pagination.perPage;
+    const nextItem = filteredData[nextStartIndex];
+
+    setSelectedId(nextItem?.ID_PROGRAM_KERJA || null);
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -286,6 +322,19 @@ export default function RKT() {
     return found ?? "-";
   };
 
+  const statusOptions = [
+    { value: "", label: "Semua Status" },
+    { value: "draft", label: "Draft" },
+    { value: "diajukan", label: "Diajukan" },
+    { value: "disetujui", label: "Disetujui" },
+    { value: "ditolak", label: "Ditolak" },
+    { value: "revisi", label: "Revisi" },
+  ];
+
+  const selectedStatusLabel =
+    statusOptions.find((option) => option.value === statusFilter)?.label ||
+    "Semua Status";
+
   return (
     <div className="rkt-shell">
       <SidebarPic />
@@ -299,8 +348,12 @@ export default function RKT() {
             </div>
 
             <div className="rkt-header-actions">
-              <button className="btn-warning-custom" onClick={handleExport}>
-                <Download size={16} />
+              <button
+                type="button"
+                className="rkt-export-btn rkt-export-excel"
+                onClick={handleExport}
+              >
+                <i className="bi bi-filetype-xlsx"></i>
                 Export Excel
               </button>
 
@@ -331,17 +384,38 @@ export default function RKT() {
 
               <div className="rkt-input-group rkt-filter-small">
                 <label>Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Semua Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="diajukan">Diajukan</option>
-                  <option value="disetujui">Disetujui</option>
-                  <option value="ditolak">Ditolak</option>
-                  <option value="revisi">Revisi</option>
-                </select>
+                  <div className="rkt-custom-select">
+                    <button
+                      type="button"
+                      className={`rkt-custom-select-btn ${
+                        !statusFilter ? "placeholder" : ""
+                      }`}
+                      onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                    >
+                      {selectedStatusLabel}
+                    </button>
+
+                    {statusDropdownOpen && (
+                      <div className="rkt-custom-select-menu">
+                        {statusOptions.map((option) => (
+                          <button
+                            key={option.value || "all"}
+                            type="button"
+                            onClick={() => {
+                              setStatusFilter(option.value);
+                              setStatusDropdownOpen(false);
+                              setPagination((current) => ({
+                                ...current,
+                                currentPage: 1,
+                              }));
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
               </div>
 
               <div className="rkt-filter-actions">
@@ -374,8 +448,8 @@ export default function RKT() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredData.length > 0 ? (
-                          filteredData.map((item, index) => {
+                        {paginatedData.length > 0 ? (
+                          paginatedData.map((item, index) => {
 
                             return (
                               <tr
@@ -429,21 +503,14 @@ export default function RKT() {
 
                   <div className="rkt-pagination">
                     <span className="rkt-pagination-info">
-                      Menampilkan{" "}
-                      {filteredData.length > 0 ? 1 : 0}
-                      {" - "}
-                      {filteredData.length}
-                      {" dari "}
-                      {data.length} data
+                      Menampilkan {showingStart} - {showingEnd} dari {totalFilteredData} data
                     </span>
 
                     <div className="rkt-pagination-actions">
                       <button
                         className="rkt-page-btn"
                         disabled={pagination.currentPage === 1}
-                        onClick={() =>
-                          fetchRkt(search, pagination.currentPage - 1)
-                        }
+                        onClick={() => handleChangePage(pagination.currentPage - 1)}
                       >
                         ‹
                       </button>
@@ -454,12 +521,8 @@ export default function RKT() {
 
                       <button
                         className="rkt-page-btn"
-                        disabled={
-                          pagination.currentPage === pagination.lastPage
-                        }
-                        onClick={() =>
-                          fetchRkt(search, pagination.currentPage + 1)
-                        }
+                        disabled={pagination.currentPage === totalPages}
+                        onClick={() => handleChangePage(pagination.currentPage + 1)}
                       >
                         ›
                       </button>
@@ -626,7 +689,7 @@ export default function RKT() {
                         </button>
 
                         <button className="btn-light-custom rkt-detail-btn" disabled>
-                          Menunggu Approval Kepala Sekolah
+                          Menunggu Approval
                         </button>
                       </>
                     )}
@@ -662,7 +725,7 @@ export default function RKT() {
                           disabled={!canSubmit}
                           onClick={() => handleAjukan(selectedItem.ID_PROGRAM_KERJA)}
                         >
-                          Ajukan RKT
+                          Ajukan
                         </button>
 
                         <button
@@ -678,7 +741,7 @@ export default function RKT() {
                 </>
               ) : (
                 <div className="rkt-detail-empty">
-                  <div className="rkt-detail-empty-icon">📋</div>
+                  <i className="bi bi-clipboard-check rkt-detail-empty-icon"></i>
                   <p>Klik baris pada tabel untuk melihat detail program kerja.</p>
                 </div>
               )}

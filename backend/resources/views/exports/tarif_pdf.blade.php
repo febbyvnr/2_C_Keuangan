@@ -52,13 +52,13 @@
         .col-nominal { width: 17%; text-align: right; }
         .total-row td { font-weight: bold; border-top: 2px solid #000; }
         
-        /* --- FOOTER PERSIS SS KE-2 --- */
+        /* --- FOOTER SESUAI TEMPLATE --- */
         .footer { 
             margin-top: 40px; 
             width: 100%; 
         }
         .signature-block {
-            text-align: center; /* Posisikan ke Tengah */
+            text-align: center; 
             width: 100%;
         }
         .nama-ttd {
@@ -67,10 +67,10 @@
             margin-top: 2px;
         }
         .signature-gap {
-            height: 80px; /* Jarak lega buat TTD basah */
+            height: 80px; /* Jarak buat TTD basah */
         }
         .dashed-line {
-            border-bottom: 1.5px dashed #000; /* Garis putus-putus sesuai SS */
+            border-bottom: 1.5px dashed #000; /* Garis putus-putus */
             width: 250px;
             margin: 0 auto 5px auto;
         }
@@ -141,18 +141,14 @@
     </table>
 
     <div class="footer">
-        <!-- Blok Tanda Tangan di Tengah -->
         <div class="signature-block">
             <p>Bendahara,</p>
             <p class="nama-ttd">Siti Aminah, S.E</p>
-            
-            <div class="signature-gap"></div> <!-- Space Kosong -->
-            
+            <div class="signature-gap"></div> 
             <div class="dashed-line"></div>
             <p>NIP. 19850505 201001 2 002</p>
         </div>
         
-        <!-- Tanggal di Kanan Bawah -->
         <div class="date-right">
             <p>Yogyakarta, {{ $tanggalCetak ?? date('d F Y') }}</p>
         </div>

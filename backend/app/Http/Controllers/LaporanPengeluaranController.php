@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\LaporanPengeluaranExport;
+use App\Exports\LaporanPengeluaranExport; 
+use Illuminate\Support\Facades\Auth; 
 
 class LaporanPengeluaranController extends Controller
 {
@@ -14,47 +15,92 @@ class LaporanPengeluaranController extends Controller
     {
         $start = $request->start;
         $end = $request->end;
-        $sumberDana = $request->sumber_dana;
         $type = $request->type;
 
-        $jabatan = DB::table('tr_jabatan as tj')
+        // 1. IDENTIFIKASI AKTOR (Untuk Izin Akses)
+        $nip_user = $request->nip ?? (Auth::check() ? Auth::user()->nip : null);
+        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        $dbRole = DB::table('tr_jabatan as tj')
             ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->where('tj.NIP_KARYAWAN', $nip_user)
             ->whereNull('tj.TGL_SELESAI_JABATAN')
-            ->select('tj.NIP_KARYAWAN', 'rj.DESKRIPSI_JABATAN')
-            ->first();
+            ->value('rj.DESKRIPSI_JABATAN');
 
-        $nip = $jabatan ? $jabatan->NIP_KARYAWAN : '-';
-        $role = $jabatan ? ucwords(strtolower($jabatan->DESKRIPSI_JABATAN)) : 'Bendahara';
+        $role = $dbRole ?? $authRole;
+        $role = strtolower(trim($role)); 
 
-        $query = DB::table('tr_pm as tp')
-            ->join('fpd_anggaran as fa', 'tp.ID_PROGRAM_KERJA', '=', 'fa.ID_PROGRAM_KERJA')
-            ->join('dtl_fpd as df', 'fa.ID_FPD', '=', 'df.ID_FPD')
-            ->join('dtl_program_kerja as dpk', 'fa.ID_PROGRAM_KERJA', '=', 'dpk.ID_PROGRAM_KERJA')
-            ->join('mst_program_kerja as mpk', 'dpk.ID_PROGRAM_KERJA', '=', 'mpk.ID_PROGRAM_KERJA')
-            ->join('ref_sumber_dana as rsd', 'dpk.ID_REF_DANA', '=', 'rsd.ID_REF_DANA')
-            ->select(
-                'tp.TGL_PM as tanggal', 
-                'mpk.PROGRAM_KERJA as program', 
-                'rsd.DESKRIPSI_SUMBER_DANA as sumber_dana', 
-                'tp.DESKRIPSI_TR_PM as uraian', 
-                DB::raw('(df.QTY * df.HARGA_SATUAN) as nominal')
-            );
-
-        if ($start && $end) $query->whereBetween('tp.TGL_PM', [$start, $end]);
-        if ($sumberDana) $query->where('dpk.ID_REF_DANA', $sumberDana);
-
-        $data = $query->orderBy('tp.TGL_PM', 'asc')->get();
-        $total = $data->sum('nominal');
-
-        if ($type === 'excel') {
-            return Excel::download(new LaporanPengeluaranExport($start, $end, $sumberDana, $role, $nip), 'Laporan_Pengeluaran.xlsx');
-        } 
-        
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('exports.LaporanPengeluaran_pdf', compact('data', 'total', 'start', 'end', 'role', 'nip'));
-            return $pdf->download('Laporan_Pengeluaran.pdf');
+        if (!in_array($role, ['bendahara', 'kepala sekolah'])) {
+            return response()->json([
+                'message' => 'Role tidak diizinkan generate laporan pengeluaran'
+            ], 403);
         }
 
-        return response()->json(['message' => 'Format tidak valid.'], 400);
+        $ttd = DB::table('tr_jabatan as tj')
+            ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+            ->join('mst_karyawan as mk', 'tj.NIP_KARYAWAN', '=', 'mk.NIP_KARYAWAN')
+            ->select(
+                'rj.DESKRIPSI_JABATAN as jabatan',
+                'mk.NAMA_LENGKAP_GELAR as nama',
+                'mk.NIP_KARYAWAN as nip'
+            )
+            ->whereNull('tj.TGL_SELESAI_JABATAN')
+            ->where('rj.DESKRIPSI_JABATAN', 'LIKE', '%Bendahara%') 
+            ->first();
+
+        $nama_ttd = $ttd->nama ?? '-';
+        $nip_ttd = $ttd->nip ?? '-';
+
+        $query = DB::table('TR_PM as p')
+            ->join('MST_PROGRAM_KERJA as mst', 'p.ID_PROGRAM_KERJA', '=', 'mst.ID_PROGRAM_KERJA')
+            ->join('DTL_PROGRAM_KERJA as dtl', 'p.ID_PROGRAM_KERJA', '=', 'dtl.ID_PROGRAM_KERJA')
+            ->select(
+                'p.TGL_PM as tanggal',
+                'mst.PROGRAM_KERJA as program',
+                'mst.INDIKATOR as indikator',
+                'p.DESKRIPSI_TR_PM as uraian',
+                'dtl.NOMINAL as nominal',
+                'dtl.VOLUME',
+                'dtl.SATUAN',
+                'p.NIP_VALIDATOR_PM as validator'
+            )
+            ->where('mst.IS_DELETE', 0); 
+
+        if ($start && $end) {
+            $query->whereBetween('p.TGL_PM', [$start, $end]);
+        }
+
+        $data = $query->get();
+        $total = $data->sum('nominal');
+
+        // 5. HANDLING EXCEL
+        if ($type == 'excel') {
+            return Excel::download(
+                new LaporanPengeluaranExport($start, $end, null, $role, $nip_user, $nama_ttd, $nip_ttd), 
+                'Laporan_Pengeluaran_RKT.xlsx'
+            );
+        }
+
+        // 6. HANDLING PDF
+        if (strtolower(trim($type)) === 'pdf') {
+            $pdf = Pdf::loadView(
+                'exports.LaporanPengeluaran_pdf', 
+                compact('data', 'total', 'start', 'end', 'role', 'nama_ttd', 'nip_ttd') 
+            );
+
+            return $pdf->download('Laporan_Pengeluaran_RKT.pdf');
+        }
+
+        // 7. DEFAULT JSON (Untuk Dashboard)
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+            'total' => $total,
+            'role_akses' => $role,
+            'info_ttd' => [
+                'nama' => $nama_ttd,
+                'nip' => $nip_ttd
+            ]
+        ]);
     }
 }

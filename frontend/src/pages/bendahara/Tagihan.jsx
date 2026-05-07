@@ -27,8 +27,7 @@ function Tagihan() {
 
   const [tagihanList, setTagihanList] = useState([]);
   const [siswaOptions, setSiswaOptions] = useState([]);
-  const [jenisPembayaranOptions, setJenisPembayaranOptions] = useState([]);
-
+  const [jenisTagihanOptions, setJenisTagihanOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -40,7 +39,7 @@ function Tagihan() {
 
   const initialForm = {
     ID_SISWA_TETAP: "",
-    ID_JENIS_PEMBAYARAN: "",
+    ID_JENIS_TAGIHAN: "",
     BULAN_TAGIHAN_SISWA: "",
     TAHUN_TAGIHAN_SISWA: "",
     JUMLAH_TAGIHAN_SISWA: "",
@@ -123,7 +122,7 @@ function Tagihan() {
     const sisa = Number(item.SISA_TAGIHAN ?? 0);
 
     if (sisa <= 0) return "Lunas";
-    if (totalBayar > 0) return "Belum Lunas";
+    if (totalBayar > 0) return "Cicilan";
     return "Belum Bayar";
   };
 
@@ -132,6 +131,7 @@ function Tagihan() {
       case "belum bayar":
       case "belum dibayar":
         return "belum-bayar";
+      case "cicilan":
       case "mengangsur":
       case "menunggu verifikasi":
       case "belum lunas":
@@ -156,12 +156,18 @@ function Tagihan() {
 
     const belumLunas = tagihanList.filter((item) => {
       const computedStatus = getComputedStatus(item).toLowerCase();
-      return computedStatus === "belum bayar" || computedStatus === "belum lunas";
+
+      return (
+        computedStatus === "belum bayar" ||
+        computedStatus === "cicilan" ||
+        computedStatus === "belum lunas"
+      );
     }).length;
 
     const lunas = tagihanList.filter((item) => {
       const computedStatus = getComputedStatus(item).toLowerCase();
-      return computedStatus === "lunas";
+
+      return computedStatus === "lunas" || computedStatus === "sudah bayar";
     }).length;
 
     const totalNominal = tagihanList.reduce(
@@ -176,7 +182,9 @@ function Tagihan() {
     return tagihanList.filter((item) => {
       const namaSiswa = item.SISWA?.NAMA_SISWA_TETAP || "";
       const jenisTagihan =
-        item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "";
+        item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+        item.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
+        "";
       const kode = String(item.ID_TAGIHAN_SISWA || "");
       const kelas = item.SISWA?.KELAS_SISWA || "";
       const computedStatus = getComputedStatus(item);
@@ -224,7 +232,7 @@ function Tagihan() {
   useEffect(() => {
     fetchTagihan();
     fetchSiswaOptions();
-    fetchJenisPembayaranOptions();
+    fetchJenisTagihanOptions();
   }, []);
 
   useEffect(() => {
@@ -283,15 +291,16 @@ function Tagihan() {
     }
   };
 
-  const fetchJenisPembayaranOptions = async () => {
+  const fetchJenisTagihanOptions = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/jenis-pembayaran`);
-      setJenisPembayaranOptions(Array.isArray(res.data?.data) ? res.data.data : []);
+      const res = await axios.get(`${API_BASE_URL}/ref-jenis-tagihan`);
+      setJenisTagihanOptions(Array.isArray(res.data?.data) ? res.data.data : []);
     } catch (error) {
       console.warn(
-        "Endpoint jenis pembayaran belum tersedia, dropdown jenis pembayaran masih kosong."
+        "Endpoint jenis tagihan belum tersedia, dropdown jenis tagihan masih kosong.",
+        error
       );
-      setJenisPembayaranOptions([]);
+      setJenisTagihanOptions([]);
     }
   };
 
@@ -336,7 +345,7 @@ function Tagihan() {
 
     if (
       !formData.ID_SISWA_TETAP ||
-      !formData.ID_JENIS_PEMBAYARAN ||
+      !formData.ID_JENIS_TAGIHAN ||
       !formData.BULAN_TAGIHAN_SISWA ||
       !formData.TAHUN_TAGIHAN_SISWA ||
       !formData.JUMLAH_TAGIHAN_SISWA ||
@@ -395,7 +404,7 @@ function Tagihan() {
     setSelectedId(item.ID_TAGIHAN_SISWA);
     setFormData({
       ID_SISWA_TETAP: siswaId,
-      ID_JENIS_PEMBAYARAN: item.ID_JENIS_PEMBAYARAN || "",
+      ID_JENIS_TAGIHAN: item.ID_JENIS_TAGIHAN || "",
       BULAN_TAGIHAN_SISWA: item.BULAN_TAGIHAN_SISWA || "",
       TAHUN_TAGIHAN_SISWA: item.TAHUN_TAGIHAN_SISWA || "",
       JUMLAH_TAGIHAN_SISWA: item.JUMLAH_TAGIHAN_SISWA || "",
@@ -456,10 +465,28 @@ function Tagihan() {
     window.open(url, "_blank");
   };
 
-  const handleExportPdf = () => {
-    const query = buildExportParams();
-    const url = `${API_BASE_URL}/tagihan-siswa/export/pdf${query ? `?${query}` : ""}`;
-    window.open(url, "_blank");
+  const handleExportPdf = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/api/tagihan-siswa/export/pdf",
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/pdf",
+          },
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Gagal export PDF:", error);
+    }
   };
 
   return (
@@ -473,19 +500,19 @@ function Tagihan() {
       </div>
 
       <div className="tagihan-summary">
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Total Tagihan</p>
           <h3>{summary.total}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Belum Lunas</p>
           <h3>{summary.belumLunas}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Lunas</p>
           <h3>{summary.lunas}</h3>
         </div>
-        <div className="summary-box">
+        <div className="tagihan-summary-box">
           <p>Total Nominal</p>
           <h3>{formatRupiah(summary.totalNominal)}</h3>
         </div>
@@ -498,7 +525,7 @@ function Tagihan() {
 
         <form className="tagihan-form" onSubmit={handleSubmit}>
           <div className="tagihan-form-grid">
-            <div className="form-group siswa-search-group" ref={siswaDropdownRef}>
+            <div className="tagihan-form-group tagihan-siswa-search-group" ref={siswaDropdownRef}>
               <label htmlFor="siswa-search">Siswa</label>
               <input
                 id="siswa-search"
@@ -517,27 +544,27 @@ function Tagihan() {
               />
 
               {showSiswaDropdown && (
-                <div className="siswa-dropdown">
+                <div className="tagihan-siswa-dropdown">
                   {filteredSiswaOptions.length > 0 ? (
                     filteredSiswaOptions.map((item) => (
                       <button
                         key={item.id}
                         type="button"
-                        className={`siswa-dropdown-item ${
+                        className={`tagihan-siswa-dropdown-item ${
                           formData.ID_SISWA_TETAP === item.id ? "active" : ""
                         }`}
                         onClick={() => handleSelectSiswa(item)}
                       >
-                        <span className="siswa-dropdown-name">
+                        <span className="tagihan-siswa-dropdown-name">
                           {item.nama || `Siswa #${item.id}`}
                         </span>
-                        <span className="siswa-dropdown-meta">
+                        <span className="tagihan-siswa-dropdown-meta">
                           {item.kelas ? `${item.kelas} • ` : ""}ID: {item.id}
                         </span>
                       </button>
                     ))
                   ) : (
-                    <div className="siswa-dropdown-empty">
+                    <div className="tagihan-siswa-dropdown-empty">
                       Siswa tidak ditemukan
                     </div>
                   )}
@@ -545,33 +572,35 @@ function Tagihan() {
               )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="ID_JENIS_PEMBAYARAN">Jenis Tagihan</label>
+            <div className="tagihan-form-group">
+              <label htmlFor="ID_JENIS_TAGIHAN">Jenis Tagihan</label>
               <select
-                id="ID_JENIS_PEMBAYARAN"
-                name="ID_JENIS_PEMBAYARAN"
-                value={formData.ID_JENIS_PEMBAYARAN}
+                id="ID_JENIS_TAGIHAN"
+                name="ID_JENIS_TAGIHAN"
+                value={formData.ID_JENIS_TAGIHAN}
                 onChange={handleChange}
+                className={!formData.ID_JENIS_TAGIHAN ? "tagihan-select-placeholder" : ""}
               >
                 <option value="">Pilih jenis tagihan</option>
-                {jenisPembayaranOptions.map((item) => (
+                {jenisTagihanOptions.map((item) => (
                   <option
-                    key={item.ID_JENIS_PEMBAYARAN}
-                    value={item.ID_JENIS_PEMBAYARAN}
+                    key={item.ID_JENIS_TAGIHAN}
+                    value={item.ID_JENIS_TAGIHAN}
                   >
-                    {item.DESKRIPSI_JENIS_PEMBAYARAN}
+                    {item.DESKRIPSI_JENIS_TAGIHAN}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="BULAN_TAGIHAN_SISWA">Bulan Tagihan</label>
               <select
                 id="BULAN_TAGIHAN_SISWA"
                 name="BULAN_TAGIHAN_SISWA"
                 value={formData.BULAN_TAGIHAN_SISWA}
                 onChange={handleChange}
+                className={!formData.BULAN_TAGIHAN_SISWA ? "tagihan-select-placeholder" : ""}
               >
                 <option value="">Pilih bulan tagihan</option>
                 {BULAN_OPTIONS.map((bulan) => (
@@ -582,7 +611,7 @@ function Tagihan() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="TAHUN_TAGIHAN_SISWA">Tahun Tagihan</label>
               <input
                 type="number"
@@ -595,7 +624,7 @@ function Tagihan() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="JUMLAH_TAGIHAN_SISWA">Jumlah Tagihan (Rp)</label>
               <input
                 type="number"
@@ -608,7 +637,7 @@ function Tagihan() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="tagihan-form-group">
               <label htmlFor="DUEDATETIME_TAGIHAN_SISWA">Jatuh Tempo</label>
               <input
                 type="date"
@@ -623,7 +652,7 @@ function Tagihan() {
           <div className="tagihan-form-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="tagihan-btn tagihan-btn-secondary"
               onClick={resetForm}
               disabled={submitLoading}
             >
@@ -631,7 +660,7 @@ function Tagihan() {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="tagihan-btn tagihan-btn-primary"
               disabled={submitLoading}
             >
               {submitLoading
@@ -645,17 +674,17 @@ function Tagihan() {
       </section>
 
       <section className="tagihan-card">
-        <div className="table-section-header">
+        <div className="tagihan-table-section-header">
           <div>
-            <h2 className="table-section-title">Daftar Tagihan Berjalan</h2>
-            <p className="table-section-subtitle">
+            <h2 className="tagihan-table-section-title">Daftar Tagihan Berjalan</h2>
+            <p className="tagihan-table-section-subtitle">
               Menampilkan tagihan dan sisa tunggakan per siswa.
             </p>
           </div>
         </div>
 
-        <div className="filter-bar">
-          <div className="filter-item">
+        <div className="tagihan-filter-bar">
+          <div className="tagihan-filter-item">
             <label htmlFor="search">Cari Siswa / Tagihan</label>
             <input
               id="search"
@@ -666,12 +695,13 @@ function Tagihan() {
             />
           </div>
 
-          <div className="filter-item">
+          {/* <div className="tagihan-filter-item">
             <label htmlFor="filterKelas">Kelas</label>
             <select
               id="filterKelas"
               value={filterKelas}
               onChange={(e) => setFilterKelas(e.target.value)}
+              className={filterKelas === "Semua" ? "tagihan-select-placeholder" : ""}
             >
               {kelasOptions.map((kelas) => (
                 <option key={kelas} value={kelas}>
@@ -679,45 +709,48 @@ function Tagihan() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
-          <div className="filter-item">
+          <div className="tagihan-filter-item">
             <label htmlFor="filterStatus">Status</label>
             <select
               id="filterStatus"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
+              className={filterStatus === "Semua" ? "tagihan-select-placeholder" : ""}
             >
               <option value="Semua">Semua</option>
               <option value="Belum Bayar">Belum Bayar</option>
-              <option value="Belum Lunas">Belum Lunas</option>
+              <option value="Cicilan">Cicilan</option>
               <option value="Lunas">Lunas</option>
             </select>
           </div>
 
-          <div className="filter-actions">
+          <div className="tagihan-filter-actions">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="tagihan-btn tagihan-btn-secondary"
               onClick={handleResetFilter}
             >
               Reset Filter
             </button>
 
-            <div className="export-group">
+            <div className="tagihan-export-group">
               <button
                 type="button"
-                className="btn btn-export-excel"
+                className="tagihan-export-btn tagihan-export-excel"
                 onClick={handleExportExcel}
               >
+                <i className="bi bi-filetype-xlsx"></i>
                 Export Excel
               </button>
 
               <button
                 type="button"
-                className="btn btn-export-pdf"
+                className="tagihan-export-btn tagihan-export-pdf"
                 onClick={handleExportPdf}
               >
+                <i className="bi bi-file-earmark-pdf"></i>
                 Export PDF
               </button>
             </div>
@@ -725,7 +758,7 @@ function Tagihan() {
           </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="tagihan-table-wrapper">
           <table className="tagihan-table">
             <thead>
               <tr>
@@ -746,7 +779,7 @@ function Tagihan() {
               {loading ? (
                 <tr>
                   <td colSpan="10">
-                    <div className="empty-state">Memuat data tagihan...</div>
+                    <div className="tagihan-empty-state">Memuat data tagihan...</div>
                   </td>
                 </tr>
               ) : paginatedData.length > 0 ? (
@@ -759,18 +792,20 @@ function Tagihan() {
                       <td className="tagihan-id">#{item.ID_TAGIHAN_SISWA}</td>
 
                       <td>
-                        <div className="nama-siswa-cell">
-                          <span className="nama-siswa-text">
+                        <div className="tagihan-nama-siswa-cell">
+                          <span className="tagihan-nama-siswa-text">
                             {item.SISWA?.NAMA_SISWA_TETAP || "-"}
                           </span>
-                          <small className="kelas-siswa-text">
+                          <small className="tagihan-kelas-siswa-text">
                             {item.SISWA?.KELAS_SISWA || "-"}
                           </small>
                         </div>
                       </td>
 
                       <td>
-                        {item.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN || "-"}
+                        {item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+                          item.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
+                          "-"}
                       </td>
 
                       <td>
@@ -780,65 +815,57 @@ function Tagihan() {
 
                       <td>{formatTanggal(item.DUEDATETIME_TAGIHAN_SISWA)}</td>
 
-                      <td className="nominal-text">
+                      <td className="tagihan-nominal-text">
                         {formatRupiah(item.JUMLAH_TAGIHAN_SISWA)}
                       </td>
 
-                      <td className="nominal-text">
+                      <td className="tagihan-nominal-text">
                         {formatRupiah(item.TOTAL_PEMBAYARAN)}
                       </td>
 
-                      <td className="sisa-highlight">
+                      <td className="tagihan-sisa-highlight">
                         {formatRupiah(item.SISA_TAGIHAN)}
                       </td>
 
                       <td>
                         <span
-                          className={`status-badge ${getStatusClass(computedStatus)}`}
+                          className={`tagihan-status-badge ${getStatusClass(computedStatus)}`}
                         >
                           {computedStatus}
                         </span>
                       </td>
 
                       <td>
-                        <div className="action-group">
-                          {hasPayment ? (
-                            <button
-                              type="button"
-                              className="btn btn-muted btn-sm"
-                              disabled
-                              title="Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
-                            >
-                              Tidak Bisa Edit
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleEdit(item)}
-                            >
-                              Edit
-                            </button>
-                          )}
+                        <div className="tagihan-action-group">
+                          <button
+                            type="button"
+                            className="tagihan-icon-btn tagihan-icon-edit"
+                            onClick={() => handleEdit(item)}
+                            disabled={hasPayment}
+                            title={
+                              hasPayment
+                                ? "Tagihan yang sudah memiliki pembayaran tidak bisa diedit"
+                                : "Edit tagihan"
+                            }
+                            aria-label="Edit tagihan"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
 
-                          {hasPayment ? (
-                            <button
-                              type="button"
-                              className="btn btn-muted btn-sm"
-                              disabled
-                              title="Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
-                            >
-                              Tidak Bisa Hapus
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDelete(item)}
-                            >
-                              Hapus
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="tagihan-icon-btn tagihan-icon-delete"
+                            onClick={() => handleDelete(item)}
+                            disabled={hasPayment}
+                            title={
+                              hasPayment
+                                ? "Tagihan yang sudah memiliki pembayaran tidak bisa dihapus"
+                                : "Hapus tagihan"
+                            }
+                            aria-label="Hapus tagihan"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -847,7 +874,7 @@ function Tagihan() {
               ) : (
                 <tr>
                   <td colSpan="10">
-                    <div className="empty-state">
+                    <div className="tagihan-empty-state">
                       Tidak ada data tagihan yang sesuai filter.
                     </div>
                   </td>
@@ -857,7 +884,7 @@ function Tagihan() {
           </table>
         </div>
 
-        <div className="table-pagination">
+        <div className="tagihan-table-pagination">
           <p>
             Menampilkan{" "}
             {filteredData.length === 0
@@ -869,25 +896,27 @@ function Tagihan() {
             {filteredData.length} data
           </p>
 
-          <div className="pagination-actions">
+          <div className="tagihan-pagination-actions">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="tagihan-pagination-arrow"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
+              aria-label="Halaman sebelumnya"
             >
-              Prev
+              ‹
             </button>
 
-            <span className="pagination-page">{currentPage}</span>
+            <span className="tagihan-pagination-page">{currentPage}</span>
 
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="tagihan-pagination-arrow"
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((prev) => prev + 1)}
+              aria-label="Halaman berikutnya"
             >
-              Next
+              ›
             </button>
           </div>
         </div>
