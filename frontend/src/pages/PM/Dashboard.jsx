@@ -1,31 +1,43 @@
 import { useEffect, useState } from "react";
-import "./PenjaminanMutu.css";
+import "../../styles/PM/Dashboard.css";
 
-export default function PenjaminanMutu() {
-  const [evaluasi, setEvaluasi] = useState([]);
-  const [trpm, setTrpm] = useState([]);
+export default function DashboardPM() {
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/evaluasi-rkt")
+    fetch("http://localhost:8000/api/dashboard-penjaminan-mutu")
       .then((res) => res.json())
-      .then((data) => setEvaluasi(data.data || []));
-
-    fetch("http://localhost:8000/api/tr-pm")
-      .then((res) => res.json())
-      .then((data) => setTrpm(data.data || []));
+      .then((data) => {
+        setDashboard(data.data);
+      })
+      .catch((err) => {
+        console.error("Gagal mengambil dashboard:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const totalEvaluasi = evaluasi.length;
+  if (loading) {
+    return (
+      <div className="pm-container">
+        <h2 className="pm-title">Dashboard Penjaminan Mutu</h2>
 
-  const sesuai = trpm.filter((d) => d.TINGKAT_KESESUAIAN === "Sesuai").length;
+        <div className="loading-box">Loading dashboard...</div>
+      </div>
+    );
+  }
 
-  const kurang = trpm.filter(
-    (d) => d.TINGKAT_KESESUAIAN === "Kurang Sesuai",
-  ).length;
+  if (!dashboard) {
+    return (
+      <div className="pm-container">
+        <h2 className="pm-title">Dashboard Penjaminan Mutu</h2>
 
-  const tidak = trpm.filter(
-    (d) => d.TINGKAT_KESESUAIAN === "Tidak Sesuai",
-  ).length;
+        <div className="loading-box error">Gagal memuat data dashboard</div>
+      </div>
+    );
+  }
 
   return (
     <div className="pm-container">
@@ -33,81 +45,89 @@ export default function PenjaminanMutu() {
 
       {/* KPI */}
       <div className="pm-kpi">
-        <div className="card">
-          <p>Total Evaluasi</p>
-          <h3>{totalEvaluasi}</h3>
+        <div className="card primary">
+          <p>Total Program RKT</p>
+          <h3>{dashboard.total_rkt}</h3>
         </div>
 
         <div className="card success">
-          <p>Sesuai</p>
-          <h3>{sesuai}</h3>
+          <p>Realisasi Evaluasi</p>
+          <h3>{dashboard.realisasi}</h3>
         </div>
 
         <div className="card warning">
-          <p>Kurang Sesuai</p>
-          <h3>{kurang}</h3>
+          <p>Total Deviasi</p>
+          <h3>{dashboard.deviasi}</h3>
         </div>
 
-        <div className="card danger">
-          <p>Tidak Sesuai</p>
-          <h3>{tidak}</h3>
+        <div className="card info">
+          <p>Persentase Capaian</p>
+          <h3>{dashboard.persentase_capaian}%</h3>
         </div>
       </div>
 
-      {/* TABLE EVALUASI */}
+      {/* TABLE RINCIAN MUTU */}
       <div className="pm-table">
-        <h3>Evaluasi RKT</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Kegiatan</th>
-              <th>Tanggal</th>
-              <th>Deskripsi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {evaluasi.map((item, index) => (
-              <tr key={index}>
-                <td>{item.programKerja?.NAMA_PROGRAM || "-"}</td>
-                <td>{item.TGL_PM}</td>
-                <td>{item.DESKRIPSI_TR_PM}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <div className="table-header">
+          <h3>Rincian Monitoring Mutu</h3>
+        </div>
 
-      {/* TABLE MONITORING PM */}
-      <div className="pm-table">
-        <h3>Monitoring Mutu</h3>
         <table>
           <thead>
             <tr>
-              <th>Deskripsi</th>
-              <th>Tanggal</th>
-              <th>Status</th>
+              <th>Kategori Mutu</th>
+              <th>Jumlah Program</th>
             </tr>
           </thead>
+
           <tbody>
-            {trpm.map((item, index) => (
-              <tr key={index}>
-                <td>{item.DESKRIPSI_TR_PM}</td>
-                <td>{item.TGL_PM}</td>
-                <td
-                  className={
-                    item.TINGKAT_KESESUAIAN === "Sesuai"
-                      ? "text-success"
-                      : item.TINGKAT_KESESUAIAN === "Kurang Sesuai"
-                        ? "text-warning"
-                        : "text-danger"
-                  }
-                >
-                  {item.TINGKAT_KESESUAIAN}
+            {dashboard.rincian_mutu && dashboard.rincian_mutu.length > 0 ? (
+              dashboard.rincian_mutu.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.kategori}</td>
+                  <td>{item.jumlah}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2" className="empty-data">
+                  Tidak ada data monitoring mutu
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* SUMMARY */}
+      <div className="pm-summary">
+        <h3>Ringkasan Penjaminan Mutu</h3>
+
+        <div className="summary-content">
+          <p>
+            Dashboard ini digunakan untuk monitoring mutu sekolah berdasarkan
+            pelaksanaan Program Kerja RKT.
+          </p>
+
+          <ul>
+            <li>
+              Total Program Kerja :<strong> {dashboard.total_rkt}</strong>
+            </li>
+
+            <li>
+              Realisasi Evaluasi :<strong> {dashboard.realisasi}</strong>
+            </li>
+
+            <li>
+              Total Deviasi :<strong> {dashboard.deviasi}</strong>
+            </li>
+
+            <li>
+              Persentase Capaian :
+              <strong> {dashboard.persentase_capaian}%</strong>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
