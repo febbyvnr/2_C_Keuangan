@@ -248,7 +248,7 @@ Route::prefix('jenis-tarif')->group(function () {
 //     Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
 //     Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
 //     Route::post('/store', [RefTarifController::class, 'store']);
-//     Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+//     Route::put('/update/{idJeniFs}/{idTahun}', [RefTarifController::class, 'update']);
 //     Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
 // });
 

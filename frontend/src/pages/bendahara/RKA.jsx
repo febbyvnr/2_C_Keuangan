@@ -17,7 +17,7 @@ function formatDate(value) {
 }
 
 function getDetails(item) {
-  return item ? [item] : [];
+  return item?.details || [];
 }
 
 function getAnggaranRkt(item) {
@@ -25,7 +25,10 @@ function getAnggaranRkt(item) {
 }
 
 function getTotalRincian(item) {
-  return Number(item?.NOMINAL || 0);
+  return getDetails(item).reduce(
+    (total, detail) => total + Number(detail.NOMINAL || 0),
+    0
+  );
 }
 
 function getStatusRka(item) {
@@ -118,14 +121,36 @@ export default function RKA() {
       const response = await axios.get("http://127.0.0.1:8000/api/rka");
       const rows = response.data?.data ?? [];
 
-      setData(Array.isArray(rows) ? rows : []);
+      const grouped = Object.values(
+        rows.reduce((acc, item) => {
+          const key = item.ID_PROGRAM_KERJA;
+
+          if (!acc[key]) {
+            acc[key] = {
+              ...item,
+              details: [],
+            };
+          }
+
+          acc[key].details.push(item);
+
+          return acc;
+        }, {})
+      );
+
+      setData(grouped);
 
       setSelectedId((prev) => {
-        if (!rows.length) return null;
-        if (prev && rows.some((item) => item.ID_PROGRAM_KERJA === prev)) {
+        if (!grouped.length) return null;
+
+        if (
+          prev &&
+          grouped.some((item) => item.ID_PROGRAM_KERJA === prev)
+        ) {
           return prev;
         }
-        return rows[0].ID_PROGRAM_KERJA;
+
+        return grouped[0].ID_PROGRAM_KERJA;
       });
     } catch (error) {
       console.error("Gagal ambil data RKA:", error);
@@ -222,7 +247,9 @@ const handleDelete = async (idDetail) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/rka/detail/${idDetail}`);
+    await axios.delete(
+      `http://127.0.0.1:8000/api/rka/delete/${idDetail}`
+    );
 
     await fetchRka();
   } catch (error) {
@@ -275,14 +302,14 @@ const handleSubmitDetail = async (e) => {
 
     if (editingDetail) {
       await axios.put(
-        `http://127.0.0.1:8000/api/rka/detail/${editingDetail}`,
+        `http://127.0.0.1:8000/api/rka/update/${editingDetail}`,
         payload
       );
     } else {
-      await axios.post("http://127.0.0.1:8000/api/rka/store", {
-        ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
-        details: [payload],
-      });
+      await axios.post(
+        "http://127.0.0.1:8000/api/rka/store",
+        payload
+      );
     }
 
     setShowDetailModal(false);
@@ -637,7 +664,9 @@ const handleSubmitDetail = async (e) => {
             <div className="rka-modal-box">
             <div className="rka-modal-header">
                 <div>
-                  <h3>Tambah Detail RKA</h3>
+                  <h3>
+                    {editingDetail ? "Edit Detail RKA" : "Tambah Detail RKA"}
+                  </h3>
                   <p>{selectedItem?.rkt?.PROGRAM_KERJA}</p>
                   <p>
                       Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
