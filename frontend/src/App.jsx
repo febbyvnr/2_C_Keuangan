@@ -57,6 +57,8 @@ import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
+import DashboardPM from "./pages/pm/Dashboard";
+
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
 
@@ -143,19 +145,34 @@ export default function App() {
           {/* BENDAHARA MASTER DATA */}
           <Route path="master/coa" element={<MasterCOA />} />
           <Route path="master/kegiatan" element={<MasterKegiatan />} />
-          <Route path="master/tahun-anggaran" element={<MasterTahunAnggaran />} />
-          <Route path="master/tahun-akademik" element={<MasterTahunAkademik />} />
+          <Route
+            path="master/tahun-anggaran"
+            element={<MasterTahunAnggaran />}
+          />
+          <Route
+            path="master/tahun-akademik"
+            element={<MasterTahunAkademik />}
+          />
           <Route path="master/sumber-dana" element={<MasterSumberDana />} />
-          <Route path="master/ref-penerimaan" element={<MasterRefPenerimaan />} />
+          <Route
+            path="master/ref-penerimaan"
+            element={<MasterRefPenerimaan />}
+          />
           <Route path="master/ref-pm" element={<MasterRefPM />} />
           <Route path="master/tarif" element={<MasterTarif />} />
           <Route path="master/jenis-tarif" element={<MasterJenisTarif />} />
-          <Route path="master/jenis-pembayaran" element={<MasterJenisPembayaran />} />
+          <Route
+            path="master/jenis-pembayaran"
+            element={<MasterJenisPembayaran />}
+          />
         </Route>
 
         {/* SISWA ORTU TANPA SIDEBAR*/}
         <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
-        <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
+        <Route
+          path="/siswa-ortu/pembayaran/:id"
+          element={<PembayaranTagihanSiswaOrtu />}
+        />
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
@@ -164,7 +181,6 @@ export default function App() {
         <Route path="/pic/guru/rkt" element={<RKT />} />
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
         <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-
 
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
@@ -197,11 +213,31 @@ export default function App() {
         {/* --- RUTE PENJAMINAN MUTU --- */}
         <Route path="/pm" element={<PmLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<div><h1>Dashboard PM</h1></div>} />
-          <Route path="monitoring-mutu" element={<div><h1>Monitoring Mutu</h1></div>} />
-          <Route path="evaluasi-rkt" element={<div><h1>Evaluasi RKT</h1></div>} />
+          <Route
+            path="dashboard"
+            element={
+              <div>
+                <h1>Dashboard PM</h1>
+              </div>
+            }
+          />
+          <Route
+            path="monitoring-mutu"
+            element={
+              <div>
+                <h1>Monitoring Mutu</h1>
+              </div>
+            }
+          />
+          <Route
+            path="evaluasi-rkt"
+            element={
+              <div>
+                <h1>Evaluasi RKT</h1>
+              </div>
+            }
+          />
         </Route>
-
       </Routes>
     </BrowserRouter>
   );
