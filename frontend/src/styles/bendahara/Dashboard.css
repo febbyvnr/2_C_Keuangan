@@ -124,7 +124,6 @@
   font-size: 0.85rem;
   color: var(--text-dark);
 }
-
 .status-item i.text-success { color: var(--bendahara-success); }
 .status-item i.text-primary { color: var(--bendahara-primary); }
 
