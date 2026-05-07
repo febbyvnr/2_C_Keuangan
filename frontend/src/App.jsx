@@ -179,6 +179,7 @@ export default function App() {
         <Route path="/pic/guru" element={<DashboardPIC />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
         <Route path="/pic/guru/rkt" element={<RKT />} />
+        <Route path="/pic/guru/rka" element={<RKA />} />
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
         <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
 

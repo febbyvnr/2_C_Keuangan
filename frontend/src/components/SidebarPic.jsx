@@ -160,27 +160,16 @@ export default function SidebarPic() {
                 </NavLink>
               </li>
 
+              
               <li className="nav-item">
                 <NavLink
-                  to="/pic/guru/realisasi-rkt"
+                  to="/pic/guru/rka"
                   className={({ isActive }) =>
                     isActive ? "nav-link sidebar-active" : "nav-link text-dark"
                   }
                 >
-                  <i className="bi bi-bar-chart-steps"></i>
-                  Page Realisasi RKT
-                </NavLink>
-              </li>
-
-              <li className="nav-item">
-                <NavLink
-                  to="/pic/guru/bridging-rkt"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
-                  }
-                >
-                  <i className="bi bi-diagram-2"></i>
-                  Page Bridging RKT
+                  <i className="bi bi-calculator"></i>
+                  RKA
                 </NavLink>
               </li>
 
@@ -192,7 +181,7 @@ export default function SidebarPic() {
                   }
                 >
                   <i className="bi bi-cash-coin"></i>
-                  Page Pengajuan Dana
+                  Pengajuan Dana
                 </NavLink>
               </li>
 
@@ -216,7 +205,7 @@ export default function SidebarPic() {
                   }
                 >
                   <i className="bi bi-clipboard2-pulse"></i>
-                  Page Evaluasi RKT
+                  Evaluasi RKT
                 </NavLink>
               </li>
             </ul>
