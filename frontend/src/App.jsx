@@ -54,6 +54,7 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 import SidebarKepsek from "./components/SidebarKepsek";
 import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
+import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
@@ -61,6 +62,7 @@ import DashboardPM from "./pages/pm/Dashboard";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
+import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
 
 function BendaharaLayout() {
   return (
@@ -179,14 +181,18 @@ export default function App() {
         <Route path="/pic/guru" element={<DashboardPIC />} />
         <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
         <Route path="/pic/guru/rkt" element={<RKT />} />
+        <Route path="/pic/guru/rka" element={<RKA />} />
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
         <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
+        {/* <Route path="/pic/guru/status-pengajuan" element={<StatusPengajuan />} /> */}
+        {/* <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKTPage />} /> */}
 
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<KepsekDashboard />} />
           <Route path="monitoring" element={<KepsekMonitoring />} />
+          <Route path="approval-center" element={<KepsekApproval />} />
         </Route>
 
         {/* WAKA */}

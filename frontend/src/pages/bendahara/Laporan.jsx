@@ -29,6 +29,8 @@ export default function Laporan() {
       baseUrl = "http://localhost:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://localhost:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://localhost:8000/api/laporan/rkas";
     } else if (active === "Yayasan") {
       baseUrl = "http://localhost:8000/api/laporan/yayasan";
     } else {
@@ -107,6 +109,8 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas/export";
     }
 
     const params = new URLSearchParams({
@@ -138,6 +142,8 @@ export default function Laporan() {
       baseUrl = "http://127.0.0.1:8000/api/laporan/pengeluaran";
     } else if (active === "BKU") {
       baseUrl = "http://127.0.0.1:8000/api/laporan/bku";
+    } else if (active === "RKAS") {
+      baseUrl = "http://127.0.0.1:8000/api/laporan/rkas";
     }
 
     const params = new URLSearchParams({
@@ -586,8 +592,111 @@ export default function Laporan() {
         </>
       )}
 
+      {/* ================= RKAS ================= */}
+      {active === "RKAS" && (
+        <>
+          <div className="laporan-header">
+            <div className="laporan-actions">
+              <button className="btn-outline excel" onClick={handleExportExcel}>
+                <i className="bi bi-file-earmark-excel"></i>
+                Export Excel
+              </button>
+
+              <button className="btn-outline pdf" onClick={handleExportPDF}>
+                <i className="bi bi-file-earmark-pdf"></i>
+                Export PDF
+              </button>
+            </div>
+
+            <div></div>
+          </div>
+
+          {/* TABLE */}
+          <div className="laporan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Program</th>
+                  <th>Sumber Dana</th>
+                  <th>Anggaran</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((item, i) => (
+                    <tr key={i}>
+                      <td>{startIndex + i + 1}</td>
+
+                      <td>{item.program_kerja}</td>
+
+                      <td>{item.sumber_dana}</td>
+
+                      <td className="nominal">
+                        Rp{" "}
+                        {Number(item.anggaran_disetujui ?? 0).toLocaleString(
+                          "id-ID",
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: "center" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FOOTER */}
+          <div className="laporan-footer">
+            <div className="laporan-info">
+              Menampilkan {totalData === 0 ? 0 : startIndex + 1} -{" "}
+              {Math.min(endIndex, totalData)} dari {totalData} data
+            </div>
+
+            <div className="laporan-pagination">
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                ‹
+              </button>
+
+              {[...Array(totalPage)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${page === i + 1 ? "active" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="page-btn arrow"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPage}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="laporan-total-card">
+              <span>Total</span>
+              <strong>Rp {total.toLocaleString("id-ID")}</strong>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ================= SISANYA ================= */}
-      {!["Penerimaan", "BKU", "Pengeluaran"].includes(active) && (
+      {!["Penerimaan", "BKU", "Pengeluaran", "RKAS"].includes(active) && (
         <div className="laporan-content">
           <div style={{ flex: 1 }}>
             <div className="laporan-table">

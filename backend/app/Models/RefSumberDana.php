@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefSumberDana extends Model
 {
@@ -48,5 +49,10 @@ class RefSumberDana extends Model
     public function trPenerimaan()
     {
         return $this->hasMany(TrPenerimaan::class, 'ID_REF_DANA', 'ID_REF_DANA');
+    }
+
+    public function rkas(): HasMany
+    {
+        return $this->hasMany(Rka::class, 'ID_REF_DANA', 'ID_REF_DANA');
     }
 }

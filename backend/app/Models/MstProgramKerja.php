@@ -84,6 +84,11 @@ class MstProgramKerja extends Model
         return $this->hasMany(TrPm::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
 
+    public function Rka(): HasMany
+    {
+        return $this->hasMany(Rka::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('IS_DELETE', 0);
