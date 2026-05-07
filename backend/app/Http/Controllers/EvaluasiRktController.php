@@ -366,4 +366,66 @@ class EvaluasiRktController extends Controller
         }
     }
 
+    public function revisi(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PM' => 'required|string|max:20',
+            'DESKRIPSI_TR_PM' => 'required|string',
+        ]);
+
+        try {
+            //  Cari evaluasi
+            $evaluasi = EvaluasiRkt::findOrFail($id);
+
+            //  Cek validator
+            $validator = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
+                ->first();
+
+            if (
+                !$validator ||
+                !str_contains(
+                    strtolower($validator->JABATAN_FUNGSIONAL ?? ''),
+                    'kepala sekolah'
+                )
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya Kepala Sekolah yang boleh meminta revisi evaluasi',
+                ], 403);
+            }
+
+            //  Cek sudah approve atau belum
+            if ($evaluasi->NIP_VALIDATOR_PM) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Evaluasi sudah disetujui, tidak bisa direvisi',
+                ], 400);
+            }
+
+            //  Update deskripsi revisi
+            $evaluasi->update([
+                'DESKRIPSI_TR_PM' => 'Revisi: ' . $request->DESKRIPSI_TR_PM,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluasi masuk tahap revisi',
+                'data' => $evaluasi
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Evaluasi tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengajukan revisi evaluasi',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
