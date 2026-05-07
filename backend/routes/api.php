@@ -294,7 +294,11 @@ Route::prefix('tagihan-siswa')->group(function () {
 Route::prefix('laporan')->group(function () {
     Route::get('/penerimaan', [LaporanPenerimaanController::class, 'penerimaan']);
     Route::post('/rkas/export', [LaporanRkasController::class, 'export']);
+    Route::post('/rkas/export-excel', [LaporanRkasController::class, 'exportExcel']);
     Route::post('/rkas/export-pdf', [LaporanRkasController::class, 'exportPdf']);
+    Route::get('/rkas/export', [LaporanRkasController::class, 'export']);
+    Route::get('/rkas/export-excel', [LaporanRkasController::class, 'export']);
+    Route::get('/rkas/export-pdf', [LaporanRkasController::class, 'exportPdf']);
     Route::get('/yayasan/export-excel', [LaporanKeuanganYayasanController::class, 'exportExcel']);
     Route::get('/yayasan/export-pdf', [LaporanKeuanganYayasanController::class, 'exportPdf']);
     Route::get('/jenis-tarif/export-excel', [JenisTarifExportController::class, 'export']);
