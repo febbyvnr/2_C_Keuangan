@@ -36,6 +36,84 @@ class LaporanRkasController extends Controller
     }
 
     /**
+     * Get RKAS report data and support export types
+     */
+    public function rkas(Request $request)
+    {
+        $filters = $request->only(['ID_TA_ANGGARAN', 'ID_REF_DANA']);
+        $metadata = $this->buildRkasMetadata($request, $filters);
+
+        $export = new RkasExport($filters, $metadata['role'], $metadata['nip'], $metadata['nama'], $metadata['filterText']);
+        $data = collect($export->getData());
+        $total = $data->sum('anggaran_disetujui');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+            'total' => $total,
+            'filterText' => $metadata['filterText'],
+            'info_ttd' => [
+                'nama' => $metadata['nama'],
+                'nip' => $metadata['nip'],
+                'role' => $metadata['role'],
+            ],
+        ]);
+    }
+
+    private function buildRkasMetadata(Request $request, array $filters = []): array
+    {
+        $role = 'Bendahara';
+        $nama = '-';
+        $nip = '-';
+
+        $jabatanId = DB::table('ref_jabatan_str')
+            ->whereRaw('LOWER(DESKRIPSI_JABATAN) = ?', ['bendahara'])
+            ->value('ID_JABATAN');
+
+        if ($jabatanId) {
+            $ttdNip = DB::table('tr_jabatan')
+                ->where('ID_JABATAN', $jabatanId)
+                ->value('NIP_KARYAWAN');
+
+            if ($ttdNip) {
+                $emp = DB::table('mst_karyawan')
+                    ->where('IS_DELETE', 0)
+                    ->where('NIP_KARYAWAN', $ttdNip)
+                    ->select('NIP_KARYAWAN', 'NAMA_KARYAWAN', 'NAMA_LENGKAP_GELAR')
+                    ->first();
+
+                if ($emp) {
+                    $nip = $emp->NIP_KARYAWAN;
+                    $nama = $emp->NAMA_LENGKAP_GELAR ?: $emp->NAMA_KARYAWAN;
+                }
+            }
+        }
+
+        $filterDisplay = [];
+        if (!empty($filters['ID_TA_ANGGARAN'])) {
+            $tahun = DB::table('ref_tahun_anggaran')
+                ->where('ID_TA_ANGGARAN', $filters['ID_TA_ANGGARAN'])
+                ->value('DESKRIPSI_TAHUN_ANGGARAN');
+            if ($tahun) {
+                $filterDisplay[] = $tahun;
+            }
+        }
+
+        if (!empty($filters['ID_REF_DANA'])) {
+            $dana = DB::table('ref_sumber_dana')
+                ->where('ID_REF_DANA', $filters['ID_REF_DANA'])
+                ->value('DESKRIPSI_SUMBER_DANA');
+            if ($dana) {
+                $filterDisplay[] = 'Sumber Dana: ' . $dana;
+            }
+        }
+
+        $filterText = !empty($filterDisplay) ? implode(' | ', $filterDisplay) : 'Semua Data';
+
+        return compact('role', 'nama', 'nip', 'filterText');
+    }
+
+    /**
      * Helper untuk memproses export (Excel/PDF)
      */
     private function processExport(Request $request, $type)

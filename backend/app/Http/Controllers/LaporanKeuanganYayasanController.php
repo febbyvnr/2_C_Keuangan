@@ -14,15 +14,16 @@ class LaporanKeuanganYayasanController extends Controller
 {
     public function exportExcel(Request $request)
     {
-        $idTaAnggaran = $this->resolveTahunAnggaranId($request);
-        $signer = $this->resolveSigner($request);
+        $hasFilter = $this->hasTahunFilter($request);
+        $idTaAnggaran = $hasFilter ? $this->resolveTahunAnggaranId($request) : null;
+        $signer = $this->resolveSigner(); // Hapus parameter $request karena tidak digunakan lagi
 
         $fileName = 'Laporan Keuangan Yayasan ' . date('Y-m-d');
 
         $filters = [
-            'tahun' => $this->resolvePeriodeTahun($request),
+            'tahun' => $hasFilter ? $this->resolvePeriodeTahun($request) : 'Semua Data',
             'id_ta_anggaran' => $idTaAnggaran,
-            'tahun_angka' => $this->resolveTahunAngka($request, $idTaAnggaran),
+            'tahun_angka' => $hasFilter ? $this->resolveTahunAngka($request, $idTaAnggaran) : null,
             'format' => 'excel',
             'role' => $signer['role'],
             'nama' => $signer['nama'],
@@ -34,15 +35,16 @@ class LaporanKeuanganYayasanController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $idTaAnggaran = $this->resolveTahunAnggaranId($request);
-        $signer = $this->resolveSigner($request);
+        $hasFilter = $this->hasTahunFilter($request);
+        $idTaAnggaran = $hasFilter ? $this->resolveTahunAnggaranId($request) : null;
+        $signer = $this->resolveSigner();
 
         $fileName = 'Laporan Keuangan Yayasan ' . date('Y-m-d');
 
         $filters = [
-            'tahun' => $this->resolvePeriodeTahun($request),
+            'tahun' => $hasFilter ? $this->resolvePeriodeTahun($request) : 'Semua Data',
             'id_ta_anggaran' => $idTaAnggaran,
-            'tahun_angka' => $this->resolveTahunAngka($request, $idTaAnggaran),
+            'tahun_angka' => $hasFilter ? $this->resolveTahunAngka($request, $idTaAnggaran) : null,
             'format' => 'pdf',
             'role' => $signer['role'],
             'nama' => $signer['nama'],
@@ -63,6 +65,41 @@ class LaporanKeuanganYayasanController extends Controller
             'totalMasuk' => $totalMasuk,
             'totalKeluar' => $totalKeluar,
         ])->download($fileName . '.pdf');
+    }
+
+    public function yayasan(Request $request)
+    {
+        $hasFilter = $this->hasTahunFilter($request);
+        $idTaAnggaran = $hasFilter ? $this->resolveTahunAnggaranId($request) : null;
+        $signer = $this->resolveSigner();
+
+        $filters = [
+            'tahun' => $hasFilter ? $this->resolvePeriodeTahun($request) : 'Semua Data',
+            'id_ta_anggaran' => $idTaAnggaran,
+            'tahun_angka' => $hasFilter ? $this->resolveTahunAngka($request, $idTaAnggaran) : null,
+            'format' => 'json',
+            'role' => $signer['role'],
+            'nama' => $signer['nama'],
+            'nip' => $signer['nip'],
+        ];
+
+        $export = new LaporanKeuanganYayasanExport($filters);
+        $data = collect($export->getData());
+        $totalMasuk = $data->sum('TOTAL_MASUK');
+        $totalKeluar = $data->sum('TOTAL_KELUAR');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+            'totalMasuk' => $totalMasuk,
+            'totalKeluar' => $totalKeluar,
+            'tahun' => $filters['tahun'] ?? '-',
+            'info_ttd' => [
+                'role' => $signer['role'],
+                'nama' => $signer['nama'],
+                'nip' => $signer['nip'],
+            ],
+        ]);
     }
 
     private function resolvePeriodeTahun(Request $request): string
@@ -112,6 +149,28 @@ class LaporanKeuanganYayasanController extends Controller
         return null;
     }
 
+    private function hasTahunFilter(Request $request): bool
+    {
+        $rawId = $request->input('ID_TA_ANGGARAN') ?? $request->input('id_ta_anggaran');
+        if (is_numeric($rawId) && (int) $rawId > 0) {
+            return true;
+        }
+
+        $rawTahun = $request->input('tahun');
+        if (is_numeric($rawTahun)) {
+            return (int) $rawTahun > 0;
+        }
+
+        if (is_string($rawTahun)) {
+            $normalized = trim(strtolower($rawTahun));
+            if ($normalized !== '' && !in_array($normalized, ['0', 'semua', 'semua data', '-'], true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function resolveTahunAngka(Request $request, ?int $idTaAnggaran): ?int
     {
         $tahun = $request->input('tahun');
@@ -132,50 +191,42 @@ class LaporanKeuanganYayasanController extends Controller
         return null;
     }
 
-    private function resolveSigner(Request $request): array
+    /**
+     * Resolve signer (penandatangan) berdasarkan jabatan Bendahara
+     * Logika ini diambil dari LaporanRkasController dan disederhanakan
+     * 
+     * @return array ['role', 'nama', 'nip']
+     */
+    private function resolveSigner(): array
     {
-        $nip = $request->input('nip')
-            ?? $request->input('NIP_KARYAWAN')
-            ?? (Auth::check() ? Auth::user()->nip : null);
+        $role = 'Bendahara';
+        $nama = '-';
+        $nip = '-';
 
-        $nama = $request->input('nama')
-            ?? (Auth::check() ? Auth::user()->name : null);
+        // Cari ID Jabatan dari ref_jabatan_str dengan deskripsi 'bendahara' (case insensitive)
+        $jabatanId = DB::table('ref_jabatan_str')
+            ->whereRaw('LOWER(DESKRIPSI_JABATAN) = ?', ['bendahara'])
+            ->value('ID_JABATAN');
 
-        $authRole = Auth::check() ? Auth::user()->role : null;
-        $dbRole = null;
+        if ($jabatanId) {
+            // Cari NIP karyawan dari tr_jabatan berdasarkan ID_JABATAN
+            $ttdNip = DB::table('tr_jabatan')
+                ->where('ID_JABATAN', $jabatanId)
+                ->value('NIP_KARYAWAN');
 
-        if ($nip) {
-            $dbRole = DB::table('tr_jabatan as tj')
-                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-                ->where('tj.NIP_KARYAWAN', $nip)
-                ->whereNull('tj.TGL_SELESAI_JABATAN')
-                ->value('rj.DESKRIPSI_JABATAN');
-        }
+            if ($ttdNip) {
+                // Ambil data karyawan dari mst_karyawan
+                $emp = DB::table('mst_karyawan')
+                    ->where('IS_DELETE', 0)
+                    ->where('NIP_KARYAWAN', $ttdNip)
+                    ->select('NIP_KARYAWAN', 'NAMA_KARYAWAN', 'NAMA_LENGKAP_GELAR')
+                    ->first();
 
-        $role = trim($dbRole ?? $request->input('role') ?? $authRole ?? 'Bendahara');
-
-        if (!$nip) {
-            $nip = DB::table('tr_jabatan as tj')
-                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
-                ->whereNull('tj.TGL_SELESAI_JABATAN')
-                ->where('rj.DESKRIPSI_JABATAN', $role)
-                ->value('tj.NIP_KARYAWAN');
-        }
-
-        if ($nip) {
-            $emp = DB::table('mst_karyawan')
-                ->where('IS_DELETE', 0)
-                ->where('NIP_KARYAWAN', $nip)
-                ->select('NAMA_LENGKAP_GELAR', 'NAMA_KARYAWAN')
-                ->first();
-
-            if ($emp) {
-                $nama = $emp->NAMA_LENGKAP_GELAR ?: $emp->NAMA_KARYAWAN;
+                if ($emp) {
+                    $nip = $emp->NIP_KARYAWAN;
+                    $nama = $emp->NAMA_LENGKAP_GELAR ?: $emp->NAMA_KARYAWAN;
+                }
             }
-        }
-
-        if (!$nama) {
-            $nama = '-';
         }
 
         return [
