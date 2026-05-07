@@ -167,7 +167,7 @@ export default function DashboardPIC() {
                       <span className="status">{statusLabel}</span>
                     </div>
 
-                    <p>
+                    <p className="progress-label">
                       Progress: <span className="progress-text">{prog}%</span>
                     </p>
 

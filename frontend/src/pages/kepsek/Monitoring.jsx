@@ -319,18 +319,18 @@ export default function Monitoring() {
                     <p>Pantau pengajuan dana dan evaluasi rencana kerja tahunan</p>
                 </header>
 
-                <div className="kepsek-tabs">
+                <div className="tab-header">
                     <button
-                        className={`kepsek-tab-btn ${tab === "fpd" ? "active" : ""}`}
+                        className={`tab-btn ${tab === "fpd" ? "active" : ""}`}
                         onClick={() => switchTab("fpd")}
                     >
-                        <i className="bi bi-cash-stack"></i> Pengajuan Dana (FPD)
+                       Pengajuan Dana (FPD)
                     </button>
                     <button
-                        className={`kepsek-tab-btn ${tab === "evaluasi" ? "active" : ""}`}
+                        className={`tab-btn ${tab === "evaluasi" ? "active" : ""}`}
                         onClick={() => switchTab("evaluasi")}
                     >
-                        <i className="bi bi-clipboard-data"></i> Evaluasi RKT
+                        Evaluasi RKT
                     </button>
                 </div>
 
