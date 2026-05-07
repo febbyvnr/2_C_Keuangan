@@ -7,6 +7,7 @@ use App\Models\EvaluasiRkt;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -237,6 +238,67 @@ class EvaluasiRktController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function approve(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PM' => 'required|string|max:20',
+        ]);
+
+        try {
+            // 🔹 Cari evaluasi
+            $evaluasi = EvaluasiRkt::findOrFail($id);
+
+            // Cek validator
+            $validator = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
+                ->first();
+
+            if (
+                !$validator ||
+                !str_contains(
+                    strtolower($validator->JABATAN_FUNGSIONAL ?? ''),
+                    'kepala sekolah'
+                )
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya Kepala Sekolah yang boleh approve evaluasi',
+                ], 403);
+            }
+
+            // 🔹 Cek sudah approve atau belum
+            if ($evaluasi->NIP_VALIDATOR_PM) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Evaluasi sudah disetujui',
+                ], 400);
+            }
+
+            // 🔹 Approve
+            $evaluasi->update([
+                'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluasi RKT berhasil disetujui',
+                'data' => $evaluasi
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Evaluasi tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve evaluasi',
                 'error' => $e->getMessage(),
             ], 500);
         }
