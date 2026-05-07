@@ -91,7 +91,7 @@ export default function DashboardPM() {
         </div>
       </div>
 
-      {/* KPI Section */}
+      {/* KPI SECTION */}
       <div className="pm-kpi">
         <div className="card primary">
           <p>Total Program RKT</p>
@@ -114,28 +114,24 @@ export default function DashboardPM() {
         </div>
       </div>
 
-      {/* PROGRESS MONITORING MUTU */}
+      {/* PROGRESS PROGRAM RKT */}
       <div className="pm-progress-section">
         <div className="table-header">
-          <h3>Progress Monitoring Mutu</h3>
+          <h3>Progress RKT</h3>
         </div>
 
         <div className="pm-progress-wrapper">
-          {dashboard.rincian_mutu && dashboard.rincian_mutu.length > 0 ? (
-            dashboard.rincian_mutu.map((item, index) => {
+          {dashboard.program_rkt && dashboard.program_rkt.length > 0 ? (
+            dashboard.program_rkt.map((item, index) => {
               const percentage =
                 dashboard.total_rkt > 0
-                  ? Math.round((item.jumlah / dashboard.total_rkt) * 100)
+                  ? Math.round((item.realisasi / dashboard.total_rkt) * 100)
                   : 0;
 
               return (
                 <div className="progress-card" key={index}>
                   <div className="progress-header">
-                    <h4>
-                      {item.kategori
-                        .toLowerCase()
-                        .replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </h4>
+                    <h4>{item.PROGRAM_KERJA}</h4>
 
                     <span className="progress-status">
                       {percentage >= 100 ? "Selesai" : "Monitoring"}
@@ -160,51 +156,18 @@ export default function DashboardPM() {
               );
             })
           ) : (
-            <div className="empty-data">Tidak ada data monitoring mutu</div>
+            <div className="empty-data">Tidak ada data RKT</div>
           )}
         </div>
       </div>
 
-      {/* ANALISIS MONITORING */}
-      <div className="pm-summary">
-        <h3>Analisis Monitoring Mutu</h3>
-
-        <div className="summary-grid">
-          <div className="summary-box">
-            <h4>Realisasi Program</h4>
-
-            <p>
-              Sebanyak
-              <strong> {dashboard.realisasi}</strong>
-              program telah terealisasi dari total
-              <strong> {dashboard.total_rkt}</strong>
-              program kerja RKT.
-            </p>
-          </div>
-
-          <div className="summary-box">
-            <h4>Deviasi Kegiatan</h4>
-
-            <p>
-              Terdapat
-              <strong> {dashboard.deviasi}</strong>
-              deviasi yang memerlukan monitoring lanjutan.
-            </p>
-          </div>
-
-          <div className="summary-box">
-            <h4>Persentase Capaian</h4>
-
-            <p>
-              Tingkat capaian program saat ini mencapai
-              <strong> {dashboard.persentase_capaian}%</strong>.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Spacer bawah agar tidak terpotong saat scroll mentok */}
-      <div style={{ minHeight: "40px", width: "100%" }}></div>
+      {/* SPACER */}
+      <div
+        style={{
+          minHeight: "40px",
+          width: "100%",
+        }}
+      ></div>
     </div>
   );
 }
