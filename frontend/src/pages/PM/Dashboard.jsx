@@ -22,7 +22,23 @@ export default function DashboardPM() {
   if (loading) {
     return (
       <div className="pm-container">
-        <h2 className="pm-title">Dashboard Penjaminan Mutu</h2>
+        {/* HEADER */}
+        <div className="pm-header-card">
+          <div className="pm-header-left">
+            <h2 className="pm-title">Selamat Datang</h2>
+
+            <p className="pm-subtitle">Tim Penjaminan Mutu</p>
+
+            <p className="pm-date">
+              {new Date().toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
 
         <div className="loading-box">Loading dashboard...</div>
       </div>
@@ -32,7 +48,23 @@ export default function DashboardPM() {
   if (!dashboard) {
     return (
       <div className="pm-container">
-        <h2 className="pm-title">Dashboard Penjaminan Mutu</h2>
+        {/* HEADER */}
+        <div className="pm-header-card">
+          <div className="pm-header-left">
+            <h2 className="pm-title">Selamat Datang</h2>
+
+            <p className="pm-subtitle">Tim Penjaminan Mutu</p>
+
+            <p className="pm-date">
+              {new Date().toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
 
         <div className="loading-box error">Gagal memuat data dashboard</div>
       </div>
@@ -41,9 +73,25 @@ export default function DashboardPM() {
 
   return (
     <div className="pm-container">
-      <h2 className="pm-title">Dashboard Penjaminan Mutu</h2>
+      {/* HEADER */}
+      <div className="pm-header-card">
+        <div className="pm-header-left">
+          <h2 className="pm-title">Selamat Datang</h2>
 
-      {/* KPI */}
+          <p className="pm-subtitle">Tim Penjaminan Mutu</p>
+
+          <p className="pm-date">
+            {new Date().toLocaleDateString("id-ID", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+      </div>
+
+      {/* KPI Section */}
       <div className="pm-kpi">
         <div className="card primary">
           <p>Total Program RKT</p>
@@ -99,36 +147,46 @@ export default function DashboardPM() {
         </table>
       </div>
 
-      {/* SUMMARY */}
+      {/* ANALISIS MONITORING */}
       <div className="pm-summary">
-        <h3>Ringkasan Penjaminan Mutu</h3>
+        <h3>Analisis Monitoring Mutu</h3>
 
-        <div className="summary-content">
-          <p>
-            Dashboard ini digunakan untuk monitoring mutu sekolah berdasarkan
-            pelaksanaan Program Kerja RKT.
-          </p>
+        <div className="summary-grid">
+          <div className="summary-box">
+            <h4>Realisasi Program</h4>
 
-          <ul>
-            <li>
-              Total Program Kerja :<strong> {dashboard.total_rkt}</strong>
-            </li>
+            <p>
+              Sebanyak
+              <strong> {dashboard.realisasi}</strong>
+              program telah terealisasi dari total
+              <strong> {dashboard.total_rkt}</strong>
+              program kerja RKT.
+            </p>
+          </div>
 
-            <li>
-              Realisasi Evaluasi :<strong> {dashboard.realisasi}</strong>
-            </li>
+          <div className="summary-box">
+            <h4>Deviasi Kegiatan</h4>
 
-            <li>
-              Total Deviasi :<strong> {dashboard.deviasi}</strong>
-            </li>
+            <p>
+              Terdapat
+              <strong> {dashboard.deviasi}</strong>
+              deviasi yang memerlukan monitoring lanjutan.
+            </p>
+          </div>
 
-            <li>
-              Persentase Capaian :
-              <strong> {dashboard.persentase_capaian}%</strong>
-            </li>
-          </ul>
+          <div className="summary-box">
+            <h4>Persentase Capaian</h4>
+
+            <p>
+              Tingkat capaian program saat ini mencapai
+              <strong> {dashboard.persentase_capaian}%</strong>.
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Spacer bawah agar tidak terpotong saat scroll mentok */}
+      <div style={{ minHeight: "40px", width: "100%" }}></div>
     </div>
   );
 }
