@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TagihanSiswa extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'tagihan_siswa';
     protected $primaryKey = 'ID_TAGIHAN_SISWA';
     public $timestamps = false;

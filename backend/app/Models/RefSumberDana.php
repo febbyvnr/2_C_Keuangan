@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefSumberDana extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_sumber_dana';
     protected $primaryKey = 'ID_REF_DANA';
 
