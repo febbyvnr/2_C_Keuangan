@@ -184,6 +184,8 @@ Route::prefix('dtl-fpd')->group(function () {
 Route::prefix('fpd-anggaran')->group(function () {
     Route::get('/', [FpdAnggaranController::class, 'index']);
     Route::get('/search', [FpdAnggaranController::class, 'search']);
+    Route::get('/export/excel', [FpdAnggaranController::class, 'exportListExcel']);
+    Route::get('/export/pdf', [FpdAnggaranController::class, 'exportListPdf']);
     Route::get('/export/{id}', [FpdAnggaranController::class, 'export']);
     Route::get('/{id}', [FpdAnggaranController::class, 'show']);
     Route::post('/store', [FpdAnggaranController::class, 'store']);
