@@ -6,7 +6,7 @@ export default function DashboardPM() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/dashboard-penjaminan-mutu")
+    fetch("http://localhost:8000/api/dashboardtimpenjaminanmutu")
       .then((res) => res.json())
       .then((data) => {
         setDashboard(data.data);
