@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefJenisTarif extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_jenis_tarif';
 
     protected $primaryKey = 'ID_JENIS_TARIF';

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 
 class TrPenerimaan extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'tr_penerimaan';
     protected $primaryKey = 'ID_TR_PENERIMAAN';
     public $timestamps = false;

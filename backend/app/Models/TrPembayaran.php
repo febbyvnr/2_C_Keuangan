@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\RefMetodePembayaran;
@@ -13,6 +14,8 @@ use App\Models\TrCicilan;
 class TrPembayaran extends Model
 {
     use HasFactory;
+    use RecordsActivity;
+
 
     protected $table = 'tr_pembayaran';
     protected $primaryKey = 'ID_PEMBAYARAN';

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RefVisiMisi extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_visi_misi';
     protected $primaryKey = 'ID_VISI_MISI';
     public $incrementing = false;

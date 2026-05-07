@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstKegiatan extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'mst_kegiatan';
     protected $primaryKey = 'ID_KEGIATAN';
     public $timestamps = false;
