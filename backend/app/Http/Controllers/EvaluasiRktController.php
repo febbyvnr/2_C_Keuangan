@@ -12,15 +12,53 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class EvaluasiRktController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
+            $query = EvaluasiRkt::with(['programKerja', 'refPm']);
+
+            // Filter per kolom (opsional)
+            if ($request->filled('ID_PROGRAM_KERJA')) {
+                $query->where('ID_PROGRAM_KERJA', (int) $request->ID_PROGRAM_KERJA);
+            }
+            if ($request->filled('ID_REF_PM')) {
+                $query->where('ID_REF_PM', (int) $request->ID_REF_PM);
+            }
+            if ($request->filled('TGL_PM')) {
+                $query->where('TGL_PM', 'like', $request->TGL_PM . '%');
+            }
+            if ($request->filled('keyword')) {
+                $kw = $request->keyword;
+                $query->where(function ($q) use ($kw) {
+                    $q->where('DESKRIPSI_TR_PM', 'like', "%{$kw}%")
+                      ->orWhereHas('refPm', fn($r) => $r->where('NAMA_PM', 'like', "%{$kw}%"))
+                      ->orWhereHas('programKerja', fn($p) => $p->where('PROGRAM_KERJA', 'like', "%{$kw}%"));
+                });
+            }
             $data = EvaluasiRkt::with([
                 'programKerja',
                 'refPm',
                 'validator.jabatan.refJabatan'
             ])->get();
 
+            // Pagination opsional — kalau tidak ada per_page, return semua (backward-compat)
+            $perPage = (int) $request->query('per_page', 0);
+            if ($perPage > 0) {
+                $data = $query->paginate($perPage);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data Evaluasi RKT berhasil diambil',
+                    'data' => $data->items(),
+                    'pagination' => [
+                        'total'        => $data->total(),
+                        'per_page'     => $data->perPage(),
+                        'current_page' => $data->currentPage(),
+                        'last_page'    => $data->lastPage(),
+                    ],
+                ]);
+            }
+
+            $data = $query->get();
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
@@ -59,8 +97,12 @@ class EvaluasiRktController extends Controller
             }
 
             if ($request->filled('keyword')) {
-                $keyword = $request->query('keyword');
-                $query->where('DESKRIPSI_TR_PM', 'like', "%{$keyword}%");
+                $kw = $request->query('keyword');
+                $query->where(function ($q) use ($kw) {
+                    $q->where('DESKRIPSI_TR_PM', 'like', "%{$kw}%")
+                      ->orWhereHas('refPm', fn($r) => $r->where('NAMA_PM', 'like', "%{$kw}%"))
+                      ->orWhereHas('programKerja', fn($p) => $p->where('PROGRAM_KERJA', 'like', "%{$kw}%"));
+                });
             }
 
             $data = $query->get();
@@ -268,7 +310,12 @@ class EvaluasiRktController extends Controller
             $query->where('TGL_PM', 'like', $filters['TGL_PM'] . '%');
         }
         if (!empty($filters['keyword'])) {
-            $query->where('DESKRIPSI_TR_PM', 'like', '%' . $filters['keyword'] . '%');
+            $kw = $filters['keyword'];
+            $query->where(function ($q) use ($kw) {
+                $q->where('DESKRIPSI_TR_PM', 'like', "%{$kw}%")
+                  ->orWhereHas('refPm', fn($r) => $r->where('NAMA_PM', 'like', "%{$kw}%"))
+                  ->orWhereHas('programKerja', fn($p) => $p->where('PROGRAM_KERJA', 'like', "%{$kw}%"));
+            });
         }
 
         $data = $query->get();
