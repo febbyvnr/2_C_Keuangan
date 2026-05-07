@@ -11,21 +11,19 @@ class DashboardTimPenjaminanMutuController extends Controller
     public function index(): JsonResponse
     {
         try {
-            // Mengambil detail Program Kerja (Target) dan hasil Mutu (Realisasi/Deviasi/Evaluasi)
             $dataRkt = DB::table('mst_program_kerja as mst')
                 ->leftJoin('tr_pm as tp', 'mst.ID_PROGRAM_KERJA', '=', 'tp.ID_PROGRAM_KERJA')
                 ->select(
                     'mst.ID_PROGRAM_KERJA',
-                    'mst.PROGRAM_KERJA',   // Nama Program
-                    'mst.INDIKATOR',       // Target Indikator dari Perencanaan
-                    'mst.SASARAN',         // Sasaran dari Perencanaan
-                    'mst.TOTAL_PROGKER',   // Pagu Anggaran
-                    
+                    'mst.PROGRAM_KERJA',   
+                    'mst.INDIKATOR',       
+                    'mst.SASARAN',         
+                    'mst.TOTAL_PROGKER',   
                     DB::raw('GROUP_CONCAT(tp.ID_REF_PM) as list_id_ref'),
-                   
-                    DB::raw('MAX(CASE WHEN tp.ID_REF_PM = 29 THEN tp.KETERANGAN ELSE NULL END) as catatan_evaluasi'),
-                   
-                    DB::raw('MAX(CASE WHEN tp.ID_REF_PM = 28 THEN tp.KETERANGAN ELSE NULL END) as realisasi_indikator')
+                    // Mengambil teks Realisasi dari kolom DESKRIPSI_TR_PM
+                    DB::raw('MAX(CASE WHEN tp.ID_REF_PM = 28 THEN tp.DESKRIPSI_TR_PM ELSE NULL END) as realisasi_indikator'),
+                    // Mengambil teks Evaluasi dari kolom DESKRIPSI_TR_PM
+                    DB::raw('MAX(CASE WHEN tp.ID_REF_PM = 29 THEN tp.DESKRIPSI_TR_PM ELSE NULL END) as catatan_evaluasi')
                 )
                 ->where('mst.IS_DELETE', 0)
                 ->groupBy(
@@ -37,54 +35,57 @@ class DashboardTimPenjaminanMutuController extends Controller
                 )
                 ->get();
 
-            $summary = [
-                'total_program' => $dataRkt->count(),
-                'mencapai_target' => 0,
-                'mengalami_deviasi' => 0,
-            ];
+            // Inisialisasi Counter untuk Summary Dashboard
+            $totalProgram = $dataRkt->count();
+            $countRealisasi = 0;
+            $countDeviasi = 0;
 
-            $mappedData = $dataRkt->map(function ($item) use (&$summary) {
-                $refIds = explode(',', $item->list_id_ref);
+            // Mapping data untuk detail tabel
+            $detailEvaluasi = $dataRkt->map(function ($item) use (&$countRealisasi, &$countDeviasi) {
+                $refIds = $item->list_id_ref ? explode(',', $item->list_id_ref) : [];
 
-                $hasRealisasi = in_array(28, $refIds);
-                
-                $hasDeviasi = in_array(25, $refIds) || in_array(26, $refIds);
+                // Pengecekan status berdasarkan konstrain tugas TPM
+                $isRealisasi = in_array(28, $refIds);
+                $isDeviasi = in_array(25, $refIds) || in_array(26, $refIds);
 
-                if ($hasRealisasi) $summary['mencapai_target']++;
-                if ($hasDeviasi) $summary['mengalami_deviasi']++;
+                if ($isRealisasi) $countRealisasi++;
+                if ($isDeviasi) $countDeviasi++;
 
                 return [
-                    'id' => $item->ID_PROGRAM_KERJA,
-                    'kegiatan' => $item->PROGRAM_KERJA,
+                    'id_program' => $item->ID_PROGRAM_KERJA,
+                    'program_kerja' => $item->PROGRAM_KERJA,
                     'target_indikator' => $item->INDIKATOR,
-                    'realisasi_indikator' => $item->realisasi_indikator ?? 'Belum diisi',
-                    'pagu' => $item->TOTAL_PROGKER,
+                    'sasaran' => $item->SASARAN,
+                    'pagu_anggaran' => (float) $item->TOTAL_PROGKER,
+                    'realisasi_teks' => $item->realisasi_indikator ?? 'Belum ada input realisasi',
+                    'evaluasi_teks' => $item->catatan_evaluasi ?? 'Belum ada input evaluasi',
                     'status' => [
-                        'is_realisasi' => $hasRealisasi,
-                        'is_deviasi' => $hasDeviasi,
-                    ],
-                    'evaluasi' => $item->catatan_evaluasi ?? 'N/A' // Konstrain 3: Evaluasi
+                        'sudah_realisasi' => $isRealisasi,
+                        'ada_deviasi' => $isDeviasi
+                    ]
                 ];
             });
 
             return response()->json([
                 'status' => true,
-                'message' => 'Dashboard RKT untuk Tim Penjaminan Mutu',
+                'message' => 'Dashboard Tim Penjaminan Mutu berhasil dimuat',
                 'summary' => [
-                    'total_rkt' => $summary['total_program'],
-                    'realisasi' => $summary['mencapai_target'],
-                    'deviasi' => $summary['mengalami_deviasi'],
-                    'persentase_mutu' => $summary['total_program'] > 0 
-                        ? round(($summary['mencapai_target'] / $summary['total_program']) * 100, 2) 
-                        : 0
+                    'total_rkt' => $totalProgram,
+                    'total_realisasi' => $countRealisasi,
+                    'total_deviasi' => $countDeviasi,
+                    'persentase_capaian' => $totalProgram > 0 
+                        ? round(($countRealisasi / $totalProgram) * 100, 2) 
+                        : 0,
                 ],
-                'detail_evaluasi_tpm' => $mappedData
+                'data' => $detailEvaluasi
             ], 200);
 
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage()
+                'message' => 'Gagal memproses Dashboard Tim Penjaminan Mutu',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString() // Opsional: untuk debug lebih dalam
             ], 500);
         }
     }
