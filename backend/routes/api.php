@@ -272,6 +272,8 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::post('/store', [EvaluasiRktController::class, 'store']);
     Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
+    Route::put('/approve/{id}', [EvaluasiRktController::class, 'approve']);
+    Route::put('/reject/{id}', [EvaluasiRktController::class, 'reject']);
 });
 
 Route::get('/ref-jenis-tagihan', [RefJenisTagihanController::class, 'index']);

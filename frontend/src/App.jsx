@@ -16,6 +16,7 @@ import Tarif from "./pages/bendahara/Tarif";
 import Laporan from "./pages/bendahara/Laporan";
 
 import Verifikasi from "./pages/bendahara/Verifikasi";
+import VerifikasiFPD from "./pages/bendahara/VerifikasiFPD";
 import Penerimaan from "./pages/bendahara/Penerimaan";
 import Log from "./pages/bendahara/ActivityLogDashboard";
 
@@ -156,6 +157,7 @@ export default function App() {
           <Route path="tarif" element={<Tarif />} />
           <Route path="laporan" element={<Laporan />} />
           <Route path="verifikasi" element={<Verifikasi />} />
+          <Route path="verifikasi-fpd" element={<VerifikasiFPD />} />
           <Route path="penerimaan" element={<Penerimaan />} />
           <Route path="log" element={<Log />} />
 

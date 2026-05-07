@@ -193,6 +193,11 @@ export default function SidebarBendahara() {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
+                                <NavLink to="/bendahara/verifikasi-fpd" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-file-check"></i>Verifikasi FPD
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
                                 <NavLink to="/bendahara/laporan" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-file-earmark"></i>Laporan
                                 </NavLink>
