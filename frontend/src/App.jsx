@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import SidebarBendahara from "./components/SidebarBendahara";
 import SidebarWaka from "./components/SidebarWaka";
-import Login from "./pages/Login"; // <-- TAMBAHAN 1: Import halaman login
+import Login from "./pages/Login";
 
 import Dashboard from "./pages/bendahara/Dashboard";
 import Dana from "./pages/bendahara/Dana";
@@ -29,6 +29,7 @@ import MasterRefPM from "./pages/bendahara/MasterRefPM";
 import MasterTarif from "./pages/bendahara/MasterTarif";
 import MasterJenisTarif from "./pages/bendahara/MasterJenisTarif";
 import MasterJenisPembayaran from "./pages/bendahara/MasterJenisPembayaran";
+
 import PicGuruFPD from "./pages/pic/guru/FPD";
 import WakaRKT from "./pages/waka/RKT";
 import WakaRKA from "./pages/waka/RKA";
@@ -54,11 +55,13 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 import SidebarKepsek from "./components/SidebarKepsek";
 import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
+// import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
+import ReferensiPm from "./pages/pm/ReferensiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
@@ -110,9 +113,17 @@ function KepsekLayout() {
 
 function PmLayout() {
   return (
-    <div className="layout" style={{ display: "flex" }}>
+    <div className="layout" style={{ display: "flex", minHeight: "100vh" }}>
       <SidebarPm />
-      <div className="content-wrapper" style={{ flex: 1 }}>
+      <div
+        className="content-wrapper"
+        style={{
+          flex: 1,
+          minHeight: "100vh",
+          background: "#f6f7f9",
+          overflowX: "auto",
+        }}
+      >
         <Outlet />
       </div>
     </div>
@@ -123,10 +134,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* --- TAMBAHAN 2: Rute Login --- */}
         <Route path="/login" element={<Login />} />
-
-        {/* --- UBAHAN DIKIT: Kalo ngetik root (/), arahin ke login dulu --- */}
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* BENDHARA LAYOUT */}
@@ -169,7 +177,7 @@ export default function App() {
           />
         </Route>
 
-        {/* SISWA ORTU TANPA SIDEBAR*/}
+        {/* SISWA ORTU TANPA SIDEBAR */}
         <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
         <Route
           path="/siswa-ortu/pembayaran/:id"
@@ -208,7 +216,7 @@ export default function App() {
           <Route path="monitoring" element={<WakaMonitoring />} />
         </Route>
 
-        {/* YAYASAN GAJADI PAKE */}
+        {/* YAYASAN */}
         <Route path="/yayasan" element={<YayasanLayout />}>
           <Route path="dashboard" element={<DashboardYayasan />} />
           <Route path="approval" element={<ApprovalYayasan />} />
@@ -216,10 +224,11 @@ export default function App() {
           <Route path="monitoring" element={<MonitoringYayasan />} />
         </Route>
 
-        {/* --- RUTE PENJAMINAN MUTU --- */}
+        {/* PM */}
         <Route path="/pm" element={<PmLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardPM />} />
+          <Route path="referensi" element={<ReferensiPm />} />
           <Route
             path="monitoring-mutu"
             element={
