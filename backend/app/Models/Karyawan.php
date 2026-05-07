@@ -35,4 +35,9 @@ class Karyawan extends Authenticatable
             'ID_JABATAN'      
         );
     }
+
+    public function jabatan()
+    {
+        return $this->hasOne(TrJabatan::class, 'NIP_KARYAWAN', 'NIP_KARYAWAN');
+    }
 }

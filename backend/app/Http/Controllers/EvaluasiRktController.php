@@ -35,6 +35,11 @@ class EvaluasiRktController extends Controller
                       ->orWhereHas('programKerja', fn($p) => $p->where('PROGRAM_KERJA', 'like', "%{$kw}%"));
                 });
             }
+            $data = EvaluasiRkt::with([
+                'programKerja',
+                'refPm',
+                'validator.jabatan.refJabatan'
+            ])->get();
 
             // Pagination opsional — kalau tidak ada per_page, return semua (backward-compat)
             $perPage = (int) $request->query('per_page', 0);
@@ -73,7 +78,11 @@ class EvaluasiRktController extends Controller
     public function search(Request $request): JsonResponse
     {
         try {
-            $query = EvaluasiRkt::with(['programKerja', 'refPm']);
+            $query = EvaluasiRkt::with([
+                'programKerja',
+                'refPm',
+                'validator.jabatan.refJabatan'
+            ]);
 
             if ($request->filled('ID_PROGRAM_KERJA')) {
                 $query->where('ID_PROGRAM_KERJA', (int) $request->query('ID_PROGRAM_KERJA'));
@@ -118,7 +127,7 @@ class EvaluasiRktController extends Controller
     {
         try {
             $id = (int) $id;
-            $data = EvaluasiRkt::with(['programKerja', 'refPm'])->find($id);
+            $data = EvaluasiRkt::with(['programKerja', 'refPm', 'validator.jabatan.refJabatan'])->find($id);
 
             if (!$data) {
                 return response()->json([
@@ -127,7 +136,6 @@ class EvaluasiRktController extends Controller
                     'data' => null,
                 ], 404);
             }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Evaluasi RKT berhasil diambil',
@@ -213,6 +221,63 @@ class EvaluasiRktController extends Controller
                 'success' => false,
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function approve(Request $request, $id): JsonResponse
+    {
+        try {
+            $data = EvaluasiRkt::find($id);
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+            $validated = $request->validate([
+                'NIP_VALIDATOR_PM' => 'required'
+            ]);
+            $data->update([
+                'NIP_VALIDATOR_PM' => $validated['NIP_VALIDATOR_PM']
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluasi berhasil disetujui',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reject($id): JsonResponse
+    {
+        try {
+            $data = EvaluasiRkt::find($id);
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+            $data->update([
+                'NIP_VALIDATOR_PM' => 'Ditolak'
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluasi berhasil ditolak',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

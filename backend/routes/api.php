@@ -250,7 +250,7 @@ Route::prefix('jenis-tarif')->group(function () {
 //     Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
 //     Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
 //     Route::post('/store', [RefTarifController::class, 'store']);
-//     Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+//     Route::put('/update/{idJeniFs}/{idTahun}', [RefTarifController::class, 'update']);
 //     Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
 // });
 
@@ -274,6 +274,8 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::post('/store', [EvaluasiRktController::class, 'store']);
     Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
+    Route::put('/approve/{id}', [EvaluasiRktController::class, 'approve']);
+    Route::put('/reject/{id}', [EvaluasiRktController::class, 'reject']);
 });
 
 Route::get('/ref-jenis-tagihan', [RefJenisTagihanController::class, 'index']);

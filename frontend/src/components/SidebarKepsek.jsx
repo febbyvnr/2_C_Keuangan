@@ -142,6 +142,24 @@ export default function SidebarKepsek() {
                                     <i className="bi bi-columns-gap"></i>Dashboard
                                 </NavLink>
                             </li>
+                            <li className="nav-item" onMouseEnter={() => setOpenMaster(true)} onMouseLeave={() => !isMasterActive && setOpenMaster(false)}>
+                                <div className="nav-link text-dark master-menu">
+                                    <i className="bi bi-database"></i>
+                                    Data Master
+                                    <i className={`bi bi-chevron-right ms-auto transition-transform ${openMaster ? 'rotate-90' : ''}`} style={{ fontSize: '10px' }}></i>
+                                </div>
+                                {openMaster && (
+                                    <ul className="submenu">
+                                        <li><NavLink to="/kepsek/master/coa" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data COA</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/kegiatan" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Kegiatan</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/tahun-anggaran" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Tahun Anggaran</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/sumber-dana" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Sumber Dana</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/ref-penerimaan" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Ref Penerimaan</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/ref-pm" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Ref PM</NavLink></li>
+                                        <li><NavLink to="/kepsek/master/tarif" className={({ isActive }) => isActive ? "nav-link sidebar-active" : "nav-link"}>Data Tarif</NavLink></li>
+                                    </ul>
+                                )}
+                            </li>
                             <li className="nav-item">
                                 <NavLink to="/kepsek/approval-center" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-check2-square"></i>Approval Center
