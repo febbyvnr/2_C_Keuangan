@@ -303,4 +303,67 @@ class EvaluasiRktController extends Controller
             ], 500);
         }
     }
+
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'NIP_VALIDATOR_PM' => 'required|string|max:20',
+            'DESKRIPSI_TR_PM' => 'required|string',
+        ]);
+
+        try {
+            // 🔹 Cari evaluasi
+            $evaluasi = EvaluasiRkt::findOrFail($id);
+
+            // 🔹 Cek validator
+            $validator = DB::table('mst_karyawan')
+                ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
+                ->first();
+
+            if (
+                !$validator ||
+                !str_contains(
+                    strtolower($validator->JABATAN_FUNGSIONAL ?? ''),
+                    'kepala sekolah'
+                )
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya Kepala Sekolah yang boleh reject evaluasi',
+                ], 403);
+            }
+
+            // 🔹 Cek sudah approve atau belum
+            if ($evaluasi->NIP_VALIDATOR_PM) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Evaluasi sudah disetujui, tidak bisa ditolak',
+                ], 400);
+            }
+
+            // 🔹 Update deskripsi jadi penolakan
+            $evaluasi->update([
+                'DESKRIPSI_TR_PM' => 'Ditolak: ' . $request->DESKRIPSI_TR_PM,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluasi berhasil ditolak',
+                'data' => $evaluasi
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Evaluasi tidak ditemukan',
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject evaluasi',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
