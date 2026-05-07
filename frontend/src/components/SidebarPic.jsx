@@ -208,6 +208,18 @@ export default function SidebarPic() {
                   Evaluasi RKT
                 </NavLink>
               </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/status-pengajuan"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-clipboard2-pulse"></i>
+                  Status Pengajuan
+                </NavLink>
+              </li>
             </ul>
 
             <div className="logout">

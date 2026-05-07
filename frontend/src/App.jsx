@@ -62,6 +62,7 @@ import DashboardPM from "./pages/pm/Dashboard";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import "./index.css";
+import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
 
 function BendaharaLayout() {
   return (
@@ -183,6 +184,8 @@ export default function App() {
         <Route path="/pic/guru/rka" element={<RKA />} />
         <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
         <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
+        {/* <Route path="/pic/guru/status-pengajuan" element={<StatusPengajuan />} /> */}
+        {/* <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKTPage />} /> */}
 
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
