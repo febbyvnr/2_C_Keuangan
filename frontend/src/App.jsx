@@ -63,6 +63,7 @@ import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
+import VerifikasiEvaluasiPm from "./pages/PM/VerifikasiEvaluasiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import KepsekMasterCOA from "./pages/kepsek/master/MasterCOA.jsx";
@@ -212,9 +213,18 @@ export default function App() {
           <Route path="approval-center" element={<KepsekApproval />} />
           <Route path="master/coa" element={<KepsekMasterCOA />} />
           <Route path="master/kegiatan" element={<KepsekMasterKegiatan />} />
-          <Route path="master/tahun-anggaran" element={<KepsekMasterTahunAnggaran />} />
-          <Route path="master/sumber-dana" element={<KepsekMasterSumberDana />} />
-          <Route path="master/ref-penerimaan" element={<KepsekMasterRefPenerimaan />} />
+          <Route
+            path="master/tahun-anggaran"
+            element={<KepsekMasterTahunAnggaran />}
+          />
+          <Route
+            path="master/sumber-dana"
+            element={<KepsekMasterSumberDana />}
+          />
+          <Route
+            path="master/ref-penerimaan"
+            element={<KepsekMasterRefPenerimaan />}
+          />
           <Route path="master/ref-pm" element={<KepsekMasterRefPM />} />
           <Route path="master/tarif" element={<KepsekMasterTarif />} />
         </Route>
@@ -260,6 +270,10 @@ export default function App() {
                 <h1>Evaluasi RKT</h1>
               </div>
             }
+          />
+          <Route
+            path="verifikasi-evaluasi"
+            element={<VerifikasiEvaluasiPm />}
           />
         </Route>
       </Routes>
