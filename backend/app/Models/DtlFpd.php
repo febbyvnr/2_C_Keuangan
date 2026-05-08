@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DtlFpd extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'dtl_fpd';
     protected $primaryKey = 'ID_DT_FPD';
     public $incrementing = true;

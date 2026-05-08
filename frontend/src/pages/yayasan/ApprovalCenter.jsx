@@ -103,15 +103,7 @@ export default function ApprovalCenter() {
     const handleReject = async () => {
         if (!selected) return;
         try {
-            const res = await fetch(`http://localhost:8000/api/rkt/update/${selected.ID_PROGRAM_KERJA}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...selected,
-                    STATUS_APPROVAL: "REJECTED"
-                })
-            });
-
+            const res = await fetch(`http://localhost:8000/api/rkt/reject/${selected.ID_PROGRAM_KERJA}`, {method: "PUT"});
             if (res.ok) {
                 alert("Program kerja ditolak!");
                 fetchData();
@@ -152,12 +144,12 @@ export default function ApprovalCenter() {
                                     <td>{item.PROGRAM_KERJA || "-"}</td>
                                     <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN}</td>
                                     <td>
-                                        Rp {Number(item.NOMINAL || 0).toLocaleString("id-ID")}
+                                        Rp {Number(item.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
                                     </td>
                                     <td>
-                                        {item.STATUS_APPROVAL === "REJECTED" ? (
+                                        {item.STATUS_APPROVAL === "Ditolak" ? (
                                             <span className="status rejected">Ditolak</span>
-                                        ) : item.NIP_VALIDATOR_PROGKER ? (
+                                        ) : item.STATUS_APPROVAL === "Disetujui" ? (
                                             <span className="status approved">Disetujui</span>
                                         ) : (
                                             <span className="status pending">Pending</span>
@@ -245,7 +237,7 @@ export default function ApprovalCenter() {
                             <div className="detail-row">
                                 <span>Anggaran</span>
                                 <span>
-                                    Rp {Number(selected.NOMINAL || 0).toLocaleString("id-ID")}
+                                    Rp {Number(selected.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
                                 </span>
                             </div>
                             <div className="detail-row">
@@ -264,14 +256,20 @@ export default function ApprovalCenter() {
                                 <button
                                     className="approve-btn"
                                     onClick={handleApprove}
-                                    disabled={selected.NIP_VALIDATOR_PROGKER != "" || selected.STATUS_APPROVAL === "APPROVED"}
+                                    disabled={
+                                        selected?.STATUS_APPROVAL === "Disetujui" ||
+                                        selected?.STATUS_APPROVAL === "Ditolak"
+                                    }
                                 >
                                     Setujui
                                 </button>
                                 <button
                                     className="reject-btn"
                                     onClick={handleReject}
-                                    disabled={selected.NIP_VALIDATOR_PROGKER != "" || selected.STATUS_APPROVAL === "REJECTED"}
+                                    disabled={
+                                        selected?.STATUS_APPROVAL === "Disetujui" ||
+                                        selected?.STATUS_APPROVAL === "Ditolak"
+                                    }
                                 >
                                     Tolak
                                 </button>

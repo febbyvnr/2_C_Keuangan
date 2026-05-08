@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,20 +10,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MstProgramKerja extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'mst_program_kerja';
     protected $primaryKey = 'ID_PROGRAM_KERJA';
     public $timestamps = false;
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'ID_PROGRAM_KERJA',
         'ID_TA_ANGGARAN',
         'ID_UNIT',
         'ID_TAN',
         'ID_MASTER_COA',
         'ID_KEGIATAN',
-        'NOMINAL',
+        'TOTAL_PROGKER',
         'INDIKATOR',
         'SASARAN',
         'WAKTU_AWAL',
@@ -41,9 +43,9 @@ class MstProgramKerja extends Model
         'ID_TAN' => 'integer',
         'ID_MASTER_COA' => 'integer',
         'ID_KEGIATAN' => 'integer',
-        'NOMINAL' => 'float',
-        'WAKTU_AWAL' => 'date',
-        'WAKTU_AKHIR' => 'date',
+        'TOTAL_PROGKER' => 'float',
+        'WAKTU_AWAL' => 'datetime',
+        'WAKTU_AKHIR' => 'datetime',
         'IS_DELETE' => 'boolean',
     ];
 
@@ -80,6 +82,11 @@ class MstProgramKerja extends Model
     public function trPm(): HasMany
     {
         return $this->hasMany(TrPm::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
+    }
+
+    public function Rka(): HasMany
+    {
+        return $this->hasMany(Rka::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
 
     public function scopeActive(Builder $query): Builder

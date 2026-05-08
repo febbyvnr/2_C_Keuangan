@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RefTarif extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'ref_tarif';
     protected $primaryKey = 'ID_REF_TARIF';
     public $incrementing = true;
@@ -17,6 +20,7 @@ class RefTarif extends Model
     protected $fillable = [
         'ID_JENIS_TARIF',
         'ID_TA_ANGGARAN',
+        'DESKRIPSI_TARIF',
         'NOMINAL',
         'TGL_PENETAPAN',
     ];

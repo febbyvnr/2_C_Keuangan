@@ -4,10 +4,15 @@ import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-const [siswaData, setSiswaData] = useState(null);
+  const [siswaData, setSiswaData] = useState(null);
   const [tagihanData, setTagihanData] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const ITEMS_PER_PAGE = 10;
+
+  const [activeBillPage, setActiveBillPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -18,6 +23,22 @@ const [siswaData, setSiswaData] = useState(null);
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(Number(value || 0));
+
+  const formatTanggal = (value) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +53,10 @@ const [siswaData, setSiswaData] = useState(null);
         const tagihanJson = await tagihanRes.json();
         const pembayaranJson = await pembayaranRes.json();
 
-        const tagihan = Array.isArray(tagihanJson.data) ? tagihanJson.data : [];
+        const tagihan = Array.isArray(tagihanJson.data)
+          ? tagihanJson.data
+          : [];
+
         const pembayaran = Array.isArray(pembayaranJson.data)
           ? pembayaranJson.data
           : [];
@@ -55,36 +79,31 @@ const [siswaData, setSiswaData] = useState(null);
     }
   }, [id]);
 
-  // const siswa = useMemo(() => {
-  //   if (tagihanData.length > 0 && tagihanData[0]?.SISWA) {
-  //     return tagihanData[0].SISWA;
-  //   }
-
-  //   if (paymentHistory.length > 0 && paymentHistory[0]?.siswa) {
-  //     return paymentHistory[0].siswa;
-  //   }
-
-  //   return null;
-  // }, [tagihanData, paymentHistory]);
-
   const activeBills = useMemo(() => {
     return tagihanData.map((item) => {
       const totalTagihan = Number(item.JUMLAH_TAGIHAN_SISWA || 0);
       const totalBayar = Number(item.TOTAL_PEMBAYARAN || 0);
-      const sisa = Number(item.SISA_TAGIHAN || totalTagihan - totalBayar);
 
-      let status = "Belum Bayar";
+      const sisaAsli =
+        item.SISA_TAGIHAN !== undefined && item.SISA_TAGIHAN !== null
+          ? Number(item.SISA_TAGIHAN)
+          : totalTagihan - totalBayar;
+
+      const sisa = Math.max(0, sisaAsli);
+
+      let status = item.STATUS_TAGIHAN_SISWA || "Belum Bayar";
+
       if (sisa <= 0) {
-        status = "Lunas";
+        status = "Sudah Bayar";
       } else if (totalBayar > 0) {
-        status = "Belum Lunas";
+        status = "Cicilan";
       }
 
       return {
         id: item.ID_TAGIHAN_SISWA,
         tagihan:
-          item?.JENIS_PEMBAYARAN?.DESKRIPSI_JENIS_PEMBAYARAN ||
-          item?.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN ||
+          item?.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
+          item?.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
           "Tagihan",
         totalTagihan,
         totalBayar,
@@ -93,6 +112,34 @@ const [siswaData, setSiswaData] = useState(null);
       };
     });
   }, [tagihanData]);
+
+  const activeBillTotalPages = Math.max(
+    1,
+    Math.ceil(activeBills.length / ITEMS_PER_PAGE)
+  );
+
+  const paginatedActiveBills = useMemo(() => {
+    const startIndex = (activeBillPage - 1) * ITEMS_PER_PAGE;
+    return activeBills.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [activeBills, activeBillPage]);
+
+  const historyTotalPages = Math.max(
+    1,
+    Math.ceil(paymentHistory.length / ITEMS_PER_PAGE)
+  );
+
+  const paginatedPaymentHistory = useMemo(() => {
+    const startIndex = (historyPage - 1) * ITEMS_PER_PAGE;
+    return paymentHistory.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [paymentHistory, historyPage]);
+
+  useEffect(() => {
+    setActiveBillPage(1);
+  }, [activeBills.length]);
+
+  useEffect(() => {
+    setHistoryPage(1);
+  }, [paymentHistory.length]);
 
   const summaryCards = useMemo(() => {
     const totalTagihan = activeBills.reduce(
@@ -118,8 +165,21 @@ const [siswaData, setSiswaData] = useState(null);
   }, [activeBills]);
 
   const sisaTagihanBulanIni = useMemo(() => {
-    const belumLunas = activeBills.filter((item) => item.status !== "Lunas");
+    const belumLunas = activeBills.filter(
+      (item) => item.status !== "Sudah Bayar" && item.status !== "Lunas"
+    );
+
     return belumLunas.reduce((sum, item) => sum + Number(item.sisa || 0), 0);
+  }, [activeBills]);
+
+  const hasUnpaidBill = useMemo(() => {
+    return activeBills.some(
+      (item) =>
+        (item.status === "Belum Bayar" ||
+          item.status === "Cicilan" ||
+          item.status === "Belum Lunas") &&
+        Number(item.sisa || 0) > 0
+    );
   }, [activeBills]);
 
   const announcements = [
@@ -134,21 +194,27 @@ const [siswaData, setSiswaData] = useState(null);
   const renderStatusBadge = (status) => {
     let className = "status-badge";
 
-    if (status === "Lunas" || status === "Terverifikasi") {
+    if (
+      status === "Sudah Bayar" ||
+      status === "Lunas" ||
+      status === "Terverifikasi"
+    ) {
       className += " success";
     } else if (status === "Belum Bayar") {
       className += " danger";
-    } else if (status === "Belum Lunas") {
+    } else if (status === "Cicilan" || status === "Belum Lunas") {
       className += " info";
     } else if (status === "Menunggu Verifikasi") {
       className += " warning";
     }
 
-    return <span className={className}>{status}</span>;
+    const label = status === "Sudah Bayar" ? "Lunas" : status;
+
+    return <span className={className}>{label}</span>;
   };
 
   const renderActionButton = (status, billId) => {
-    if (status === "Lunas") {
+    if (status === "Lunas" || status === "Sudah Bayar") {
       return (
         <button className="action-btn action-btn-disabled" disabled>
           Lunas
@@ -176,7 +242,11 @@ const [siswaData, setSiswaData] = useState(null);
 
   const handlePayNow = () => {
     const unpaidBill = activeBills.find(
-      (item) => item.status === "Belum Bayar" || item.status === "Belum Lunas"
+      (item) =>
+        (item.status === "Belum Bayar" ||
+          item.status === "Cicilan" ||
+          item.status === "Belum Lunas") &&
+        Number(item.sisa || 0) > 0
     );
 
     if (unpaidBill) {
@@ -194,9 +264,11 @@ const [siswaData, setSiswaData] = useState(null);
         <header className="portal-header">
           <div className="portal-header-left">
             <p className="portal-label">Portal Siswa / Ortu</p>
+
             <h1 className="portal-title">
               Halo, {siswaData?.NAMA_SISWA_TETAP || "Siswa"}!
             </h1>
+
             <p className="portal-subtitle">
               Pantau tagihan administrasi sekolah dan riwayat pembayaran Anda di
               sini.
@@ -222,14 +294,15 @@ const [siswaData, setSiswaData] = useState(null);
                 <span className="profile-name">
                   {siswaData?.NAMA_SISWA_TETAP || "Siswa"}
                 </span>
-                <span className="profile-class">
-                  Siswa
-                </span>
+
+                <span className="profile-class">Siswa</span>
               </div>
 
-              <span className={`profile-caret ${isProfileOpen ? "rotate" : ""}`}>
-                ▾
-              </span>
+              <i
+                className={`bi ${
+                  isProfileOpen ? "bi-chevron-up" : "bi-chevron-down"
+                } profile-caret`}
+              ></i>
             </button>
 
             {isProfileOpen && (
@@ -266,8 +339,14 @@ const [siswaData, setSiswaData] = useState(null);
             <h2 className="hero-value">{formatRupiah(sisaTagihanBulanIni)}</h2>
           </div>
 
-          <button className="hero-button" onClick={handlePayNow}>
-            Bayar Sekarang
+          <button
+            className={`hero-button ${
+              !hasUnpaidBill ? "hero-button-disabled" : ""
+            }`}
+            onClick={handlePayNow}
+            disabled={!hasUnpaidBill}
+          >
+            {hasUnpaidBill ? "Bayar Sekarang" : "Tidak Ada Tagihan"}
           </button>
         </section>
 
@@ -289,11 +368,11 @@ const [siswaData, setSiswaData] = useState(null);
               </div>
 
               <div className="table-wrapper">
-                <table className="custom-table">
+                <table className="custom-table bill-table">
                   <thead>
                     <tr>
                       <th>No</th>
-                      <th>Tagihan</th>
+                      <th>Jenis Tagihan</th>
                       <th>Total Tagihan</th>
                       <th>Total Bayar</th>
                       <th>Sisa</th>
@@ -301,11 +380,14 @@ const [siswaData, setSiswaData] = useState(null);
                       <th>Aksi</th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {activeBills.length > 0 ? (
-                      activeBills.map((item, index) => (
+                    {paginatedActiveBills.length > 0 ? (
+                      paginatedActiveBills.map((item, index) => (
                         <tr key={item.id}>
-                          <td>{index + 1}</td>
+                          <td>
+                            {(activeBillPage - 1) * ITEMS_PER_PAGE + index + 1}
+                          </td>
                           <td>{item.tagihan}</td>
                           <td>{formatRupiah(item.totalTagihan)}</td>
                           <td>{formatRupiah(item.totalBayar)}</td>
@@ -322,6 +404,47 @@ const [siswaData, setSiswaData] = useState(null);
                   </tbody>
                 </table>
               </div>
+
+              {activeBills.length > 0 && (
+                <div className="portal-pagination">
+                  <span className="portal-pagination-info">
+                    Menampilkan {(activeBillPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
+                    {Math.min(
+                      activeBillPage * ITEMS_PER_PAGE,
+                      activeBills.length
+                    )}{" "}
+                    dari {activeBills.length} data
+                  </span>
+
+                  <div className="portal-pagination-actions">
+                    <button
+                      type="button"
+                      className="portal-page-btn"
+                      disabled={activeBillPage === 1}
+                      onClick={() =>
+                        setActiveBillPage((prev) => Math.max(1, prev - 1))
+                      }
+                    >
+                      ‹
+                    </button>
+
+                    <span className="portal-page-number">{activeBillPage}</span>
+
+                    <button
+                      type="button"
+                      className="portal-page-btn"
+                      disabled={activeBillPage === activeBillTotalPages}
+                      onClick={() =>
+                        setActiveBillPage((prev) =>
+                          Math.min(activeBillTotalPages, prev + 1)
+                        )
+                      }
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
 
             <section className="content-card">
@@ -331,7 +454,7 @@ const [siswaData, setSiswaData] = useState(null);
               </div>
 
               <div className="table-wrapper">
-                <table className="custom-table">
+                <table className="custom-table history-table">
                   <thead>
                     <tr>
                       <th>No</th>
@@ -341,16 +464,21 @@ const [siswaData, setSiswaData] = useState(null);
                       <th>ID Tagihan</th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {paymentHistory.length > 0 ? (
-                      paymentHistory.map((item, index) => (
+                    {paginatedPaymentHistory.length > 0 ? (
+                      paginatedPaymentHistory.map((item, index) => (
                         <tr key={item.ID_PEMBAYARAN}>
-                          <td>{index + 1}</td>
-                          <td>{item.TGL_BAYAR || "-"}</td>
+                          <td>
+                            {(historyPage - 1) * ITEMS_PER_PAGE + index + 1}
+                          </td>
+                          <td>{formatTanggal(item.TGL_BAYAR)}</td>
                           <td>{formatRupiah(item.JUMLAH_BAYAR)}</td>
                           <td>
-                            {item?.jenis_pembayaran?.DESKRIPSI_JENIS_PEMBAYARAN ||
-                              item?.jenisPembayaran?.DESKRIPSI_JENIS_PEMBAYARAN ||
+                            {item?.metode_pembayaran
+                              ?.DESKRIPSI_METODE_PEMBAYARAN ||
+                              item?.metodePembayaran
+                                ?.DESKRIPSI_METODE_PEMBAYARAN ||
                               "-"}
                           </td>
                           <td>{item.ID_TAGIHAN_SISWA || "-"}</td>
@@ -364,6 +492,47 @@ const [siswaData, setSiswaData] = useState(null);
                   </tbody>
                 </table>
               </div>
+
+              {paymentHistory.length > 0 && (
+                <div className="portal-pagination">
+                  <span className="portal-pagination-info">
+                    Menampilkan {(historyPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
+                    {Math.min(
+                      historyPage * ITEMS_PER_PAGE,
+                      paymentHistory.length
+                    )}{" "}
+                    dari {paymentHistory.length} data
+                  </span>
+
+                  <div className="portal-pagination-actions">
+                    <button
+                      type="button"
+                      className="portal-page-btn"
+                      disabled={historyPage === 1}
+                      onClick={() =>
+                        setHistoryPage((prev) => Math.max(1, prev - 1))
+                      }
+                    >
+                      ‹
+                    </button>
+
+                    <span className="portal-page-number">{historyPage}</span>
+
+                    <button
+                      type="button"
+                      className="portal-page-btn"
+                      disabled={historyPage === historyTotalPages}
+                      onClick={() =>
+                        setHistoryPage((prev) =>
+                          Math.min(historyTotalPages, prev + 1)
+                        )
+                      }
+                    >
+                      ›
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 

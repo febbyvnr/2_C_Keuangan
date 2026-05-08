@@ -9,6 +9,10 @@ class RefJenisTarifController extends Controller
     public function index()
     {
         $data = RefJenisTarif::orderBy('ID_JENIS_TARIF', 'asc')->get();
+        $data->transform(function ($item) {
+            $item->is_used = $item->tarif()->exists();
+            return $item;
+        });
         return response()->json([
             'success' => true,
             'data' => $data
@@ -21,7 +25,10 @@ class RefJenisTarifController extends Controller
         if ($request->filled('keyword')) {
             $query->where('DESKRIPSI_JENIS_TARIF', 'like', '%' . $request->keyword . '%');
         }
-        $data = $query->get();
+        $data = $query->get()->transform(function ($item) {
+            $item->is_used = $item->tarif()->exists();
+            return $item;
+        });
         return response()->json([
             'success' => true,
             'data' => $data

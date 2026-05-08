@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EvaluasiRkt extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'tr_pm';
     protected $primaryKey = 'ID_PM';
     public $incrementing = false;
@@ -41,5 +44,10 @@ class EvaluasiRkt extends Model
     public function refPm(): BelongsTo
     {
         return $this->belongsTo(RefPm::class, 'ID_REF_PM', 'ID_REF_PM');
+    }
+
+    public function validator()
+    {
+        return $this->belongsTo(Karyawan::class, 'NIP_VALIDATOR_PM', 'NIP_KARYAWAN');
     }
 }

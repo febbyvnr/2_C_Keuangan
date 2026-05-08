@@ -22,7 +22,12 @@ class RefTanController extends Controller
                       ->orWhere('DESKRIPSI_TAN', 'like', "%{$search}%");
                 });
             }
-            $data = $query->get();
+            $data = $query->get()->map(function ($item) {
+                $item->is_used = DB::table('mst_program_kerja')
+                    ->where('ID_TAN', $item->ID_TAN)
+                    ->exists();
+                return $item;
+            });
             return response()->json([
                 'data' => $data,
             ]);

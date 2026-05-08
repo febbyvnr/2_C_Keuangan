@@ -3,6 +3,7 @@ import "../../styles/waka/EvaluasiRKT.css";
 import SidebarWaka from "../../components/SidebarWaka";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
+const PAGE_SIZE = 10;
 
 const createEmptyForm = () => ({
     ID_PROGRAM_KERJA: "",
@@ -58,6 +59,33 @@ const formatDateLabel = (value) => {
     }).format(parsed);
 };
 
+const escapeHtml = (value) =>
+    String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+const escapeXml = (value) =>
+    String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+
+const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+};
+
 async function fetchJson(url, options = {}) {
     const response = await fetch(url, options);
     const json = await response.json();
@@ -93,6 +121,7 @@ export default function WakaEvaluasiRKT() {
     const [form, setForm] = useState(createEmptyForm());
     const [filters, setFilters] = useState(createEmptyFilters());
     const [editId, setEditId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
@@ -109,6 +138,19 @@ export default function WakaEvaluasiRKT() {
 
         return { total, selesai, terbaru };
     }, [rows]);
+
+    const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    const paginatedRows = useMemo(() => {
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        return rows.slice(startIndex, startIndex + PAGE_SIZE);
+    }, [currentPage, rows]);
+
+    const startData = rows.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+    const endData = rows.length === 0 ? 0 : Math.min(currentPage * PAGE_SIZE, rows.length);
+
+    useEffect(() => {
+        setCurrentPage((page) => Math.min(page, totalPages));
+    }, [totalPages]);
 
     const loadReferences = async () => {
         const [rktJson, refPmJson] = await Promise.all([
@@ -137,6 +179,7 @@ export default function WakaEvaluasiRKT() {
             const endpoint = queryString ? `/evaluasi-rkt/search?${queryString}` : "/evaluasi-rkt";
             const json = await fetchJson(`${API_BASE_URL}${endpoint}`);
             setRows(extractCollection(json));
+            setCurrentPage(1);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -260,9 +303,216 @@ export default function WakaEvaluasiRKT() {
     };
 
     const openExport = (type) => {
-        const queryString = toQueryString(filters);
-        const suffix = queryString ? `?${queryString}` : "";
-        window.open(`${API_BASE_URL}/evaluasi-rkt/export/${type}${suffix}`, "_blank");
+        const exportRows = rows.map((item) => ({
+            id: item.ID_PM ?? "-",
+            programKerja: item?.program_kerja?.PROGRAM_KERJA ?? item?.programKerja?.PROGRAM_KERJA ?? "-",
+            indikator: item?.program_kerja?.INDIKATOR ?? item?.programKerja?.INDIKATOR ?? "-",
+            statusPm: item?.ref_pm?.NAMA_PM ?? item?.refPm?.NAMA_PM ?? "-",
+            tanggal: formatDateLabel(item.TGL_PM),
+            deskripsi: item.DESKRIPSI_TR_PM || "-",
+        }));
+
+        if (exportRows.length === 0) {
+            setError("Tidak ada data evaluasi RKT untuk diexport.");
+            return;
+        }
+
+        setError("");
+
+        if (type === "csv") {
+            const headers = ["ID Evaluasi", "Program Kerja", "Indikator", "Status PM", "Tanggal Evaluasi", "Deskripsi"];
+            const lines = exportRows.map((row) =>
+                [row.id, row.programKerja, row.indikator, row.statusPm, row.tanggal, row.deskripsi]
+                    .map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`)
+                    .join(",")
+            );
+
+            const csvContent = [headers.join(","), ...lines].join("\n");
+            downloadBlob(new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" }), "evaluasi_rkt.csv");
+            return;
+        }
+
+        if (type === "excel") {
+            const activeFilters = [
+                filters.keyword ? `Keyword: ${filters.keyword}` : null,
+                filters.ID_PROGRAM_KERJA
+                    ? `Program Kerja: ${
+                          programKerjaOptions.find((item) => String(item.ID_PROGRAM_KERJA) === String(filters.ID_PROGRAM_KERJA))
+                              ?.PROGRAM_KERJA ?? filters.ID_PROGRAM_KERJA
+                      }`
+                    : null,
+                filters.ID_REF_PM
+                    ? `Status PM: ${
+                          refPmOptions.find((item) => String(item.ID_REF_PM) === String(filters.ID_REF_PM))?.NAMA_PM ?? filters.ID_REF_PM
+                      }`
+                    : null,
+                filters.TGL_PM ? `Tanggal: ${formatDateLabel(filters.TGL_PM)}` : null,
+            ].filter(Boolean);
+
+            const filterText = activeFilters.length > 0 ? activeFilters.join(" | ") : "Semua data evaluasi";
+
+            const xmlRows = exportRows
+                .map(
+                    (row, index) => `
+                        <Row>
+                            <Cell ss:StyleID="cellCenter"><Data ss:Type="Number">${index + 1}</Data></Cell>
+                            <Cell ss:StyleID="cellCenter"><Data ss:Type="String">${escapeXml(row.id)}</Data></Cell>
+                            <Cell ss:StyleID="cellText"><Data ss:Type="String">${escapeXml(row.programKerja)}</Data></Cell>
+                            <Cell ss:StyleID="cellText"><Data ss:Type="String">${escapeXml(row.indikator)}</Data></Cell>
+                            <Cell ss:StyleID="cellText"><Data ss:Type="String">${escapeXml(row.statusPm)}</Data></Cell>
+                            <Cell ss:StyleID="cellCenter"><Data ss:Type="String">${escapeXml(row.tanggal)}</Data></Cell>
+                            <Cell ss:StyleID="cellText"><Data ss:Type="String">${escapeXml(row.deskripsi)}</Data></Cell>
+                        </Row>
+                    `
+                )
+                .join("");
+
+            const excelXml = `<?xml version="1.0"?>
+                <?mso-application progid="Excel.Sheet"?>
+                <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+                    xmlns:o="urn:schemas-microsoft-com:office:office"
+                    xmlns:x="urn:schemas-microsoft-com:office:excel"
+                    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+                    xmlns:html="http://www.w3.org/TR/REC-html40">
+                    <Styles>
+                        <Style ss:ID="title">
+                            <Font ss:Bold="1" ss:Size="14"/>
+                            <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+                        </Style>
+                        <Style ss:ID="subtitle">
+                            <Font ss:Bold="1" ss:Size="12"/>
+                            <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+                        </Style>
+                        <Style ss:ID="filter">
+                            <Font ss:Italic="1"/>
+                            <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+                        </Style>
+                        <Style ss:ID="header">
+                            <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+                            <Interior ss:Color="#4F81BD" ss:Pattern="Solid"/>
+                            <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+                            <Borders>
+                                <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+                            </Borders>
+                        </Style>
+                        <Style ss:ID="cellText">
+                            <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+                            <Borders>
+                                <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+                            </Borders>
+                        </Style>
+                        <Style ss:ID="cellCenter">
+                            <Alignment ss:Horizontal="Center" ss:Vertical="Top" ss:WrapText="1"/>
+                            <Borders>
+                                <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+                                <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+                            </Borders>
+                        </Style>
+                    </Styles>
+                    <Worksheet ss:Name="Evaluasi RKT">
+                        <Table>
+                            <Column ss:Width="45"/>
+                            <Column ss:Width="70"/>
+                            <Column ss:Width="180"/>
+                            <Column ss:Width="180"/>
+                            <Column ss:Width="110"/>
+                            <Column ss:Width="100"/>
+                            <Column ss:Width="240"/>
+                            <Row>
+                                <Cell ss:MergeAcross="6" ss:StyleID="title"><Data ss:Type="String">LAPORAN EVALUASI RKT</Data></Cell>
+                            </Row>
+                            <Row>
+                                <Cell ss:MergeAcross="6" ss:StyleID="subtitle"><Data ss:Type="String">UNIT SEKOLAH SMK BOPKRI 2 YOGYAKARTA</Data></Cell>
+                            </Row>
+                            <Row>
+                                <Cell ss:MergeAcross="6" ss:StyleID="filter"><Data ss:Type="String">${escapeXml(filterText)}</Data></Cell>
+                            </Row>
+                            <Row></Row>
+                            <Row>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">NO</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">ID EVALUASI</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">PROGRAM KERJA</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">INDIKATOR</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">STATUS PM</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">TANGGAL EVALUASI</Data></Cell>
+                                <Cell ss:StyleID="header"><Data ss:Type="String">DESKRIPSI</Data></Cell>
+                            </Row>
+                            ${xmlRows}
+                        </Table>
+                    </Worksheet>
+                </Workbook>`;
+
+            downloadBlob(new Blob([excelXml], { type: "application/vnd.ms-excel;charset=utf-8;" }), "evaluasi_rkt.xls");
+            return;
+        }
+
+        if (type === "pdf") {
+            const printWindow = window.open("", "_blank", "width=1000,height=700");
+
+            if (!printWindow) {
+                setError("Popup diblokir browser. Izinkan popup untuk export PDF.");
+                return;
+            }
+
+            const tableRows = exportRows
+                .map(
+                    (row) => `
+                        <tr>
+                            <td>${escapeHtml(row.id)}</td>
+                            <td>${escapeHtml(row.programKerja)}</td>
+                            <td>${escapeHtml(row.indikator)}</td>
+                            <td>${escapeHtml(row.statusPm)}</td>
+                            <td>${escapeHtml(row.tanggal)}</td>
+                            <td>${escapeHtml(row.deskripsi)}</td>
+                        </tr>
+                    `
+                )
+                .join("");
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Evaluasi RKT</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 24px; }
+                            h1 { margin: 0 0 6px; font-size: 22px; }
+                            p { margin: 0 0 18px; color: #555; }
+                            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                            th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; vertical-align: top; }
+                            th { background: #f3f4f6; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Evaluasi RKT</h1>
+                        <p>Jumlah data: ${exportRows.length}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID Evaluasi</th>
+                                    <th>Program Kerja</th>
+                                    <th>Indikator</th>
+                                    <th>Status PM</th>
+                                    <th>Tanggal Evaluasi</th>
+                                    <th>Deskripsi</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        }
     };
 
     const openDatePicker = (inputRef) => {
@@ -281,7 +531,7 @@ export default function WakaEvaluasiRKT() {
 
     return (
         <div className="waka-evaluasi-shell">
-            <SidebarWaka />
+            {/* <SidebarWaka /> */}
 
             <main className="waka-evaluasi-main">
                 <section className="waka-evaluasi-stats">
@@ -308,15 +558,6 @@ export default function WakaEvaluasiRKT() {
                         <div className="waka-evaluasi-actions-top">
                             <button type="button" className="waka-evaluasi-button ghost" onClick={() => loadRows()}>
                                 Refresh
-                            </button>
-                            <button type="button" className="waka-evaluasi-button ghost" onClick={() => openExport("excel")}>
-                                Export Excel
-                            </button>
-                            <button type="button" className="waka-evaluasi-button ghost" onClick={() => openExport("csv")}>
-                                Export CSV
-                            </button>
-                            <button type="button" className="waka-evaluasi-button primary" onClick={() => openExport("pdf")}>
-                                Export PDF
                             </button>
                         </div>
                     </div>
@@ -493,7 +734,7 @@ export default function WakaEvaluasiRKT() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        rows.map((item) => (
+                                        paginatedRows.map((item) => (
                                             <tr key={item.ID_PM}>
                                                 <td>
                                                     <strong>{item?.program_kerja?.PROGRAM_KERJA ?? item?.programKerja?.PROGRAM_KERJA ?? "-"}</strong>
@@ -527,6 +768,76 @@ export default function WakaEvaluasiRKT() {
                             </table>
                         </div>
                     )}
+
+                    {!loading ? (
+                        <div className="waka-evaluasi-table-footer">
+                            <div className="waka-evaluasi-pagination-info">
+                                Menampilkan {startData} - {endData} dari {rows.length} data
+                            </div>
+
+                            <div className="waka-evaluasi-pagination">
+                                <button
+                                    type="button"
+                                    className="waka-evaluasi-page-btn"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage((page) => page - 1)}
+                                >
+                                    <i className="bi bi-chevron-left"></i>
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, index) => {
+                                    const pageNumber = index + 1;
+
+                                    return (
+                                        <button
+                                            key={pageNumber}
+                                            type="button"
+                                            className={`waka-evaluasi-page-btn ${currentPage === pageNumber ? "active" : ""}`}
+                                            onClick={() => setCurrentPage(pageNumber)}
+                                        >
+                                            {pageNumber}
+                                        </button>
+                                    );
+                                })}
+
+                                <button
+                                    type="button"
+                                    className="waka-evaluasi-page-btn"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage((page) => page + 1)}
+                                >
+                                    <i className="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+
+                            <div className="waka-evaluasi-export-group">
+                                <button
+                                    type="button"
+                                    className="waka-evaluasi-export-btn"
+                                    onClick={() => openExport("excel")}
+                                >
+                                    <i className="bi bi-filetype-xlsx"></i>
+                                    Export Excel
+                                </button>
+                                {/* <button
+                                    type="button"
+                                    className="waka-evaluasi-export-btn"
+                                    onClick={() => openExport("csv")}
+                                >
+                                    <i className="bi bi-filetype-csv"></i>
+                                    Export CSV
+                                </button>*/}
+                                <button
+                                    type="button"
+                                    className="btn-outline-danger custom-btn"
+                                    onClick={() => openExport("pdf")}
+                                >
+                                    <i className="bi bi-file-earmark-pdf"></i>
+                                    Export PDF
+                                </button> 
+                            </div>
+                        </div>
+                    ) : null}
                 </section>
             </main>
         </div>

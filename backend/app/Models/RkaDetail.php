@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RkaDetail extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'dtl_program_kerja';
     protected $primaryKey = 'ID_DT_PROGKER';
-    public $incrementing = true; // Diubah ke true
+    public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
 
@@ -23,7 +26,6 @@ class RkaDetail extends Model
         'HARGA_SATUAN',
         'VOLUME',
         'SATUAN',
-        'TOTAL_PROGKER',
     ];
 
     protected $casts = [
@@ -36,7 +38,6 @@ class RkaDetail extends Model
         'QTY' => 'integer',
         'HARGA_SATUAN' => 'double',
         'VOLUME' => 'integer',
-        'TOTAL_PROGKER' => 'double',
     ];
 
     public function rka(): BelongsTo

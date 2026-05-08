@@ -11,6 +11,8 @@ export default function MasterCOA() {
     const [editId, setEditId] = useState(null); 
     const [coaList, setCoaList] = useState([]);
     const [search, setSearch] = useState("");
+    const [toast, setToast] = useState(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_MASTER_COA",
         direction: "asc"
@@ -23,6 +25,7 @@ export default function MasterCOA() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
+            setCurrentPage(1);
             const url = keyword
                 ? `http://localhost:8000/api/coa?search=${keyword}`
                 : "http://localhost:8000/api/coa";
@@ -48,6 +51,14 @@ export default function MasterCOA() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
 
     const handleSort = (key) => {
         let direction = "asc";
@@ -94,8 +105,12 @@ export default function MasterCOA() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update COA" : "Berhasil tambah COA");
             setShowModal(false);
+            if (isEdit) {
+                showToast("update");
+            } else {
+                showToast("add");
+            }
             setIsEdit(false);
             setEditId(null);
             setForm({
@@ -104,29 +119,41 @@ export default function MasterCOA() {
             });
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast(json.message || "Gagal", "error");
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus COA ini?");
-        if (!confirmDelete) return;
+    const confirmDeleteAction = async () => {
         try {
             const res = await fetch(
-                `http://localhost:8000/api/coa/delete/${id}`,
+                `http://localhost:8000/api/coa/delete/${confirmDeleteId}`,
                 { method: "DELETE" }
             );
             const json = await res.json();
             if (json.success) {
-                alert("Berhasil hapus data");
+                showToast("delete");
                 fetchData();
             } else {
-                alert(json.message || "Gagal hapus data");
+                showToast("Gagal menghapus data", "error");
             }
         } catch (err) {
             console.error(err);
-            alert("Terjadi error saat menghapus");
+            showToast("Terjadi error saat menghapus", "error");
+        } finally {
+            setConfirmDeleteId(null);
         }
+    };
+
+    const handleDelete = (item) => {
+        if (item.is_used) {
+            showToast("error", "COA sudah digunakan");
+            return;
+        }
+        if (item.has_child) {
+            showToast("error", "COA tidak boleh dihapus karena masih memiliki sub COA");
+            return;
+        }
+        setConfirmDeleteId(item.ID_MASTER_COA);
     };
 
     const closeModal = () => {
@@ -138,13 +165,6 @@ export default function MasterCOA() {
             DESKRIPSI_COA: ""
         });
     };
-
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
 
     const sortedData = [...data].sort((a, b) => {
         let valA = a[sortConfig.key] || "";
@@ -159,11 +179,110 @@ export default function MasterCOA() {
         if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
     });
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     const changePage = (page) => {
         setCurrentPage(page);
     };
+
+    const [visible, setVisible] = useState(false);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const buildTree = (nodes) => {
+        const map = {};
+        const roots = [];
+        nodes.forEach(item => {
+            map[item.ID_MASTER_COA] = { ...item, children: [] };
+        });
+        nodes.forEach(item => {
+            const parentId = item.MST_ID_MASTER_COA;
+            const isParent = !parentId || parentId === 0 || parentId === "0";
+            if (!isParent) {
+                if (map[parentId]) {
+                    map[parentId].children.push(map[item.ID_MASTER_COA]);
+                } else {
+                    roots.push(map[item.ID_MASTER_COA]);
+                }
+            } else {
+                roots.push(map[item.ID_MASTER_COA]);
+            }
+        });
+        return roots;
+    };
+
+    const sortTree = (nodes) => {
+        return nodes
+            .sort((a, b) => {
+                const valA = isNaN(a[sortConfig.key]) ? (a[sortConfig.key] || "").toString().toLowerCase() : Number(a[sortConfig.key]);
+                const valB = isNaN(b[sortConfig.key]) ? (b[sortConfig.key] || "").toString().toLowerCase() : Number(b[sortConfig.key]);
+                
+                if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
+            })
+            .map(node => ({
+                ...node,
+                children: sortTree(node.children)
+            }));
+    };
+
+    const addNumbering = (nodes, prefix = "") => {
+        return nodes.map((node, index) => {
+            const number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const currentNumber = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const isLast = index === nodes.length - 1;
+            return {
+                ...node,
+                number,
+                path: node.path || currentNumber,
+                isLast,
+                children: addNumbering(node.children, number)
+            };
+        });
+    };
+
+    const flattenTree = (nodes, level = 0, parentLines = []) => {
+        let result = [];
+        nodes.forEach(node => {
+            result.push({
+                ...node,
+                level,
+                parentLines: level === 0 ? [] : parentLines 
+            });
+            if (node.children.length > 0) {
+                result = result.concat(
+                    flattenTree(
+                        node.children,
+                        level + 1,
+                        level === 0 ? [] : [...parentLines, !node.isLast]
+                    )
+                );
+            }
+        });
+        return result;
+    };
+
+    const tree = sortTree(buildTree(data));
+    const numbered = addNumbering(tree);
+    const allFlatRows = flattenTree(numbered); 
+    const totalData = allFlatRows.length;
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentRows = allFlatRows.slice(indexOfFirst, indexOfLast);
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
+    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
     return (
         <div className="coa-container">
@@ -185,7 +304,6 @@ export default function MasterCOA() {
                             placeholder="Cari deskripsi / kode COA..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button
@@ -215,68 +333,48 @@ export default function MasterCOA() {
                 </div>
             </div>
             <div className="coa-table-wrapper">
-                <table className="coa-table">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort("ID_MASTER_COA")}>
-                                ID <i className={getIcon("ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("MST_ID_MASTER_COA")}>
-                                MST ID <i className={getIcon("MST_ID_MASTER_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("KODE_COA")}>
-                                Kode COA <i className={getIcon("KODE_COA")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_COA")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_COA")}></i>
-                            </th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Loading...
-                                </td>
-                            </tr>
-                        ) : currentData.length === 0 ? (
-                            <tr>
-                                <td colSpan="5" className="text-center">
-                                    Tidak ada data
-                                </td>
-                            </tr>
-                        ) : (
-                            currentData.map((item) => (
-                                <tr key={item.ID_MASTER_COA}>
-                                    <td>{item.ID_MASTER_COA}</td>
-                                    <td>{item.MST_ID_MASTER_COA}</td>
-                                    <td>{item.KODE_COA}</td>
-                                    <td>{item.DESKRIPSI_COA}</td>
-                                    <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
-                                            <i className="bi bi-pencil"></i>
-                                        </button>
-                                        <button
-                                            className="btn-delete"
-                                            disabled={item.is_used}
-                                            title={
-                                                item.is_used
-                                                    ? "COA sudah digunakan Program Kerja"
-                                                    : "Hapus COA"
-                                            }
-                                            onClick={() =>
-                                                handleDelete(item.ID_MASTER_COA)
-                                            }
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                <div className="tree-list">
+                    {loading ? (
+                        <div className="text-center" style={{padding: "20px"}}>Loading...</div>
+                    ) : currentRows.length === 0 ? (
+                        <div className="text-center" style={{padding: "20px"}}>Tidak ada data</div>
+                    ) : (
+                        currentRows.map((item) => (
+                            <div 
+                                className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
+                                key={item.ID_MASTER_COA}
+                            >
+                                <div className="tree-left" style={{ paddingLeft: "10px" }}>
+                                    {item.parentLines.map((hasActiveLine, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            className={`tree-line ${hasActiveLine ? "active" : ""}`} 
+                                        />
+                                    ))}
+                                    {item.level > 0 && (
+                                        <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
+                                    )}
+                                    {/* <span className="tree-number">{item.number}</span>
+                                    <span className="tree-text">{item.KODE_COA} | {item.DESKRIPSI_COA}</span> */}
+                                    <span className="tree-number">{item.path}</span>
+                                    <span className="tree-text">{item.KODE_COA} | {item.DESKRIPSI_COA}</span>
+                                </div>
+                                <div className="tree-actions">
+                                    <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                        <i className="bi bi-pencil"></i>
+                                    </button>
+                                    <button
+                                        className="btn-delete"
+                                        disabled={item.is_used > 0 || (item.children && item.children.length > 0)}
+                                        onClick={() => setConfirmDeleteId(item.ID_MASTER_COA)}
+                                    >
+                                        <i className="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">
@@ -336,11 +434,14 @@ export default function MasterCOA() {
                                 onChange={handleChange}
                             >
                                 <option value="">-- Pilih Parent --</option>
-                                {coaList.map((coa) => (
-                                    <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
-                                        {coa.KODE_COA} - {coa.DESKRIPSI_COA}
-                                    </option>
-                                ))}
+                                {coaList
+                                    .filter((coa) => coa.ID_MASTER_COA !== editId) 
+                                    .map((coa) => (
+                                        <option key={coa.ID_MASTER_COA} value={coa.ID_MASTER_COA}>
+                                            {coa.KODE_COA} - {coa.DESKRIPSI_COA}
+                                        </option>
+                                    ))
+                                }
                             </select>
                             <label>Deskripsi COA</label>
                             <input
@@ -363,6 +464,49 @@ export default function MasterCOA() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    COA
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3 className="toast-modal-box-h3">Konfirmasi Hapus</h3>
+                        <p style={{ fontSize: "14px", marginBottom: "16px" }}>
+                            Yakin ingin menghapus COA ini?
+                        </p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -2,7 +2,7 @@
 <html>
 <head>
     <style>
-                body { 
+        body { 
             font-family: sans-serif; 
             position: relative;
         }
@@ -15,11 +15,11 @@
         th, td { 
             border: 1px solid black; 
             padding: 6px; 
+            text-align: center;
         }
 
-        HEADER TABLE LEBIH SOFT
         th { 
-            background: #f5f5f5;  
+            background: #f5f5f5; 
         }
 
         .no-border td {
@@ -30,7 +30,6 @@
             text-align: center;
         }
 
-        /* JUDUL */
         .title-main {
             font-size: 18px;
             font-weight: bold;
@@ -41,7 +40,6 @@
             font-weight: bold;
         }
 
-        /* WATERMARK (LEBIH HALUS & TENGAH) */
         .watermark {
             position: absolute;
             top: 50%;
@@ -51,13 +49,37 @@
             z-index: -1;
         }
 
-        /* GARIS DOBEL */
         .double-line {
             border-top: 3px solid black;
             border-bottom: 1px solid black;
             margin: 8px 0 12px 0;
         }
 
+        .ttd-center {
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .ttd-role {
+            margin-bottom: 8px;
+        }
+
+        .ttd-nama {
+            margin-bottom: 10px;
+        }
+
+        .ttd-garis {
+            margin-top: 50px;   
+        }
+
+        .ttd-nip {
+            margin-top: 10px;
+        }
+
+        .tanggal-kanan {
+            text-align: right;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
@@ -81,50 +103,42 @@
 <table>
     <thead>
         <tr>
-            <th width="5%">No</th>
-            <th width="15%">Tanggal</th>
-            <th width="20%">Program Kerja</th>
-            <th width="15%">Sumber Dana</th>
-            <th width="30%">Uraian</th>
-            <th width="15%">Nominal</th>
+            <th>Tanggal</th>
+            <th>Program Kerja</th>
+            <th>Indikator</th>
+            <th>Uraian</th>
+            <th>NOMINAL</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($data as $key => $row)
+        @foreach($data as $row)
         <tr>
-            <td class="text-center">{{ $key + 1 }}</td>
-            <td class="text-center">{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
+            <td>{{ date('d-m-Y', strtotime($row->tanggal)) }}</td>
             <td>{{ $row->program }}</td>
-            <td class="text-center">{{ $row->sumber_dana }}</td>
-            <td>{{ $row->uraian }}</td>
-            <td class="text-right">Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
+            <td>{{ $row->indikator }}</td>
+            <td style="text-align:left;">{{ $row->uraian }}</td>
+            <td>Rp {{ number_format($row->nominal, 0, ',', '.') }}</td>
         </tr>
         @endforeach
 
         <tr>
-            <td colspan="5" class="text-right"><b>TOTAL PENGELUARAN</b></td>
-            <td class="text-right"><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
+            <td colspan="4"><b>TOTAL</b></td>
+            <td><b>Rp {{ number_format($total, 0, ',', '.') }}</b></td>
         </tr>
     </tbody>
 </table>
 
-@php
-\Carbon\Carbon::setLocale('id');
-@endphp
+<div class="ttd-center">
+    <p class="ttd-role">Bendahara,</p>
 
-<div style="margin-top: 50px;">
-    <table class="no-border">
-        <tr class="no-border">
-            <td width="60%"></td>
-            <td class="text-right">
-                Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-                <br><br>
-                <b>By: Bendahara</b>
-                <br><br><br><br><br>
-                <b>{{ Auth::user()->name ?? '' }}</b>
-            </td>
-        </tr>
-    </table>
+    <p class="ttd-nama"><b>{{ $nama_ttd }}</b></p>
+
+    <p class="ttd-garis">-------------------------</p>
+    <p class="ttd-nip">NIP: {{ $nip_ttd }}</p>
+</div>
+
+<div class="tanggal-kanan">
+    Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 </div>
 
 </body>

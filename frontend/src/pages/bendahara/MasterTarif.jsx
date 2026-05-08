@@ -14,7 +14,7 @@ export default function MasterTarif() {
     const [search, setSearch] = useState("");
     const [sortConfig, setSortConfig] = useState({
         key: "ID_REF_TARIF",
-        direction: "asc"
+        direction: "desc"
     });
     const [form, setForm] = useState({
         ID_JENIS_TARIF: "",
@@ -32,6 +32,10 @@ export default function MasterTarif() {
                 : "http://localhost:8000/api/tarif";
 
             const res = await fetch(url);
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text);
+            }
             const json = await res.json();
             setData(json.data || json || []);
         } catch (err) {
@@ -170,10 +174,10 @@ export default function MasterTarif() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update Tarif" : "Berhasil tambah Tarif");
             setShowModal(false);
             setIsEdit(false);
             setEditId(null);
+            showToast(isEdit ? "update" : "add");
             setForm({
                 ID_JENIS_TARIF: "",
                 ID_TA_ANGGARAN: "",
@@ -183,29 +187,12 @@ export default function MasterTarif() {
             });
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast("error", json.message || "Gagal");
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = confirm("Yakin mau hapus Tarif ini?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/tarif/delete/${id}`,
-                { method: "DELETE" }
-            );
-            const json = await res.json();
-            if (json.success) {
-                alert("Berhasil hapus data");
-                fetchData();
-            } else {
-                alert(json.message || "Gagal hapus data");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Terjadi error saat menghapus");
-        }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -231,6 +218,42 @@ export default function MasterTarif() {
 
     const changePage = (page) => {
         setCurrentPage(page);
+    };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/tarif/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
     };
 
     return (
@@ -392,11 +415,17 @@ export default function MasterTarif() {
                                 onChange={handleChange}
                             >
                                 <option value="">-- Pilih Jenis Tarif --</option>
-                                {jenisTarifList.map((item) => (
-                                    <option key={item.ID_JENIS_TARIF} value={item.ID_JENIS_TARIF}>
-                                        [{item.ID_JENIS_TARIF}] {item.DESKRIPSI_JENIS_TARIF}
-                                    </option>
-                                ))}
+                                {[...jenisTarifList]
+                                    .sort((a, b) => b.ID_JENIS_TARIF - a.ID_JENIS_TARIF)
+                                    .map((item) => (
+                                        <option
+                                            key={item.ID_JENIS_TARIF}
+                                            value={item.ID_JENIS_TARIF}
+                                        >
+                                            {item.ID_JENIS_TARIF} - {item.DESKRIPSI_JENIS_TARIF}
+                                        </option>
+                                    ))
+                                }
                             </select>
                             <label>ID TA Anggaran</label>
                             <select
@@ -407,7 +436,7 @@ export default function MasterTarif() {
                                 <option value="">-- Pilih Tahun Anggaran --</option>
                                 {tahunAnggaranList.map((item) => (
                                     <option key={item.ID_TA_ANGGARAN} value={item.ID_TA_ANGGARAN}>
-                                        [{item.ID_TA_ANGGARAN}] {item.TAHUN_ANGGARAN || item.DESKRIPSI_TAHUN_ANGGARAN}
+                                        {item.ID_TA_ANGGARAN} - {item.TAHUN_ANGGARAN || item.DESKRIPSI_TAHUN_ANGGARAN}
                                     </option>
                                 ))}
                             </select>
@@ -451,6 +480,47 @@ export default function MasterTarif() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Tarif
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus Tarif ini?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

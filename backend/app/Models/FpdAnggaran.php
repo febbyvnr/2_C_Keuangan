@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FpdAnggaran extends Model
 {
+    use RecordsActivity;
+
     protected $table = 'fpd_anggaran';
     protected $primaryKey = 'ID_FPD';
     public $incrementing = true;
@@ -40,5 +43,10 @@ class FpdAnggaran extends Model
     public function programKerja(): BelongsTo
     {
         return $this->belongsTo(MstProgramKerja::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
+    }
+
+    public function validator()
+    {
+        return $this->belongsTo(MstKaryawan::class, 'NIP_VALIDATOR_FPD', 'NIP_KARYAWAN');
     }
 }

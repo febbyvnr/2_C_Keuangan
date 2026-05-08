@@ -23,6 +23,7 @@ export default function MasterKegiatan() {
     const fetchData = async (keyword = "") => {
         try {
             setLoading(true);
+            if (keyword !== "") setCurrentPage(1);
             const url = keyword
                 ? `http://localhost:8000/api/kegiatan?search=${keyword}`
                 : "http://localhost:8000/api/kegiatan";
@@ -42,9 +43,17 @@ export default function MasterKegiatan() {
         fetchParent();
     }, []);
 
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            setCurrentPage(1);
+            fetchData(search);
+        }, 200);
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
+
     const fetchParent = async () => {
         try {
-            const res = await fetch("http://localhost:8000/api/kegiatan");
+            const res = await fetch("http://localhost:8000/api/kegiatan?limit=1000");
             const json = await res.json();
             setParentList(json.data || []);
         } catch (err) {
@@ -87,14 +96,6 @@ export default function MasterKegiatan() {
         return 0;
     });
 
-    const indexOfLast = currentPage * itemsPerPage;
-    const indexOfFirst = indexOfLast - itemsPerPage;
-    const currentData = sortedData.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const totalData = data.length;
-    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
-    const endData = Math.min(indexOfLast, totalData);
-
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -126,21 +127,16 @@ export default function MasterKegiatan() {
         });
         const json = await res.json();
         if (json.success) {
-            alert(isEdit ? "Berhasil update" : "Berhasil tambah");
             closeModal();
+            showToast(isEdit ? "update" : "add");
             fetchData();
         } else {
-            alert(json.message || "Gagal");
+            showToast("error", json.message || "Gagal");
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm("Yakin mau hapus?")) return;
-        try {
-            const res = await fetch(`http://localhost:8000/api/kegiatan/delete/${id}`, { method: "DELETE" });
-            const json = await res.json();
-            if (json.success) { fetchData(); }
-        } catch (err) { console.error(err); }
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
     };
 
     const closeModal = () => {
@@ -149,6 +145,117 @@ export default function MasterKegiatan() {
         setEditId(null);
         setForm({ MST_ID_KEGIATAN: "", DESKRIPSI_KEGIATAN: "" });
     };
+
+    const [toast, setToast] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+    const showToast = (type = "add", message = "") => {
+        let action = "";
+        if (type === "add") action = "Menambahkan";
+        if (type === "update") action = "Memperbarui";
+        if (type === "delete") action = "Menghapus";
+        if (type === "error") action = "Gagal";
+        setToast({ type, action, message });
+        setVisible(true);
+        setTimeout(() => setVisible(false), 2500);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const confirmDeleteAction = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/kegiatan/delete/${confirmDeleteId}`, {
+                method: "DELETE"
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast("delete");
+                fetchData();
+            } else {
+                showToast("error", json.message || "Gagal menghapus data");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("error", "Terjadi error");
+        } finally {
+            setConfirmDeleteId(null);
+        }
+    };
+
+    const buildTree = (nodes) => {
+        const map = {};
+        const roots = [];
+        nodes.forEach(item => {
+            map[item.ID_KEGIATAN] = { ...item, children: [] };
+        });
+        nodes.forEach(item => {
+            const parentId = item.MST_ID_KEGIATAN;
+            if (parentId && map[parentId]) {
+                map[parentId].children.push(map[item.ID_KEGIATAN]);
+            } else {
+                roots.push(map[item.ID_KEGIATAN]);
+            }
+        });
+        return roots;
+    };
+
+    const sortTree = (nodes) => {
+        return nodes
+            .sort((a, b) => {
+                const valA = Number(a[sortConfig.key]);
+                const valB = Number(b[sortConfig.key]);
+                return sortConfig.direction === "asc" ? valA - valB : valB - valA;
+            })
+            .map(node => ({
+                ...node,
+                children: sortTree(node.children)
+            }));
+    };
+
+    const addNumbering = (nodes, prefix = "") => {
+        return nodes.map((node, index) => {
+            const number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+            const isLast = index === nodes.length - 1;
+            return {
+                ...node,
+                number,
+                isLast,
+                children: addNumbering(node.children, number)
+            };
+        });
+    };
+
+    const flattenTree = (nodes, level = 0, parentLines = []) => {
+        let result = [];
+        nodes.forEach(node => {
+            result.push({
+                ...node,
+                level,
+                parentLines: level === 0 ? [] : parentLines 
+            });
+            if (node.children.length > 0) {
+                result = result.concat(
+                    flattenTree(
+                        node.children,
+                        level + 1,
+                        level === 0 ? [] : [...parentLines, !node.isLast]
+                    )
+                );
+            }
+        });
+        return result;
+    };
+
+    const tree = sortTree(buildTree(data));
+    const numbered = addNumbering(tree);
+    const allFlatRows = flattenTree(numbered); 
+    const totalData = allFlatRows.length;
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    const currentRows = allFlatRows.slice(indexOfFirst, indexOfLast);
+    const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+    const endData = Math.min(indexOfLast, totalData);
 
     return (
         <div className="kegiatan-container">
@@ -164,7 +271,6 @@ export default function MasterKegiatan() {
                             placeholder="Cari kegiatan..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             className="search-input"
                         />
                         <button className="search-btn" onClick={() => { setCurrentPage(1); fetchData(search); }}>
@@ -177,49 +283,40 @@ export default function MasterKegiatan() {
                 </div>
             </div>
             <div className="kegiatan-table-wrapper">
-                <table className="kegiatan-table">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort("ID_KEGIATAN")}>
-                                ID <i className={getIcon("ID_KEGIATAN")}></i>
-                            </th>
-                            <th onClick={() => handleSort("MST_ID_KEGIATAN")}>
-                                MST ID <i className={getIcon("MST_ID_KEGIATAN")}></i>
-                            </th>
-                            <th onClick={() => handleSort("DESKRIPSI_KEGIATAN")}>
-                                Deskripsi <i className={getIcon("DESKRIPSI_KEGIATAN")}></i>
-                            </th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan="4" className="text-center">Loading...</td></tr>
-                        ) : currentData.length === 0 ? (
-                            <tr><td colSpan="4" className="text-center">Tidak ada data</td></tr>
-                        ) : (
-                            currentData.map((item) => (
-                                <tr key={item.ID_KEGIATAN}>
-                                    <td>{item.ID_KEGIATAN}</td>
-                                    <td>{item.MST_ID_KEGIATAN}</td>
-                                    <td>{item.DESKRIPSI_KEGIATAN}</td>
-                                    <td className="aksi">
-                                        <button className="btn-edit" onClick={() => handleEdit(item)}>
-                                            <i className="bi bi-pencil"></i>
-                                        </button>
-                                        <button
-                                            className="btn-delete"
-                                            disabled={item.is_used}
-                                            onClick={() => handleDelete(item.ID_KEGIATAN)}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                <div className="tree-list">
+                    {currentRows.map((item) => (
+                        <div 
+                            className={`tree-row ${item.level > 0 ? "child-row" : "parent-row"}`} 
+                            key={item.ID_KEGIATAN}
+                        >
+                            <div className="tree-left" style={{ paddingLeft: "10px" }}>
+                                {item.parentLines.map((hasActiveLine, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className={`tree-line ${hasActiveLine ? "active" : ""}`} 
+                                    />
+                                ))}
+                                {item.level > 0 && (
+                                    <div className={`tree-connector ${item.isLast ? "is-last" : ""}`}></div>
+                                )}
+                                <span className="tree-number">{item.nomor_urut}</span>
+                                <span className="tree-text">{item.DESKRIPSI_KEGIATAN}</span>
+                            </div>
+                            <div className="tree-actions">
+                                <button className="btn-edit" onClick={() => handleEdit(item)}>
+                                    <i className="bi bi-pencil"></i>
+                                </button>
+                                <button
+                                    className="btn-delete"
+                                    disabled={item.is_used > 0 || item.has_child > 0}
+                                    onClick={() => setConfirmDeleteId(item.ID_KEGIATAN)}
+                                >
+                                    <i className="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
             <div className="pagination-wrapper">
                 <div className="pagination-info">
@@ -269,10 +366,10 @@ export default function MasterKegiatan() {
                             >
                                 <option value="">-- Pilih Parent --</option>
                                 {parentList
-                                    .filter(item => item.ID_KEGIATAN !== editId) //bisa ref ke diri sendiri kah?
+                                    .filter(item => item.ID_KEGIATAN !== editId)
                                     .map((item) => (
                                         <option key={item.ID_KEGIATAN} value={item.ID_KEGIATAN}>
-                                            [{item.ID_KEGIATAN}] {item.DESKRIPSI_KEGIATAN}
+                                            {item.ID_KEGIATAN} - {item.DESKRIPSI_KEGIATAN}
                                         </option>
                                     ))}
                             </select>
@@ -283,6 +380,47 @@ export default function MasterKegiatan() {
                                 <button type="submit" className="btn-submit">{isEdit ? "Perbarui" : "Tambah"}</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {toast && (
+                <div className={`toast-container ${visible ? "show" : "hide"}`}>
+                    <div className="toast-box">
+                        <span className="toast-text">
+                            {toast.type === "error" ? (
+                                toast.message
+                            ) : (
+                                <>
+                                    Berhasil{" "}
+                                    <span className={`highlight ${toast.type}`}>
+                                        {toast.action}
+                                    </span>{" "}
+                                    Kegiatan
+                                </>
+                            )}
+                        </span>
+                    </div>
+                </div>
+            )}
+            {confirmDeleteId && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <h3>Konfirmasi Hapus</h3>
+                        <p>Yakin ingin menghapus kegiatan ini?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="toast-btn-cancel"
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="toast-btn-delete"
+                                onClick={confirmDeleteAction}
+                            >
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

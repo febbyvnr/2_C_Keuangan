@@ -2,26 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FpdAnggaranListExport;
 use App\Models\FpdAnggaran;
 use App\Models\MstProgramKerja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FpdAnggaranController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = FpdAnggaran::with([
+            $query = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
-            ])->orderByDesc('ID_FPD')->get();
+            ])->orderByDesc('ID_FPD');
 
+            // Filter per kolom (opsional)
+            if ($request->filled('TGL_FPD')) {
+                $query->where('TGL_FPD', 'like', $request->TGL_FPD . '%');
+            }
+            if ($request->filled('NIP_VALIDATOR_FPD')) {
+                $query->where('NIP_VALIDATOR_FPD', 'like', '%' . $request->NIP_VALIDATOR_FPD . '%');
+            }
+            if ($request->filled('PROGRAM_KERJA')) {
+                $query->whereHas('programKerja', fn($q) => $q->where('PROGRAM_KERJA', 'like', '%' . $request->PROGRAM_KERJA . '%'));
+            }
+
+            // Pagination opsional — kalau tidak ada page param, return semua (backward-compat)
+            $perPage = (int) $request->query('per_page', 0);
+            if ($perPage > 0) {
+                $data = $query->paginate($perPage);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data FPD anggaran berhasil diambil',
+                    'data' => $data->items(),
+                    'pagination' => [
+                        'total'        => $data->total(),
+                        'per_page'     => $data->perPage(),
+                        'current_page' => $data->currentPage(),
+                        'last_page'    => $data->lastPage(),
+                    ],
+                ]);
+            }
+
+            $data = $query->get();
             return response()->json([
                 'success' => true,
                 'message' => $data->isEmpty()
@@ -38,6 +70,48 @@ class FpdAnggaranController extends Controller
         }
     }
 
+    public function exportListExcel(Request $request)
+    {
+        $query = FpdAnggaran::with(['programKerja'])
+            ->orderByDesc('ID_FPD');
+
+        if ($request->filled('TGL_FPD')) {
+            $query->where('TGL_FPD', 'like', $request->TGL_FPD . '%');
+        }
+        if ($request->filled('NIP_VALIDATOR_FPD')) {
+            $query->where('NIP_VALIDATOR_FPD', 'like', '%' . $request->NIP_VALIDATOR_FPD . '%');
+        }
+        if ($request->filled('PROGRAM_KERJA')) {
+            $query->whereHas('programKerja', fn($q) => $q->where('PROGRAM_KERJA', 'like', '%' . $request->PROGRAM_KERJA . '%'));
+        }
+
+        $data = $query->get();
+        $filename = 'FPD_Anggaran_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new FpdAnggaranListExport($data), $filename);
+    }
+
+    public function exportListPdf(Request $request)
+    {
+        $query = FpdAnggaran::with(['programKerja', 'validator.jabatan.refJabatan'])
+            ->orderByDesc('ID_FPD');
+
+        if ($request->filled('TGL_FPD')) {
+            $query->where('TGL_FPD', 'like', $request->TGL_FPD . '%');
+        }
+        if ($request->filled('NIP_VALIDATOR_FPD')) {
+            $query->where('NIP_VALIDATOR_FPD', 'like', '%' . $request->NIP_VALIDATOR_FPD . '%');
+        }
+        if ($request->filled('PROGRAM_KERJA')) {
+            $query->whereHas('programKerja', fn($q) => $q->where('PROGRAM_KERJA', 'like', '%' . $request->PROGRAM_KERJA . '%'));
+        }
+
+        $data = $query->get();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.fpd_anggaran_list_pdf', compact('data'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->download('FPD_Anggaran_' . now()->format('Ymd_His') . '.pdf');
+    }
+
     public function search(Request $request): JsonResponse
     {
         try {
@@ -45,6 +119,7 @@ class FpdAnggaranController extends Controller
 
             $query = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
@@ -84,6 +159,7 @@ class FpdAnggaranController extends Controller
             $id = (int) $id;
             $data = FpdAnggaran::with([
                 'programKerja',
+                'validator.jabatan.refJabatan',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
                 'detailFpd.detailProgram.sumberDana',
@@ -275,6 +351,7 @@ class FpdAnggaranController extends Controller
                 'message' => 'Data berhasil diperbarui',
                 'data' => $data->load([
                     'programKerja',
+                    'validator.jabatan.refJabatan',
                     'programKerja.detailProgramKerja.sumberDana',
                     'detailFpd.detailProgram',
                     'detailFpd.detailProgram.sumberDana',
@@ -327,6 +404,39 @@ class FpdAnggaranController extends Controller
             ], 500);
         }
     }
+
+    public function reject(Request $request, int $id): JsonResponse
+    {
+        try {
+            $fpd = FpdAnggaran::find($id);
+            if (!$fpd) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'FPD tidak ditemukan'
+                ], 404);
+            }
+            if ($fpd->NIP_VALIDATOR_FPD === "Ditolak") {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sudah ditolak sebelumnya'
+                ], 400);
+            }
+            $fpd->update([
+                'NIP_VALIDATOR_FPD' => "Ditolak"
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'FPD berhasil ditolak'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject FPD',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function export($id): JsonResponse|StreamedResponse
     {
         try {

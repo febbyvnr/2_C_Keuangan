@@ -20,24 +20,38 @@ class MstCoaController extends Controller
     {
         try {
             $search = trim((string) $request->query('search', ''));
-
-            $query = MstCoa::query()
-                ->with([
-                    'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'desc');
-                    }
-                ])
-                ->active()
-                // ->whereNull('MST_ID_MASTER_COA')
-                ->orderBy('KODE_COA', 'desc');
-
             if ($search !== '') {
-                $query->where(function ($q) use ($search) {
-                    $q->where('KODE_COA', 'like', "%{$search}%")
-                      ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%");
-                });
+                $matchingIds = MstCoa::active()
+                    ->where('KODE_COA', 'like', "%{$search}%")
+                    ->orWhere('DESKRIPSI_COA', 'like', "%{$search}%")
+                    ->pluck('ID_MASTER_COA')
+                    ->toArray();
+                if (empty($matchingIds)) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Data COA tidak ditemukan',
+                        'data' => [],
+                    ]);
+                }
+                $allIds = [];
+                foreach ($matchingIds as $id) {
+                    $currentId = $id;
+                    while ($currentId) {
+                        if (in_array($currentId, $allIds)) break;
+                        $allIds[] = $currentId;
+                        $item = MstCoa::find($currentId);
+                        $currentId = $item ? $item->MST_ID_MASTER_COA : null;
+                    }
+                }
+                $query = MstCoa::query()
+                    ->whereIn('ID_MASTER_COA', $allIds)
+                    ->active()
+                    ->orderBy('KODE_COA', 'asc');
+            } else {
+                $query = MstCoa::query()
+                    ->active()
+                    ->orderBy('KODE_COA', 'asc');
             }
-
             $data = $query->get()->map(function ($item) {
                 return [
                     'ID_MASTER_COA' => $item->ID_MASTER_COA,
@@ -45,20 +59,18 @@ class MstCoaController extends Controller
                     'KODE_COA' => $item->KODE_COA,
                     'DESKRIPSI_COA' => $item->DESKRIPSI_COA,
                     'is_used' => $this->isCoaUsed($item),
+                    'has_child' => $item->children()->active()->exists(),
                 ];
             });
-
             return response()->json([
                 'success' => true,
-                'message' => $data->isEmpty()
-                    ? 'Data COA tidak ditemukan'
-                    : 'Data COA berhasil diambil',
+                'message' => 'Data COA berhasil diambil',
                 'data' => $data,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data COA',
+                'message' => 'Terjadi kesalahan saat mencari data COA',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -71,7 +83,7 @@ class MstCoaController extends Controller
                 ->with([
                     'parent',
                     'children' => function ($q) {
-                        $q->active()->orderBy('KODE_COA', 'desc');
+                        $q->active()->orderBy('ID_MASTER_COA', 'desc');
                     },
                     'programKerja',
                 ])
@@ -160,13 +172,14 @@ class MstCoaController extends Controller
                 ], 404);
             }
 
-            if ($this->isCoaUsed($coa)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
-                    'data' => null,
-                ], 422);
-            }
+            // kl klp sebelah ttp bisa edit walaupun uda dipake,asal ga memutus FK ke tabel lain aja
+            // if ($this->isCoaUsed($coa)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'COA tidak boleh diubah karena sudah dipakai pada program kerja',
+            //         'data' => null,
+            //     ], 422);
+            // }
             $validated = $request->validate(
                 [
                     'MST_ID_MASTER_COA' => [
@@ -310,7 +323,7 @@ class MstCoaController extends Controller
         try {
             $data = MstCoa::query()
                 ->active()
-                ->orderBy('KODE_COA', 'asc')
+                ->orderBy('ID_MASTER_COA', 'desc')
                 ->get([
                     'ID_MASTER_COA',
                     'KODE_COA',
@@ -345,7 +358,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'desc');
+            ->orderBy('ID_MASTER_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -409,7 +422,7 @@ class MstCoaController extends Controller
         $query = MstCoa::query()
             ->with(['parent'])
             ->active()
-            ->orderBy('KODE_COA', 'desc');
+            ->orderBy('ID_MASTER_COA', 'desc');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -494,5 +507,12 @@ class MstCoaController extends Controller
     private function isCoaUsed(MstCoa $coa): bool
     {
         return $coa->programKerja()->exists();
+    }
+    
+    public function getTreeNumber($coa, $prefix = "") {
+        $siblings = MstCoa::where('parent_id', $coa->parent_id)->orderBy('id')->get();
+        $index = $siblings->pluck('id')->search($coa->id) + 1;
+        $currentNumber = $prefix ? "$prefix.$index" : "$index";
+        return $currentNumber;
     }
 }

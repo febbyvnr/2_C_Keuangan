@@ -4,208 +4,268 @@ import profile from "../assets/user-profile.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const MENU_ITEMS = [
-    { label: "Dashboard", to: "/pic/guru", icon: "bi bi-columns-gap", end: true },
-    { label: "Page RKT", icon: "bi bi-journal-check" },
-    { label: "Page Realisasi RKT", icon: "bi bi-bar-chart-steps" },
-    { label: "Page Bridging RKT", icon: "bi bi-diagram-2" },
-    { label: "Page Pengajuan Dana", to: "/pic/guru/fpd", icon: "bi bi-cash-coin" },
-    { label: "Page LPJ", icon: "bi bi-file-earmark-text" },
-    { label: "Page Evaluasi RKT", icon: "bi bi-clipboard2-pulse" },
-];
-
 export default function SidebarPic() {
-    const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
-            if (window.innerWidth > 768) {
-                setIsOpen(false);
-            }
-        };
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userName = user.NAMA_KARYAWAN || "PIC Guru";
+  const userEmail = user.EMAIL_KARYAWAN || user.email || "-";
 
-    const confirmLogout = async () => {
-        try {
-            const token = localStorage.getItem("token");
-
-            await fetch("http://localhost:8000/api/logout", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
-            });
-        } catch (error) {
-            console.error("Gagal lapor logout ke backend:", error);
-        } finally {
-            localStorage.clear();
-            setShowLogoutConfirm(false);
-            navigate("/login");
-        }
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) setIsOpen(false);
     };
 
-    return (
-        <>
-            {showLogoutConfirm && (
-                <div style={styles.modalOverlay}>
-                    <div style={styles.modalBox}>
-                        <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>Konfirmasi Keluar</h4>
-                        <p style={{ margin: "0 0 20px 0", color: "#666" }}>Apakah Anda yakin ingin logout dari sistem?</p>
-                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                            <button onClick={() => setShowLogoutConfirm(false)} style={styles.btnTidak}>
-                                Tidak
-                            </button>
-                            <button onClick={confirmLogout} style={styles.btnIya}>
-                                Iya
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-            {isMobile && isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>}
+  const confirmLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-            {(isCollapsed || isMobile) && !isOpen && (
-                <button
-                    className="hamburger-btn floating-global"
-                    onClick={() => {
-                        if (isMobile) {
-                            setIsOpen(true);
-                        } else {
-                            setIsCollapsed(false);
-                        }
-                    }}
-                >
-                    <i className="bi bi-list"></i>
-                </button>
-            )}
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Logout gagal:", error);
+    } finally {
+      localStorage.clear();
+      setShowLogoutConfirm(false);
+      navigate("/login");
+    }
+  };
 
-            <div className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${isCollapsed && !isMobile ? "collapsed" : ""}`}>
-                {(isMobile || !isCollapsed) && (
-                    <>
-                        <div className="atas">
-                            <div className="sidebar-header mb-4">
-                                <div className="sidebar-logo">
-                                    <img src={logo} alt="logo" />
-                                </div>
-                                <div className="header-text">
-                                    <div className="sidebar-title">SIBOKU</div>
-                                    <div className="sidebar-subtitle">Ruang PIC Guru</div>
-                                </div>
-                                <button
-                                    className="hamburger-btn inside"
-                                    onClick={() => {
-                                        if (isMobile) {
-                                            setIsOpen(false);
-                                        } else {
-                                            setIsCollapsed(true);
-                                        }
-                                    }}
-                                >
-                                    <i className="bi bi-list"></i>
-                                </button>
-                            </div>
-
-                            <div className="user-account">
-                                <div className="user-profile">
-                                    <img src={profile} alt="profile" />
-                                </div>
-                                <div className="user-info">
-                                    <div className="user-role">PIC Guru</div>
-                                    <div className="user-email">guru@smkbopkri2.sch.id</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul className="nav flex-column sidebar-menu">
-                            {MENU_ITEMS.map((item) => (
-                                <li key={item.label} className="nav-item">
-                                    {item.to ? (
-                                        <NavLink
-                                            to={item.to}
-                                            end={item.end}
-                                            className={({ isActive }) => (isActive ? "nav-link sidebar-active" : "nav-link text-dark")}
-                                        >
-                                            <i className={item.icon}></i>
-                                            {item.label}
-                                        </NavLink>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className="nav-link text-dark"
-                                            style={{ width: "100%", opacity: 0.55, cursor: "default", background: "transparent", border: "none" }}
-                                        >
-                                            <i className={item.icon}></i>
-                                            {item.label}
-                                        </button>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-
-                        <div className="logout">
-                            <div className="logout-button">
-                                <button className="btn-logout" onClick={() => setShowLogoutConfirm(true)}>
-                                    <i className="bi bi-box-arrow-right"></i>
-                                    <span>Logout</span>
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                )}
+  return (
+    <>
+      {showLogoutConfirm && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalBox}>
+            <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>
+              Konfirmasi Keluar
+            </h4>
+            <p style={{ margin: "0 0 20px 0", color: "#666" }}>
+              Apakah Anda yakin ingin logout?
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button onClick={() => setShowLogoutConfirm(false)} style={styles.btnTidak}>
+                Tidak
+              </button>
+              <button onClick={confirmLogout} style={styles.btnIya}>
+                Iya
+              </button>
             </div>
-        </>
-    );
+          </div>
+        </div>
+      )}
+
+      {isMobile && isOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
+      )}
+
+      {isMobile && !isOpen && (
+        <button
+          className="hamburger-btn floating-global"
+          onClick={() => setIsOpen(true)}
+        >
+          <i className="bi bi-list"></i>
+        </button>
+      )}
+
+      {!isMobile && isCollapsed && (
+        <button
+          className="hamburger-btn outside"
+          onClick={() => setIsCollapsed(false)}
+        >
+          <i className="bi bi-list"></i>
+        </button>
+      )}
+
+      <div
+        className={`sidebar-container ${isMobile && isOpen ? "active" : ""} ${
+          isCollapsed && !isMobile ? "collapsed" : ""
+        }`}
+      >
+        {(isMobile || !isCollapsed) && (
+          <>
+            <div className="atas">
+              <div className="sidebar-header mb-4">
+                <div className="sidebar-logo">
+                  <img src={logo} alt="logo" />
+                </div>
+
+                <div className="header-text">
+                  <div className="sidebar-title">SIBOKU</div>
+                  <div className="sidebar-subtitle">Ruang PIC Guru</div>
+                </div>
+
+                <button
+                  className="hamburger-btn inside"
+                  onClick={() =>
+                    isMobile ? setIsOpen(false) : setIsCollapsed(true)
+                  }
+                >
+                  <i className="bi bi-list"></i>
+                </button>
+              </div>
+
+              <div className="user-account">
+                <div className="user-profile">
+                  <img src={profile} alt="profile" />
+                </div>
+                <div className="user-info">
+                  <div className="user-role" style={{ fontWeight: "bold" }}>
+                    {userName}
+                  </div>
+                  <div className="user-email" style={{ fontSize: "11px" }}>
+                    {userEmail}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ul className="nav flex-column sidebar-menu">
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru"
+                  end
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-columns-gap"></i>
+                  Dashboard
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/rkt"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-journal-check"></i>
+                  RKT
+                </NavLink>
+              </li>
+
+              
+              {/* <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/rka"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-calculator"></i>
+                  RKA
+                </NavLink>
+              </li> */}
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/fpd"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-cash-coin"></i>
+                  Pengajuan Dana
+                </NavLink>
+              </li>
+
+              {/* <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/lpj"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-file-earmark-text"></i>
+                  Page LPJ
+                </NavLink>
+              </li> */}
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pic/guru/evaluasi-rkt"
+                  className={({ isActive }) =>
+                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-clipboard2-pulse"></i>
+                  Evaluasi RKT
+                </NavLink>
+              </li>
+            </ul>
+
+            <div className="logout">
+              <div className="logout-button">
+                <button
+                  className="btn-logout"
+                  onClick={() => setShowLogoutConfirm(true)}
+                >
+                  <i className="bi bi-box-arrow-right"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
 }
 
 const styles = {
-    modalOverlay: {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 9999,
-    },
-    modalBox: {
-        backgroundColor: "white",
-        padding: "20px 25px",
-        borderRadius: "8px",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-        maxWidth: "400px",
-        width: "90%",
-        textAlign: "left",
-        fontFamily: "sans-serif",
-    },
-    btnTidak: {
-        backgroundColor: "#dc2626",
-        color: "white",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "4px",
-        cursor: "pointer",
-        fontWeight: "bold",
-    },
-    btnIya: {
-        backgroundColor: "#0d6efd",
-        color: "white",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "4px",
-        cursor: "pointer",
-        fontWeight: "bold",
-    },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+  modalBox: {
+    backgroundColor: "white",
+    padding: "20px 25px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+    maxWidth: "400px",
+    width: "90%",
+    textAlign: "left",
+  },
+  btnTidak: {
+    backgroundColor: "#dc2626",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+  btnIya: {
+    backgroundColor: "#0d6efd",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
 };

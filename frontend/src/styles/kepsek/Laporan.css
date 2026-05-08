@@ -1,0 +1,222 @@
+/* ========================= */
+/* ROOT & VARIABLES          */
+/* ========================= */
+:root {
+  --primary: #265f9c;
+  --secondary: #eda60f;
+  --accent: #edd15b;
+  --bg: #f6f7f9;
+
+  --text-main: #1a1a1a;
+  --text-secondary: #585858;
+  --text-disabled: #7d7d7e;
+
+  --success: #2e7d32;
+  --error: #c62828;
+}
+
+/* ========================= */
+/* CONTAINER & TAB           */
+/* ========================= */
+.laporan-tabs {
+  display: flex;
+  gap: 60px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 25px;
+  padding-left: 5px;
+}
+
+.laporan-tab {
+  padding-bottom: 12px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  min-width: max-content;
+  transition: all 0.2s ease;
+}
+
+.laporan-tab.active {
+  color: var(--primary);
+  border-bottom: 3px solid var(--primary);
+  font-weight: 600;
+}
+
+/* ========================= */
+/* HEADER & ACTIONS          */
+/* ========================= */
+.laporan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.laporan-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* GAYA TOMBOL EXPORT SESUAI GAMBAR */
+.btn-outline {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-outline.excel {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+.btn-outline.pdf {
+  border-color: #c62828;
+  color: #c62828;
+}
+
+/* FILTER SECTION */
+.laporan-filter {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.laporan-filter input,
+.laporan-filter select {
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-main);
+  background-color: white;
+}
+
+.btn-primary {
+  background-color: #265f9c;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ========================= */
+/* TABLE CARD (WHITE BOX)    */
+/* ========================= */
+.laporan-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Shadow halus sesuai gambar */
+  margin-bottom: 20px;
+}
+
+.laporan-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.laporan-table thead th {
+  padding: 18px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  color: #585858;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.laporan-table tbody td {
+  padding: 18px;
+  font-size: 14px;
+  color: #1a1a1a;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.laporan-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* KHUSUS NOMINAL DI KANAN */
+.nominal {
+  text-align: right !important;
+  font-weight: 700;
+}
+
+/* ========================= */
+/* FOOTER & PAGINATION       */
+/* ========================= */
+.laporan-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 5px;
+}
+
+.laporan-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.laporan-pagination {
+  display: flex;
+  gap: 8px;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-btn.active {
+  background-color: #265f9c;
+  color: white;
+  border-color: #265f9c;
+}
+
+/* TOTAL CARD DI POJOK KANAN */
+.laporan-total-card {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.laporan-total-card span {
+  font-size: 14px;
+  color: #585858;
+}
+
+.laporan-total-card strong {
+  font-size: 15px;
+  color: #265f9c;
+  font-weight: 700;
+}
+
+/* ========================= */
+/* RESPONSIVE                */
+/* ========================= */
+@media (max-width: 1024px) {
+  .laporan-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
