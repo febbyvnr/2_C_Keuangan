@@ -29,12 +29,12 @@ class AuthController extends Controller
         $accessLog = AccessLog::create([
                 'START_LOGIN' => now(), 
                 'USERNAME'    => $user->NIP_KARYAWAN,
-                'ROLE'        => $roles->first()
+                'ROLE'        => substr($userRole, 0, 10)
             ]);
 
         $tokenData = [
             'nip'           => $user->NIP_KARYAWAN,
-            'role'          => $userRole,
+            'role'          => substr($userRole, 0, 10),
             'id_access_log' => $accessLog->ID_ACCESS_LOG, 
             'time'          => now()->timestamp
         ];
