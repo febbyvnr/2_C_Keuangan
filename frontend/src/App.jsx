@@ -75,6 +75,7 @@ import KepsekMasterRefPM from "./pages/kepsek/master/MasterRefPM.jsx";
 import KepsekMasterTarif from "./pages/kepsek/master/MasterTarif.jsx";
 import "./index.css";
 import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
+import LaporanKepsek from "./pages/kepsek/Laporan.jsx";
 
 function BendaharaLayout() {
   return (
@@ -227,6 +228,7 @@ export default function App() {
           />
           <Route path="master/ref-pm" element={<KepsekMasterRefPM />} />
           <Route path="master/tarif" element={<KepsekMasterTarif />} />
+          <Route path="laporan" element={<LaporanKepsek />} />
         </Route>
 
         {/* WAKA */}

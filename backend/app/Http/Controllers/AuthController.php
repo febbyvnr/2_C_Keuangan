@@ -27,10 +27,10 @@ class AuthController extends Controller
         $userRole = $roles->first() ?? 'User';
 
         $accessLog = AccessLog::create([
-            'START_LOGIN' => now(),
-            'USERNAME'    => $user->NIP_KARYAWAN,
-            'ROLE'        => substr($userRole, 0, 10) 
-        ]);
+                'START_LOGIN' => now(), 
+                'USERNAME'    => $user->NIP_KARYAWAN,
+                'ROLE'        => $roles->first()
+            ]);
 
         $tokenData = [
             'nip'           => $user->NIP_KARYAWAN,
