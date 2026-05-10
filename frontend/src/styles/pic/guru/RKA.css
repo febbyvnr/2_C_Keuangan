@@ -1,3 +1,8 @@
+.rka-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f6fb;
+}
 .rka-main {
   flex: 1;
   width: 100%;

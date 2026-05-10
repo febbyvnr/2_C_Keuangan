@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 
 import Dashboard from "./pages/bendahara/Dashboard";
 import Dana from "./pages/bendahara/Dana";
-import RKA from "./pages/bendahara/RKA";
+// import RKA from "./pages/bendahara/RKA";
 import BKU from "./pages/bendahara/BKU";
 import BKM from "./pages/bendahara/BKM";
 import BKK from "./pages/bendahara/BKK";
@@ -56,7 +56,7 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 import SidebarKepsek from "./components/SidebarKepsek";
 import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
-// import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+import RKA from "./pages/pic/guru/RKA.jsx";
 import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
 //import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
@@ -151,7 +151,7 @@ export default function App() {
         <Route path="/bendahara" element={<BendaharaLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dana" element={<Dana />} />
-          <Route path="rka" element={<RKA />} />
+          {/* <Route path="rka" element={<RKA />} /> */}
           <Route path="bku" element={<BKU />} />
           <Route path="bkm" element={<BKM />} />
           <Route path="bkk" element={<BKK />} />
