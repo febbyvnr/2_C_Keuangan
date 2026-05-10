@@ -161,7 +161,7 @@ export default function SidebarPic() {
               </li>
 
               
-              {/* <li className="nav-item">
+              <li className="nav-item">
                 <NavLink
                   to="/pic/guru/rka"
                   className={({ isActive }) =>
@@ -171,7 +171,7 @@ export default function SidebarPic() {
                   <i className="bi bi-calculator"></i>
                   RKA
                 </NavLink>
-              </li> */}
+              </li>
 
               <li className="nav-item">
                 <NavLink
