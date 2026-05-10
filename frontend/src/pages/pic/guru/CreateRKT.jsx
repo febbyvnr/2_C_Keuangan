@@ -455,7 +455,7 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Total Program Kerja</span>
+                  <span>Nominal (Pagu)</span>
                   <input
                     type="number"
                     min="0"

@@ -591,7 +591,7 @@ export default function RKT() {
                       </div>
 
                       <div className="rkt-detail-item">
-                        <span className="rkt-detail-label">Total Program Kerja</span>
+                        <span className="rkt-detail-label">Nominal (Pagu)</span>
                         <span className="rkt-detail-value strong">
                           {formatRupiah(selectedItem.TOTAL_PROGKER)}
                         </span>
