@@ -133,7 +133,7 @@ class MstProgramKerjaController extends Controller
                 Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
             ],
             'ID_UNIT' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('mst_unit', 'ID_UNIT'),
             ],
@@ -201,7 +201,7 @@ class MstProgramKerjaController extends Controller
             $data = DB::transaction(function () use ($validated, $aksi) {
                 $programKerja = MstProgramKerja::create([
                     'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
-                    'ID_UNIT' => $validated['ID_UNIT'],
+                    'ID_UNIT' => $validated['ID_UNIT'] ?? null,
                     'ID_TAN' => $validated['ID_TAN'] ?? null,
                     'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
                     'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
@@ -261,7 +261,7 @@ class MstProgramKerjaController extends Controller
                 Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
             ],
             'ID_UNIT' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('mst_unit', 'ID_UNIT'),
             ],
