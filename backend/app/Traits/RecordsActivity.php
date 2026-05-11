@@ -4,7 +4,8 @@ namespace App\Traits;
 
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Crypt;
-use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 trait RecordsActivity
 {
@@ -19,68 +20,56 @@ trait RecordsActivity
 
     protected function recordActivity($event)
     {
-        $username = 'System';
-        $role = 'Unknown';
-        $accessLogId = null;
+        // --- 1. BLOKIR DOUBLE LOG ---
+        if ($event === 'updated' && $this->wasRecentlyCreated) {
+            return; 
+        }
 
-        // 1. Ambil & Decrypt token dari request header
+        // --- 2. AMBIL DATA USER DARI TOKEN ---
         $token = request()->bearerToken();
+        $accessLogId = null;
+        $username    = 'Sistem / Tidak Ditemukan';
+        $role        = 'Unknown';
 
         if ($token) {
             try {
-                $decrypted = Crypt::decryptString($token);
-                $tokenData = json_decode($decrypted);
-
-                $username = $tokenData->nip ?? 'System';
-                $role = $tokenData->role ?? 'Unknown';
-                $accessLogId = $tokenData->id_access_log ?? null;
-            } catch (Exception $e) {
-                // Jika token tidak valid/bisa didecrypt, abaikan atau biarkan tercatat sebagai System
+                $decryptedToken = json_decode(Crypt::decryptString($token));
+                $accessLogId = $decryptedToken->id_access_log ?? null;
+                $username    = $decryptedToken->nip ?? 'Unknown';
+                $role        = $decryptedToken->role ?? 'Unknown';
+            } catch (\Exception $e) {
+                Log::error('Gagal decrypt token di RecordsActivity');
             }
         }
 
-        // 2. Nama Aktivitas
+        // --- 3. AKTIVITAS TETAP SIMPLE & SINGKAT (Demi UI Badge Frontend) ---
+        // Contoh Output: "CREATED MstCoa", "UPDATED TrPenerimaan"
         $activityName = strtoupper($event) . ' ' . class_basename($this);
 
-        // 3. Data yang Terkait
-        $relatedData = 'PK ID: ' . $this->getKey();
-
-        // 4. Deskripsi Perubahan (Bahasa Manusia)
+        // --- 4. DESKRIPSI TETAP DIMANUSIAKAN (Tanpa JSON mentah) ---
+        $relatedData = 'ID Record: ' . $this->getKey();
         $description = '';
-        
+
         if ($event === 'created') {
-            $description = "Menambah data baru (ID: " . $this->getKey() . ")";
+            $description = "Berhasil menginput data baru ke dalam sistem.";
         } elseif ($event === 'deleted') {
-            $description = "Menghapus data (ID: " . $this->getKey() . ")";
+            $description = "Data telah dihapus dari sistem.";
         } elseif ($event === 'updated') {
-            $changes = $this->getChanges();
-            $original = $this->getOriginal();
-            $teksPerubahan = [];
-
-            foreach ($changes as $kolom => $nilaiBaru) {
-                // Abaikan jika yang berubah cuma timestamp
-                if ($kolom === 'updated_at' || $kolom === 'created_at') continue;
-
-                $nilaiLama = $original[$kolom] ?? 'kosong';
+            $listPerubahan = [];
+            foreach ($this->getChanges() as $kolom => $nilaiBaru) {
+                $nilaiLama = $this->getOriginal($kolom);
+                $nilaiLama = $nilaiLama ?? '(kosong)';
+                $nilaiBaru = $nilaiBaru ?? '(kosong)';
                 
-                // Pastikan nilainya string supaya tidak error saat digabung
-                $nilaiLamaStr = is_scalar($nilaiLama) ? $nilaiLama : json_encode($nilaiLama);
-                $nilaiBaruStr = is_scalar($nilaiBaru) ? $nilaiBaru : json_encode($nilaiBaru);
-
-                $teksPerubahan[] = "kolom {$kolom} dari '{$nilaiLamaStr}' menjadi '{$nilaiBaruStr}'";
+                $listPerubahan[] = "$kolom dari '$nilaiLama' menjadi '$nilaiBaru'";
             }
-
-            if (count($teksPerubahan) > 0) {
-                $description = "Mengubah " . implode(', ', $teksPerubahan);
-            } else {
-                $description = "Memperbarui data";
-            }
+            $description = "Mengubah nilai " . implode(', ', $listPerubahan);
         }
 
-        // Potong string agar tidak error batas varchar(255) di database
-        $description = substr($description, 0, 250);
+        // Batasi panjang teks agar aman di database
+        $description = Str::limit($description, 245);
 
-        // 5. Simpan Log
+        // --- 5. SIMPAN LOG ---
         ActivityLog::create([
             'ID_ACCESS_LOG'        => $accessLogId,
             'EVENT_TIME'           => now(),
