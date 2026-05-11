@@ -295,6 +295,25 @@ const handleSubmitDetail = async (e) => {
   }
 };
 
+function getSumberDanaSummary(item) {
+  const details = getDetails(item);
+
+  const sumberDanaList = details
+    .map(
+      (d) =>
+        d.DESKRIPSI_SUMBER_DANA ||
+        d.ref_dana?.DESKRIPSI_SUMBER_DANA ||
+        d.refDana?.DESKRIPSI_SUMBER_DANA
+    )
+    .filter(Boolean);
+
+  const uniqueSumberDana = [...new Set(sumberDanaList)];
+
+  if (uniqueSumberDana.length === 0) return "-";
+
+  return uniqueSumberDana.join(", ");
+}
+
   return (
     <div className="rka-shell">
       <SidebarPic></SidebarPic>
@@ -450,18 +469,7 @@ const handleSubmitDetail = async (e) => {
                               <td className="rka-program">
                                 {item.rkt?.PROGRAM_KERJA || "-"}
                               </td>
-                              <td>
-                                {getDetails(item).length > 0
-                                  ? getDetails(item)
-                                      .map(
-                                        (d) =>
-                                          d.DESKRIPSI_SUMBER_DANA ||
-                                          d.ref_dana?.DESKRIPSI_SUMBER_DANA
-                                      )
-                                      .filter(Boolean)
-                                      .join(", ")
-                                  : "-"}
-                              </td>
+                              <td>{getSumberDanaSummary(item)}</td>
                               <td className="rka-amount">
                                 {formatRupiah(getTotalRincian(item))}
                               </td>
