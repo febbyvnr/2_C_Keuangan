@@ -335,6 +335,15 @@ export default function RKT() {
     statusOptions.find((option) => option.value === statusFilter)?.label ||
     "Semua Status";
 
+  const approvedData = data.filter((item) => getStatusInfo(item).value === "disetujui");
+
+  const totalApprovedRkt = approvedData.length;
+
+  const totalApprovedBudget = approvedData.reduce(
+    (total, item) => total + Number(item.TOTAL_PROGKER || 0),
+    0
+  );
+
   return (
     <div className="rkt-shell">
       <SidebarPic />
@@ -364,6 +373,20 @@ export default function RKT() {
                 <Plus size={16} />
                 Tambah RKT
               </button>
+            </div>
+          </div>
+
+          <div className="rkt-summary-grid">
+            <div className="rkt-summary-card">
+              <span className="rkt-summary-label">RKT Disetujui</span>
+              <strong className="rkt-summary-value">{totalApprovedRkt}</strong>
+            </div>
+
+            <div className="rkt-summary-card">
+              <span className="rkt-summary-label">Total Anggaran Disetujui</span>
+              <strong className="rkt-summary-value">
+                {formatRupiah(totalApprovedBudget)}
+              </strong>
             </div>
           </div>
 
@@ -443,7 +466,7 @@ export default function RKT() {
                           <th>Program Kerja</th>
                           <th>Indikator</th>
                           <th>Waktu</th>
-                          <th>Anggaran</th>
+                          <th>Anggaran/Pagu</th>
                           <th>Status</th>
                         </tr>
                       </thead>
