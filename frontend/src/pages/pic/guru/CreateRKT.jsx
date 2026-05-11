@@ -456,7 +456,7 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Program Kerja</span>
+                  <span>Nama Program Kerja</span>
                   <input
                     type="text"
                     name="PROGRAM_KERJA"
