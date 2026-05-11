@@ -633,7 +633,7 @@
 
 .rka-detail-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 86px 130px;
   align-items: center;
   gap: 10px;
   padding: 16px 14px;
@@ -654,9 +654,11 @@
 }
 
 .rka-detail-action-icons {
+  width: 86px;
   justify-self: center;
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
   gap: 8px;
 }
@@ -685,7 +687,9 @@
 
 
 .rka-detail-total {
+  width: 130px;
   justify-self: end;
+  text-align: right;
   color: #0b4a86;
   font-weight: 700;
   white-space: nowrap;
