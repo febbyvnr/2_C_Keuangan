@@ -629,7 +629,7 @@ export default function RKT() {
                         </span>
                       </div>
 
-                      <div className="rkt-detail-item">
+                      {/* <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Unit</span>
                         <span className="rkt-detail-value">
                           {getDisplayValue(
@@ -637,7 +637,7 @@ export default function RKT() {
                             selectedItem.nama_unit
                           )}
                         </span>
-                      </div>
+                      </div> */}
 
                       <div className="rkt-detail-item">
                         <span className="rkt-detail-label">Tahun Anggaran</span>

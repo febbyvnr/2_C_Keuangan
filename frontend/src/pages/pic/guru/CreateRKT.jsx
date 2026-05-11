@@ -8,7 +8,7 @@ const API_BASE_URL =
 
 const createEmptyForm = () => ({
   ID_TA_ANGGARAN: "",
-  ID_UNIT: "",
+  // ID_UNIT: "",
   ID_TAN: "",
   ID_MASTER_COA: "",
   ID_KEGIATAN: "",
@@ -39,13 +39,13 @@ const normalizeDate = (value) => {
   return String(value).slice(0, 10);
 };
 
-const normalizeUnitLabel = (item) =>
-  item?.NAMA_UNIT ??
-  item?.DESKRIPSI_UNIT ??
-  item?.UNIT ??
-  item?.DESKRIPSI ??
-  item?.NAMA ??
-  `Unit ${item?.ID_UNIT ?? ""}`.trim();
+// const normalizeUnitLabel = (item) =>
+//   item?.NAMA_UNIT ??
+//   item?.DESKRIPSI_UNIT ??
+//   item?.UNIT ??
+//   item?.DESKRIPSI ??
+//   item?.NAMA ??
+//   `Unit ${item?.ID_UNIT ?? ""}`.trim();
 
 const normalizeTahunAnggaranLabel = (item) =>
   item?.DESKRIPSI_TAHUN_ANGGARAN ??
@@ -105,7 +105,7 @@ export default function CreateRKT() {
 
   const isEditMode = Boolean(id);
 
-  const [unitOptions, setUnitOptions] = useState([]);
+  // const [unitOptions, setUnitOptions] = useState([]);
   const [tahunAnggaranOptions, setTahunAnggaranOptions] = useState([]);
   const [tanOptions, setTanOptions] = useState([]);
   const [coaOptions, setCoaOptions] = useState([]);
@@ -131,20 +131,32 @@ export default function CreateRKT() {
     .join(" - ");
 
   const loadMasterData = async () => {
-    const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
+    // const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
+    //   await Promise.all([
+    //     fetchJson(`${API_BASE_URL}/unit`),
+    //     fetchJson(`${API_BASE_URL}/tahun-anggaran`),
+    //     fetchJson(`${API_BASE_URL}/ref-tan`),
+    //     fetchJson(`${API_BASE_URL}/coa`),
+    //     fetchJson(`${API_BASE_URL}/kegiatan`),
+    //   ]);
+    const [taJson, tanJson, coaJson, kegiatanJson] =
       await Promise.all([
-        fetchJson(`${API_BASE_URL}/unit`),
         fetchJson(`${API_BASE_URL}/tahun-anggaran`),
         fetchJson(`${API_BASE_URL}/ref-tan`),
         fetchJson(`${API_BASE_URL}/coa`),
         fetchJson(`${API_BASE_URL}/kegiatan`),
       ]);
 
-    setUnitOptions(extractCollection(unitJson));
-    setTahunAnggaranOptions(extractCollection(taJson));
-    setTanOptions(extractCollection(tanJson));
-    setCoaOptions(extractCollection(coaJson));
-    setKegiatanOptions(normalizeKegiatanItems(extractCollection(kegiatanJson)));
+      setTahunAnggaranOptions(extractCollection(taJson));
+      setTanOptions(extractCollection(tanJson));
+      setCoaOptions(extractCollection(coaJson));
+      setKegiatanOptions(normalizeKegiatanItems(extractCollection(kegiatanJson)));
+
+    // setUnitOptions(extractCollection(unitJson));
+    // setTahunAnggaranOptions(extractCollection(taJson));
+    // setTanOptions(extractCollection(tanJson));
+    // setCoaOptions(extractCollection(coaJson));
+    // setKegiatanOptions(normalizeKegiatanItems(extractCollection(kegiatanJson)));
   };
 
   const loadRktDetail = async () => {
@@ -168,7 +180,7 @@ export default function CreateRKT() {
 
     setForm({
       ID_TA_ANGGARAN: String(data?.ID_TA_ANGGARAN ?? ""),
-      ID_UNIT: String(data?.ID_UNIT ?? ""),
+      // ID_UNIT: String(data?.ID_UNIT ?? ""),
       ID_TAN: data?.ID_TAN ? String(data.ID_TAN) : "",
       ID_MASTER_COA: String(data?.ID_MASTER_COA ?? ""),
       ID_KEGIATAN: String(data?.ID_KEGIATAN ?? ""),
@@ -253,7 +265,7 @@ export default function CreateRKT() {
     const payload = {
       ...form,
       ID_TA_ANGGARAN: Number(form.ID_TA_ANGGARAN),
-      ID_UNIT: Number(form.ID_UNIT),
+      // ID_UNIT: Number(form.ID_UNIT),
       ID_TAN: form.ID_TAN ? Number(form.ID_TAN) : null,
       ID_MASTER_COA: Number(form.ID_MASTER_COA),
       ID_KEGIATAN: Number(form.ID_KEGIATAN),
@@ -370,7 +382,7 @@ export default function CreateRKT() {
                   </select>
                 </label>
 
-                <label className="create-rkt-field">
+                {/* <label className="create-rkt-field">
                   <span>Unit</span>
                   <select
                     name="ID_UNIT"
@@ -385,7 +397,7 @@ export default function CreateRKT() {
                       </option>
                     ))}
                   </select>
-                </label>
+                </label> */}
 
                 <label className="create-rkt-field">
                   <span>TAN</span>
@@ -444,7 +456,7 @@ export default function CreateRKT() {
                 </label>
 
                 <label className="create-rkt-field">
-                  <span>Program Kerja</span>
+                  <span>Nama Program Kerja</span>
                   <input
                     type="text"
                     name="PROGRAM_KERJA"
