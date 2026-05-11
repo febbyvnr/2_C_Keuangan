@@ -805,3 +805,8 @@
   font-size: 15px;
   line-height: 1;
 }
+
+.rka-header-actions > .btn-primary-custom {
+  align-self: center;
+  transform: translateY(7px);
+}
