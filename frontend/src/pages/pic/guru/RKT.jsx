@@ -443,7 +443,7 @@ export default function RKT() {
                           <th>Program Kerja</th>
                           <th>Indikator</th>
                           <th>Waktu</th>
-                          <th>Anggaran</th>
+                          <th>Anggaran/Pagu</th>
                           <th>Status</th>
                         </tr>
                       </thead>
