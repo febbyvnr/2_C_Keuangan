@@ -63,6 +63,7 @@ import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
+// import PMRKT from "./pages/pm/RKT";
 import VerifikasiEvaluasiPm from "./pages/PM/VerifikasiEvaluasiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
@@ -149,6 +150,7 @@ export default function App() {
 
         {/* BENDHARA LAYOUT */}
         <Route path="/bendahara" element={<BendaharaLayout />}>
+          <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dana" element={<Dana />} />
           {/* <Route path="rka" element={<RKA />} /> */}
@@ -257,25 +259,13 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardPM />} />
           <Route path="referensi" element={<ReferensiPm />} />
-          <Route
-            path="monitoring-mutu"
-            element={
-              <div>
-                <h1>Monitoring Mutu</h1>
-              </div>
-            }
-          />
-          <Route
-            path="evaluasi-rkt"
-            element={
+          <Route path="kegiatan" element={<KepsekMasterKegiatan />} />
+          {/* <Route path="rkt" element={<PMRKT />} /> */}
+          <Route path="evaluasi-rkt" element={
               <div>
                 <h1>Evaluasi RKT</h1>
               </div>
             }
-          />
-          <Route
-            path="verifikasi-evaluasi"
-            element={<VerifikasiEvaluasiPm />}
           />
         </Route>
       </Routes>
