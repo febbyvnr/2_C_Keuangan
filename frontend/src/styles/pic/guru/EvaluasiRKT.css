@@ -3,6 +3,7 @@
     min-height: 100vh;
     background: #f3f6fb;
     color: #1f2937;
+    overflow-x: hidden
 }
 
 .waka-evaluasi-sidebar {
@@ -64,9 +65,10 @@
 }
 
 .waka-evaluasi-main {
-    padding: 28px 34px 40px;
+    flex: 1;
+    padding: 20px 24px 32px;
     background: #f3f6fb;
-    width: 100%;
+    min-width: 0;
 }
 
 .waka-evaluasi-card h2 {

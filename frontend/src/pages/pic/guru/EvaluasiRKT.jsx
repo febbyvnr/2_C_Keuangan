@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import "../../styles/pic/guru/EvaluasiRKT.css";
-import SidebarPic from "../../components/SidebarPic";
+import "../../../styles/pic/guru/EvaluasiRKT.css";
+import SidebarPic from "../../../components/SidebarPic";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 const PAGE_SIZE = 10;
@@ -531,7 +531,7 @@ export default function PicEvaluasiRKT() {
 
     return (
         <div className="waka-evaluasi-shell">
-            {/* <SidebarWaka /> */}
+            <SidebarPic />
 
             <main className="waka-evaluasi-main">
                 <section className="waka-evaluasi-stats">
