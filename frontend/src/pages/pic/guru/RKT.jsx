@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/bendahara/SidebarBendahara.css";
 import "../../../styles/pic/guru/RKT.css";
 import { Plus} from "lucide-react";
@@ -346,7 +345,6 @@ export default function RKT() {
 
   return (
     <div className="rkt-shell">
-      <SidebarPic />
 
       <main className="rkt-main">
         <div className="rkt-wrapper">

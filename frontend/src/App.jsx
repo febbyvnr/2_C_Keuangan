@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import SidebarBendahara from "./components/SidebarBendahara";
 import SidebarWaka from "./components/SidebarWaka";
+import SidebarPic from "./components/SidebarPic";
 import Login from "./pages/Login";
 
 import Dashboard from "./pages/bendahara/Dashboard";
@@ -140,6 +141,17 @@ function PmLayout() {
   );
 }
 
+function PicGuruLayout() {
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarPic />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -196,16 +208,15 @@ export default function App() {
         />
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
-        {/* PIC GURU */}
-        <Route path="/pic/guru" element={<DashboardPIC />} />
-        <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
-        <Route path="/pic/guru/rkt" element={<RKT />} />
-        <Route path="/pic/guru/rka" element={<RKA />} />
-        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
-        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-        {/* <Route path="/pic/guru/status-pengajuan" element={<StatusPengajuan />} /> */}
-        {/* <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKTPage />} /> */}
-
+        <Route path="/pic/guru" element={<PicGuruLayout />}>
+  <Route index element={<DashboardPIC />} />
+  <Route path="dashboard" element={<DashboardPIC />} />
+  <Route path="fpd" element={<PicGuruFPD />} />
+  <Route path="rkt" element={<RKT />} />
+  <Route path="rka" element={<RKA />} />
+  <Route path="rkt/create" element={<CreateRKT />} />
+  <Route path="rkt/edit/:id" element={<CreateRKT />} />
+</Route>
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
