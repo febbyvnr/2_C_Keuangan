@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "../../../styles/pic/guru/RKA.css";
-import SidebarPic from "../../../components/SidebarPic";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 function formatRupiah(value) {
@@ -316,7 +315,6 @@ function getSumberDanaSummary(item) {
 
   return (
     <div className="rka-shell">
-      <SidebarPic></SidebarPic>
       <main className="rka-main">
         <div className="rka-wrapper">
           <div className="rka-header-card">

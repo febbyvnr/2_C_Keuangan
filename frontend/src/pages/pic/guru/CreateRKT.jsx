@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/CreateRKT.css";
 
 const API_BASE_URL =
@@ -306,8 +305,6 @@ export default function CreateRKT() {
 
   return (
     <div className="create-rkt-shell">
-      <SidebarPic />
-
       <main className="create-rkt-main">
         <section className="create-rkt-card">
           <div className="create-rkt-card-head">
