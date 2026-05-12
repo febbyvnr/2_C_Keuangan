@@ -16,6 +16,8 @@ export default function RKTPage({ setHasPending }) {
     const [revisiText, setRevisiText] = useState("");
     const [showRevisiInput, setShowRevisiInput] = useState(false);
 
+    const [tolakText, setTolakText] = useState("");
+    const [showTolakInput, setShowTolakInput] = useState(false);
     const showToast = (type = "success", message = "") => {
         setToast({ type, message });
         setVisible(true);
@@ -34,9 +36,14 @@ export default function RKTPage({ setHasPending }) {
                 : "http://localhost:8000/api/rkt";
             const res = await fetch(url);
             const json = await res.json();
-            const result = json.data || [];
+            const rawResult = json.data || [];
+
+            const result = rawResult.filter((item) => {
+                return getStatus(item).label !== "Draft";
+            });
+
             setData(result);
-            const hasPending = result.some(item => !item.NIP_VALIDATOR_PROGKER);
+            const hasPending = result.some((item) => getStatus(item).label === "Pending");
             setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
@@ -80,16 +87,26 @@ export default function RKTPage({ setHasPending }) {
         const lastPm = item.tr_pm?.length
             ? item.tr_pm[item.tr_pm.length - 1]
             : null;
-        const note = lastPm?.DESKRIPSI_TR_PM?.toLowerCase() || "";
-        if (note.includes("ditolak")) {
+
+        const aksi = String(lastPm?.AKSI || lastPm?.aksi || "").toUpperCase();
+        const note = String(lastPm?.DESKRIPSI_TR_PM || "").toLowerCase();
+
+        if (aksi === "DRAFT" || note.startsWith("draft")) {
+            return { label: "Draft", className: "draft" };
+        }
+
+        if (aksi === "TOLAK" || aksi === "DITOLAK" || note.includes("ditolak")) {
             return { label: "Ditolak", className: "rejected" };
         }
-        if (note.includes("revisi")) {
+
+        if (aksi === "REVISI" || note.includes("revisi")) {
             return { label: "Revisi", className: "revisi" };
         }
-        if (item.NIP_VALIDATOR_PROGKER) {
+
+        if (aksi === "SETUJUI" || item.NIP_VALIDATOR_PROGKER) {
             return { label: "Disetujui", className: "approved" };
         }
+
         return { label: "Pending", className: "pending" };
     };
 
@@ -165,38 +182,51 @@ export default function RKTPage({ setHasPending }) {
     };
 
     const handleReject = async () => {
-        if (!selected) return;
-        const userData = localStorage.getItem("user");
-        if (!userData) {
-            showToast("error", "Sesi login tidak ditemukan");
-            return;
-        }
-        const user = JSON.parse(userData);
-        try {
-            const res = await fetch(
-                `http://localhost:8000/api/rkt/reject/${selected.ID_PROGRAM_KERJA}`,
-                {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        NIP_VALIDATOR_PM: user.NIP_KARYAWAN,
-                        DESKRIPSI: "Ditolak"
-                    })
-                }
-            );
-            const json = await res.json();
-            if (res.ok) {
-                showToast("success", "Program Kerja Ditolak");
-                fetchData();
-                setSelected(null);
-            } else {
-                showToast("error", json.message || "Gagal menolak");
+    if (!selected) return;
+
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+        showToast("error", "Sesi login tidak ditemukan");
+        return;
+    }
+
+    const user = JSON.parse(userData);
+
+    if (!tolakText.trim()) {
+        showToast("error", "Alasan penolakan wajib diisi");
+        return;
+    }
+
+    try {
+        const res = await fetch(
+            `http://localhost:8000/api/rkt/reject/${selected.ID_PROGRAM_KERJA}`,
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    NIP_VALIDATOR_PM: user.NIP_KARYAWAN,
+                    AKSI: "TOLAK",
+                    DESKRIPSI: tolakText,
+                }),
             }
-        } catch (err) {
-            console.error(err);
-            showToast("error", "Koneksi gagal");
+        );
+
+        const json = await res.json();
+
+        if (res.ok) {
+            showToast("success", "Program Kerja Ditolak");
+            fetchData();
+            setSelected(null);
+            setTolakText("");
+            setShowTolakInput(false);
+        } else {
+            showToast("error", json.message || "Gagal menolak");
         }
-    };
+    } catch (err) {
+        console.error(err);
+        showToast("error", "Koneksi gagal");
+    }
+};
 
     const handleRevisi = async () => {
         if (!selected) return;
@@ -309,7 +339,7 @@ export default function RKTPage({ setHasPending }) {
                                             selected?.ID_PROGRAM_KERJA === item.ID_PROGRAM_KERJA
                                                 ? "active-row"
                                                 : ""
-                                        }z
+                                        }
                                     >
                                         <td>{item.ID_PROGRAM_KERJA}</td>
                                         <td>{item.PROGRAM_KERJA}</td>
@@ -476,7 +506,10 @@ export default function RKTPage({ setHasPending }) {
                                     </button>
                                     <button
                                         className="reject-btn"
-                                        onClick={handleReject}
+                                        onClick={() => {
+                                            setShowTolakInput(!showTolakInput);
+                                            setShowRevisiInput(false);
+                                        }}
                                         disabled={!selected || isDisabled(selected)}
                                     >
                                         Tolak
@@ -489,6 +522,26 @@ export default function RKTPage({ setHasPending }) {
                                         disabled={!revisiText.trim()}
                                     >
                                         Kirim Revisi
+                                    </button>
+                                )}
+                                {showTolakInput && (
+                                    <div className="revisi-input-wrapper">
+                                        <textarea
+                                            placeholder="Masukkan alasan penolakan..."
+                                            value={tolakText}
+                                            onChange={(e) => setTolakText(e.target.value)}
+                                            className="revisi-textarea"
+                                        />
+                                    </div>
+                                )}
+
+                                {showTolakInput && (
+                                    <button
+                                        className="reject-btn"
+                                        onClick={handleReject}
+                                        disabled={!tolakText.trim()}
+                                    >
+                                        Kirim Penolakan
                                     </button>
                                 )}
                             </div>

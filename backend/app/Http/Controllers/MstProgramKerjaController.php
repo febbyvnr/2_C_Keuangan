@@ -345,7 +345,7 @@ class MstProgramKerjaController extends Controller
                     ], 422);
                 }
 
-                if (str_starts_with($lastNote, 'ditolak')) {
+                if (str_contains($lastNote, 'ditolak') || str_contains($lastNote, 'tolak')) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Program kerja sudah ditolak, tidak bisa diubah.'
@@ -362,7 +362,7 @@ class MstProgramKerjaController extends Controller
                 
                 $programKerja->update($validated);
 
-                if (str_starts_with($lastNote, 'revisi')) {
+                if (str_contains($lastNote, 'revisi')) {
                     TrPm::create([
                         'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
                         'NIP_VALIDATOR_PM' => null,
@@ -613,9 +613,12 @@ class MstProgramKerjaController extends Controller
     {
         $request->validate([
             'NIP_VALIDATOR_PM' => 'required|string',
+            'DESKRIPSI' => 'required|string',
         ]);
+
         try {
             $program = MstProgramKerja::findOrFail($id);
+
             $karyawan = DB::table('mst_karyawan')
                 ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
                 ->first();
@@ -626,18 +629,25 @@ class MstProgramKerjaController extends Controller
                     'message' => 'Validator tidak ditemukan'
                 ], 404);
             }
-            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $id)
-                ->orderByDesc('ID_PM')
-                ->first();
-            $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
+
             TrPm::create([
                 'ID_PROGRAM_KERJA' => $id,
                 'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
-                'DESKRIPSI_TR_PM' => $baseDesc . ' : Ditolak',
+                'DESKRIPSI_TR_PM' => 'Ditolak: ' . $request->DESKRIPSI,
             ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Program kerja berhasil ditolak'
+                'message' => 'Program kerja berhasil ditolak',
+                'data' => $program->fresh([
+                    'tahunAnggaran',
+                    'unit',
+                    'tan',
+                    'coa',
+                    'kegiatan',
+                    'detailProgramKerja',
+                    'trPm',
+                ]),
             ], 200);
         } catch (\Throwable $e) {
             return response()->json([

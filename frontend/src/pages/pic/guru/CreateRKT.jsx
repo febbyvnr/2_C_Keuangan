@@ -38,6 +38,29 @@ const normalizeDate = (value) => {
   return String(value).slice(0, 10);
 };
 
+function getLatestReviewNote(rawNote = "") {
+  if (!rawNote) return "";
+
+  const note = String(rawNote).trim();
+
+  const revisiIndex = note.toLowerCase().lastIndexOf("revisi:");
+  if (revisiIndex !== -1) {
+    return note.slice(revisiIndex).trim();
+  }
+
+  const ditolakIndex = note.toLowerCase().lastIndexOf("ditolak:");
+  if (ditolakIndex !== -1) {
+    return note.slice(ditolakIndex).trim();
+  }
+
+  const tolakIndex = note.toLowerCase().lastIndexOf("tolak:");
+  if (tolakIndex !== -1) {
+    return note.slice(tolakIndex).trim();
+  }
+
+  return note;
+}
+
 // const normalizeUnitLabel = (item) =>
 //   item?.NAMA_UNIT ??
 //   item?.DESKRIPSI_UNIT ??
@@ -175,7 +198,7 @@ export default function CreateRKT() {
         );
       })?.DESKRIPSI_TR_PM;
 
-    setCatatanReview(reviewNote || "" );
+    setCatatanReview(getLatestReviewNote(reviewNote || ""));
 
     setForm({
       ID_TA_ANGGARAN: String(data?.ID_TA_ANGGARAN ?? ""),
@@ -339,7 +362,8 @@ export default function CreateRKT() {
 
           {isEditMode && catatanReview ? (
             <div className="create-rkt-feedback error">
-              <strong>Catatan Review:</strong> {catatanReview}
+              <strong>Catatan Revisi: </strong>
+              <p>{catatanReview.replace(/^revisi:\s*/i, "")}</p>
             </div>
           ) : null}
 

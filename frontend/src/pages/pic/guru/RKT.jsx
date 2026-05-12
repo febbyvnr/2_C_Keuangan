@@ -28,6 +28,28 @@ function formatLongDate(value) {
   });
 }
 
+function getLatestReviewNote(item) {
+  const trPmList = item?.trPm || item?.tr_pm || [];
+  const lastTrPm = trPmList.length > 0 ? trPmList[trPmList.length - 1] : null;
+
+  const rawNote =
+    lastTrPm?.DESKRIPSI_TR_PM ||
+    lastTrPm?.deskripsi_tr_pm ||
+    item?.DESKRIPSI_TR_PM ||
+    item?.CATATAN_REVISI ||
+    item?.catatan_revisi ||
+    "";
+
+  if (!rawNote) return "Belum ada catatan.";
+
+  const parts = String(rawNote)
+    .split(/\s:\s(?=Draft|Diajukan|Revisi|Ditolak|Disetujui)/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts.length ? parts[parts.length - 1] : rawNote;
+}
+
 function getStatusInfo(item) {
   if (!item) {
     return {
@@ -41,10 +63,28 @@ function getStatusInfo(item) {
   const validator = item?.NIP_VALIDATOR_PROGKER;
 
   const trPmList = item?.trPm || item?.tr_pm || [];
-  const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
-  const note = lastNote.toLowerCase().trim();
+  const lastTrPm = trPmList.length > 0 ? trPmList[trPmList.length - 1] : null;
 
-  if (note.startsWith("draft")) {
+  const aksi = String(
+    lastTrPm?.AKSI ||
+      lastTrPm?.aksi ||
+      item?.AKSI ||
+      item?.aksi ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+
+  const note = String(
+    lastTrPm?.DESKRIPSI_TR_PM ||
+      lastTrPm?.deskripsi_tr_pm ||
+      item?.DESKRIPSI_TR_PM ||
+      ""
+  )
+    .toLowerCase()
+    .trim();
+
+  if (aksi === "DRAFT" || note.startsWith("draft")) {
     return {
       value: "draft",
       label: "Draft",
@@ -53,16 +93,27 @@ function getStatusInfo(item) {
     };
   }
 
-  if (note.startsWith("ditolak")) {
+  if (
+    aksi === "TOLAK" ||
+    aksi === "DITOLAK" ||
+    aksi === "REJECT" ||
+    note.includes("ditolak") ||
+    note.includes("tolak")
+  ) {
     return {
       value: "ditolak",
       label: "Ditolak",
-      detailLabel: "Ditolak",
+      detailLabel: "Ditolak Kepala Sekolah",
       className: "rkt-status-badge rejected",
     };
   }
 
-  if (note.startsWith("revisi")) {
+  if (
+    aksi === "REVISI" ||
+    aksi === "REVISION" ||
+    note.startsWith("revisi") ||
+    note.includes(": revisi")
+  ) {
     return {
       value: "revisi",
       label: "Revisi",
@@ -71,7 +122,26 @@ function getStatusInfo(item) {
     };
   }
 
-  if (validator) {
+  if (
+    aksi === "DIAJUKAN" ||
+    note.startsWith("diajukan") ||
+    note.includes(": diajukan")
+  ) {
+    return {
+      value: "diajukan",
+      label: "Diajukan",
+      detailLabel: "Menunggu Approval Kepala Sekolah",
+      className: "rkt-status-badge submitted",
+    };
+  }
+
+  if (
+    aksi === "SETUJUI" ||
+    aksi === "DISETUJUI" ||
+    aksi === "APPROVE" ||
+    aksi === "APPROVED" ||
+    validator
+  ) {
     return {
       value: "disetujui",
       label: "Disetujui",
@@ -675,13 +745,22 @@ export default function RKT() {
                     </div>
 
                     <div className="rkt-note-box">
-                      <div className="rkt-note-title">Catatan Revisi / Review</div>
+                      <div className="rkt-note-title">
+                        {selectedStatusValue === "draft"
+                          ? "Catatan Draft"
+                          : selectedStatusValue === "diajukan"
+                          ? "Catatan Pengajuan"
+                          : selectedStatusValue === "revisi"
+                          ? "Catatan Revisi"
+                          : selectedStatusValue === "ditolak"
+                          ? "Catatan Penolakan"
+                          : selectedStatusValue === "disetujui"
+                          ? "Catatan Persetujuan"
+                          : "Catatan Revisi / Review"}
+                      </div>
+
                       <div className="rkt-note-content">
-                        {selectedItem.tr_pm?.[selectedItem.tr_pm.length - 1]?.DESKRIPSI_TR_PM ||
-                          selectedItem.trPm?.[selectedItem.trPm.length - 1]?.DESKRIPSI_TR_PM ||
-                          selectedItem.CATATAN_REVISI ||
-                          selectedItem.catatan_revisi ||
-                          "Belum ada catatan revisi."}
+                        {getLatestReviewNote(selectedItem)}
                       </div>
                     </div>
                   </div>
