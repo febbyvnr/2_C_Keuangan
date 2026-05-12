@@ -20,12 +20,19 @@ trait RecordsActivity
 
     protected function recordActivity($event)
     {
-        // 1. Blokir eksekusi ganda jika objek baru saja dibuat
+        // 1. Blokir eksekusi ganda jika objek baru saja di-insert
         if ($event === 'updated' && $this->wasRecentlyCreated) {
             return; 
         }
 
-        // 2. Tangkap identitas dari token secara mandiri dan aman
+        // --- 2. MANIPULASI STATUS SOFT DELETE DEMI UI FRONTEND ---
+        // Menggunakan array $perubahan secara langsung agar terhindar dari Undefined Property
+        $perubahan = $this->getChanges();
+        if ($event === 'updated' && isset($perubahan['IS_DELETE']) && $perubahan['IS_DELETE'] == 1) {
+            $event = 'deleted';
+        }
+
+        // 3. Tangkap identitas user dari Bearer Token
         $token = request()->bearerToken();
         $accessLogId = null;
         $username    = 'Sistem / Tidak Ditemukan';
@@ -38,15 +45,14 @@ trait RecordsActivity
                 $username    = $payload->nip ?? 'Unknown';
                 $role        = $payload->role ?? 'Unknown';
             } catch (\Exception $e) {
-                // Gagal silent agar tidak merusak respons JSON ke React
                 Log::warning('Token log gagal diurai: ' . $e->getMessage());
             }
         }
 
-        // 3. Susun nama aktivitas singkat demi mempertahankan UI badge aslimu
+        // 4. Cetak string aktivitas ("DELETED MstCoa", "UPDATED RefTarif", dll.)
         $activityName = strtoupper($event) . ' ' . class_basename($this);
 
-        // 4. Buat deskripsi perubahan teks manusiawi
+        // 5. Susun deskripsi riwayat yang bersih
         $relatedData = 'ID Record: ' . $this->getKey();
         $description = '';
 
@@ -56,18 +62,24 @@ trait RecordsActivity
             $description = "Data telah dihapus dari sistem.";
         } elseif ($event === 'updated') {
             $listPerubahan = [];
-            foreach ($this->getChanges() as $kolom => $nilaiBaru) {
+            foreach ($perubahan as $kolom => $nilaiBaru) {
+                // Abaikan pencatatan teknis jika ada flag sistem lain yang ikut terubah
+                if ($kolom === 'IS_DELETE') continue;
+
                 $nilaiLama = $this->getOriginal($kolom) ?? '(kosong)';
                 $nilaiBaru = $nilaiBaru ?? '(kosong)';
                 $listPerubahan[] = "$kolom dari '$nilaiLama' menjadi '$nilaiBaru'";
             }
-            $description = "Mengubah nilai " . implode(', ', $listPerubahan);
+            
+            $description = !empty($listPerubahan) 
+                ? "Mengubah nilai " . implode(', ', $listPerubahan)
+                : "Melakukan pembaruan atribut data.";
         }
 
-        // Amankan dari batas kolom VARCHAR(255) MySQL
+        // Batasi panjang string agar aman masuk ke database
         $description = Str::limit($description, 245);
 
-        // 5. Simpan ke database
+        // 6. Eksekusi penyimpanan ke tabel riwayat
         ActivityLog::create([
             'ID_ACCESS_LOG'        => $accessLogId,
             'EVENT_TIME'           => now(),
