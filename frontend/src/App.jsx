@@ -78,6 +78,32 @@ import "./index.css";
 import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
 import LaporanKepsek from "./pages/kepsek/Laporan.jsx";
 
+// Menyisipkan header Authorization otomatis ke semua request fetch lokal
+const originalFetch = window.fetch;
+
+window.fetch = async (...args) => {
+  let [resource, config] = args;
+  
+  // Hanya sisipkan token jika URL mengarah ke backend Laravel kita
+  if (typeof resource === 'string' && resource.includes('api')) {
+    config = config || {};
+    config.headers = config.headers || {};
+    
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // Pastikan kita tidak menimpa header lain yang sudah ditulis temanmu
+      config.headers = {
+        ...config.headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
+  }
+  
+  return originalFetch(resource, config);
+};
+// -----------------------------------------------------------
+
 function BendaharaLayout() {
   return (
     <div className="layout" style={{ display: "flex" }}>
