@@ -53,7 +53,7 @@ const ActivityLogDashboard = () => {
         setRoleFilter('All');
     };
 
-    // Filter Logic untuk Tab Aktif
+    // Filter Logic untuk Tab Aktif (Mendukung pencarian teks & potongan waktu lengkap)
     const getFilteredData = () => {
         const sourceData = activeTab === 'activity' ? activityLogs : accessLogs;
         
@@ -61,11 +61,19 @@ const ActivityLogDashboard = () => {
             const strAktivitas = log.aktivitas || '';
             const strNama = log.username || log.nama_asli || '';
             const strNip = log.nip_nis || '';
+            
+            // Atribut waktu untuk mendukung pencarian Year, Month, Date, Hours, Minutes, Seconds
+            const strWaktu = log.waktu || '';
+            const strStartLogin = log.start_login || '';
+            const strEndLogin = log.end_login || '';
 
             const matchSearch = 
                 strAktivitas.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 strNip.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                strNama.toLowerCase().includes(searchTerm.toLowerCase());
+                strNama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                strWaktu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                strStartLogin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                strEndLogin.toLowerCase().includes(searchTerm.toLowerCase());
                 
             const matchRole = roleFilter === 'All' || log.role === roleFilter;
 
@@ -74,6 +82,10 @@ const ActivityLogDashboard = () => {
     };
 
     const filteredData = getFilteredData();
+
+    // EKSTRAKSI ROLE OTOMATIS (Menggunakan new Set secara dinamis dari tab yang aktif)
+    const currentSourceData = activeTab === 'activity' ? activityLogs : accessLogs;
+    const uniqueRoles = ['All', ...new Set(currentSourceData.map(item => item.role).filter(Boolean))];
 
     const getBadgeClass = (aktivitas) => {
         if (!aktivitas) return 'badge';
@@ -93,24 +105,24 @@ const ActivityLogDashboard = () => {
                 
                 <div className="log-actions">
                     <button className="log-btn-reset" onClick={handleReset}>Reset</button>
+                    
+                    {/* Dropdown Role Dinamis */}
                     <select 
                         className="log-select" 
                         value={roleFilter} 
                         onChange={(e) => setRoleFilter(e.target.value)}
                     >
-                        <option value="All">Semua Role</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Bendahara">Bendahara</option>
-                        <option value="Kepala Sekolah">Kepala Sekolah</option>
-                        <option value="Waka">Waka</option>
-                        <option value="PIC / Guru">PIC / Guru</option>
-                        <option value="TPM / Tim Penjaminan Mutu">TPM / Tim Penjaminan Mutu</option>
-                        <option value="Yayasan">Yayasan</option>
-                        <option value="Siswa / Orang Tua">Siswa / Orang Tua</option>
+                        {uniqueRoles.map((role, index) => (
+                            <option key={index} value={role}>
+                                {role === 'All' ? 'Semua Role' : role}
+                            </option>
+                        ))}
                     </select>
+
+                    {/* Searchbar tunggal yang mendukung pencarian universal */}
                     <input 
                         type="text" 
-                        placeholder="Cari NIP, Nama, Aktivitas..." 
+                        placeholder="Cari NIP, Nama, Aktivitas, Waktu..." 
                         className="log-input"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -122,13 +134,13 @@ const ActivityLogDashboard = () => {
             <div className="log-tabs-container">
                 <button 
                     className={`log-tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('activity')}
+                    onClick={() => { setActiveTab('activity'); setRoleFilter('All'); }}
                 >
                     Log Aktivitas Data
                 </button>
                 <button 
                     className={`log-tab-btn ${activeTab === 'access' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('access')}
+                    onClick={() => { setActiveTab('access'); setRoleFilter('All'); }}
                 >
                     Log Session Login
                 </button>
@@ -184,7 +196,6 @@ const ActivityLogDashboard = () => {
                                             <td>{log.nip_nis}</td>
                                             <td>{log.role || '-'}</td>
                                             <td><span className={getBadgeClass(log.aktivitas)}>{log.aktivitas}</span></td>
-                                            {/* Asumsi API activity log me-return field 'deskripsi' */}
                                             <td style={{ fontSize: '13px', color: '#6b7280' }}>{log.deskripsi || '-'}</td>
                                         </tr>
                                     ) : (
