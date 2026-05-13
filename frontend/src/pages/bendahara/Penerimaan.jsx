@@ -46,6 +46,9 @@ export default function Penerimaan() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const initialForm = {
     ID_REF_PENERIMAAN: "",
     ID_REF_DANA: "",
@@ -180,11 +183,13 @@ export default function Penerimaan() {
 
   const handleSearch = () => {
     setSearchTerm(searchInput.trim().toLowerCase());
+    setCurrentPage(1);
   };
 
   const handleResetSearch = () => {
     setSearchInput("");
     setSearchTerm("");
+    setCurrentPage(1);
   };
 
   const downloadFile = async (url, filename) => {
@@ -261,6 +266,14 @@ export default function Penerimaan() {
       return joined.includes(searchTerm);
     });
   }, [dataPenerimaan, searchTerm]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  const paginatedData = useMemo(() => {
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, startIndex, endIndex]);
 
   const formatTanggal = (value) => {
     if (!value) return "-";
@@ -435,16 +448,16 @@ export default function Penerimaan() {
                   Memuat data penerimaan...
                 </td>
               </tr>
-            ) : filteredData.length === 0 ? (
+            ) : paginatedData.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center">
                   Tidak ada data penerimaan
                 </td>
               </tr>
             ) : (
-              filteredData.map((item, index) => (
+              paginatedData.map((item, index) => (
                 <tr key={item.ID_TR_PENERIMAAN || index}>
-                  <td>{index + 1}</td>
+                  <td>{startIndex + index + 1}</td>
                   <td>{item.ID_TR_PENERIMAAN || "-"}</td>
                   <td>{getNamaRefPenerimaan(item)}</td>
                   <td>{formatTanggal(item.TANGGAL_TR_PENERIMAAN)}</td>
@@ -483,7 +496,33 @@ export default function Penerimaan() {
 
         <div className="table-footer">
           <div className="pagination-info">
-            Menampilkan {filteredData.length} data
+            Menampilkan{" "}
+            {filteredData.length === 0 ? 0 : startIndex + 1} -{" "}
+            {Math.min(endIndex, filteredData.length)} dari {filteredData.length} data
+          </div>
+
+          <div className="pagination-controls">
+            <button
+              className="btn-pagination"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            <span className="page-number">
+              Halaman {currentPage} / {totalPages}
+            </span>
+
+            <button
+              className="btn-pagination"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
 
           <div style={{ display: "flex", gap: "10px" }}>
@@ -492,7 +531,10 @@ export default function Penerimaan() {
               Export Excel
             </button>
 
-            <button className="btn-export" onClick={handleExportPdf}>
+            <button
+              className="btn-export btn-export-pdf"
+              onClick={handleExportPdf}
+            >
               <FileText size={16} />
               Export PDF
             </button>
@@ -584,7 +626,6 @@ export default function Penerimaan() {
               </select>
 
               <br />
-
 
               <label>NIP Penerima</label>
               <input

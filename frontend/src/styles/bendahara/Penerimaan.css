@@ -264,6 +264,18 @@
     cursor: not-allowed;
 }
 
+.btn-export-pdf {
+    border: 1.5px solid #d32f2f;
+    color: #c62828;
+    border-radius: 10px;
+}
+
+.btn-export-pdf:hover {
+    background: #c62828;
+    color: #ffffff;
+    border-color: #c62828;
+}
+
 .th-icon {
     margin-left: 4px;
     vertical-align: middle;
@@ -364,5 +376,38 @@
 .btn-submit:disabled,
 .btn-cancel:disabled {
     opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-number {
+    font-size: 14px;
+    color: #585858;
+    font-weight: 500;
+}
+
+.btn-pagination {
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    color: #4d4d4d;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }
