@@ -78,32 +78,36 @@ import KepsekMasterTarif from "./pages/kepsek/master/MasterTarif.jsx";
 import "./index.css";
 import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
 import LaporanKepsek from "./pages/kepsek/Laporan.jsx";
+import axios from "axios";
 
-// Menyisipkan header Authorization otomatis ke semua request fetch lokal
+// --- 1. GLOBAL FETCH OVERRIDE ---
 const originalFetch = window.fetch;
-
 window.fetch = async (...args) => {
   let [resource, config] = args;
-  
-  // Hanya sisipkan token jika URL mengarah ke backend Laravel kita
+  config = config || {};
+  config.headers = config.headers || {};
+
   if (typeof resource === 'string' && resource.includes('api')) {
-    config = config || {};
-    config.headers = config.headers || {};
-    
-    const token = localStorage.getItem('token');
-    
+    let token = localStorage.getItem('token');
     if (token) {
-      // Pastikan kita tidak menimpa header lain yang sudah ditulis temanmu
-      config.headers = {
-        ...config.headers,
-        'Authorization': `Bearer ${token}`
-      };
+      token = token.replace(/^"(.*)"$/, '$1'); // Bersihkan tanda kutip pembungkus
+      const newHeaders = new Headers(config.headers);
+      newHeaders.set('Authorization', `Bearer ${token}`);
+      config.headers = newHeaders;
     }
   }
-  
   return originalFetch(resource, config);
 };
-// -----------------------------------------------------------
+
+// --- 2. GLOBAL AXIOS INTERCEPTOR (PENOLONG LOG DELETE) ---
+axios.interceptors.request.use((config) => {
+  let token = localStorage.getItem("token");
+  if (token && config.url && config.url.includes("api")) {
+    token = token.replace(/^"(.*)"$/, '$1'); // Bersihkan tanda kutip pembungkus
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => Promise.reject(error));
 
 function BendaharaLayout() {
   return (
