@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Exports\FpdAnggaranListExport;
+use App\Models\DtlProgramKerja;
 use App\Models\FpdAnggaran;
 use App\Models\MstProgramKerja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
@@ -191,21 +193,24 @@ class FpdAnggaranController extends Controller
     {
         try {
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
+                'ID_DT_PROGKER' => 'required_without:ID_PROGRAM_KERJA|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'ID_PROGRAM_KERJA' => 'required_without:ID_DT_PROGKER|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
                 'TGL_FPD' => 'required|date',
-                'NOMINAL_ANGGARAN' => 'required|numeric|min:0',
+                'NOMINAL_ANGGARAN' => 'required_without:ID_DT_PROGKER|numeric|min:0',
                 'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
             ]);
 
+            $payload = $this->buildFpdPayload($validated);
+
             $this->validateProgramKerjaBudget(
-                (int) $validated['ID_PROGRAM_KERJA'],
-                (float) $validated['NOMINAL_ANGGARAN']
+                (int) $payload['ID_PROGRAM_KERJA'],
+                (float) $payload['NOMINAL_ANGGARAN']
             );
 
-            $validated['NOMINAL_FPD'] = 0;
-            $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'];
+            $payload['NOMINAL_FPD'] = 0;
+            $payload['NOMINAL_SISA'] = (float) $payload['NOMINAL_ANGGARAN'];
 
-            $data = FpdAnggaran::create($validated)->load([
+            $data = FpdAnggaran::create($payload)->load([
                 'programKerja',
                 'programKerja.detailProgramKerja.sumberDana',
                 'detailFpd.detailProgram',
@@ -318,34 +323,36 @@ class FpdAnggaranController extends Controller
                 ], 404);
             }
             $validated = $request->validate([
-                'ID_PROGRAM_KERJA' => 'required|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
+                'ID_DT_PROGKER' => 'required_without:ID_PROGRAM_KERJA|integer|exists:dtl_program_kerja,ID_DT_PROGKER',
+                'ID_PROGRAM_KERJA' => 'required_without:ID_DT_PROGKER|integer|exists:mst_program_kerja,ID_PROGRAM_KERJA',
                 'TGL_FPD' => 'required|date',
-                'NOMINAL_ANGGARAN' => 'required|numeric|min:0',
+                'NOMINAL_ANGGARAN' => 'required_without:ID_DT_PROGKER|numeric|min:0',
                 'NIP_VALIDATOR_FPD' => 'nullable|string|max:20',
             ]);
+            $payload = $this->buildFpdPayload($validated);
             $totalDetail = (float) $data->detailFpd()->sum('TOTAL');
-            if ($data->detailFpd()->exists() && (int) $validated['ID_PROGRAM_KERJA'] !== (int) $data->ID_PROGRAM_KERJA) {
+            if ($data->detailFpd()->exists() && (int) $payload['ID_PROGRAM_KERJA'] !== (int) $data->ID_PROGRAM_KERJA) {
                 throw ValidationException::withMessages([
                     'ID_PROGRAM_KERJA' => ['ID program kerja tidak bisa diubah karena FPD sudah punya rincian detail.'],
                 ]);
             }
-            if ((float) $validated['NOMINAL_ANGGARAN'] < $totalDetail) {
+            if ((float) $payload['NOMINAL_ANGGARAN'] < $totalDetail) {
                 throw ValidationException::withMessages([
                     'NOMINAL_ANGGARAN' => ['Nominal anggaran tidak boleh lebih kecil dari total rincian (Rp ' . number_format($totalDetail, 0, ',', '.') . ').'],
                 ]);
             }
-            $isNominalChanged = (float)$validated['NOMINAL_ANGGARAN'] !== (float)$data->NOMINAL_ANGGARAN;
-            $isProgramChanged = (int)$validated['ID_PROGRAM_KERJA'] !== (int)$data->ID_PROGRAM_KERJA;
+            $isNominalChanged = (float)$payload['NOMINAL_ANGGARAN'] !== (float)$data->NOMINAL_ANGGARAN;
+            $isProgramChanged = (int)$payload['ID_PROGRAM_KERJA'] !== (int)$data->ID_PROGRAM_KERJA;
             if ($isNominalChanged || $isProgramChanged) {
                 $this->validateProgramKerjaBudget(
-                    (int) $validated['ID_PROGRAM_KERJA'],
-                    (float) $validated['NOMINAL_ANGGARAN'],
+                    (int) $payload['ID_PROGRAM_KERJA'],
+                    (float) $payload['NOMINAL_ANGGARAN'],
                     $data->ID_FPD
                 );
             }
-            $validated['NOMINAL_FPD'] = $totalDetail;
-            $validated['NOMINAL_SISA'] = (float) $validated['NOMINAL_ANGGARAN'] - $totalDetail;
-            $data->update($validated);
+            $payload['NOMINAL_FPD'] = $totalDetail;
+            $payload['NOMINAL_SISA'] = (float) $payload['NOMINAL_ANGGARAN'] - $totalDetail;
+            $data->update($payload);
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil diperbarui',
@@ -437,29 +444,54 @@ class FpdAnggaranController extends Controller
         }
     }
     
-    public function export($id): JsonResponse|StreamedResponse
+    public function export(Request $request, $id = null): JsonResponse|StreamedResponse
     {
         try {
-            $id = (int) $id;
-
-            $fpd = FpdAnggaran::with([
+            $relations = [
                 'programKerja',
                 'detailFpd.detailProgram.programKerja',
                 'detailFpd.detailProgram.sumberDana',
-            ])->find($id);
+            ];
 
-            if (!$fpd) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data FPD tidak ditemukan',
-                    'data' => null,
-                ], 404);
+            if (!is_null($id)) {
+                $id = (int) $id;
+
+                $fpd = FpdAnggaran::with($relations)->find($id);
+
+                if (!$fpd) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data FPD tidak ditemukan',
+                        'data' => null,
+                    ], 404);
+                }
+
+                $fileName = 'laporan_FPD_' . $id . '.xlsx';
+
+                return response()->streamDownload(function () use ($fpd) {
+                    echo $this->buildFpdXlsx($fpd);
+                }, $fileName, [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]);
             }
 
-            $fileName = 'laporan_FPD.xlsx';
+            $query = FpdAnggaran::with($relations)->orderByDesc('ID_FPD');
 
-            return response()->streamDownload(function () use ($fpd) {
-                echo $this->buildFpdXlsx($fpd);
+            if ($request->filled('TGL_FPD')) {
+                $query->where('TGL_FPD', 'like', $request->TGL_FPD . '%');
+            }
+            if ($request->filled('NIP_VALIDATOR_FPD')) {
+                $query->where('NIP_VALIDATOR_FPD', 'like', '%' . $request->NIP_VALIDATOR_FPD . '%');
+            }
+            if ($request->filled('PROGRAM_KERJA')) {
+                $query->whereHas('programKerja', fn($q) => $q->where('PROGRAM_KERJA', 'like', '%' . $request->PROGRAM_KERJA . '%'));
+            }
+
+            $fpds = $query->get();
+            $fileName = 'laporan_FPD_semua_' . now()->format('Ymd_His') . '.xlsx';
+
+            return response()->streamDownload(function () use ($fpds) {
+                echo $this->buildFpdXlsx($fpds);
             }, $fileName, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
@@ -472,11 +504,13 @@ class FpdAnggaranController extends Controller
         }
     }
 
-    private function buildFpdXlsx(FpdAnggaran $fpd): string
+    private function buildFpdXlsx(FpdAnggaran|Collection $fpdData): string
     {
-        $rows = $fpd->detailFpd->sortBy('ID_DT_FPD')->values();
+        $fpds = $fpdData instanceof FpdAnggaran
+            ? collect([$fpdData])
+            : $fpdData->values();
         $reportDate = now();
-        $sheetXml = $this->buildFpdWorksheetXml($fpd, $rows, $reportDate);
+        $sheetXml = $this->buildFpdWorksheetXml($fpds, $reportDate);
 
         $entries = [
             '[Content_Types].xml' => $this->buildContentTypesXml(),
@@ -493,17 +527,17 @@ class FpdAnggaranController extends Controller
         return $this->buildZipArchive($entries);
     }
 
-    private function buildFpdWorksheetXml(FpdAnggaran $fpd, $rows, $reportDate): array
+    private function buildFpdWorksheetXml(Collection $fpds, $reportDate): array
     {
         $sharedStrings = [];
         $sharedStringMap = [];
         $sheetRows = [];
         $lastColumn = 'R';
-        $currentRow = 1;
-
-        $programKerjaName = optional($fpd->programKerja)->PROGRAM_KERJA ?? '-';
-        $tanggalFpd = $fpd->TGL_FPD?->format('d/m/Y') ?? '-';
-        $validator = $fpd->NIP_VALIDATOR_FPD ?: '-';
+        $summary = $fpds->count() === 1
+            ? 'ID FPD: ' . $fpds->first()->ID_FPD
+                . ' | Tanggal FPD: ' . ($fpds->first()->TGL_FPD?->format('d/m/Y') ?? '-')
+                . ' | Program Kerja: ' . (optional($fpds->first()->programKerja)->PROGRAM_KERJA ?? '-')
+            : 'Semua ID FPD | Total FPD: ' . $fpds->count();
 
         $sheetRows[] = $this->buildRowXml(2, [
             $this->sharedStringCell('A2', 2, 'SMK BOPKRI 2 YOGYAKARTA', $sharedStrings, $sharedStringMap),
@@ -515,7 +549,7 @@ class FpdAnggaranController extends Controller
             $this->sharedStringCell(
                 'A4',
                 1,
-                'ID FPD: ' . $fpd->ID_FPD . ' | Tanggal FPD: ' . $tanggalFpd . ' | Program Kerja: ' . $programKerjaName,
+                $summary,
                 $sharedStrings,
                 $sharedStringMap
             ),
@@ -550,18 +584,21 @@ class FpdAnggaranController extends Controller
         $sheetRows[] = $this->buildRowXml(6, $headerCells);
 
         $currentRow = 7;
+        $rowNumber = 1;
         $detailTotal = 0.0;
+        $totalAnggaran = 0.0;
+        $totalSisa = 0.0;
 
-        if ($rows->isEmpty()) {
+        if ($fpds->isEmpty()) {
             $sheetRows[] = $this->buildRowXml($currentRow, [
                 $this->numberCell("A{$currentRow}", 5, 1),
-                $this->numberCell("B{$currentRow}", 5, (float) $fpd->ID_FPD),
-                $this->sharedStringCell("C{$currentRow}", 5, $tanggalFpd, $sharedStrings, $sharedStringMap),
-                $this->sharedStringCell("D{$currentRow}", 6, $programKerjaName, $sharedStrings, $sharedStringMap),
-                $this->sharedStringCell("E{$currentRow}", 5, $validator, $sharedStrings, $sharedStringMap),
-                $this->numberCell("F{$currentRow}", 7, (float) $fpd->NOMINAL_ANGGARAN),
-                $this->numberCell("G{$currentRow}", 7, (float) $fpd->NOMINAL_FPD),
-                $this->numberCell("H{$currentRow}", 7, (float) $fpd->NOMINAL_SISA),
+                $this->sharedStringCell("B{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                $this->sharedStringCell("C{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                $this->sharedStringCell("D{$currentRow}", 6, 'Tidak ada data FPD', $sharedStrings, $sharedStringMap),
+                $this->sharedStringCell("E{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                $this->numberCell("F{$currentRow}", 7, 0),
+                $this->numberCell("G{$currentRow}", 7, 0),
+                $this->numberCell("H{$currentRow}", 7, 0),
                 $this->sharedStringCell("I{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
                 $this->sharedStringCell("J{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
                 $this->sharedStringCell("K{$currentRow}", 6, '-', $sharedStrings, $sharedStringMap),
@@ -575,35 +612,75 @@ class FpdAnggaranController extends Controller
             ]);
             $currentRow++;
         } else {
-            foreach ($rows as $index => $detail) {
-                $detailProgram = $detail->detailProgram;
-                $rowProgramKerja = optional(optional($detailProgram)->programKerja)->PROGRAM_KERJA ?? $programKerjaName;
-                $sumberDanaName = optional(optional($detailProgram)->sumberDana)->SUMBER_DANA ?? '-';
-                $detailLabel = $rowProgramKerja . ($sumberDanaName !== '-' ? ' - ' . $sumberDanaName : '');
-                $detailTotal += (float) $detail->TOTAL;
+            foreach ($fpds as $fpd) {
+                $programKerjaName = optional($fpd->programKerja)->PROGRAM_KERJA ?? '-';
+                $tanggalFpd = $fpd->TGL_FPD?->format('d/m/Y') ?? '-';
+                $validator = $fpd->NIP_VALIDATOR_FPD ?: '-';
+                $rows = $fpd->detailFpd->sortBy('ID_DT_FPD')->values();
 
-                $sheetRows[] = $this->buildRowXml($currentRow, [
-                    $this->numberCell("A{$currentRow}", 5, $index + 1),
-                    $this->numberCell("B{$currentRow}", 5, (float) $fpd->ID_FPD),
-                    $this->sharedStringCell("C{$currentRow}", 5, $tanggalFpd, $sharedStrings, $sharedStringMap),
-                    $this->sharedStringCell("D{$currentRow}", 6, $programKerjaName, $sharedStrings, $sharedStringMap),
-                    $this->sharedStringCell("E{$currentRow}", 5, $validator, $sharedStrings, $sharedStringMap),
-                    $this->numberCell("F{$currentRow}", 7, (float) $fpd->NOMINAL_ANGGARAN),
-                    $this->numberCell("G{$currentRow}", 7, (float) $fpd->NOMINAL_FPD),
-                    $this->numberCell("H{$currentRow}", 7, (float) $fpd->NOMINAL_SISA),
-                    $this->numberCell("I{$currentRow}", 5, (float) $detail->ID_DT_FPD),
-                    $this->numberCell("J{$currentRow}", 5, (float) $detail->ID_DT_PROGKER),
-                    $this->sharedStringCell("K{$currentRow}", 6, $detailLabel, $sharedStrings, $sharedStringMap),
-                    $this->sharedStringCell("L{$currentRow}", 6, $sumberDanaName, $sharedStrings, $sharedStringMap),
-                    $this->numberCell("M{$currentRow}", 5, (float) $detail->QTY),
-                    $this->numberCell("N{$currentRow}", 5, (float) $detail->VOLUME),
-                    $this->sharedStringCell("O{$currentRow}", 5, $detail->SATUAN ?? '-', $sharedStrings, $sharedStringMap),
-                    $this->numberCell("P{$currentRow}", 7, (float) $detail->HARGA_SATUAN),
-                    $this->numberCell("Q{$currentRow}", 7, (float) $detail->TOTAL),
-                    $this->sharedStringCell("R{$currentRow}", 6, $detail->LINK_BUKTI_NOTA_FPD ?? '-', $sharedStrings, $sharedStringMap),
-                ]);
+                $totalAnggaran += (float) $fpd->NOMINAL_ANGGARAN;
+                $totalSisa += (float) $fpd->NOMINAL_SISA;
 
-                $currentRow++;
+                if ($rows->isEmpty()) {
+                    $sheetRows[] = $this->buildRowXml($currentRow, [
+                        $this->numberCell("A{$currentRow}", 5, $rowNumber++),
+                        $this->numberCell("B{$currentRow}", 5, (float) $fpd->ID_FPD),
+                        $this->sharedStringCell("C{$currentRow}", 5, $tanggalFpd, $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("D{$currentRow}", 6, $programKerjaName, $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("E{$currentRow}", 5, $validator, $sharedStrings, $sharedStringMap),
+                        $this->numberCell("F{$currentRow}", 7, (float) $fpd->NOMINAL_ANGGARAN),
+                        $this->numberCell("G{$currentRow}", 7, (float) $fpd->NOMINAL_FPD),
+                        $this->numberCell("H{$currentRow}", 7, (float) $fpd->NOMINAL_SISA),
+                        $this->sharedStringCell("I{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("J{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("K{$currentRow}", 6, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("L{$currentRow}", 6, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("M{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("N{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("O{$currentRow}", 5, '-', $sharedStrings, $sharedStringMap),
+                        $this->numberCell("P{$currentRow}", 7, 0),
+                        $this->numberCell("Q{$currentRow}", 7, 0),
+                        $this->sharedStringCell("R{$currentRow}", 6, '-', $sharedStrings, $sharedStringMap),
+                    ]);
+
+                    $currentRow++;
+                    continue;
+                }
+
+                foreach ($rows as $detail) {
+                    $detailProgram = $detail->detailProgram;
+                    $sumberDana = optional($detailProgram)->sumberDana;
+                    $rowProgramKerja = optional(optional($detailProgram)->programKerja)->PROGRAM_KERJA ?? $programKerjaName;
+                    $sumberDanaName = optional($sumberDana)->SUMBER_DANA
+                        ?? optional($sumberDana)->DESKRIPSI_SUMBER_DANA
+                        ?? optional($sumberDana)->NAMA_SUMBER_DANA
+                        ?? '-';
+                    $detailLabel = $rowProgramKerja . ($sumberDanaName !== '-' ? ' - ' . $sumberDanaName : '');
+                    $detailTotal += (float) $detail->TOTAL;
+
+                    $sheetRows[] = $this->buildRowXml($currentRow, [
+                        $this->numberCell("A{$currentRow}", 5, $rowNumber++),
+                        $this->numberCell("B{$currentRow}", 5, (float) $fpd->ID_FPD),
+                        $this->sharedStringCell("C{$currentRow}", 5, $tanggalFpd, $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("D{$currentRow}", 6, $programKerjaName, $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("E{$currentRow}", 5, $validator, $sharedStrings, $sharedStringMap),
+                        $this->numberCell("F{$currentRow}", 7, (float) $fpd->NOMINAL_ANGGARAN),
+                        $this->numberCell("G{$currentRow}", 7, (float) $fpd->NOMINAL_FPD),
+                        $this->numberCell("H{$currentRow}", 7, (float) $fpd->NOMINAL_SISA),
+                        $this->numberCell("I{$currentRow}", 5, (float) $detail->ID_DT_FPD),
+                        $this->numberCell("J{$currentRow}", 5, (float) $detail->ID_DT_PROGKER),
+                        $this->sharedStringCell("K{$currentRow}", 6, $detailLabel, $sharedStrings, $sharedStringMap),
+                        $this->sharedStringCell("L{$currentRow}", 6, $sumberDanaName, $sharedStrings, $sharedStringMap),
+                        $this->numberCell("M{$currentRow}", 5, (float) $detail->QTY),
+                        $this->numberCell("N{$currentRow}", 5, (float) $detail->VOLUME),
+                        $this->sharedStringCell("O{$currentRow}", 5, $detail->SATUAN ?? '-', $sharedStrings, $sharedStringMap),
+                        $this->numberCell("P{$currentRow}", 7, (float) $detail->HARGA_SATUAN),
+                        $this->numberCell("Q{$currentRow}", 7, (float) $detail->TOTAL),
+                        $this->sharedStringCell("R{$currentRow}", 6, $detail->LINK_BUKTI_NOTA_FPD ?? '-', $sharedStrings, $sharedStringMap),
+                    ]);
+
+                    $currentRow++;
+                }
             }
         }
 
@@ -615,12 +692,12 @@ class FpdAnggaranController extends Controller
 
         $sheetRows[] = $this->buildRowXml($totalRow + 1, [
             $this->sharedStringCell('Q' . ($totalRow + 1), 8, 'NOMINAL ANGGARAN', $sharedStrings, $sharedStringMap),
-            $this->numberCell('R' . ($totalRow + 1), 9, (float) $fpd->NOMINAL_ANGGARAN),
+            $this->numberCell('R' . ($totalRow + 1), 9, $totalAnggaran),
         ]);
 
         $sheetRows[] = $this->buildRowXml($totalRow + 2, [
             $this->sharedStringCell('Q' . ($totalRow + 2), 8, 'NOMINAL SISA', $sharedStrings, $sharedStringMap),
-            $this->numberCell('R' . ($totalRow + 2), 9, (float) $fpd->NOMINAL_SISA),
+            $this->numberCell('R' . ($totalRow + 2), 9, $totalSisa),
         ]);
 
         $footerRow = $totalRow + 5;
@@ -927,10 +1004,63 @@ class FpdAnggaranController extends Controller
         return [$dosTime, $dosDate];
     }
 
+    private function buildFpdPayload(array $validated): array
+    {
+        $payload = [
+            'TGL_FPD' => $validated['TGL_FPD'],
+        ];
+
+        if (array_key_exists('NIP_VALIDATOR_FPD', $validated)) {
+            $payload['NIP_VALIDATOR_FPD'] = $validated['NIP_VALIDATOR_FPD'];
+        }
+
+        if (!empty($validated['ID_DT_PROGKER'])) {
+            $rka = DtlProgramKerja::with('programKerja')
+                ->find((int) $validated['ID_DT_PROGKER']);
+            $programKerja = $rka?->programKerja;
+
+            if (!$rka || !$programKerja || (int) ($programKerja->IS_DELETE ?? 0) === 1) {
+                throw ValidationException::withMessages([
+                    'ID_DT_PROGKER' => ['RKA tidak ditemukan atau RKT sudah tidak aktif.'],
+                ]);
+            }
+
+            if (blank($programKerja->NIP_VALIDATOR_PROGKER)) {
+                throw ValidationException::withMessages([
+                    'ID_DT_PROGKER' => ['RKA belum bisa dipakai karena RKT belum disetujui.'],
+                ]);
+            }
+
+            $payload['ID_PROGRAM_KERJA'] = (int) $rka->ID_PROGRAM_KERJA;
+            $payload['NOMINAL_ANGGARAN'] = $this->getRkaNominal($rka);
+
+            return $payload;
+        }
+
+        $payload['ID_PROGRAM_KERJA'] = (int) $validated['ID_PROGRAM_KERJA'];
+        $payload['NOMINAL_ANGGARAN'] = (float) $validated['NOMINAL_ANGGARAN'];
+
+        return $payload;
+    }
+
+    private function getRkaNominal(DtlProgramKerja $rka): float
+    {
+        $nominal = $rka->NOMINAL;
+
+        if (!is_null($nominal)) {
+            return (float) $nominal;
+        }
+
+        return (float) $rka->QTY * (float) $rka->HARGA_SATUAN * (float) $rka->VOLUME;
+    }
+
     private function validateProgramKerjaBudget(int $idProgramKerja, float $nominalAnggaranBaru, ?int $excludeFpdId = null): void
     {
         $programKerja = MstProgramKerja::query()
-            ->active()
+            ->where(function ($query) {
+                $query->where('IS_DELETE', '!=', 1)
+                    ->orWhereNull('IS_DELETE');
+            })
             ->find($idProgramKerja);
 
         if (!$programKerja) {
@@ -947,7 +1077,7 @@ class FpdAnggaranController extends Controller
         }
 
         $allocatedNominal = (float) $allocatedQuery->sum('NOMINAL_ANGGARAN');
-        $programBudget = (float) $programKerja->NOMINAL;
+        $programBudget = (float) ($programKerja->TOTAL_PROGKER ?? $programKerja->NOMINAL ?? 0);
 
         if (($allocatedNominal + $nominalAnggaranBaru) > $programBudget) {
             throw ValidationException::withMessages([
