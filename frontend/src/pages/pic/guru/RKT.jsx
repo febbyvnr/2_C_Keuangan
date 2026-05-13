@@ -158,6 +158,60 @@ function getStatusInfo(item) {
   };
 }
 
+function getRkaDetails(item) {
+  return (
+    item?.detailProgramKerja ||
+    item?.detail_program_kerja ||
+    item?.Rka ||
+    item?.rka ||
+    []
+  );
+}
+
+function getTotalRka(item) {
+  return getRkaDetails(item).reduce((total, detail) => {
+    return total + Number(detail.NOMINAL || 0);
+  }, 0);
+}
+
+function getRkaValidationInfo(item) {
+  const pagu = Number(item?.TOTAL_PROGKER || 0);
+  const totalRka = getTotalRka(item);
+  const minimalRka = pagu * 0.95;
+  if (!item) {
+    return {
+      valid: false,
+      label: "Pilih RKT terlebih dahulu.",
+    };
+  }
+
+  if (totalRka <= 0) {
+    return {
+      valid: false,
+      label: "Lengkapi rincian RKA terlebih dahulu sebelum mengajukan RKT",
+    };
+  }
+
+  if (totalRka > pagu) {
+    return {
+      valid: false,
+      label: "Total RKA melebihi pagu",
+    };
+  }
+
+  if (totalRka < minimalRka) {
+    return {
+      valid: false,
+      label: "Total RKA belum mencapai 95% pagu",
+    };
+  }
+
+  return {
+    valid: true,
+    label: "RKA sesuai anggaran",
+  };
+}
+
 export default function RKT() {
   const navigate = useNavigate();
 
@@ -293,8 +347,12 @@ export default function RKT() {
   const canDelete =
     isOwner && (selectedStatusValue === "draft");
 
+  const selectedRkaInfo = getRkaValidationInfo(selectedItem);
+
   const canSubmit =
-    isOwner && selectedStatusValue === "draft";
+    isOwner &&
+    selectedStatusValue === "draft" &&
+    selectedRkaInfo.valid;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -763,6 +821,14 @@ export default function RKT() {
                         {getLatestReviewNote(selectedItem)}
                       </div>
                     </div>
+                    {(selectedStatusValue === "draft" || selectedStatusValue === "revisi") && (
+                      <div className="rkt-note-box">
+                        <div className="rkt-note-title">Status RKA</div>
+                        <div className="rkt-note-content">
+                          {selectedRkaInfo.label}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="rkt-detail-actions">
@@ -823,6 +889,7 @@ export default function RKT() {
                         <button
                           className="btn-primary-custom rkt-detail-btn"
                           disabled={!canSubmit}
+                          title={!selectedRkaInfo.valid ? selectedRkaInfo.label : "Ajukan RKT"}
                           onClick={() => handleAjukan(selectedItem.ID_PROGRAM_KERJA)}
                         >
                           Ajukan
