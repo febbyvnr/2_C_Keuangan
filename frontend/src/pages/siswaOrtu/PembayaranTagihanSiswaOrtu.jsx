@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 import logoSekolah from "../../assets/logo.png";
 
 import "../../styles/siswaOrtu/PembayaranTagihanSiswaOrtu.css";
-
 
 function PembayaranTagihanSiswaOrtu() {
   const { id } = useParams();
@@ -23,6 +21,27 @@ function PembayaranTagihanSiswaOrtu() {
   const [submitting, setSubmitting] = useState(false);
 
   const [tagihan, setTagihan] = useState(null);
+
+  const [toast, setToast] = useState(null);
+
+  const [visible, setVisible] = useState(false);
+
+  const showToast = (
+    type = "success",
+    message = ""
+  ) => {
+    setToast({ type, message });
+
+    setVisible(true);
+
+    setTimeout(() => {
+      setVisible(false);
+    }, 2500);
+
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,11 +74,14 @@ function PembayaranTagihanSiswaOrtu() {
 
         setTagihan(tagihanResult.data);
 
-        setMetodeList(metodeResult.data || []);
+        setMetodeList(
+          metodeResult.data || []
+        );
       } catch (error) {
         console.error(error);
 
-        toast.error(
+        showToast(
+          "error",
           error.message ||
             "Gagal mengambil data"
         );
@@ -93,7 +115,8 @@ function PembayaranTagihanSiswaOrtu() {
       e.target.buktiTransfer?.files?.[0];
 
     if (!metode) {
-      toast.error(
+      showToast(
+        "error",
         "Pilih metode pembayaran terlebih dahulu."
       );
 
@@ -101,7 +124,8 @@ function PembayaranTagihanSiswaOrtu() {
     }
 
     if (!nominal || nominal <= 0) {
-      toast.error(
+      showToast(
+        "error",
         "Nominal pembayaran harus lebih dari 0."
       );
 
@@ -112,7 +136,8 @@ function PembayaranTagihanSiswaOrtu() {
       nominal >
       Number(tagihan.SISA_TAGIHAN || 0)
     ) {
-      toast.error(
+      showToast(
+        "error",
         "Nominal pembayaran tidak boleh melebihi sisa tagihan."
       );
 
@@ -127,7 +152,8 @@ function PembayaranTagihanSiswaOrtu() {
       namaMetode?.includes("transfer");
 
     if (isBank && !file) {
-      toast.error(
+      showToast(
+        "error",
         "Untuk pembayaran bank, bukti pembayaran wajib diunggah."
       );
 
@@ -183,7 +209,8 @@ function PembayaranTagihanSiswaOrtu() {
         );
       }
 
-      toast.success(
+      showToast(
+        "success",
         "Pembayaran berhasil dikirim"
       );
 
@@ -191,11 +218,12 @@ function PembayaranTagihanSiswaOrtu() {
         navigate(
           `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
         );
-      }, 5000);
+      }, 3000);
     } catch (error) {
       console.error(error);
 
-      toast.error(
+      showToast(
+        "error",
         error.message ||
           "Terjadi kesalahan saat pembayaran"
       );
@@ -508,6 +536,22 @@ function PembayaranTagihanSiswaOrtu() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div
+          className={`toast-container ${
+            visible ? "show" : "hide"
+          }`}
+        >
+          <div
+            className={`toast-box ${toast.type}`}
+          >
+            <span className="toast-text">
+              {toast.message}
+            </span>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
