@@ -28,6 +28,7 @@ export default function DashboardPM() {
     return (
       <div className="pm-container">
         {/* HEADER */}
+        {/* HEADER */}
         <div className="pm-header-card">
           <div className="pm-header-left">
             <h2 className="pm-title">Selamat Datang</h2>
@@ -66,33 +67,6 @@ export default function DashboardPM() {
             </select>
           </div>
         </div>
-
-        <div className="loading-box">Loading dashboard...</div>
-      </div>
-    );
-  }
-
-  if (!dashboard) {
-    return (
-      <div className="pm-container">
-        {/* HEADER */}
-        <div className="pm-header-card">
-          <div className="pm-header-left">
-            <h2 className="pm-title">Selamat Datang</h2>
-
-            <p className="pm-subtitle">Tim Penjaminan Mutu</p>
-
-            <p className="pm-date">
-              {new Date().toLocaleDateString("id-ID", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-          </div>
-        </div>
-
         <div className="loading-box error">Gagal memuat data dashboard</div>
       </div>
     );
