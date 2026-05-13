@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\RefJenisPembayaranExport;
+use App\Models\RefJenisPembayaran;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -25,10 +27,16 @@ class RefJenisPembayaranExportController extends Controller
         $nip = $request->nip
             ?? $request->NIP_KARYAWAN
             ?? (Auth::check() ? Auth::user()->nip : null);
-        $nama = $request->nama ?? (Auth::check() ? Auth::user()->name : null);
-        $authRole = Auth::check() ? Auth::user()->role : null;
+
+        $nama = $request->nama
+            ?? (Auth::check() ? Auth::user()->name : null);
+
+        $authRole = Auth::check()
+            ? Auth::user()->role
+            : null;
 
         $dbRole = null;
+
         if ($nip) {
             $dbRole = DB::table('tr_jabatan as tj')
                 ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
@@ -37,17 +45,39 @@ class RefJenisPembayaranExportController extends Controller
                 ->value('rj.DESKRIPSI_JABATAN');
         }
 
-        $role = trim($dbRole ?? $request->role ?? $authRole ?? 'Bendahara');
+        $role = trim(
+            $dbRole
+            ?? $request->role
+            ?? $authRole
+            ?? 'Bendahara'
+        );
 
-        // Fallback: jika NIP belum ada, ambil dari jabatan aktif berdasarkan role.
-        if (!$nip) {
-            $nip = DB::table('tr_jabatan as tj')
-                ->join('ref_jabatan_str as rj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+        // Fallback: jika NIP belum ada
+        if (!$nip || !$nama) {
+
+            $bendahara = DB::table('ref_jabatan_str as rj')
+                ->join('tr_jabatan as tj', 'tj.ID_JABATAN', '=', 'rj.ID_JABATAN')
+                ->join('mst_karyawan as mk', 'mk.NIP_KARYAWAN', '=', 'tj.NIP_KARYAWAN')
+                ->whereRaw('LOWER(rj.DESKRIPSI_JABATAN) = ?', ['bendahara'])
                 ->whereNull('tj.TGL_SELESAI_JABATAN')
-                ->where('rj.DESKRIPSI_JABATAN', $role)
-                ->value('tj.NIP_KARYAWAN');
+                ->where('mk.IS_DELETE', 0)
+                ->select(
+                    'mk.NIP_KARYAWAN',
+                    'mk.NAMA_KARYAWAN',
+                    'mk.NAMA_LENGKAP_GELAR'
+                )
+                ->first();
+
+            if ($bendahara) {
+                $nip = $bendahara->NIP_KARYAWAN;
+                $nama = $bendahara->NAMA_LENGKAP_GELAR
+                    ?: $bendahara->NAMA_KARYAWAN;
+
+                $role = 'Bendahara';
+            }
         }
 
+        // Validasi role
         if (!in_array($role, ['Bendahara', 'Kepala Sekolah'])) {
             return response()->json([
                 'message' => 'Role tidak diizinkan generate laporan'
@@ -55,19 +85,41 @@ class RefJenisPembayaranExportController extends Controller
         }
 
         try {
+
+            $fileName = 'Laporan_MetodePembayaran_' . date('Y-m-d');
+
+            $data = RefJenisPembayaran::select(
+                'DESKRIPSI_METODE_PEMBAYARAN'
+            )
+            ->orderBy('DESKRIPSI_METODE_PEMBAYARAN')
+            ->get();
+
+            // PDF
             if ($type === 'pdf') {
-                return Excel::download(
-                    new RefJenisPembayaranExport($role, $nip, $nama),
-                    'Ref_Jenis_Pembayaran.pdf',
-                    \Maatwebsite\Excel\Excel::DOMPDF
-                );
+
+                return Pdf::loadView(
+                    'exports.metode_pembayaran_pdf',
+                    [
+                        'data' => $data,
+                        'role' => $role,
+                        'nama' => $nama,
+                        'nip' => $nip,
+                    ]
+                )->download($fileName . '.pdf');
             }
 
+            // EXCEL
             return Excel::download(
-                new RefJenisPembayaranExport($role, $nip, $nama),
-                'Ref_Jenis_Pembayaran.xlsx'
+                new RefJenisPembayaranExport(
+                    $role,
+                    $nip,
+                    $nama
+                ),
+                $fileName . '.xlsx'
             );
+
         } catch (\Exception $e) {
+
             \Illuminate\Support\Facades\Artisan::call('config:clear');
 
             return response()->json([
