@@ -210,12 +210,10 @@ export default function PicGuruFPD() {
     };
 
     const handleExport = () => {
-        if (!form.idFpd) {
-            setError("Pilih FPD anggaran terlebih dahulu sebelum export.");
-            return;
-        }
-
-        window.open(`${API_BASE_URL}/fpd-anggaran/export/${form.idFpd}`, "_blank");
+        const endpoint = form.idFpd
+            ? `${API_BASE_URL}/fpd-anggaran/export/${form.idFpd}`
+            : `${API_BASE_URL}/fpd-anggaran/export`;
+        window.open(endpoint, "_blank");
     };
 
     const selectedProgramName = selectedFpd?.program_kerja?.PROGRAM_KERJA ?? selectedFpd?.programKerja?.PROGRAM_KERJA ?? "-";
