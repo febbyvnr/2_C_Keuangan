@@ -50,23 +50,23 @@ export default function DashboardPM() {
 
           {/* FILTER TAHUN */}
           <div className="pm-header-filter">
-            <label>Tahun</label>
+            <label>Tahun (ID)</label>
 
             <select
               value={tahun}
               onChange={(e) => setTahun(e.target.value)}
               className="pm-filter-select"
             >
-              <option value="1">2025</option>
-              <option value="2">2024</option>
-              <option value="3">2023</option>
-              <option value="4">2022</option>
-              <option value="5">2021</option>
-              <option value="6">2020</option>
-              <option value="7">2019</option>
-              <option value="8">2018</option>
-              <option value="9">2017</option>
-              <option value="10">2016</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
             </select>
           </div>
         </div>
@@ -102,23 +102,23 @@ export default function DashboardPM() {
 
           {/* FILTER TAHUN */}
           <div className="pm-header-filter">
-            <label>Tahun</label>
+            <label>Tahun (ID)</label>
 
             <select
               value={tahun}
               onChange={(e) => setTahun(e.target.value)}
               className="pm-filter-select"
             >
-              <option value="1">2025</option>
-              <option value="2">2024</option>
-              <option value="3">2023</option>
-              <option value="4">2022</option>
-              <option value="5">2021</option>
-              <option value="6">2020</option>
-              <option value="7">2019</option>
-              <option value="8">2018</option>
-              <option value="9">2017</option>
-              <option value="10">2016</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
             </select>
           </div>
         </div>
@@ -165,23 +165,23 @@ export default function DashboardPM() {
 
         {/* FILTER TAHUN */}
         <div className="pm-header-filter">
-          <label>Tahun</label>
+          <label>Tahun (ID)</label>
 
           <select
             value={tahun}
             onChange={(e) => setTahun(e.target.value)}
             className="pm-filter-select"
           >
-            <option value="1">2025</option>
-            <option value="2">2024</option>
-            <option value="3">2023</option>
-            <option value="4">2022</option>
-            <option value="5">2021</option>
-            <option value="6">2020</option>
-            <option value="7">2019</option>
-            <option value="8">2018</option>
-            <option value="9">2017</option>
-            <option value="10">2016</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
           </select>
         </div>
       </div>
