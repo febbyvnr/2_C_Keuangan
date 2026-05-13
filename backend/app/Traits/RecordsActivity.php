@@ -12,47 +12,54 @@ trait RecordsActivity
     public static function bootRecordsActivity()
     {
         foreach (['created', 'updated', 'deleted'] as $event) {
+            // WAJIB PAKAI TANDA DOLAR ($event) AGAR DINAMIS:
             static::$event(function ($model) use ($event) {
                 $model->recordActivity($event);
             });
         }
     }
 
-    protected function recordActivity($event)
+protected function recordActivity($event)
     {
-        // 1. Blokir eksekusi ganda jika objek baru saja di-insert
+        // 1. Blokir pencatatan ganda saat data pertama kali dibuat
         if ($event === 'updated' && $this->wasRecentlyCreated) {
             return; 
         }
 
-        // --- 2. MANIPULASI STATUS SOFT DELETE DEMI UI FRONTEND ---
-        // Menggunakan array $perubahan secara langsung agar terhindar dari Undefined Property
+        // 2. Pembajakan status Soft Delete agar antarmuka menampilkan label 'DELETED'
         $perubahan = $this->getChanges();
         if ($event === 'updated' && isset($perubahan['IS_DELETE']) && $perubahan['IS_DELETE'] == 1) {
             $event = 'deleted';
         }
 
-        // 3. Tangkap identitas user dari Bearer Token
-        $token = request()->bearerToken();
-        $accessLogId = null;
+        // 3. Ekstraksi Token Kebal Error (Bulletproof)
         $username    = 'Sistem / Tidak Ditemukan';
         $role        = 'Unknown';
+        $accessLogId = null;
+
+        // Membaca token otorisasi melalui fungsi bawaan atau pengaksesan header mentah
+        $token = request()->bearerToken() ?? request()->header('Authorization');
 
         if ($token) {
             try {
-                $payload = json_decode(Crypt::decryptString($token));
-                $accessLogId = $payload->id_access_log ?? null;
-                $username    = $payload->nip ?? 'Unknown';
-                $role        = $payload->role ?? 'Unknown';
+                // Hapus prefiks 'Bearer ' serta pangkas sisa tanda kutip/spasi
+                $cleanToken = trim(str_replace('Bearer ', '', $token), '"\' ');
+                $payload = json_decode(\Illuminate\Support\Facades\Crypt::decryptString($cleanToken));
+                
+                if ($payload) {
+                    $username    = $payload->nip ?? $username;
+                    $role        = $payload->role ?? $role;
+                    $accessLogId = $payload->id_access_log ?? null;
+                }
             } catch (\Exception $e) {
-                Log::warning('Token log gagal diurai: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('RecordsActivity gagal mengurai token: ' . $e->getMessage());
             }
         }
 
-        // 4. Cetak string aktivitas ("DELETED MstCoa", "UPDATED RefTarif", dll.)
+        // 4. Peracikan Nama Aktivitas
         $activityName = strtoupper($event) . ' ' . class_basename($this);
 
-        // 5. Susun deskripsi riwayat yang bersih
+        // 5. Peracikan Deskripsi Riwayat
         $relatedData = 'ID Record: ' . $this->getKey();
         $description = '';
 
@@ -63,24 +70,17 @@ trait RecordsActivity
         } elseif ($event === 'updated') {
             $listPerubahan = [];
             foreach ($perubahan as $kolom => $nilaiBaru) {
-                // Abaikan pencatatan teknis jika ada flag sistem lain yang ikut terubah
                 if ($kolom === 'IS_DELETE') continue;
-
                 $nilaiLama = $this->getOriginal($kolom) ?? '(kosong)';
-                $nilaiBaru = $nilaiBaru ?? '(kosong)';
                 $listPerubahan[] = "$kolom dari '$nilaiLama' menjadi '$nilaiBaru'";
             }
-            
-            $description = !empty($listPerubahan) 
-                ? "Mengubah nilai " . implode(', ', $listPerubahan)
-                : "Melakukan pembaruan atribut data.";
+            $description = !empty($listPerubahan) ? "Mengubah nilai " . implode(', ', $listPerubahan) : "Melakukan pembaruan data.";
         }
 
-        // Batasi panjang string agar aman masuk ke database
         $description = Str::limit($description, 245);
 
-        // 6. Eksekusi penyimpanan ke tabel riwayat
-        ActivityLog::create([
+        // 6. Penyimpanan Riwayat
+        \App\Models\ActivityLog::create([
             'ID_ACCESS_LOG'        => $accessLogId,
             'EVENT_TIME'           => now(),
             'ACTOR_USERNAME'       => $username,
