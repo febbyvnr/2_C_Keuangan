@@ -139,7 +139,8 @@ export default function CreateRKT() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [catatanReview, setCatatanReview] = useState("");
-
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
   const waktuAwalRef = useRef(null);
   const waktuAkhirRef = useRef(null);
 
@@ -151,6 +152,14 @@ export default function CreateRKT() {
   ]
     .filter(Boolean)
     .join(" - ");
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const loadMasterData = async () => {
     // const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
@@ -314,10 +323,11 @@ export default function CreateRKT() {
         ? "Perbaikan RKT berhasil disimpan."
         : "RKT berhasil disimpan sebagai draft.";
 
-      setMessage(successMessage);
-      alert(successMessage);
+      showToast("success", successMessage);
 
-      navigate("/pic/guru/rkt");
+      setTimeout(() => {
+        navigate("/pic/guru/rkt");
+      }, 1200);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -624,6 +634,13 @@ export default function CreateRKT() {
             </form>
           )}
         </section>
+        {toast && (
+          <div className={`toast-container ${visible ? "show" : "hide"}`}>
+            <div className={`toast-box ${toast.type}`}>
+              <span className="toast-text">{toast.message}</span>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

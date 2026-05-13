@@ -17,13 +17,39 @@ function formatDate(v) {
     return isNaN(d) ? v : d.toLocaleDateString("id-ID");
 }
 
+function normalizeDateInput(v) {
+    if (!v) return "";
+    return String(v).slice(0, 10);
+}
+
+function getRkaRows(item) {
+    return item?.rka || item?.Rka || item?.details || item?.detail_program_kerja || item?.detailProgramKerja || [];
+}
+
+function getSumberDanaLabel(detail) {
+    const sumberDana = detail?.ref_dana || detail?.refDana || detail?.sumber_dana || detail?.sumberDana;
+    return (
+        sumberDana?.SUMBER_DANA ||
+        sumberDana?.DESKRIPSI_SUMBER_DANA ||
+        sumberDana?.NAMA_SUMBER_DANA ||
+        (detail?.ID_REF_DANA ? `Dana #${detail.ID_REF_DANA}` : "-")
+    );
+}
+
+function getRkaNominal(detail) {
+    const nominal = Number(detail?.NOMINAL ?? detail?.TOTAL_PROGKER);
+    if (!Number.isNaN(nominal) && nominal > 0) return nominal;
+
+    return Number(detail?.QTY || 0) * Number(detail?.VOLUME || 0) * Number(detail?.HARGA_SATUAN || 0);
+}
+
 function BadgeFPD({ nip }) {
     if (!nip) return <span className="waka-fpd-badge menunggu">Menunggu</span>;
     if (nip === "Ditolak") return <span className="waka-fpd-badge ditolak">Ditolak</span>;
     return <span className="waka-fpd-badge disetujui">Disetujui</span>;
 }
 
-const EMPTY_FPD = { ID_PROGRAM_KERJA: "", TGL_FPD: "", NOMINAL_ANGGARAN: "", NIP_VALIDATOR_FPD: "" };
+const EMPTY_FPD = { ID_PROGRAM_KERJA: "", ID_DT_PROGKER: "", TGL_FPD: "", NOMINAL_ANGGARAN: "" };
 const EMPTY_DTL = { ID_DT_PROGKER: "", QTY: "", HARGA_SATUAN: "", VOLUME: "1", SATUAN: "", LINK_BUKTI_NOTA_FPD: "" };
 
 export default function WakaFPD() {
@@ -53,7 +79,7 @@ export default function WakaFPD() {
     useEffect(() => {
         if (selectedFpd) {
             fetchDtl(selectedFpd.ID_FPD);
-            fetchRkaDetails(selectedFpd.ID_PROGRAM_KERJA);
+            setRkaDetails(getRkaRows(selectedFpd.program_kerja || selectedFpd.programKerja || selectedFpd));
         } else {
             setDtlList([]);
             setRkaDetails([]);
@@ -64,10 +90,25 @@ export default function WakaFPD() {
         const kw = search.toLowerCase();
         return fpdList.filter(
             (f) =>
-                (f.program_kerja?.PROGRAM_KERJA || "").toLowerCase().includes(kw) ||
+                (f.program_kerja?.PROGRAM_KERJA || f.programKerja?.PROGRAM_KERJA || "").toLowerCase().includes(kw) ||
                 (f.TGL_FPD || "").includes(kw)
         );
     }, [fpdList, search]);
+
+    const selectedRktForForm = useMemo(
+        () => progkerOptions.find((item) => String(item.ID_PROGRAM_KERJA) === String(fpdForm.ID_PROGRAM_KERJA)) || null,
+        [progkerOptions, fpdForm.ID_PROGRAM_KERJA]
+    );
+
+    const rkaOptionsForForm = useMemo(() => getRkaRows(selectedRktForForm), [selectedRktForForm]);
+
+    const selectedRkaForForm = useMemo(
+        () => rkaOptionsForForm.find((item) => String(item.ID_DT_PROGKER) === String(fpdForm.ID_DT_PROGKER)) || null,
+        [rkaOptionsForForm, fpdForm.ID_DT_PROGKER]
+    );
+
+    const derivedNominalFpd = selectedRkaForForm ? getRkaNominal(selectedRkaForForm) : Number(fpdForm.NOMINAL_ANGGARAN || 0);
+    const isFpdInputDisabled = !fpdForm.ID_PROGRAM_KERJA;
 
     const fetchFpd = async () => {
         setLoading(true);
@@ -83,7 +124,7 @@ export default function WakaFPD() {
 
     const fetchProgker = async () => {
         try {
-            const res = await apiFetch("/rkt");
+            const res = await apiFetch("/rka");
             setProgkerOptions(res.data || []);
         } catch (_) {}
     };
@@ -100,17 +141,6 @@ export default function WakaFPD() {
         }
     };
 
-    const fetchRkaDetails = async (id_program_kerja) => {
-        if (!id_program_kerja) return;
-        try {
-            const res = await apiFetch(`/rka/${id_program_kerja}`);
-            const details = res.data?.details || res.data?.detail_program_kerja || [];
-            setRkaDetails(details);
-        } catch (_) {
-            setRkaDetails([]);
-        }
-    };
-
     const showToast = (type, msg) => {
         setToast({ type, msg });
         setTimeout(() => setToast(null), 3000);
@@ -122,12 +152,23 @@ export default function WakaFPD() {
         setModalFpd("create");
     };
 
+    const inferRkaIdFromFpd = (fpd) => {
+        const savedDetails = fpd.detail_fpd || fpd.detailFpd || [];
+        if (savedDetails[0]?.ID_DT_PROGKER) {
+            return String(savedDetails[0].ID_DT_PROGKER);
+        }
+
+        const program = progkerOptions.find((item) => String(item.ID_PROGRAM_KERJA) === String(fpd.ID_PROGRAM_KERJA));
+        const matchedRka = getRkaRows(program).find((item) => Number(getRkaNominal(item)) === Number(fpd.NOMINAL_ANGGARAN));
+        return matchedRka?.ID_DT_PROGKER ? String(matchedRka.ID_DT_PROGKER) : "";
+    };
+
     const openEditFpd = (fpd) => {
         setFpdForm({
             ID_PROGRAM_KERJA: fpd.ID_PROGRAM_KERJA || "",
-            TGL_FPD: fpd.TGL_FPD || "",
+            ID_DT_PROGKER: inferRkaIdFromFpd(fpd),
+            TGL_FPD: normalizeDateInput(fpd.TGL_FPD),
             NOMINAL_ANGGARAN: fpd.NOMINAL_ANGGARAN || "",
-            NIP_VALIDATOR_FPD: fpd.NIP_VALIDATOR_FPD || "",
         });
         setModalFpd("edit");
     };
@@ -136,11 +177,14 @@ export default function WakaFPD() {
         e.preventDefault();
         setSubmitting(true);
         try {
+            if (!fpdForm.ID_PROGRAM_KERJA || !fpdForm.ID_DT_PROGKER || !fpdForm.TGL_FPD) {
+                showToast("error", "Pilih RKT, tanggal FPD, dan ID RKA terlebih dahulu");
+                return;
+            }
+
             const body = {
-                ID_PROGRAM_KERJA: Number(fpdForm.ID_PROGRAM_KERJA),
+                ID_DT_PROGKER: Number(fpdForm.ID_DT_PROGKER),
                 TGL_FPD: fpdForm.TGL_FPD,
-                NOMINAL_ANGGARAN: Number(fpdForm.NOMINAL_ANGGARAN),
-                ...(fpdForm.NIP_VALIDATOR_FPD && { NIP_VALIDATOR_FPD: fpdForm.NIP_VALIDATOR_FPD }),
             };
             if (modalFpd === "create") {
                 await apiFetch("/fpd-anggaran/store", { method: "POST", body: JSON.stringify(body) });
@@ -162,7 +206,7 @@ export default function WakaFPD() {
     };
 
     const handleDeleteFpd = async (fpd) => {
-        if (!window.confirm(`Hapus FPD "${fpd.program_kerja?.PROGRAM_KERJA}"? Semua detail FPD juga akan dihapus.`)) return;
+        if (!window.confirm(`Hapus FPD "${fpd.program_kerja?.PROGRAM_KERJA || fpd.programKerja?.PROGRAM_KERJA || "-"}"? Semua detail FPD juga akan dihapus.`)) return;
         try {
             await apiFetch(`/fpd-anggaran/delete/${fpd.ID_FPD}`, { method: "DELETE" });
             showToast("success", "FPD berhasil dihapus");
@@ -251,10 +295,11 @@ export default function WakaFPD() {
         }
     };
 
-    const downloadExport = async (id) => {
+    const downloadExport = async (id = null) => {
         const token = localStorage.getItem("token");
         try {
-            const res = await fetch(`${BASE}/fpd-anggaran/export/${id}`, {
+            const endpoint = id ? `${BASE}/fpd-anggaran/export/${id}` : `${BASE}/fpd-anggaran/export`;
+            const res = await fetch(endpoint, {
                 headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
             });
             if (!res.ok) throw new Error("Gagal mengunduh");
@@ -262,7 +307,7 @@ export default function WakaFPD() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `FPD_${id}.xlsx`;
+            a.download = id ? `FPD_${id}.xlsx` : "FPD_semua.xlsx";
             a.style.display = "none";
             document.body.appendChild(a);
             a.click();
@@ -273,7 +318,25 @@ export default function WakaFPD() {
         }
     };
 
-    const setFpdField = (k, v) => setFpdForm((p) => ({ ...p, [k]: v }));
+    const setFpdField = (k, v) => {
+        setFpdForm((prev) => {
+            if (k === "ID_PROGRAM_KERJA") {
+                return { ...prev, ID_PROGRAM_KERJA: v, ID_DT_PROGKER: "", NOMINAL_ANGGARAN: "" };
+            }
+
+            if (k === "ID_DT_PROGKER") {
+                const program = progkerOptions.find((item) => String(item.ID_PROGRAM_KERJA) === String(prev.ID_PROGRAM_KERJA));
+                const selectedRka = getRkaRows(program).find((item) => String(item.ID_DT_PROGKER) === String(v));
+                return {
+                    ...prev,
+                    ID_DT_PROGKER: v,
+                    NOMINAL_ANGGARAN: selectedRka ? String(getRkaNominal(selectedRka)) : "",
+                };
+            }
+
+            return { ...prev, [k]: v };
+        });
+    };
     const setDtlField = (k, v) => setDtlForm((p) => ({ ...p, [k]: v }));
 
     return (
@@ -288,9 +351,14 @@ export default function WakaFPD() {
                         <h1>Form Pengajuan Dana (FPD)</h1>
                         <p>Kelola pengajuan dan rincian pencairan dana program kerja</p>
                     </div>
-                    <button className="waka-fpd-btn primary" onClick={openCreateFpd}>
-                        <i className="bi bi-plus-lg"></i> Buat FPD
-                    </button>
+                    <div className="waka-fpd-header-actions">
+                        <button className="waka-fpd-btn ghost" onClick={() => downloadExport()}>
+                            <i className="bi bi-file-earmark-excel"></i> Export Semua
+                        </button>
+                        <button className="waka-fpd-btn primary" onClick={openCreateFpd}>
+                            <i className="bi bi-plus-lg"></i> Buat FPD
+                        </button>
+                    </div>
                 </header>
 
                 <div className="waka-fpd-body">
@@ -343,7 +411,7 @@ export default function WakaFPD() {
                                                 >
                                                     <td>{i + 1}</td>
                                                     <td>
-                                                        <strong>{f.program_kerja?.PROGRAM_KERJA || "-"}</strong>
+                                                        <strong>{f.program_kerja?.PROGRAM_KERJA || f.programKerja?.PROGRAM_KERJA || "-"}</strong>
                                                     </td>
                                                     <td>{formatDate(f.TGL_FPD)}</td>
                                                     <td>{formatRupiah(f.NOMINAL_ANGGARAN)}</td>
@@ -390,7 +458,7 @@ export default function WakaFPD() {
                             <>
                                 <div className="waka-fpd-detail-head">
                                     <div>
-                                        <h2>{selectedFpd.program_kerja?.PROGRAM_KERJA || "Detail FPD"}</h2>
+                                        <h2>{selectedFpd.program_kerja?.PROGRAM_KERJA || selectedFpd.programKerja?.PROGRAM_KERJA || "Detail FPD"}</h2>
                                         <p>FPD #{selectedFpd.ID_FPD} · {formatDate(selectedFpd.TGL_FPD)}</p>
                                     </div>
                                     <div className="waka-fpd-detail-actions">
@@ -452,7 +520,7 @@ export default function WakaFPD() {
                                             <tbody>
                                                 {dtlList.map((d) => (
                                                     <tr key={d.ID_DT_FPD}>
-                                                        <td>{d.detail_program?.program_kerja?.PROGRAM_KERJA || `#${d.ID_DT_PROGKER}`}</td>
+                                                        <td>{d.detail_program?.program_kerja?.PROGRAM_KERJA || d.detailProgram?.programKerja?.PROGRAM_KERJA || `#${d.ID_DT_PROGKER}`}</td>
                                                         <td>{d.QTY}</td>
                                                         <td>{d.VOLUME}</td>
                                                         <td>{formatRupiah(d.HARGA_SATUAN)}</td>
@@ -503,14 +571,14 @@ export default function WakaFPD() {
 
                             <form onSubmit={handleSaveFpd} className="waka-fpd-modal-form">
                                 <label>
-                                    Program Kerja <span>*</span>
+                                    RKT <span>*</span>
                                     <select
                                         required
                                         value={fpdForm.ID_PROGRAM_KERJA}
                                         onChange={(e) => setFpdField("ID_PROGRAM_KERJA", e.target.value)}
                                         disabled={modalFpd === "edit" && dtlList.length > 0}
                                     >
-                                        <option value="">-- Pilih Program Kerja --</option>
+                                        <option value="">-- Pilih RKT --</option>
                                         {progkerOptions.map((p) => (
                                             <option key={p.ID_PROGRAM_KERJA} value={p.ID_PROGRAM_KERJA}>
                                                 {p.PROGRAM_KERJA}
@@ -519,7 +587,7 @@ export default function WakaFPD() {
                                     </select>
                                     {modalFpd === "edit" && dtlList.length > 0 && (
                                         <small style={{ color: "#6b7280" }}>
-                                            Program kerja tidak bisa diubah karena sudah ada detail FPD
+                                            RKT tidak bisa diubah karena sudah ada detail FPD
                                         </small>
                                     )}
                                 </label>
@@ -531,26 +599,40 @@ export default function WakaFPD() {
                                             type="date" required
                                             value={fpdForm.TGL_FPD}
                                             onChange={(e) => setFpdField("TGL_FPD", e.target.value)}
+                                            disabled={isFpdInputDisabled}
                                         />
                                     </label>
                                     <label>
-                                        Nominal Anggaran <span>*</span>
-                                        <input
-                                            type="number" min="0" required
-                                            placeholder="0"
-                                            value={fpdForm.NOMINAL_ANGGARAN}
-                                            onChange={(e) => setFpdField("NOMINAL_ANGGARAN", e.target.value)}
-                                        />
+                                        ID RKA <span>*</span>
+                                        <select
+                                            required
+                                            value={fpdForm.ID_DT_PROGKER}
+                                            onChange={(e) => setFpdField("ID_DT_PROGKER", e.target.value)}
+                                            disabled={isFpdInputDisabled}
+                                        >
+                                            <option value="">-- Pilih ID RKA --</option>
+                                            {rkaOptionsForForm.map((rka) => (
+                                                <option key={rka.ID_DT_PROGKER} value={rka.ID_DT_PROGKER}>
+                                                    #{rka.ID_DT_PROGKER} - {getSumberDanaLabel(rka)} ({formatRupiah(getRkaNominal(rka))})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {fpdForm.ID_PROGRAM_KERJA && rkaOptionsForForm.length === 0 && (
+                                            <small style={{ color: "#dc2626" }}>
+                                                Belum ada RKA untuk RKT ini
+                                            </small>
+                                        )}
                                     </label>
                                 </div>
 
                                 <label>
-                                    NIP Validator (opsional)
+                                    Nominal Anggaran dari RKA
                                     <input
                                         type="text"
-                                        placeholder="Kosongkan jika belum ada"
-                                        value={fpdForm.NIP_VALIDATOR_FPD}
-                                        onChange={(e) => setFpdField("NIP_VALIDATOR_FPD", e.target.value)}
+                                        value={selectedRkaForForm ? formatRupiah(derivedNominalFpd) : ""}
+                                        placeholder="Pilih ID RKA untuk melihat nominal"
+                                        disabled
+                                        readOnly
                                     />
                                 </label>
 
@@ -558,7 +640,7 @@ export default function WakaFPD() {
                                     <button type="button" className="waka-fpd-btn ghost" onClick={() => setModalFpd(null)}>
                                         Batal
                                     </button>
-                                    <button type="submit" className="waka-fpd-btn primary" disabled={submitting}>
+                                    <button type="submit" className="waka-fpd-btn primary" disabled={submitting || isFpdInputDisabled || !fpdForm.ID_DT_PROGKER || !fpdForm.TGL_FPD}>
                                         {submitting ? "Menyimpan..." : "Simpan"}
                                     </button>
                                 </div>
