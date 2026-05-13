@@ -307,9 +307,9 @@ export default function MasterJenisPembayaran() {
                     <a href={`http://localhost:8000/api/jenis-pembayaran/export`} className="btn-outline-success custom-btn">
                         <i className="bi bi-filetype-xlsx"></i> Export Excel
                     </a>
-                    {/* <a href={`http://localhost:8000/api/jenis-pembayaran/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
+                    <a href={`http://localhost:8000/api/jenis-pembayaran/export/pdf?search=${search}`} className="btn-outline-danger custom-btn">
                         <i className="bi bi-file-earmark-pdf"></i> Export PDF
-                    </a> */}
+                    </a>
                 </div>
             </div>
             {showModal && (
