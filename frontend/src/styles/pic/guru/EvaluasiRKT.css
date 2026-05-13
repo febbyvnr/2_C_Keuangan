@@ -1,0 +1,519 @@
+.waka-evaluasi-shell {
+    display: flex;
+    min-height: 100vh;
+    background: #f3f6fb;
+    color: #1f2937;
+    overflow-x: hidden
+}
+
+.waka-evaluasi-sidebar {
+    padding: 24px 14px;
+    background: #ffffff;
+    border-right: 1px solid #e5edf5;
+}
+
+.waka-evaluasi-brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 6px 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #e8edf4;
+}
+
+.waka-evaluasi-badge {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #1d4ed8;
+    color: #fff;
+    font-weight: 700;
+}
+
+.waka-evaluasi-brand strong,
+.waka-evaluasi-brand span {
+    display: block;
+}
+
+.waka-evaluasi-brand span {
+    color: #6b7280;
+    font-size: 0.88rem;
+}
+
+.waka-evaluasi-nav {
+    display: grid;
+    gap: 8px;
+}
+
+.waka-evaluasi-nav-item {
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #334155;
+    text-align: left;
+}
+
+.waka-evaluasi-nav-item.active {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 700;
+    box-shadow: inset -4px 0 0 #1d4ed8;
+}
+
+.waka-evaluasi-main {
+    flex: 1;
+    padding: 20px 24px 32px;
+    background: #f3f6fb;
+    min-width: 0;
+}
+
+.waka-evaluasi-card h2 {
+    margin: 0;
+}
+
+.waka-evaluasi-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.waka-evaluasi-stat-card,
+.waka-evaluasi-card {
+    background: #fff;
+    border: 1px solid #dfe7f1;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.waka-evaluasi-stat-card {
+    padding: 18px 20px;
+    transition: 0.2s ease;
+}
+
+.waka-evaluasi-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.waka-evaluasi-stat-card-blue {
+    border-left: 4px solid #265f9c;
+}
+
+.waka-evaluasi-stat-card-green {
+    border-left: 4px solid #2e7d32;
+}
+
+.waka-evaluasi-stat-card-orange {
+    border-left: 4px solid #f4b000;
+}
+
+.waka-evaluasi-stat-card span {
+    display: block;
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.waka-evaluasi-stat-card strong {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.7rem;
+    color: #0f172a;
+}
+
+.waka-evaluasi-card {
+    padding: 24px;
+    margin-bottom: 22px;
+}
+
+.waka-evaluasi-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.waka-evaluasi-card-head p {
+    margin: 10px 0 0;
+    color: #6b7280;
+}
+
+.waka-evaluasi-actions-top,
+.waka-evaluasi-submit,
+.waka-evaluasi-row-actions,
+.waka-evaluasi-filter-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.waka-evaluasi-grid,
+.waka-evaluasi-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.waka-evaluasi-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.waka-evaluasi-date-input {
+    position: relative;
+}
+
+.waka-evaluasi-field-full,
+.waka-evaluasi-filter-actions {
+    grid-column: 1 / -1;
+}
+
+.waka-evaluasi-field span {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.waka-evaluasi-field input,
+.waka-evaluasi-field select,
+.waka-evaluasi-field textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d5deea;
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    outline: none;
+    font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.waka-evaluasi-field textarea {
+    min-height: 112px;
+    resize: vertical;
+}
+
+.waka-evaluasi-field input:focus,
+.waka-evaluasi-field select:focus,
+.waka-evaluasi-field textarea:focus {
+    border-color: #1f4e82;
+    box-shadow: 0 0 0 4px rgba(31, 78, 130, 0.12);
+}
+
+.waka-evaluasi-date-input input {
+    padding-right: 50px;
+}
+
+.waka-evaluasi-date-trigger {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 10px;
+    background: #eef3ff;
+    color: #1f4e82;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.waka-evaluasi-date-trigger:hover {
+    background: #dbeafe;
+}
+
+.waka-evaluasi-submit,
+.waka-evaluasi-filter-actions {
+    justify-content: flex-end;
+}
+
+.waka-evaluasi-submit {
+    margin-top: 22px;
+}
+
+.waka-evaluasi-button,
+.waka-evaluasi-mini-button {
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-weight: 700;
+}
+
+.waka-evaluasi-button {
+    min-height: 48px;
+    padding: 0 18px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.waka-evaluasi-button.primary {
+    background: #1f4e82;
+    color: #fff;
+}
+
+.waka-evaluasi-button.secondary {
+    background: #dbeafe;
+    color: #1f4e82;
+}
+
+.waka-evaluasi-button.ghost {
+    background: #fff;
+    color: #1f4e82;
+    border-color: #cfdce8;
+}
+
+.waka-evaluasi-button.primary:hover:not(:disabled) {
+    background: #173c64;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(31, 78, 130, 0.15);
+}
+
+.waka-evaluasi-button.secondary:hover:not(:disabled) {
+    background: #c7defd;
+    color: #12375c;
+}
+
+.waka-evaluasi-button.ghost:hover:not(:disabled) {
+    background: #edf6ff;
+    border-color: #9fc1df;
+    color: #173c64;
+}
+
+.waka-evaluasi-feedback,
+.waka-evaluasi-empty {
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+}
+
+.waka-evaluasi-feedback.success {
+    background: #eef6ff;
+    border: 1px solid #bfd7fb;
+    color: #1f4e82;
+}
+
+.waka-evaluasi-feedback.error {
+    background: #fff1f3;
+    border: 1px solid #f2c7cd;
+    color: #b54555;
+}
+
+.waka-evaluasi-empty {
+    text-align: center;
+    color: #64748b;
+    background: #f8fbfd;
+    border: 1px dashed #cfdce8;
+}
+
+.waka-evaluasi-table-wrap {
+    overflow-x: auto;
+}
+
+.waka-evaluasi-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+}
+
+.waka-evaluasi-table th,
+.waka-evaluasi-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e6edf5;
+    text-align: left;
+    vertical-align: top;
+}
+
+.waka-evaluasi-table th {
+    color: #64748b;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+}
+
+.waka-evaluasi-table td strong,
+.waka-evaluasi-table td small {
+    display: block;
+}
+
+.waka-evaluasi-table td small {
+    margin-top: 5px;
+    color: #64748b;
+}
+
+.waka-evaluasi-empty-cell {
+    text-align: center;
+    color: #64748b;
+}
+
+.waka-evaluasi-mini-button {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.waka-evaluasi-mini-button.edit {
+    background: #e6f0ff;
+    color: #1f4e82;
+}
+
+.waka-evaluasi-mini-button.delete {
+    background: #fff0f2;
+    color: #be4257;
+}
+
+.waka-evaluasi-mini-button.edit:hover {
+    background: #cfe0ff;
+    transform: translateY(-1px);
+}
+
+.waka-evaluasi-mini-button.delete:hover {
+    background: #ffdce2;
+    transform: translateY(-1px);
+}
+
+.waka-evaluasi-table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #e6edf5;
+    flex-wrap: wrap;
+}
+
+.waka-evaluasi-pagination-info {
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.waka-evaluasi-pagination,
+.waka-evaluasi-export-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.waka-evaluasi-page-btn,
+.waka-evaluasi-export-btn {
+    height: 40px;
+    min-width: 40px;
+    border-radius: 11px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.waka-evaluasi-page-btn {
+    padding: 0 13px;
+    border: 1px solid #d6e1ea;
+    background: #fff;
+    color: #33516e;
+}
+
+.waka-evaluasi-page-btn:hover:not(:disabled) {
+    background: #edf6ff;
+    border-color: #9fc1df;
+    color: #173c64;
+}
+
+.waka-evaluasi-page-btn.active {
+    background: #1f4e82;
+    border-color: #1f4e82;
+    color: #fff;
+}
+
+.waka-evaluasi-page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.waka-evaluasi-export-btn {
+    min-width: 126px;
+    padding: 0 16px;
+    border: 1px solid #2e7d32;
+    background: transparent;
+    color: #2e7d32;
+}
+
+.waka-evaluasi-export-btn:hover {
+    background: #2e7d32;
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(46, 125, 50, 0.16);
+    transform: translateY(-1px);
+}
+
+.waka-evaluasi-export-btn i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+@media (max-width: 1080px) {
+    .waka-evaluasi-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .waka-evaluasi-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid #e5edf5;
+    }
+
+    .waka-evaluasi-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .waka-evaluasi-main {
+        padding: 22px 16px 30px;
+    }
+
+    .waka-evaluasi-card {
+        padding: 18px;
+    }
+
+    .waka-evaluasi-card-head {
+        flex-direction: column;
+    }
+
+    .waka-evaluasi-grid,
+    .waka-evaluasi-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .waka-evaluasi-submit,
+    .waka-evaluasi-filter-actions {
+        flex-direction: column;
+    }
+
+    .waka-evaluasi-button,
+    .waka-evaluasi-export-btn {
+        width: 100%;
+    }
+
+    .waka-evaluasi-table-footer {
+        align-items: stretch;
+    }
+
+    .waka-evaluasi-pagination,
+    .waka-evaluasi-export-group {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

@@ -45,6 +45,7 @@ use App\Http\Controllers\RefMetodePembayaranController;
 use App\Http\Controllers\DashboardTimPenjaminanMutuController;
 use App\Http\Controllers\DashboardKepsekRKTController;
 
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -357,6 +358,8 @@ Route::prefix('jenis-pembayaran')->group(function () {
     Route::delete('/delete/{id}', [RefJenisPembayaranController::class, 'destroy']);
     Route::get('/search', [RefJenisPembayaranController::class, 'search']);
     Route::get('/export', [RefJenisPembayaranExportController::class, 'export']);
+    Route::get('/export', [RefJenisPembayaranExportController::class, 'export']);
+    Route::get('/export/pdf', [RefJenisPembayaranExportController::class, 'exportPdf']);
 });
 
 Route::prefix('export')->group(function () {
