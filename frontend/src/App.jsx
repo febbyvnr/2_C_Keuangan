@@ -64,7 +64,7 @@ import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
-// import PMRKT from "./pages/pm/RKT";
+import PMRKT from "./pages/pm/RKTPage";
 import VerifikasiEvaluasiPm from "./pages/PM/VerifikasiEvaluasiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
@@ -237,14 +237,15 @@ export default function App() {
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         <Route path="/pic/guru" element={<PicGuruLayout />}>
-  <Route index element={<DashboardPIC />} />
-  <Route path="dashboard" element={<DashboardPIC />} />
-  <Route path="fpd" element={<PicGuruFPD />} />
-  <Route path="rkt" element={<RKT />} />
-  <Route path="rka" element={<RKA />} />
-  <Route path="rkt/create" element={<CreateRKT />} />
-  <Route path="rkt/edit/:id" element={<CreateRKT />} />
-</Route>
+          <Route index element={<DashboardPIC />} />
+          <Route path="dashboard" element={<DashboardPIC />} />
+          <Route path="fpd" element={<PicGuruFPD />} />
+          <Route path="rkt" element={<RKT />} />
+          <Route path="rka" element={<RKA />} />
+          <Route path="rkt/create" element={<CreateRKT />} />
+          <Route path="rkt/edit/:id" element={<CreateRKT />} />
+        </Route>
+
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
@@ -297,7 +298,7 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPM />} />
           <Route path="referensi" element={<ReferensiPm />} />
           <Route path="kegiatan" element={<KepsekMasterKegiatan />} />
-          {/* <Route path="rkt" element={<PMRKT />} /> */}
+          <Route path="rkt" element={<PMRKT />} />
           <Route path="evaluasi-rkt" element={
               <div>
                 <h1>Evaluasi RKT</h1>
