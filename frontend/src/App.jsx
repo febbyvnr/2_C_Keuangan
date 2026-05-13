@@ -59,7 +59,6 @@ import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
 import RKA from "./pages/pic/guru/RKA.jsx";
 import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
-//import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
@@ -240,6 +239,7 @@ export default function App() {
         />
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
+        {/* PIC GURU */}
         <Route path="/pic/guru" element={<PicGuruLayout />}>
           <Route index element={<DashboardPIC />} />
           <Route path="dashboard" element={<DashboardPIC />} />
@@ -301,13 +301,27 @@ export default function App() {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardPM />} />
           <Route path="referensi" element={<ReferensiPm />} />
+          <Route
+            path="monitoring-mutu"
+            element={
+              <div>
+                <h1>Monitoring Mutu</h1>
+              </div>
+            }
+          />
           <Route path="kegiatan" element={<KepsekMasterKegiatan />} />
           <Route path="rkt" element={<PMRKT />} />
-          <Route path="evaluasi-rkt" element={
+          <Route
+            path="evaluasi-rkt"
+            element={
               <div>
                 <h1>Evaluasi RKT</h1>
               </div>
             }
+          />
+          <Route
+            path="verifikasi-evaluasi"
+            element={<VerifikasiEvaluasiPm />}
           />
         </Route>
       </Routes>
