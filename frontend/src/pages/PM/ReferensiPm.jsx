@@ -3,17 +3,14 @@ import axios from "axios";
 import {
   FaSearch,
   FaSyncAlt,
+  FaPlus,
   FaEdit,
   FaTrash,
-  FaPlus,
+  FaEye,
 } from "react-icons/fa";
 import "../../styles/PM/ReferensiPm.css";
 
 const API_BASE_URL = "http://127.0.0.1:8000/api";
-
-function normalizeText(value) {
-  return String(value ?? "").toLowerCase();
-}
 
 function getAuthConfig() {
   const token = localStorage.getItem("token");
@@ -21,166 +18,262 @@ function getAuthConfig() {
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
       Accept: "application/json",
+      "Content-Type": "application/json",
     },
   };
 }
 
+function useSort() {
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  return [sortConfig, handleSort];
+}
+
+function SortableTh({ sortConfig, sortKey, onSort, children, className = "" }) {
+  const isActive = sortConfig.key === sortKey;
+  const icon = !isActive ? "⇅" : sortConfig.direction === "asc" ? "↑" : "↓";
+
+  return (
+    <th
+      className={`sortable-th ${className}`}
+      onClick={() => onSort(sortKey)}
+      title={`Urutkan ${children}`}
+    >
+      <span>{children}</span>
+      <span className={`sort-icon ${isActive ? "active" : "neutral"}`}>
+        {icon}
+      </span>
+    </th>
+  );
+}
+
 export default function ReferensiPm() {
   const [dataList, setDataList] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const [showModal, setShowModal] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
-  const [form, setForm] = useState({
-    REF_ID_REF_PM: "",
-    NAMA_PM: "",
-    DESKRIPSI_PM: "",
-  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
- const fetchData = async () => {
-  setLoading(true);
-  setError("");
+  const [sortConfig, handleSort] = useSort();
 
-  try {
-    const res = await axios.get(`${API_BASE_URL}/ref-pm`, getAuthConfig());
-    const raw = Array.isArray(res.data?.data) ? res.data.data : [];
+  const initialForm = {
+    NAMA_PM: "",
+    REF_ID_REF_PM: "",
+    DESKRIPSI_PM: "",
+  };
 
-    const flattened = [];
+  const [form, setForm] = useState(initialForm);
 
-    const flattenAll = (items) => {
-      items.forEach((item) => {
-        flattened.push(item);
-        if (Array.isArray(item.children) && item.children.length > 0) {
-          flattenAll(item.children);
-        }
-      });
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
 
-    flattenAll(raw);
+    try {
+      const res = await axios.get(`${API_BASE_URL}/ref-pm`, getAuthConfig());
+      const raw = Array.isArray(res.data?.data)
+        ? res.data.data
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
 
-    const withKategori = flattened.map((item) => {
-      const parent = flattened.find(
-        (p) => Number(p.ID_REF_PM) === Number(item.REF_ID_REF_PM)
+      setDataList(raw);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Gagal mengambil data referensi PM."
       );
-
-      return {
-        ...item,
-        KATEGORI: parent
-          ? parent.NAMA_PM || parent.NAMA_REF_PM || "-"
-          : "-",
-      };
-    });
-
-    withKategori.sort((a, b) => {
-      const idA = Number(a.ID_REF_PM || 0);
-      const idB = Number(b.ID_REF_PM || 0);
-      return idA - idB;
-    });
-
-    setDataList(withKategori);
-    setFilteredList(withKategori);
-
-    return withKategori;
-  } catch (err) {
-    setError(
-      err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Gagal mengambil data Referensi PM."
-    );
-    return [];
-  } finally {
-    setLoading(false);
-  }
-};
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const keyword = normalizeText(search);
+  const parentOptions = useMemo(() => {
+    return dataList.map((item) => ({
+      id: item.ID_REF_PM,
+      nama: item.NAMA_PM || "-",
+    }));
+  }, [dataList]);
 
-    if (!keyword) {
-      setFilteredList(dataList);
-      return;
-    }
+  const normalizedData = useMemo(() => {
+    const idToName = new Map(
+      dataList.map((item) => [String(item.ID_REF_PM), item.NAMA_PM || "-"])
+    );
 
-    const result = dataList.filter((item) => {
-      const merged = [
-        item?.NAMA_PM,
-        item?.DESKRIPSI_PM,
-        item?.KATEGORI,
-      ]
-        .map(normalizeText)
-        .join(" ");
+    return dataList.map((item, index) => {
+      const kategori =
+        item.REF_ID_REF_PM !== null && item.REF_ID_REF_PM !== undefined
+          ? idToName.get(String(item.REF_ID_REF_PM)) || "-"
+          : "-";
 
-      return merged.includes(keyword);
+      const statusValue = Number(item.is_used) === 1 ? 1 : 0;
+
+      return {
+        no: index + 1,
+        id: item.ID_REF_PM,
+        nama: item.NAMA_PM || "-",
+        kategori,
+        kategoriId: item.REF_ID_REF_PM ?? "",
+        deskripsi: item.DESKRIPSI_PM || "-",
+        statusValue,
+        statusLabel: statusValue ? "Digunakan" : "Belum Digunakan",
+        nomorUrut: item.nomor_urut || "-",
+        hasChild: Number(item.has_child) === 1,
+        raw: item,
+      };
     });
+  }, [dataList]);
 
-    setFilteredList(result);
-  }, [search, dataList]);
+  const filteredData = useMemo(() => {
+    const keyword = String(search || "").toLowerCase().trim();
+
+    if (!keyword) return normalizedData;
+
+    return normalizedData.filter((item) => {
+      const text = [
+        item.nama,
+        item.kategori,
+        item.deskripsi,
+        item.statusLabel,
+        item.id,
+        item.nomorUrut,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(keyword);
+    });
+  }, [search, normalizedData]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, sortConfig]);
 
-  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+  const sortedData = useMemo(() => {
+    const cloned = [...filteredData];
+    if (!sortConfig.key) return cloned;
+
+    cloned.sort((a, b) => {
+      let aValue = "";
+      let bValue = "";
+
+      switch (sortConfig.key) {
+        case "nama":
+          aValue = a.nama;
+          bValue = b.nama;
+          break;
+        case "kategori":
+          aValue = a.kategori;
+          bValue = b.kategori;
+          break;
+        case "deskripsi":
+          aValue = a.deskripsi;
+          bValue = b.deskripsi;
+          break;
+        case "status":
+          aValue = a.statusLabel;
+          bValue = b.statusLabel;
+          break;
+        default:
+          break;
+      }
+
+      const compareResult =
+        typeof aValue === "number" && typeof bValue === "number"
+          ? aValue - bValue
+          : String(aValue).localeCompare(String(bValue), "id", {
+              sensitivity: "base",
+            });
+
+      return sortConfig.direction === "asc" ? compareResult : -compareResult;
+    });
+
+    return cloned;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
   const paginatedList = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredList.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredList, currentPage]);
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, startIndex, endIndex]);
 
   const handleReset = () => {
     setSearch("");
-    setFilteredList(dataList);
     setCurrentPage(1);
     setError("");
     setSuccess("");
   };
 
-  const openTambahModal = () => {
-    setIsEdit(false);
+  const openAddModal = () => {
+    setIsEditMode(false);
     setSelectedId(null);
-    setForm({
-      REF_ID_REF_PM: "",
-      NAMA_PM: "",
-      DESKRIPSI_PM: "",
-    });
+    setForm(initialForm);
+    setError("");
+    setSuccess("");
     setShowModal(true);
   };
 
   const openEditModal = (item) => {
-    setIsEdit(true);
-    setSelectedId(item.ID_REF_PM);
+    setIsEditMode(true);
+    setSelectedId(item.id);
     setForm({
-      REF_ID_REF_PM: item.REF_ID_REF_PM ?? "",
-      NAMA_PM: item.NAMA_PM ?? "",
-      DESKRIPSI_PM: item.DESKRIPSI_PM ?? "",
+      NAMA_PM: item.nama === "-" ? "" : item.nama,
+      REF_ID_REF_PM: item.kategoriId || "",
+      DESKRIPSI_PM: item.deskripsi === "-" ? "" : item.deskripsi,
     });
+    setError("");
+    setSuccess("");
     setShowModal(true);
+  };
+
+  const openDetailModal = (item) => {
+    setSelectedDetail(item);
+    setShowDetailModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setIsEdit(false);
+    setIsEditMode(false);
     setSelectedId(null);
-    setForm({
-      REF_ID_REF_PM: "",
-      NAMA_PM: "",
-      DESKRIPSI_PM: "",
-    });
+    setForm(initialForm);
+    setError("");
+  };
+
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedDetail(null);
   };
 
   const handleChange = (e) => {
@@ -191,56 +284,51 @@ export default function ReferensiPm() {
     }));
   };
 
+  const validateForm = () => {
+    if (!form.NAMA_PM.trim()) return "Nama Referensi PM wajib diisi.";
+    if (!form.DESKRIPSI_PM.trim()) return "Deskripsi wajib diisi.";
+    return "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
     setSuccess("");
 
-    const payload = {
-      REF_ID_REF_PM:
-        form.REF_ID_REF_PM === "" ? null : Number(form.REF_ID_REF_PM),
-      NAMA_PM: form.NAMA_PM,
-      DESKRIPSI_PM: form.DESKRIPSI_PM,
-    };
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      setSubmitting(false);
+      return;
+    }
 
     try {
-      let res;
+      const payload = {
+        NAMA_PM: form.NAMA_PM,
+        REF_ID_REF_PM: form.REF_ID_REF_PM || null,
+        DESKRIPSI_PM: form.DESKRIPSI_PM,
+      };
 
-      if (isEdit && selectedId) {
-        res = await axios.put(
+      if (isEditMode && selectedId) {
+        await axios.put(
           `${API_BASE_URL}/ref-pm/${selectedId}`,
           payload,
           getAuthConfig()
         );
+        setSuccess("Data berhasil diupdate.");
       } else {
-        res = await axios.post(
-          `${API_BASE_URL}/ref-pm`,
-          payload,
-          getAuthConfig()
-        );
+        await axios.post(`${API_BASE_URL}/ref-pm`, payload, getAuthConfig());
+        setSuccess("Data berhasil ditambahkan.");
       }
 
-      setSuccess(
-        res.data?.message ||
-          (isEdit
-            ? "Referensi PM berhasil diperbarui."
-            : "Referensi PM berhasil ditambahkan.")
-      );
-
+      await fetchData();
       closeModal();
-
-      const latestData = await fetchData();
-
-      if (!isEdit) {
-        const lastPage = Math.ceil(latestData.length / itemsPerPage);
-        setCurrentPage(lastPage || 1);
-      }
     } catch (err) {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Gagal menyimpan data Referensi PM."
+          "Gagal menyimpan data."
       );
     } finally {
       setSubmitting(false);
@@ -248,42 +336,29 @@ export default function ReferensiPm() {
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Yakin ingin menghapus Referensi PM ini?"
+    const confirmed = window.confirm(
+      "Yakin ingin menghapus referensi PM ini?"
     );
-    if (!confirmDelete) return;
+    if (!confirmed) return;
 
+    setDeleteLoadingId(id);
     setError("");
     setSuccess("");
 
     try {
-      const res = await axios.delete(
-        `${API_BASE_URL}/ref-pm/${id}`,
-        getAuthConfig()
-      );
-
-      setSuccess(res.data?.message || "Referensi PM berhasil dihapus.");
-
-      const latestData = await fetchData();
-      const newTotalPages = Math.ceil(latestData.length / itemsPerPage);
-
-      if (currentPage > newTotalPages && newTotalPages > 0) {
-        setCurrentPage(newTotalPages);
-      } else if (latestData.length === 0) {
-        setCurrentPage(1);
-      }
+      await axios.delete(`${API_BASE_URL}/ref-pm/${id}`, getAuthConfig());
+      setSuccess("Data berhasil dihapus.");
+      await fetchData();
     } catch (err) {
       setError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
-          "Gagal menghapus Referensi PM."
+          "Gagal menghapus data."
       );
+    } finally {
+      setDeleteLoadingId(null);
     }
   };
-
-  const parentOptions = dataList.filter(
-    (item) => !item.REF_ID_REF_PM || item.KATEGORI === "-"
-  );
 
   return (
     <div className="referensi-pm-container">
@@ -309,64 +384,113 @@ export default function ReferensiPm() {
             Cari
           </button>
 
-          <button className="btn-primary" onClick={openTambahModal}>
+          <button className="btn-primary" onClick={openAddModal}>
             <FaPlus />
             Tambah Referensi
           </button>
         </div>
       </div>
 
-      {success ? <div className="alert-success">{success}</div> : null}
-      {error ? <div className="alert-error">{error}</div> : null}
+      {success && <div className="alert-success">{success}</div>}
+      {error && !showModal && <div className="alert-error">{error}</div>}
 
       <div className="referensi-pm-table-wrapper">
         <table className="referensi-pm-table">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Nama Referensi PM</th>
-              <th>Kategori</th>
-              <th>Deskripsi</th>
-              <th>Aksi</th>
+              <th className="th-center">No</th>
+
+              <SortableTh
+                sortConfig={sortConfig}
+                sortKey="nama"
+                onSort={handleSort}
+              >
+                Nama Referensi PM
+              </SortableTh>
+
+              <SortableTh
+                sortConfig={sortConfig}
+                sortKey="kategori"
+                onSort={handleSort}
+              >
+                Kategori
+              </SortableTh>
+
+              <SortableTh
+                sortConfig={sortConfig}
+                sortKey="deskripsi"
+                onSort={handleSort}
+              >
+                Deskripsi
+              </SortableTh>
+
+              <SortableTh
+                sortConfig={sortConfig}
+                sortKey="status"
+                onSort={handleSort}
+                className="th-center"
+              >
+                Status
+              </SortableTh>
+
+              <th className="th-center">Aksi</th>
             </tr>
           </thead>
+
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5" className="text-center">
+                <td colSpan="6" className="text-center">
                   Memuat data...
                 </td>
               </tr>
             ) : paginatedList.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center">
-                  Tidak ada data.
+                <td colSpan="6" className="text-center">
+                  Tidak ada data referensi.
                 </td>
               </tr>
             ) : (
               paginatedList.map((item, index) => (
-                <tr key={item.ID_REF_PM || index}>
-                  <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td className="ellipsis-cell">
-                    {item.NAMA_PM || item.NAMA_REF_PM || "-"}
+                <tr key={item.id || index}>
+                  <td className="th-center">{startIndex + index + 1}</td>
+                  <td>{item.nama}</td>
+                  <td>{item.kategori}</td>
+                  <td className="deskripsi-cell" title={item.deskripsi}>
+                    {item.deskripsi}
                   </td>
-                  <td className="ellipsis-cell">{item.KATEGORI || "-"}</td>
-                  <td className="ellipsis-cell">
-                    {item.DESKRIPSI_PM || "-"}
+                  <td className="th-center">
+                    <span
+                      className={`status-badge ${
+                        item.statusValue ? "active" : "inactive"
+                      }`}
+                    >
+                      {item.statusLabel}
+                    </span>
                   </td>
                   <td>
                     <div className="aksi">
                       <button
+                        className="btn-detail"
+                        title="Detail"
+                        onClick={() => openDetailModal(item)}
+                      >
+                        <FaEye />
+                      </button>
+
+                      <button
                         className="btn-edit"
-                        onClick={() => openEditModal(item)}
                         title="Edit"
+                        onClick={() => openEditModal(item)}
                       >
                         <FaEdit />
                       </button>
+
                       <button
                         className="btn-delete"
-                        onClick={() => handleDelete(item.ID_REF_PM)}
                         title="Hapus"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deleteLoadingId === item.id}
                       >
                         <FaTrash />
                       </button>
@@ -380,19 +504,13 @@ export default function ReferensiPm() {
 
         <div className="table-footer">
           <div className="pagination-info">
-            Menampilkan{" "}
-            {filteredList.length === 0
-              ? 0
-              : (currentPage - 1) * itemsPerPage + 1}
-            {" - "}
-            {Math.min(currentPage * itemsPerPage, filteredList.length)}
-            {" dari "}
-            {filteredList.length} data
+            Menampilkan {sortedData.length === 0 ? 0 : startIndex + 1} -{" "}
+            {Math.min(endIndex, sortedData.length)} dari {sortedData.length} data
           </div>
 
           <div className="pagination-controls">
             <button
-              className="btn-reset"
+              className="btn-pagination"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -400,15 +518,15 @@ export default function ReferensiPm() {
             </button>
 
             <span className="page-number">
-              Halaman {currentPage} / {totalPages || 1}
+              Halaman {currentPage} / {totalPages}
             </span>
 
             <button
-              className="btn-reset"
+              className="btn-pagination"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages}
             >
               Next
             </button>
@@ -418,41 +536,44 @@ export default function ReferensiPm() {
 
       {showModal && (
         <div className="modal-overlay">
-          <div className="modal-box">
-            <h3>{isEdit ? "Edit Referensi PM" : "Tambah Referensi PM"}</h3>
+          <div className="modal-box referensi-modal">
+            <h3>{isEditMode ? "Edit Referensi PM" : "Tambah Referensi PM"}</h3>
+
+            {error && <div className="alert-error">{error}</div>}
 
             <form onSubmit={handleSubmit}>
+              <label>Nama Referensi PM</label>
+              <input
+                type="text"
+                name="NAMA_PM"
+                value={form.NAMA_PM}
+                onChange={handleChange}
+                placeholder="Masukkan nama referensi PM"
+              />
+
               <label>Kategori / Parent</label>
               <select
                 name="REF_ID_REF_PM"
                 value={form.REF_ID_REF_PM}
                 onChange={handleChange}
               >
-                <option value="">- Tanpa Kategori -</option>
-                {parentOptions.map((item) => (
-                  <option key={item.ID_REF_PM} value={item.ID_REF_PM}>
-                    {item.NAMA_PM || item.NAMA_REF_PM}
-                  </option>
-                ))}
+                <option value="">Tidak ada parent</option>
+                {parentOptions
+                  .filter((item) => String(item.id) !== String(selectedId || ""))
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.nama}
+                    </option>
+                  ))}
               </select>
-
-              <label>Nama Referensi PM</label>
-              <input
-                type="text"
-                name="NAMA_PM"
-                placeholder="Masukkan nama referensi PM"
-                value={form.NAMA_PM}
-                onChange={handleChange}
-                required
-              />
 
               <label>Deskripsi</label>
               <textarea
                 name="DESKRIPSI_PM"
-                rows="4"
-                placeholder="Masukkan deskripsi referensi PM"
                 value={form.DESKRIPSI_PM}
                 onChange={handleChange}
+                rows="4"
+                placeholder="Masukkan deskripsi referensi PM"
               />
 
               <div className="modal-actions">
@@ -464,19 +585,77 @@ export default function ReferensiPm() {
                 >
                   Batal
                 </button>
+
                 <button
                   type="submit"
                   className="btn-submit"
                   disabled={submitting}
                 >
                   {submitting
-                    ? "Menyimpan..."
-                    : isEdit
+                    ? isEditMode
+                      ? "Mengupdate..."
+                      : "Menyimpan..."
+                    : isEditMode
                     ? "Update"
                     : "Simpan"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDetailModal && selectedDetail && (
+        <div className="modal-overlay">
+          <div className="modal-box referensi-modal">
+            <h3>Detail Referensi PM</h3>
+
+            <div className="detail-grid">
+              <div>
+                <label>ID Referensi PM</label>
+                <p>{selectedDetail.id || "-"}</p>
+              </div>
+
+              <div>
+                <label>Nomor Urut</label>
+                <p>{selectedDetail.nomorUrut || "-"}</p>
+              </div>
+
+              <div>
+                <label>Nama Referensi PM</label>
+                <p>{selectedDetail.nama}</p>
+              </div>
+
+              <div>
+                <label>Kategori / Parent</label>
+                <p>{selectedDetail.kategori}</p>
+              </div>
+
+              <div>
+                <label>Status</label>
+                <p>{selectedDetail.statusLabel}</p>
+              </div>
+
+              <div>
+                <label>Memiliki Child</label>
+                <p>{selectedDetail.hasChild ? "Ya" : "Tidak"}</p>
+              </div>
+
+              <div className="detail-full">
+                <label>Deskripsi</label>
+                <p>{selectedDetail.deskripsi}</p>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={closeDetailModal}
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
