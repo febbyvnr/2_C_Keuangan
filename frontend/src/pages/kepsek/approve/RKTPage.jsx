@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../../../styles/waka/approve/RKT.css";
+import "../../../styles/kepsek/approveRKT.css";
 
 export default function RKTPage({ setHasPending }) {
     const [data, setData] = useState([]);
@@ -7,6 +7,7 @@ export default function RKTPage({ setHasPending }) {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [showModal, setShowModal] = useState(false);
     const [sortConfig, setSortConfig] = useState({
         key: "ID_PROGRAM_KERJA",
         direction: "desc"
@@ -16,6 +17,8 @@ export default function RKTPage({ setHasPending }) {
     const [revisiText, setRevisiText] = useState("");
     const [showRevisiInput, setShowRevisiInput] = useState(false);
 
+    const [tolakText, setTolakText] = useState("");
+    const [showTolakInput, setShowTolakInput] = useState(false);
     const showToast = (type = "success", message = "") => {
         setToast({ type, message });
         setVisible(true);
@@ -30,14 +33,36 @@ export default function RKTPage({ setHasPending }) {
     const fetchData = async (searchValue = "") => {
         try {
             const url = searchValue
-                ? `http://localhost:8000/api/rkt?search=${searchValue}`
-                : "http://localhost:8000/api/rkt";
+                ? `http://localhost:8000/api/rkt/ready-approval?search=${searchValue}`
+                : "http://localhost:8000/api/rkt/ready-approval";
             const res = await fetch(url);
             const json = await res.json();
-            const result = json.data || [];
+            const rawResult = json.data || [];
+
+            const result = rawResult.filter((item) => {
+                return getStatus(item).label !== "Draft";
+            });
+
             setData(result);
-            const hasPending = result.some(item => !item.NIP_VALIDATOR_PROGKER);
+            const hasPending = result.some((item) => getStatus(item).label === "Pending");
             setHasPending && setHasPending(hasPending);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+        
+    const [detailData, setDetailData] = useState(null);
+
+    const handleDetail = async (id) => {
+        try {
+            const res = await fetch(
+                `http://localhost:8000/api/rkt/${id}`
+            );
+            const json = await res.json();
+            if (json.success) {
+                setDetailData(json.data);
+                setShowModal(true);
+            }
         } catch (err) {
             console.error(err);
         }
@@ -80,16 +105,26 @@ export default function RKTPage({ setHasPending }) {
         const lastPm = item.tr_pm?.length
             ? item.tr_pm[item.tr_pm.length - 1]
             : null;
-        const note = lastPm?.DESKRIPSI_TR_PM?.toLowerCase() || "";
-        if (note.includes("ditolak")) {
+
+        const aksi = String(lastPm?.AKSI || lastPm?.aksi || "").toUpperCase();
+        const note = String(lastPm?.DESKRIPSI_TR_PM || "").toLowerCase();
+
+        if (aksi === "DRAFT" || note.startsWith("draft")) {
+            return { label: "Draft", className: "draft" };
+        }
+
+        if (aksi === "TOLAK" || aksi === "DITOLAK" || note.includes("ditolak")) {
             return { label: "Ditolak", className: "rejected" };
         }
-        if (note.includes("revisi")) {
+
+        if (aksi === "REVISI" || note.includes("revisi")) {
             return { label: "Revisi", className: "revisi" };
         }
-        if (item.NIP_VALIDATOR_PROGKER) {
+
+        if (aksi === "SETUJUI" || item.NIP_VALIDATOR_PROGKER) {
             return { label: "Disetujui", className: "approved" };
         }
+
         return { label: "Pending", className: "pending" };
     };
 
@@ -172,6 +207,10 @@ export default function RKTPage({ setHasPending }) {
             return;
         }
         const user = JSON.parse(userData);
+        if (!tolakText.trim()) {
+            showToast("error", "Alasan penolakan wajib diisi");
+            return;
+        }
         try {
             const res = await fetch(
                 `http://localhost:8000/api/rkt/reject/${selected.ID_PROGRAM_KERJA}`,
@@ -180,8 +219,9 @@ export default function RKTPage({ setHasPending }) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         NIP_VALIDATOR_PM: user.NIP_KARYAWAN,
-                        DESKRIPSI: "Ditolak"
-                    })
+                        AKSI: "TOLAK",
+                        DESKRIPSI: tolakText,
+                    }),
                 }
             );
             const json = await res.json();
@@ -189,6 +229,8 @@ export default function RKTPage({ setHasPending }) {
                 showToast("success", "Program Kerja Ditolak");
                 fetchData();
                 setSelected(null);
+                setTolakText("");
+                setShowTolakInput(false);
             } else {
                 showToast("error", json.message || "Gagal menolak");
             }
@@ -278,59 +320,80 @@ export default function RKTPage({ setHasPending }) {
                 </div>
             </div>
             <div className="rkt-approval-grid">
-                <div className="rkt-table-section">
-                    <div className="rkt-table-wrapper">
+                <div className="pmrkt-table-section">
+                    <div className="pmrkt-table-wrapper">
                         <table>
-                            <thead>
-                                <tr>
-                                    <th onClick={() => handleSort("ID_PROGRAM_KERJA")}>
-                                        ID <i className={getIcon("ID_PROGRAM_KERJA")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("PROGRAM_KERJA")}>
-                                        Program <i className={getIcon("PROGRAM_KERJA")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("tahun_anggaran")}>
-                                        Tahun <i className={getIcon("tahun_anggaran")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("TOTAL_PROGKER")}>
-                                        Anggaran <i className={getIcon("TOTAL_PROGKER")}></i>
-                                    </th>
-                                    <th onClick={() => handleSort("status")}>
-                                        Status <i className={getIcon("status")}></i>
-                                    </th>
-                                </tr>
-                            </thead>
+                            <tr>
+                                <th onClick={() => handleSort("ID_PROGRAM_KERJA")}>
+                                    ID{" "}
+                                    <i className={getIcon("ID_PROGRAM_KERJA")}></i>
+                                </th>
+                                <th onClick={() => handleSort("PROGRAM_KERJA")}>
+                                    Program{" "}
+                                    <i className={getIcon("PROGRAM_KERJA")}></i>
+                                </th>
+                                <th onClick={() => handleSort("tahun_anggaran")}>
+                                    Tahun{" "}
+                                    <i className={getIcon("tahun_anggaran")}></i>
+                                </th>
+                                <th onClick={() => handleSort("TOTAL_PROGKER")}>
+                                    Anggaran{" "}
+                                    <i className={getIcon("TOTAL_PROGKER")}></i>
+                                </th>
+                                <th onClick={() => handleSort("status")}>
+                                    Status{" "}
+                                    <i className={getIcon("status")}></i>
+                                </th>
+                                <th>Detail</th>
+                            </tr>
                             <tbody>
                                 {currentData.map((item) => (
                                     <tr
                                         key={item.ID_PROGRAM_KERJA}
                                         onClick={() => setSelected(item)}
                                         className={
-                                            selected?.ID_PROGRAM_KERJA === item.ID_PROGRAM_KERJA
+                                            selected?.ID_PROGRAM_KERJA ===
+                                            item.ID_PROGRAM_KERJA
                                                 ? "active-row"
                                                 : ""
-                                        }z
+                                        }
                                     >
                                         <td>{item.ID_PROGRAM_KERJA}</td>
                                         <td>{item.PROGRAM_KERJA}</td>
-                                        <td>{item.tahun_anggaran?.DESKRIPSI_TAHUN_ANGGARAN}</td>
                                         <td>
-                                            Rp {Number(item.TOTAL_PROGKER || 0).toLocaleString("id-ID")}
+                                            {
+                                                item.tahun_anggaran
+                                                    ?.DESKRIPSI_TAHUN_ANGGARAN
+                                            }
+                                        </td>
+                                        <td>
+                                            Rp{" "}
+                                            {Number(
+                                                item.TOTAL_PROGKER || 0
+                                            ).toLocaleString("id-ID")}
                                         </td>
                                         <td>
                                             {(() => {
                                                 const status = getStatus(item);
-                                                if (status.label === "Pending") {
-                                                    return (
-                                                        <i className="bi bi-exclamation-circle-fill icon-danger icon-warning-animate"></i>
-                                                    );
-                                                }
                                                 return (
-                                                    <span className={`status ${status.className}`}>
+                                                    <span
+                                                        className={`pmrkt-status ${status.className}`}
+                                                    >
                                                         {status.label}
                                                     </span>
                                                 );
                                             })()}
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="pmrkt-detail-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDetail(item.ID_PROGRAM_KERJA);
+                                                }}
+                                            >
+                                                Detail
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -339,34 +402,50 @@ export default function RKTPage({ setHasPending }) {
                     </div>
                     <div className="pagination-wrapper">
                         <div className="pagination-info">
-                            Menampilkan {startData} - {endData} dari {totalData} data
+                            Menampilkan {startData} - {endData} dari{" "}
+                            {totalData} data
                         </div>
+
                         <div className="pagination">
                             <button
                                 className="page-btn"
                                 onClick={() =>
-                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                    setCurrentPage((prev) =>
+                                        Math.max(prev - 1, 1)
+                                    )
                                 }
                                 disabled={currentPage === 1}
                             >
                                 <i className="bi bi-chevron-left"></i>
                             </button>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button
-                                    key={i + 1}
-                                    onClick={() => changePage(i + 1)}
-                                    className={`page-btn ${
-                                        currentPage === i + 1 ? "active" : ""
-                                    }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
+
+                            {Array.from(
+                                { length: totalPages },
+                                (_, i) => (
+                                    <button
+                                        key={i + 1}
+                                        onClick={() =>
+                                            changePage(i + 1)
+                                        }
+                                        className={`page-btn ${
+                                            currentPage === i + 1
+                                                ? "active"
+                                                : ""
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                )
+                            )}
+
                             <button
                                 className="page-btn"
                                 onClick={() =>
                                     setCurrentPage((prev) =>
-                                        Math.min(prev + 1, totalPages)
+                                        Math.min(
+                                            prev + 1,
+                                            totalPages
+                                        )
                                     )
                                 }
                                 disabled={currentPage === totalPages}
@@ -374,12 +453,26 @@ export default function RKTPage({ setHasPending }) {
                                 <i className="bi bi-chevron-right"></i>
                             </button>
                         </div>
+
                         <div className="export-wrapper">
-                            <a href={`http://localhost:8000/api/rkt/export/excel/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-success custom-btn">
-                                <i className="bi bi-filetype-xlsx"></i> Export Excel
+                            <a
+                                href={`http://localhost:8000/api/rkt/export/excel/${
+                                    selected?.ID_PROGRAM_KERJA || ""
+                                }`}
+                                className="btn-outline-success custom-btn"
+                            >
+                                <i className="bi bi-filetype-xlsx"></i>
+                                Export Excel
                             </a>
-                            <a href={`http://localhost:8000/api/rkt/export/pdf/${selected?.ID_PROGRAM_KERJA || ""}`} className="btn-outline-danger custom-btn">
-                                <i className="bi bi-filetype-pdf"></i> Export PDF
+
+                            <a
+                                href={`http://localhost:8000/api/rkt/export/pdf/${
+                                    selected?.ID_PROGRAM_KERJA || ""
+                                }`}
+                                className="btn-outline-danger custom-btn"
+                            >
+                                <i className="bi bi-filetype-pdf"></i>
+                                Export PDF
                             </a>
                         </div>
                     </div>
@@ -476,7 +569,10 @@ export default function RKTPage({ setHasPending }) {
                                     </button>
                                     <button
                                         className="reject-btn"
-                                        onClick={handleReject}
+                                        onClick={() => {
+                                            setShowTolakInput(!showTolakInput);
+                                            setShowRevisiInput(false);
+                                        }}
                                         disabled={!selected || isDisabled(selected)}
                                     >
                                         Tolak
@@ -489,6 +585,26 @@ export default function RKTPage({ setHasPending }) {
                                         disabled={!revisiText.trim()}
                                     >
                                         Kirim Revisi
+                                    </button>
+                                )}
+                                {showTolakInput && (
+                                    <div className="revisi-input-wrapper">
+                                        <textarea
+                                            placeholder="Masukkan alasan penolakan..."
+                                            value={tolakText}
+                                            onChange={(e) => setTolakText(e.target.value)}
+                                            className="revisi-textarea"
+                                        />
+                                    </div>
+                                )}
+
+                                {showTolakInput && (
+                                    <button
+                                        className="reject-btn"
+                                        onClick={handleReject}
+                                        disabled={!tolakText.trim()}
+                                    >
+                                        Kirim Penolakan
                                     </button>
                                 )}
                             </div>
@@ -506,6 +622,122 @@ export default function RKTPage({ setHasPending }) {
                         <span className="toast-text">
                             {toast.message}
                         </span>
+                    </div>
+                </div>
+            )}
+            {showModal && detailData && (
+                <div className="pmrkt-modal-overlay">
+                    <div className="pmrkt-modal-content">
+                        <div className="pmrkt-modal-header">
+                            <h2>Detail Program Kerja</h2>
+                            <button className="pmrkt-close-btn" onClick={() => { setShowModal(false); setDetailData(null); }} >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="pmrkt-detail-title">
+                            Detail
+                        </div>
+                        <div className="pmrkt-detail-grid">
+                            <div className="pmrkt-detail-item">
+                                <span>Program Kerja</span>
+                                <p>{detailData.PROGRAM_KERJA}</p>
+                            </div>
+                            <div className="pmrkt-detail-item">
+                                <span>Tahun Anggaran</span>
+                                <p>
+                                    {
+                                        detailData.tahun_anggaran
+                                            ?.DESKRIPSI_TAHUN_ANGGARAN
+                                    }
+                                </p>
+                            </div>
+                            <div className="pmrkt-detail-item">
+                                <span>Anggaran RKT</span>
+                                <p>
+                                    Rp{" "}
+                                    {Number(
+                                        detailData.TOTAL_PROGKER || 0
+                                    ).toLocaleString("id-ID")}
+                                </p>
+                            </div>
+                            <div className="pmrkt-detail-item">
+                                <span>Unit</span>
+                                <p>{detailData.unit?.NAMA_UNIT}</p>
+                            </div>
+                            <div className="pmrkt-detail-item">
+                                <span>COA</span>
+                                <p>{detailData.coa?.DESKRIPSI_COA}</p>
+                            </div>
+                            <div className="pmrkt-detail-item">
+                                <span>Total RKA</span>
+                                <p>
+                                    Rp{" "}
+                                    {detailData.detail_program_kerja
+                                        ?.reduce((total, item) => {
+                                            const qty =
+                                                item.QTY ??
+                                                item.KUANTITAS ??
+                                                item.JUMLAH ??
+                                                0;
+
+                                            const harga =
+                                                item.HARGA ??
+                                                item.HARGA_SATUAN ??
+                                                item.NOMINAL ??
+                                                0;
+
+                                            const subtotal =
+                                                item.TOTAL ??
+                                                item.TOTAL_RINCIAN ??
+                                                item.SUBTOTAL ??
+                                                qty * harga;
+
+                                            return total + Number(subtotal);
+                                        }, 0)
+                                        .toLocaleString("id-ID")}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="pmrkt-detail-title">
+                            RKA
+                        </div>
+                        <table className="pmrkt-rka-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Satuan</th>
+                                    <th>Qty</th>
+                                    <th>Volume</th>
+                                    <th>Harga</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailData.detail_program_kerja?.length > 0 ? (
+                                    detailData.detail_program_kerja.map((item, index) => {
+                                        const qty = item.QTY ?? item.KUANTITAS ?? item.JUMLAH ?? 0;
+                                        const harga = item.HARGA ?? item.HARGA_SATUAN ?? item.NOMINAL ?? 0;
+                                        const total = item.TOTAL ?? item.TOTAL_RINCIAN ?? item.SUBTOTAL ?? qty * harga;
+                                        const satuan = item.SATUAN ?? "-";
+                                        const volume = item.VOLUME ?? "-";
+                                        return (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{satuan}</td>
+                                                <td>{Number(qty).toLocaleString("id-ID")}</td>
+                                                <td>{volume}</td>
+                                                <td>Rp{" "}{Number(harga).toLocaleString("id-ID")}</td>
+                                                <td>Rp{" "}{Number(total).toLocaleString("id-ID")}</td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5">Tidak ada data RKA</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

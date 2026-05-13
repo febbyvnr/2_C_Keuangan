@@ -170,6 +170,7 @@ Route::prefix('rkt')->group(function () {
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
     Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
+    Route::get('/ready-approval', [MstProgramKerjaController::class, 'readyForApproval']);
 });
 
 Route::prefix('dtl-fpd')->group(function () {

@@ -25,6 +25,7 @@ class MstProgramKerjaController extends Controller
                 'coa',
                 'kegiatan',
                 'trPm',
+                'detailProgramKerja',
             ])
             ->leftJoin(
                 'mst_karyawan as validator',
@@ -133,7 +134,7 @@ class MstProgramKerjaController extends Controller
                 Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
             ],
             'ID_UNIT' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('mst_unit', 'ID_UNIT'),
             ],
@@ -197,11 +198,18 @@ class MstProgramKerjaController extends Controller
         $aksi = $validated['AKSI'];
         unset($validated['AKSI']);
 
+        if ($aksi === 'AJUKAN') {
+            return response()->json([
+                'success' => false,
+                'message' => 'RKT belum bisa langsung diajukan. Simpan draft lalu lengkapi RKA terlebih dahulu.',
+            ], 422);
+        }
+
         try {
             $data = DB::transaction(function () use ($validated, $aksi) {
                 $programKerja = MstProgramKerja::create([
                     'ID_TA_ANGGARAN' => $validated['ID_TA_ANGGARAN'],
-                    'ID_UNIT' => $validated['ID_UNIT'],
+                    'ID_UNIT' => $validated['ID_UNIT'] ?? null,
                     'ID_TAN' => $validated['ID_TAN'] ?? null,
                     'ID_MASTER_COA' => $validated['ID_MASTER_COA'],
                     'ID_KEGIATAN' => $validated['ID_KEGIATAN'],
@@ -261,7 +269,7 @@ class MstProgramKerjaController extends Controller
                 Rule::exists('ref_tahun_anggaran', 'ID_TA_ANGGARAN'),
             ],
             'ID_UNIT' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('mst_unit', 'ID_UNIT'),
             ],
@@ -345,28 +353,20 @@ class MstProgramKerjaController extends Controller
                     ], 422);
                 }
 
-                if (str_starts_with($lastNote, 'ditolak')) {
+                if (str_contains($lastNote, 'ditolak') || str_contains($lastNote, 'tolak')) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Program kerja sudah ditolak, tidak bisa diubah.'
                     ], 422);
                 }
 
-
-                if ($this->isProgramKerjaUsedForUpdate($id)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Data sudah digunakan, tidak bisa diubah.'
-                    ], 422);
-                }
-                
                 $programKerja->update($validated);
 
-                if (str_starts_with($lastNote, 'revisi')) {
+                if (str_contains($lastNote, 'revisi')) {
                     TrPm::create([
                         'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
                         'NIP_VALIDATOR_PM' => null,
-                        'DESKRIPSI_TR_PM' => 'Diajukan: Perbaikan RKT telah dikirim ulang',
+                        'DESKRIPSI_TR_PM' => 'Draft: Perbaikan RKT disimpan, lengkapi/cek RKA sebelum diajukan ulang',
                     ]);
                 }
 
@@ -613,9 +613,12 @@ class MstProgramKerjaController extends Controller
     {
         $request->validate([
             'NIP_VALIDATOR_PM' => 'required|string',
+            'DESKRIPSI' => 'required|string',
         ]);
+
         try {
             $program = MstProgramKerja::findOrFail($id);
+
             $karyawan = DB::table('mst_karyawan')
                 ->where('NIP_KARYAWAN', $request->NIP_VALIDATOR_PM)
                 ->first();
@@ -626,18 +629,25 @@ class MstProgramKerjaController extends Controller
                     'message' => 'Validator tidak ditemukan'
                 ], 404);
             }
-            $lastPm = TrPm::where('ID_PROGRAM_KERJA', $id)
-                ->orderByDesc('ID_PM')
-                ->first();
-            $baseDesc = $lastPm?->DESKRIPSI_TR_PM ?? 'Program Kerja';
+
             TrPm::create([
                 'ID_PROGRAM_KERJA' => $id,
                 'NIP_VALIDATOR_PM' => $request->NIP_VALIDATOR_PM,
-                'DESKRIPSI_TR_PM' => $baseDesc . ' : Ditolak',
+                'DESKRIPSI_TR_PM' => 'Ditolak: ' . $request->DESKRIPSI,
             ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Program kerja berhasil ditolak'
+                'message' => 'Program kerja berhasil ditolak',
+                'data' => $program->fresh([
+                    'tahunAnggaran',
+                    'unit',
+                    'tan',
+                    'coa',
+                    'kegiatan',
+                    'detailProgramKerja',
+                    'trPm',
+                ]),
             ], 200);
         } catch (\Throwable $e) {
             return response()->json([
@@ -751,57 +761,87 @@ class MstProgramKerjaController extends Controller
 
 
     public function ajukan(Request $request, $id): JsonResponse
-    {
-        try {
-            $programKerja = MstProgramKerja::with('trPm')
-                ->where('ID_PROGRAM_KERJA', $id)
-                ->where('IS_DELETE', 0)
-                ->firstOrFail();
+{
+    try {
+        $programKerja = MstProgramKerja::with(['trPm', 'detailProgramKerja'])
+            ->where('ID_PROGRAM_KERJA', $id)
+            ->where('IS_DELETE', 0)
+            ->firstOrFail();
 
-            $ownershipError = $this->ensureOwnedByUser($programKerja, $request);
-            if ($ownershipError) {
-                return $ownershipError;
-            }
+        $ownershipError = $this->ensureOwnedByUser($programKerja, $request);
+        if ($ownershipError) {
+            return $ownershipError;
+        }
 
-            if ($programKerja->NIP_VALIDATOR_PROGKER) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'RKT sudah disetujui dan terkunci.',
-                ], 422);
-            }
-
-            $lastPm = $programKerja->trPm
-                ->sortByDesc('ID_PM')
-                ->first();
-
-            $lastNote = strtolower(trim($lastPm->DESKRIPSI_TR_PM ?? ''));
-
-            if (!str_starts_with($lastNote, 'draft')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Hanya RKT berstatus draft yang bisa diajukan.',
-                ], 422);
-            }
-
-            TrPm::create([
-                'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
-                'NIP_VALIDATOR_PM' => null,
-                'DESKRIPSI_TR_PM' => 'Diajukan: RKT diajukan untuk review Kepala Sekolah',
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'RKT berhasil diajukan ke Kepala Sekolah.',
-                'data' => $programKerja->fresh(['trPm']),
-            ]);
-        } catch (\Throwable $e) {
+        if ($programKerja->NIP_VALIDATOR_PROGKER) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengajukan RKT.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'RKT sudah disetujui dan terkunci.',
+            ], 422);
         }
+
+        $lastPm = $programKerja->trPm
+            ->sortByDesc('ID_PM')
+            ->first();
+
+        $lastNote = strtolower(trim($lastPm->DESKRIPSI_TR_PM ?? ''));
+
+        if (!str_starts_with($lastNote, 'draft')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya RKT berstatus draft yang bisa diajukan.',
+            ], 422);
+        }
+
+        $paguRkt = (float) $programKerja->TOTAL_PROGKER;
+
+        $totalRka = $programKerja->detailProgramKerja
+            ->sum(function ($detail) {
+                return (float) $detail->NOMINAL;
+            });
+
+        $minimalRka = $paguRkt * 0.95;
+
+        if ($totalRka <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'RKT belum bisa diajukan. Lengkapi RKA terlebih dahulu.',
+            ], 422);
+        }
+
+        if ($totalRka > $paguRkt) {
+            return response()->json([
+                'success' => false,
+                'message' => 'RKT belum bisa diajukan. Total RKA melebihi pagu RKT.',
+            ], 422);
+        }
+
+        if ($totalRka < $minimalRka) {
+            return response()->json([
+                'success' => false,
+                'message' => 'RKT belum bisa diajukan. Total RKA minimal harus 95% dari pagu RKT.',
+            ], 422);
+        }
+
+        TrPm::create([
+            'ID_PROGRAM_KERJA' => $programKerja->ID_PROGRAM_KERJA,
+            'NIP_VALIDATOR_PM' => null,
+            'DESKRIPSI_TR_PM' => 'Diajukan: RKT dan RKA diajukan untuk review Kepala Sekolah',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'RKT dan RKA berhasil diajukan ke Kepala Sekolah.',
+            'data' => $programKerja->fresh(['trPm', 'detailProgramKerja']),
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengajukan RKT.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
     
     private function ensureOwnedByUser($programKerja, Request $request): ?JsonResponse
     {
@@ -822,5 +862,54 @@ class MstProgramKerjaController extends Controller
         }
 
         return null;
+    }
+
+    public function readyForApproval(Request $request): JsonResponse
+    {
+        try {
+            $data = MstProgramKerja::with([
+                'tahunAnggaran',
+                'unit',
+                'tan',
+                'coa',
+                'kegiatan',
+                'trPm',
+                'detailProgramKerja',
+            ])
+            ->where('IS_DELETE', 0)
+            ->get()
+            ->filter(function ($item) {
+                $totalRkt = (float) $item->TOTAL_PROGKER;
+                $totalRka = collect($item->detailProgramKerja)->sum(function ($detail) {
+                    $qty = $detail->QTY
+                        ?? $detail->KUANTITAS
+                        ?? $detail->JUMLAH
+                        ?? 0;
+                    $harga = $detail->HARGA
+                        ?? $detail->HARGA_SATUAN
+                        ?? $detail->NOMINAL
+                        ?? 0;
+                    return $detail->TOTAL
+                        ?? $detail->TOTAL_RINCIAN
+                        ?? $detail->SUBTOTAL
+                        ?? ($qty * $harga);
+                });
+                $minimalRka = $totalRkt * 0.95;
+                return $totalRka >= $minimalRka
+                    && $totalRka <= $totalRkt;
+            })
+            ->values();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data RKT siap approval berhasil diambil',
+                'data' => $data,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -160,7 +160,7 @@ class MstProgramKerjaExport implements FromArray, WithEvents
                             $sheet->setCellValueExplicit("F{$row}", (string) ($item->INDIKATOR ?? '-'), DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("G{$row}", (string) ($item->SASARAN ?? '-'), DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("H{$row}", (string) ($item->NIP_PENANGGUNG_JAWAB ?? '-'), DataType::TYPE_STRING);
-                            $sheet->setCellValue("I{$row}", (float) ($item->NOMINAL ?? 0));
+                            $sheet->setCellValue("I{$row}", (float) ($item->TOTAL_PROGKER ?? 0));
                             $sheet->setCellValueExplicit("J{$row}", $waktu, DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("K{$row}", (string) ($item->KELUARAN_PROGKER ?? '-'), DataType::TYPE_STRING);
                             $sheet->setCellValueExplicit("L{$row}", (string) ($item->KETERANGAN ?? '-'), DataType::TYPE_STRING);

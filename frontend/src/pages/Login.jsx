@@ -52,7 +52,7 @@ export default function Login() {
                 navigate("/bendahara");
             }
             else if (roleText.includes("kepala sekolah") || roleText.includes("kepsek")) {
-                navigate("/kepsek/monitoring");
+                navigate("/kepsek");
             }
             else if (roleText.includes("waka")) {
                 navigate("/waka");

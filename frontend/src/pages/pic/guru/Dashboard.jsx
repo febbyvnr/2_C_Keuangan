@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/Dashboard.css";
 
 import { BsCalendarEvent } from "react-icons/bs";
@@ -53,8 +52,6 @@ export default function DashboardPIC() {
 
   return (
     <div className="dashboard-wrapper">
-      <SidebarPic />
-
       <main className="waka-container">
         <div className="header-card welcome-card">
           <div className="welcome-left">

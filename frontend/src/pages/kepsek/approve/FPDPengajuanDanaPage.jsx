@@ -23,7 +23,9 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             const json = await res.json();
             const result = json.data || [];
             setData(result);
-            const hasPending = result.some(item => !item.NIP_VALIDATOR_FPD);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
             setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
@@ -34,9 +36,16 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
         setSearch(value);
         setCurrentPage(1);
         try {
-            const res = await fetch(`http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`);
+            const res = await fetch(
+                `http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`
+            );
             const json = await res.json();
-            setData(json.data || []);
+            const result = json.data || [];
+            setData(result);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
+            setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
         }
