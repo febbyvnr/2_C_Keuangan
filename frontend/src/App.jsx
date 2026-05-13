@@ -108,6 +108,8 @@ axios.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
+import EvaluasiRKT from "./pages/pic/guru/EvaluasiRKT.jsx";
+
 function BendaharaLayout() {
   return (
     <div className="layout" style={{ display: "flex" }}>
@@ -240,6 +242,7 @@ export default function App() {
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
+
         <Route path="/pic/guru" element={<PicGuruLayout />}>
           <Route index element={<DashboardPIC />} />
           <Route path="dashboard" element={<DashboardPIC />} />
@@ -248,6 +251,7 @@ export default function App() {
           <Route path="rka" element={<RKA />} />
           <Route path="rkt/create" element={<CreateRKT />} />
           <Route path="rkt/edit/:id" element={<CreateRKT />} />
+          <Route path="evaluasi-rkt" element={<EvaluasiRKT />} />
         </Route>
 
         {/* KEPSEK */}
