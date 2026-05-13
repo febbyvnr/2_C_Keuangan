@@ -2,6 +2,7 @@
     padding: 18px 25px;
     background-color: #f6f7f9;
     min-height: 100vh;
+    overflow: visible;
 }
 
 .penerimaan-header {
@@ -119,6 +120,9 @@
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
 }
 
 .penerimaan-table {
@@ -133,6 +137,7 @@
     color: #585858;
     border-bottom: 2px solid #f0f0f0;
     font-size: 14px;
+    white-space: nowrap;
 }
 
 .penerimaan-table td {
@@ -174,6 +179,30 @@
 .penerimaan-table td:nth-child(7) {
     width: 110px;
     text-align: center;
+}
+
+.penerimaan-th-sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.penerimaan-th-sortable:hover {
+    background: #eef2ff;
+}
+
+.penerimaan-sort-icon {
+    font-style: normal;
+    font-size: 0.75rem;
+}
+
+.penerimaan-sort-icon.neutral {
+    color: #c4c9d4;
+}
+
+.penerimaan-sort-icon.active {
+    color: #265f9c;
+    font-weight: 700;
 }
 
 .deskripsi-cell {
@@ -239,6 +268,7 @@
     margin-top: 18px;
     gap: 14px;
     flex-wrap: wrap;
+    position: static;
 }
 
 .pagination-info {
@@ -246,17 +276,56 @@
     color: #7d7d7e;
 }
 
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-number {
+    font-size: 14px;
+    color: #585858;
+    font-weight: 500;
+}
+
+.btn-pagination {
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    color: #4d4d4d;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.export-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .btn-export {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     background: #ffffff;
-    border: 1.5px solid #5f9f5f;
-    color: #2f7a2f;
     padding: 8px 14px;
-    border-radius: 999px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .btn-export:disabled {
@@ -264,16 +333,26 @@
     cursor: not-allowed;
 }
 
-.btn-export-pdf {
-    border: 1.5px solid #d32f2f;
-    color: #c62828;
-    border-radius: 10px;
+.btn-export-excel {
+    background: transparent;
+    color: #2E7D32;
+    border-color: #2E7D32;
 }
 
-.btn-export-pdf:hover {
-    background: #c62828;
-    color: #ffffff;
-    border-color: #c62828;
+.btn-export-excel:hover:not(:disabled) {
+    background: #2E7D32;
+    color: #f6f7f9;
+}
+
+.btn-export-pdf {
+    background: transparent;
+    color: #C62828;
+    border-color: #C62828;
+}
+
+.btn-export-pdf:hover:not(:disabled) {
+    background: #C62828;
+    color: #f6f7f9;
 }
 
 .th-icon {
@@ -376,38 +455,5 @@
 .btn-submit:disabled,
 .btn-cancel:disabled {
     opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.pagination-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.page-number {
-    font-size: 14px;
-    color: #585858;
-    font-weight: 500;
-}
-
-.btn-pagination {
-    background: #ffffff;
-    border: 1px solid #d9d9d9;
-    color: #4d4d4d;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.2s ease;
-}
-
-.btn-pagination:hover:not(:disabled) {
-    border-color: #265f9c;
-    color: #265f9c;
-}
-
-.btn-pagination:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
 }
