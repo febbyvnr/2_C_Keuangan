@@ -31,7 +31,7 @@ use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\TarifExportController;
 use App\Http\Controllers\MstUnitController;
 use App\Http\Controllers\MstKaryawanController;
-
+use App\Http\Controllers\InventarisController;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -376,3 +376,7 @@ Route::get('/dashboard-kepsek', [DashboardKepsekKeuanganController::class, 'inde
 Route::get('/dashboardtimpenjaminanmutu', [DashboardTimPenjaminanMutuController::class, 'index']);
 
 Route::get('/dashboard-kepsekrkt', [DashboardKepsekRKTController::class, 'index']);
+
+Route::prefix('inventaris')->group(function () {
+    Route::get('/', [InventarisController::class, 'index']);
+});
