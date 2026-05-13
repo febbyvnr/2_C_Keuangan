@@ -5,8 +5,10 @@ export default function DashboardPM() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [tahun, setTahun] = useState(1);
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/dashboardtimpenjaminanmutu")
+    fetch(`http://localhost:8000/api/dashboardtimpenjaminanmutu?tahun=${tahun}`)
       .then((res) => res.json())
       .then((data) => {
         setDashboard({
@@ -20,7 +22,7 @@ export default function DashboardPM() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [tahun]);
 
   if (loading) {
     return (
@@ -40,6 +42,28 @@ export default function DashboardPM() {
                 year: "numeric",
               })}
             </p>
+          </div>
+
+          {/* FILTER TAHUN */}
+          <div className="pm-header-filter">
+            <label>Tahun</label>
+
+            <select
+              value={tahun}
+              onChange={(e) => setTahun(e.target.value)}
+              className="pm-filter-select"
+            >
+              <option value="1">2025</option>
+              <option value="2">2024</option>
+              <option value="3">2023</option>
+              <option value="4">2022</option>
+              <option value="5">2021</option>
+              <option value="6">2020</option>
+              <option value="7">2019</option>
+              <option value="8">2018</option>
+              <option value="9">2017</option>
+              <option value="10">2016</option>
+            </select>
           </div>
         </div>
 
@@ -146,7 +170,7 @@ export default function DashboardPM() {
         <div className="pm-progress-wrapper">
           {dashboard.data && dashboard.data.length > 0 ? (
             dashboard.data.map((item, index) => {
-              const percentage = item.status.sudah_realisasi ? 100 : 0;
+              const percentage = item.status_detail.sudah_realisasi ? 100 : 0;
               return (
                 <div className="progress-card" key={index}>
                   <div className="progress-header">
