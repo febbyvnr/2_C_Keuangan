@@ -232,6 +232,17 @@ export default function RKT() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const selectedItem = useMemo(() => {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
   }, [data, selectedId]);
@@ -394,7 +405,7 @@ export default function RKT() {
       await axios.post(`http://127.0.0.1:8000/api/rkt/ajukan/${id}`, {
         NIP_LOGIN: nipLogin,
       });
-
+      showToast("success", "RKT berhasil diajukan ke Kepala Sekolah.");
       await fetchRkt(search, pagination.currentPage);
     } catch (error) {
       alert(error.response?.data?.message || "Gagal mengajukan RKT");
@@ -415,7 +426,7 @@ export default function RKT() {
           },
         }
       );
-
+      showToast("success", "RKT berhasil dihapus.");
       setDeleteTarget(null);
 
       const nextPage =
@@ -961,7 +972,13 @@ export default function RKT() {
           </div>
         )}
 
-
+        {toast && (
+          <div className={`toast-container ${visible ? "show" : "hide"}`}>
+            <div className={`toast-box ${toast.type}`}>
+              <span className="toast-text">{toast.message}</span>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
