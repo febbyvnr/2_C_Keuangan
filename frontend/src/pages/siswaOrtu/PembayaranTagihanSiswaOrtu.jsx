@@ -24,19 +24,11 @@ function PembayaranTagihanSiswaOrtu() {
 
   const [toast, setToast] = useState(null);
 
-  const [visible, setVisible] = useState(false);
-
   const showToast = (
     type = "success",
     message = ""
   ) => {
     setToast({ type, message });
-
-    setVisible(true);
-
-    setTimeout(() => {
-      setVisible(false);
-    }, 2500);
 
     setTimeout(() => {
       setToast(null);
@@ -537,21 +529,17 @@ function PembayaranTagihanSiswaOrtu() {
         </div>
       </div>
 
-      {toast && (
+    {toast && (
+      <div className="payment-toast-container">
         <div
-          className={`toast-container ${
-            visible ? "show" : "hide"
-          }`}
+          className={`payment-toast-box ${toast.type}`}
         >
-          <div
-            className={`toast-box ${toast.type}`}
-          >
-            <span className="toast-text">
-              {toast.message}
-            </span>
-          </div>
+          <span className="payment-toast-text">
+            {toast.message}
+          </span>
         </div>
-      )}
+      </div>
+    )}
     </main>
   );
 }
