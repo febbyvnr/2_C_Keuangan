@@ -65,6 +65,7 @@ import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
 import PMRKT from "./pages/pm/RKTPage";
 import VerifikasiEvaluasiPm from "./pages/PM/VerifikasiEvaluasiPm";
+import EvaluasiRKT_PM from "./pages/pm/EvaluasiRKT_PM.jsx";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
 import KepsekMasterCOA from "./pages/kepsek/master/MasterCOA.jsx";
@@ -317,11 +318,7 @@ export default function App() {
           <Route path="rkt" element={<PMRKT />} />
           <Route
             path="evaluasi-rkt"
-            element={
-              <div>
-                <h1>Evaluasi RKT</h1>
-              </div>
-            }
+            element={<EvaluasiRKT_PM />  }
           />
           <Route
             path="verifikasi-evaluasi"
