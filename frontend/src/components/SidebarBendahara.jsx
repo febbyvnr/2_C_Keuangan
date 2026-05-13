@@ -143,7 +143,7 @@ export default function SidebarBendahara() {
                                 </NavLink>
                             </li>
 
-                            <li className="nav-item">
+                            {/* <li className="nav-item">
                                 <NavLink
                                 to="/bendahara/rka"
                                 className={({ isActive }) =>
@@ -153,7 +153,7 @@ export default function SidebarBendahara() {
                                 <i className="bi bi-calculator"></i>
                                 Page RKA
                                 </NavLink>
-                            </li>
+                            </li> */}
 
                             <li className="nav-item" onMouseEnter={() => setOpenMaster(true)} onMouseLeave={() => !isMasterActive && setOpenMaster(false)}>
                                 <div className="nav-link text-dark master-menu">
@@ -190,6 +190,11 @@ export default function SidebarBendahara() {
                             <li className="nav-item">
                                 <NavLink to="/bendahara/verifikasi" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-file-check"></i>Verifikasi Pembayaran
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink to="/bendahara/verifikasi-fpd" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
+                                    <i className="bi bi-file-check"></i>Verifikasi FPD
                                 </NavLink>
                             </li>
                             <li className="nav-item">

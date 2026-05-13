@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rka;
+use App\Models\MstProgramKerja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,24 +26,37 @@ class RkaController extends Controller
             })
             ->first();
     }
-
+    
     public function index(Request $request): JsonResponse
     {
         try {
-            $data = Rka::with(['rkt', 'refDana'])
-                ->whereHas('rkt', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->where('IS_DELETE', '!=', 1)
-                            ->orWhereNull('IS_DELETE');
-                    });
-                    $q->whereNotNull('NIP_VALIDATOR_PROGKER');
-                })
-                ->get();
+            $data = MstProgramKerja::with([
+                'Rka.refDana',
+                'trPm'
+            ])
+            ->where(function ($q) {
+                $q->where('IS_DELETE', '!=', 1)
+                ->orWhereNull('IS_DELETE');
+            })
+            ->get()
+            ->filter(function ($item) {
+                $lastPm = $item->trPm
+                    ? $item->trPm->sortByDesc('ID_PM')->first()
+                    : null;
+
+                $lastNote = strtolower(trim($lastPm->DESKRIPSI_TR_PM ?? ''));
+
+                return !str_contains($lastNote, 'ditolak')
+                    && !str_contains($lastNote, 'tolak');
+            })
+            ->values();
+
             return response()->json([
                 'success' => true,
                 'count' => $data->count(),
                 'data' => $data,
             ]);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -121,10 +135,35 @@ class RkaController extends Controller
         ]);
         try {
             DB::beginTransaction();
+            $programKerja = MstProgramKerja::where('ID_PROGRAM_KERJA', $request->ID_PROGRAM_KERJA)
+                ->where(function ($q) {
+                    $q->where('IS_DELETE', '!=', 1)
+                    ->orWhereNull('IS_DELETE');
+                })
+                ->firstOrFail();
+
+            if ($programKerja->NIP_VALIDATOR_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RKA tidak bisa ditambah karena RKT sudah disetujui dan terkunci.'
+                ], 422);
+            }
             $subtotal =
                 $request->QTY *
                 $request->HARGA_SATUAN *
                 $request->VOLUME;
+
+            $totalRkaSaatIni = Rka::where('ID_PROGRAM_KERJA', $request->ID_PROGRAM_KERJA)
+                ->sum('NOMINAL');
+
+            $totalSetelahTambah = $totalRkaSaatIni + $subtotal;
+
+            if ($totalSetelahTambah > (float) $programKerja->TOTAL_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Total RKA tidak boleh melebihi pagu RKT.'
+                ], 422);
+            }
             $rka = Rka::create([
                 'ID_PROGRAM_KERJA' => $request->ID_PROGRAM_KERJA,
                 'ID_REF_DANA' => $request->ID_REF_DANA,
@@ -180,11 +219,31 @@ class RkaController extends Controller
                     'message' => 'Data sudah digunakan transaksi.'
                 ], 400);
             }
+            if ($this->isProgramKerjaLockedByRkt($rka->ID_PROGRAM_KERJA)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RKA tidak bisa diubah karena RKT sudah disetujui dan terkunci.'
+                ], 422);
+            }
             DB::beginTransaction();
             $nominal =
                 $request->QTY *
                 $request->HARGA_SATUAN *
                 $request->VOLUME;
+            $programKerja = MstProgramKerja::findOrFail($rka->ID_PROGRAM_KERJA);
+
+            $totalRkaLain = Rka::where('ID_PROGRAM_KERJA', $rka->ID_PROGRAM_KERJA)
+                ->where('ID_DT_PROGKER', '!=', $rka->ID_DT_PROGKER)
+                ->sum('NOMINAL');
+
+            $totalSetelahUpdate = $totalRkaLain + $nominal;
+
+            if ($totalSetelahUpdate > (float) $programKerja->TOTAL_PROGKER) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Total RKA tidak boleh melebihi pagu RKT.'
+                ], 422);
+            }
             $rka->update([
                 'ID_REF_DANA' => $request->ID_REF_DANA,
                 'QTY' => $request->QTY,
@@ -229,6 +288,12 @@ class RkaController extends Controller
                     'success' => false,
                     'message' => 'Data sudah digunakan transaksi.'
                 ], 400);
+            }
+            if ($this->isProgramKerjaLockedByRkt($rka->ID_PROGRAM_KERJA)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RKA tidak bisa dihapus karena RKT sudah disetujui dan terkunci.'
+                ], 422);
             }
             DB::beginTransaction();
             $rka->delete();
@@ -327,5 +392,11 @@ class RkaController extends Controller
                 'EVENT_TIME' => now(),
             ]);
         }
+    }
+    private function isProgramKerjaLockedByRkt($programKerjaId): bool
+    {
+        return MstProgramKerja::where('ID_PROGRAM_KERJA', $programKerjaId)
+            ->whereNotNull('NIP_VALIDATOR_PROGKER')
+            ->exists();
     }
 }

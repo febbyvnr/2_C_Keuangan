@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import "../../../styles/pic/guru/FPD.css";
-import SidebarPic from "../../../components/SidebarPic";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 const currencyFormatter = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
@@ -223,7 +222,7 @@ export default function PicGuruFPD() {
 
     return (
         <div className="pic-fpd-shell">
-            <SidebarPic />
+            {/* <SidebarPic /> */}
             <main className="pic-fpd-main">
                 <section className="pic-fpd-card">
                     <div className="pic-fpd-card-heading">

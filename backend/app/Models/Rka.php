@@ -47,8 +47,12 @@ class Rka extends Model
         return $this->belongsTo(MstProgramKerja::class, 'ID_PROGRAM_KERJA', 'ID_PROGRAM_KERJA');
     }
 
-    public function refDana(): BelongsTo
+    public function refDana()
     {
-        return $this->belongsTo(RefSumberDana::class, 'ID_REF_DANA', 'ID_REF_DANA');
+        return $this->belongsTo(
+            RefSumberDana::class,
+            'ID_REF_DANA',
+            'ID_REF_DANA'
+        );
     }
 }

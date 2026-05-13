@@ -1,3 +1,8 @@
+.rka-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f6fb;
+}
 .rka-main {
   flex: 1;
   width: 100%;
@@ -316,9 +321,12 @@
 }
 
 .rka-empty {
-  text-align: center;
-  padding: 24px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8fafc;
   color: #64748b;
+  font-size: 14px;
+  text-align: center;
 }
 
 .rka-table th:nth-child(4),
@@ -628,7 +636,7 @@
 
 .rka-detail-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 86px 130px;
   align-items: center;
   gap: 10px;
   padding: 16px 14px;
@@ -649,9 +657,11 @@
 }
 
 .rka-detail-action-icons {
+  width: 86px;
   justify-self: center;
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
   gap: 8px;
 }
@@ -680,10 +690,75 @@
 
 
 .rka-detail-total {
+  width: 130px;
   justify-self: end;
+  text-align: right;
   color: #0b4a86;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.rka-pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rka-pagination-info {
+  font-size: 13px;
+  color: #7d7d7e;
+}
+
+.rka-pagination {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.rka-page-btn {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 6px 10px;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #1a1a1a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.rka-page-btn:hover:not(:disabled) {
+  background-color: #f6f7f9;
+  border-color: #265f9c;
+  color: #265f9c;
+}
+
+.rka-page-btn.active {
+  background-color: #265f9c;
+  color: #ffffff;
+  border-color: #265f9c;
+}
+
+.rka-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rka-locked-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 @media (max-width: 1080px) {
@@ -795,4 +870,9 @@
 .custom-btn i {
   font-size: 15px;
   line-height: 1;
+}
+
+.rka-header-actions > .btn-primary-custom {
+  align-self: center;
+  transform: translateY(7px);
 }

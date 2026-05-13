@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import "../../../styles/waka/ApprovalCenter.css";
+import "../../styles/waka/ApprovalCenter.css";
 
-export default function FPDPengajuanDanaPage({ setHasPending }) {
+export default function VerifikasiFPD({ setHasPending }) {
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [search, setSearch] = useState("");
@@ -23,9 +23,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             const json = await res.json();
             const result = json.data || [];
             setData(result);
-            const hasPending = result.some(
-                (item) => getStatus(item).type === "pending"
-            );
+            const hasPending = result.some(item => !item.NIP_VALIDATOR_FPD);
             setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
@@ -36,16 +34,9 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
         setSearch(value);
         setCurrentPage(1);
         try {
-            const res = await fetch(
-                `http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`
-            );
+            const res = await fetch(`http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`);
             const json = await res.json();
-            const result = json.data || [];
-            setData(result);
-            const hasPending = result.some(
-                (item) => getStatus(item).type === "pending"
-            );
-            setHasPending && setHasPending(hasPending);
+            setData(json.data || []);
         } catch (err) {
             console.error(err);
         }
@@ -83,7 +74,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
         }
         const jabatan =
             item.validator?.jabatan?.ref_jabatan?.DESKRIPSI_JABATAN;
-        if (jabatan?.toLowerCase() === "bendahara") {
+        if (jabatan?.toLowerCase() === "waka") {
             return { type: "pending" };
         }
         return { type: "approved" };
@@ -223,11 +214,12 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
     };
 
     return (
-        <div className="fpd-container">
+        <div className="fpd-container" style={{ padding: "25px" }}>
             <div className="fpd-header">
+                <h2>Verifikasi FPD{" "}</h2>
                 <div>
                     <div className="status-filter">
-                        <span>Urutkan Status Berdasarkan :</span>
+                        <span style={{ color: "#1A1A1A" }}>Urutkan Status Berdasarkan :</span>
                         <div className="custom-dropdown">
                             <button className={`dropdown-btn ${statusFilter !== "default" ? "active" : ""}`}>
                                 {statusFilter === "default" && "Semua"}
@@ -378,12 +370,12 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                             </button>
                         </div>
                         <div className="export-wrapper">
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn">
+                            <a href={`http://localhost:8000/api/fpd-anggaran/export/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn-excel">
                                 <i className="bi bi-filetype-xlsx"></i> Export Excel
                             </a>
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-danger custom-btn">
+                            {/* <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-danger custom-btn-pdf">
                                 <i className="bi bi-filetype-pdf"></i> Export PDF
-                            </a>
+                            </a> */}
                         </div>
                     </div>
                 </div>

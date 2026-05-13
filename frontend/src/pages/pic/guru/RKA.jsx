@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import "../../styles/bendahara/RKA.css";
+import "../../../styles/pic/guru/RKA.css";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 function formatRupiah(value) {
@@ -17,7 +17,7 @@ function formatDate(value) {
 }
 
 function getDetails(item) {
-  return item ? [item] : [];
+  return item?.details || [];
 }
 
 function getAnggaranRkt(item) {
@@ -25,12 +25,18 @@ function getAnggaranRkt(item) {
 }
 
 function getTotalRincian(item) {
-  return Number(item?.NOMINAL || 0);
+  const details = getDetails(item);
+  return details.reduce((total, detail) => {
+    const nominal = Number(detail.NOMINAL) || 
+                    (Number(detail.QTY || 0) * Number(detail.VOLUME || 0) * Number(detail.HARGA_SATUAN || 0));
+    return total + nominal;
+  }, 0);
 }
 
 function getStatusRka(item) {
   const anggaranRkt = getAnggaranRkt(item);
   const totalRincian = getTotalRincian(item);
+  const minimalRka = anggaranRkt * 0.95;
 
   if (totalRincian === 0) {
     return {
@@ -46,6 +52,13 @@ function getStatusRka(item) {
     };
   }
 
+  if (totalRincian < minimalRka) {
+    return {
+      label: "Belum Sesuai",
+      className: "rka-status-badge warning",
+    };
+  }
+
   return {
     label: "Sesuai Anggaran",
     className: "rka-status-badge ready",
@@ -54,6 +67,63 @@ function getStatusRka(item) {
 
 function getSisaAnggaran(item) {
   return getAnggaranRkt(item) - getTotalRincian(item);
+}
+
+function isRktLocked(item) {
+  return Boolean(item?.rkt?.NIP_VALIDATOR_PROGKER || item?.NIP_VALIDATOR_PROGKER);
+}
+
+function getLatestRktStatus(item) {
+  const trPmList = item?.trPm || item?.tr_pm || [];
+
+  if (!trPmList.length) return "draft";
+
+  const latest = [...trPmList].sort((a, b) => {
+    return Number(b.ID_PM || 0) - Number(a.ID_PM || 0);
+  })[0];
+
+  const note = String(latest?.DESKRIPSI_TR_PM || "").toLowerCase();
+
+  if (note.includes("ditolak") || note.includes("tolak")) return "ditolak";
+  if (note.includes("revisi")) return "revisi";
+  if (note.includes("disetujui") || note.includes("setujui")) return "disetujui";
+  if (note.includes("diajukan")) return "diajukan";
+  if (note.includes("draft")) return "draft";
+
+  return "draft";
+}
+
+function isRkaActionDisabled(item) {
+  const status = getLatestRktStatus(item);
+
+  return (
+    Boolean(item?.rkt?.NIP_VALIDATOR_PROGKER || item?.NIP_VALIDATOR_PROGKER) ||
+    status === "diajukan" ||
+    status === "disetujui" ||
+    status === "ditolak"
+  );
+}
+
+function getRkaLockMessage(item) {
+  const status = getLatestRktStatus(item);
+
+  if (status === "diajukan") {
+    return "RKA sedang menunggu approval Kepala Sekolah dan tidak dapat diubah sementara.";
+  }
+
+  if (
+    status === "disetujui" ||
+    item?.rkt?.NIP_VALIDATOR_PROGKER ||
+    item?.NIP_VALIDATOR_PROGKER
+  ) {
+    return "RKA terkunci karena RKT sudah disetujui Kepala Sekolah.";
+  }
+
+  if (status === "ditolak") {
+    return "RKA tidak dapat diubah karena RKT sudah ditolak.";
+  }
+
+  return "";
 }
 
 export default function RKA() {
@@ -71,6 +141,8 @@ export default function RKA() {
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [savingDetail, setSavingDetail] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [detailForm, setDetailForm] = useState({
     ID_REF_DANA: "",
     QTY: "",
@@ -83,6 +155,8 @@ export default function RKA() {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
   }, [data, selectedId]);
 
+  const selectedLocked = isRkaActionDisabled(selectedItem);
+  const selectedLockMessage = getRkaLockMessage(selectedItem);
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return data.filter((item) => {
@@ -99,6 +173,27 @@ export default function RKA() {
         });
   }, [data, search, statusFilter]);
 
+  const totalData = filteredData.length;
+  const totalPages = Math.max(1, Math.ceil(totalData / itemsPerPage));
+
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+
+  const currentData = filteredData.slice(indexOfFirst, indexOfLast);
+
+  const startData = totalData === 0 ? 0 : indexOfFirst + 1;
+  const endData = Math.min(indexOfLast, totalData);
+
+  const changePage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+
+    const firstItemOnPage = filteredData[(page - 1) * itemsPerPage];
+    if (firstItemOnPage) {
+      setSelectedId(firstItemOnPage.ID_PROGRAM_KERJA);
+    }
+  };
+
   const filteredSumberDana = useMemo(() => {
     const keyword = sumberDanaKeyword.toLowerCase().trim();
 
@@ -114,19 +209,18 @@ export default function RKA() {
   const fetchRka = async () => {
     try {
       setLoading(true);
-
       const response = await axios.get("http://127.0.0.1:8000/api/rka");
       const rows = response.data?.data ?? [];
-
-      setData(Array.isArray(rows) ? rows : []);
-
-      setSelectedId((prev) => {
-        if (!rows.length) return null;
-        if (prev && rows.some((item) => item.ID_PROGRAM_KERJA === prev)) {
-          return prev;
-        }
-        return rows[0].ID_PROGRAM_KERJA;
-      });
+      // console.log(rows);
+      const formattedData = rows.map((item) => ({
+        ...item,
+        rkt: item,
+        details: item.rka || [],
+      }));
+      setData(formattedData);
+      if (formattedData.length > 0 && !selectedId) {
+        setSelectedId(formattedData[0].ID_PROGRAM_KERJA);
+      }
     } catch (error) {
       console.error("Gagal ambil data RKA:", error);
       setData([]);
@@ -154,6 +248,7 @@ export default function RKA() {
   const handleReset = () => {
     setSearch("");
     setStatusFilter("");
+    setCurrentPage(1);
     fetchRka();
   };
 
@@ -176,6 +271,11 @@ const handleOpenDetailModal = () => {
     return;
   }
 
+  if (isRkaActionDisabled(selectedItem)) {
+  alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
+  return;
+}
+
   setEditingDetail(null);
 
   setDetailForm({
@@ -192,6 +292,11 @@ const handleOpenDetailModal = () => {
 };
 
 const handleEdit = (detail) => {
+  if (isRkaActionDisabled(selectedItem)) {
+    alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
+    return;
+  }
+
   setEditingDetail(detail.ID_DT_PROGKER);
 
   setDetailForm({
@@ -215,6 +320,10 @@ const handleEdit = (detail) => {
 };
 
 const handleDelete = async (idDetail) => {
+  if (isRkaActionDisabled(selectedItem)) {
+    alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa dihapus.");
+    return;
+  }
   const confirmDelete = window.confirm(
     "Yakin mau menghapus rincian anggaran ini?"
   );
@@ -222,7 +331,9 @@ const handleDelete = async (idDetail) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/rka/detail/${idDetail}`);
+    await axios.delete(
+      `http://127.0.0.1:8000/api/rka/delete/${idDetail}`
+    );
 
     await fetchRka();
   } catch (error) {
@@ -272,21 +383,14 @@ const handleSubmitDetail = async (e) => {
 
   try {
     setSavingDetail(true);
-
     if (editingDetail) {
-      await axios.put(
-        `http://127.0.0.1:8000/api/rka/detail/${editingDetail}`,
-        payload
-      );
+      await axios.put(`http://127.0.0.1:8000/api/rka/update/${editingDetail}`, payload);
     } else {
-      await axios.post("http://127.0.0.1:8000/api/rka/store", {
-        ID_PROGRAM_KERJA: selectedItem.ID_PROGRAM_KERJA,
-        details: [payload],
-      });
+      await axios.post("http://127.0.0.1:8000/api/rka/store", payload);
     }
-
+    setDetailForm({ ID_REF_DANA: "", QTY: "", VOLUME: "", SATUAN: "", HARGA_SATUAN: "" });
+    setSumberDanaKeyword("");
     setShowDetailModal(false);
-    setEditingDetail(null);
     await fetchRka();
   } catch (error) {
     alert(error.response?.data?.message || "Gagal menyimpan detail RKA");
@@ -294,6 +398,25 @@ const handleSubmitDetail = async (e) => {
     setSavingDetail(false);
   }
 };
+
+function getSumberDanaSummary(item) {
+  const details = getDetails(item);
+
+  const sumberDanaList = details
+    .map(
+      (d) =>
+        d.DESKRIPSI_SUMBER_DANA ||
+        d.ref_dana?.DESKRIPSI_SUMBER_DANA ||
+        d.refDana?.DESKRIPSI_SUMBER_DANA
+    )
+    .filter(Boolean);
+
+  const uniqueSumberDana = [...new Set(sumberDanaList)];
+
+  if (uniqueSumberDana.length === 0) return "-";
+
+  return uniqueSumberDana.join(", ");
+}
 
   return (
     <div className="rka-shell">
@@ -303,7 +426,7 @@ const handleSubmitDetail = async (e) => {
             <div>
               <h1 className="rka-title">Rencana Kegiatan dan Anggaran</h1>
               <p className="rka-subtitle">
-                Kelola rincian anggaran dari RKT yang sudah disetujui.
+                Kelola rincian anggaran dari RKT sebelum diajukan untuk verifikasi.
               </p>
             </div>
 
@@ -334,6 +457,7 @@ const handleSubmitDetail = async (e) => {
                 className="btn-primary-custom"
                 type="button"
                 onClick={handleOpenDetailModal}
+                disabled={selectedLocked}
               >
                 <Plus size={16} />
                 Tambah Detail RKA
@@ -382,6 +506,7 @@ const handleSubmitDetail = async (e) => {
                       {[
                         "",
                         "Belum Ada Rincian",
+                        "Belum Sesuai",
                         "Sesuai Anggaran",
                         "Melebihi Anggaran",
                       ].map((status) => (
@@ -433,7 +558,7 @@ const handleSubmitDetail = async (e) => {
 
                     <tbody>
                       {filteredData.length > 0 ? (
-                        filteredData.map((item, index) => {
+                        currentData.map((item, index) => {
                           const status = getStatusRka(item);
                           return (
                             <tr
@@ -445,22 +570,11 @@ const handleSubmitDetail = async (e) => {
                               }
                               onClick={() => setSelectedId(item.ID_PROGRAM_KERJA)}
                             >
-                              <td>{index + 1}</td>
+                              <td>{indexOfFirst + index + 1}</td>
                               <td className="rka-program">
                                 {item.rkt?.PROGRAM_KERJA || "-"}
                               </td>
-                              <td>
-                                {getDetails(item).length > 0
-                                  ? getDetails(item)
-                                      .map(
-                                        (d) =>
-                                          d.DESKRIPSI_SUMBER_DANA ||
-                                          d.ref_dana?.DESKRIPSI_SUMBER_DANA
-                                      )
-                                      .filter(Boolean)
-                                      .join(", ")
-                                  : "-"}
-                              </td>
+                              <td>{getSumberDanaSummary(item)}</td>
                               <td className="rka-amount">
                                 {formatRupiah(getTotalRincian(item))}
                               </td>
@@ -493,6 +607,40 @@ const handleSubmitDetail = async (e) => {
                       )}
                     </tbody>
                   </table>
+
+                  <div className="rka-pagination-wrapper">
+                    <div className="rka-pagination-info">
+                      Menampilkan {startData} - {endData} dari {totalData} data
+                    </div>
+
+                    <div className="rka-pagination">
+                      <button
+                        className="rka-page-btn"
+                        onClick={() => changePage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        ‹
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i + 1}
+                          onClick={() => changePage(i + 1)}
+                          className={`rka-page-btn ${currentPage === i + 1 ? "active" : ""}`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+
+                      <button
+                        className="rka-page-btn"
+                        onClick={() => changePage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -511,6 +659,11 @@ const handleSubmitDetail = async (e) => {
                     <span className={getStatusRka(selectedItem).className}>
                       {getStatusRka(selectedItem).label}
                     </span>
+                    {selectedLocked && selectedLockMessage && (
+                      <p className="rka-locked-note">
+                        {selectedLockMessage}
+                      </p>
+                    )}
                   </div>
 
                   <div className="rka-detail-body">
@@ -537,6 +690,12 @@ const handleSubmitDetail = async (e) => {
                         <span className="rka-detail-label">Anggaran RKT</span>
                         <span className="rka-detail-value strong">
                           {formatRupiah(getAnggaranRkt(selectedItem))}
+                        </span>
+                      </div>
+                      <div className="rka-detail-item">
+                        <span className="rka-detail-label">Minimal RKA</span>
+                        <span className="rka-detail-value strong">
+                          {formatRupiah(getAnggaranRkt(selectedItem) * 0.95)}
                         </span>
                       </div>
                       <div className="rka-detail-item">
@@ -568,54 +727,66 @@ const handleSubmitDetail = async (e) => {
                     <div className="rka-detail-list">
                       <div className="rka-detail-list-title">Rincian Anggaran</div>
 
-                      {getDetails(selectedItem).map((detail, index) => {
-                        const qty = Number(detail.QTY || 0);
-                        const volume = Number(detail.VOLUME || 1);
-                        const satuan = detail.SATUAN || "Item Rincian";
-                        const total = Number(detail.NOMINAL || 0);
+                      {getDetails(selectedItem).length === 0 ? (
+                        <div className="rka-empty">
+                          Belum ada rincian anggaran. Tambahkan detail RKA agar RKT bisa diajukan.
+                        </div>
+                      ) : (
+                        getDetails(selectedItem).map((detail, index) => {
+                          const qty = Number(detail.QTY || 0);
+                          const volume = Number(detail.VOLUME || 1);
+                          const satuan = detail.SATUAN || "Item Rincian";
+                          const total = Number(detail.NOMINAL || 0);
 
-                        return (
-                          <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
-                            <span className="rka-detail-text">
-                              {index + 1}. {qty} {satuan} × {volume} ×{" "}
-                              {formatRupiah(detail.HARGA_SATUAN)}
-                            </span>
+                          return (
+                            <div className="rka-detail-row" key={detail.ID_DT_PROGKER}>
+                              <span className="rka-detail-text">
+                                {index + 1}. {qty} {satuan} × {volume} ×{" "}
+                                {formatRupiah(detail.HARGA_SATUAN)}
+                              </span>
 
-                            <div className="rka-detail-action-icons">
-                              <button
-                                type="button"
-                                className="rka-icon-btn edit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(detail);
-                                }}
-                                title="Edit rincian"
-                              >
-                                <Pencil size={15} />
-                              </button>
+                              <div className="rka-detail-action-icons">
+                                <button
+                                  type="button"
+                                  className="rka-icon-btn edit"
+                                  disabled={selectedLocked}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(detail);
+                                  }}
+                                  title={selectedLocked ? "RKA terkunci" : "Edit rincian"}
+                                >
+                                  <Pencil size={15} />
+                                </button>
 
-                              <button
-                                type="button"
-                                className="rka-icon-btn delete"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(detail.ID_DT_PROGKER);
-                                }}
-                                title="Hapus rincian"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                                <button
+                                  type="button"
+                                  className="rka-icon-btn delete"
+                                  disabled={selectedLocked}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(detail.ID_DT_PROGKER);
+                                  }}
+                                  title={selectedLocked ? "RKA terkunci" : "Hapus rincian"}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+
+                              <b className="rka-detail-total">{formatRupiah(total)}</b>
                             </div>
-
-                            <b className="rka-detail-total">{formatRupiah(total)}</b>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   </div>
 
                   <div className="rka-detail-actions">
-                    <button className="btn-primary-custom rka-detail-btn" onClick={handleOpenDetailModal}>
+                    <button
+                      className="btn-primary-custom rka-detail-btn"
+                      onClick={handleOpenDetailModal}
+                      disabled={selectedLocked}
+                    >
                       Tambah Detail
                     </button>
                   </div>
@@ -637,7 +808,9 @@ const handleSubmitDetail = async (e) => {
             <div className="rka-modal-box">
             <div className="rka-modal-header">
                 <div>
-                  <h3>Tambah Detail RKA</h3>
+                  <h3>
+                    {editingDetail ? "Edit Detail RKA" : "Tambah Detail RKA"}
+                  </h3>
                   <p>{selectedItem?.rkt?.PROGRAM_KERJA}</p>
                   <p>
                       Anggaran RKT: {formatRupiah(getAnggaranRkt(selectedItem))} • Total saat ini:{" "}
