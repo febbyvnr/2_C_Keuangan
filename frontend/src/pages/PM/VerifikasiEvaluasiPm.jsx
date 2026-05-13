@@ -7,6 +7,8 @@ import {
   FaCheck,
   FaTimes,
   FaCheckCircle,
+  FaFileExcel,
+  FaFilePdf,
 } from "react-icons/fa";
 import "../../styles/PM/VerifikasiEvaluasiPm.css";
 
@@ -224,6 +226,52 @@ export default function VerifikasiEvaluasiPm() {
     }
   };
 
+  const downloadExport = async (type) => {
+    try {
+      setError("");
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${API_BASE_URL}/evaluasi-rkt/export/${type}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            Accept: "application/octet-stream",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Gagal export ${type.toUpperCase()}`);
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      if (type === "excel") {
+        link.download = "verifikasi_pm.xlsx";
+      } else if (type === "csv") {
+        link.download = "verifikasi_pm.csv";
+      } else {
+        link.download = "verifikasi_pm.pdf";
+      }
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.message || "Gagal export data.");
+    }
+  };
+
   return (
     <div className="verifikasi-pm-container">
       <div className="verifikasi-pm-header">
@@ -352,6 +400,27 @@ export default function VerifikasiEvaluasiPm() {
         </div>
 
         <div className="table-footer">
+
+        <div className="footer-left">
+          <div className="export-buttons">
+
+            <button
+              className="export-btn excel"
+              // onClick={() => downloadExport("excel")}
+            >
+              Export Excel
+            </button>
+
+            <button
+              className="export-btn pdf"
+              // onClick={() => downloadExport("pdf")}
+            >
+              Export PDF
+            </button>
+
+          </div>
+        </div>
+
           <div className="pagination-info">
             Menampilkan{" "}
             {filteredList.length === 0

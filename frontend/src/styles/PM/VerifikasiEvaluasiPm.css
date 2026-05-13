@@ -325,16 +325,9 @@ button {
 
 .table-footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 10px;
-  gap: 12px;
-  flex-wrap: wrap;
-  border-top: 1px solid #f0f0f0;
-  background: #ffffff;
-  position: static;
-  flex-shrink: 0;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .pagination-info {
@@ -373,6 +366,73 @@ button {
 .btn-pagination:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.export-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-left .export-btn {
+  background: #ffffff !important;
+
+  border-radius: 10px !important;
+  padding: 8px 14px !important;
+
+  font-size: 13px !important;
+  font-weight: 600 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+/* EXCEL */
+.footer-left .export-btn.excel {
+  border: 1.5px solid #2e7d32 !important;
+  color: #2e7d32 !important;
+}
+
+.footer-left .export-btn.excel svg {
+  color: #2e7d32 !important;
+}
+
+.footer-left .export-btn.excel:hover {
+  background: #2e7d32 !important;
+  color: #ffffff !important;
+}
+
+.footer-left .export-btn.excel:hover svg {
+  color: #ffffff !important;
+}
+
+/* PDF */
+.footer-left .export-btn.pdf {
+  border: 1.5px solid #d32f2f !important;
+  color: #d32f2f !important;
+}
+
+.footer-left .export-btn.pdf svg {
+  color: #d32f2f !important;
+}
+
+.footer-left .export-btn.pdf:hover {
+  background: #d32f2f !important;
+  color: #ffffff !important;
+}
+
+.footer-left .export-btn.pdf:hover svg {
+  color: #ffffff !important;
 }
 
 .modal-overlay {
