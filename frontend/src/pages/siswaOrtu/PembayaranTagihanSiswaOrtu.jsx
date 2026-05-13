@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import logoSekolah from "../../assets/logo.png";
 
@@ -191,7 +191,7 @@ function PembayaranTagihanSiswaOrtu() {
         navigate(
           `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
         );
-      }, 1500);
+      }, 5000);
     } catch (error) {
       console.error(error);
 
