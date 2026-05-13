@@ -156,7 +156,7 @@ export default function SidebarPic() {
                   }
                 >
                   <i className="bi bi-journal-check"></i>
-                  Page RKT
+                  RKT
                 </NavLink>
               </li>
 
@@ -185,7 +185,7 @@ export default function SidebarPic() {
                 </NavLink>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <NavLink
                   to="/pic/guru/lpj"
                   className={({ isActive }) =>
@@ -195,7 +195,7 @@ export default function SidebarPic() {
                   <i className="bi bi-file-earmark-text"></i>
                   Page LPJ
                 </NavLink>
-              </li>
+              </li> */}
 
               <li className="nav-item">
                 <NavLink
@@ -206,18 +206,6 @@ export default function SidebarPic() {
                 >
                   <i className="bi bi-clipboard2-pulse"></i>
                   Evaluasi RKT
-                </NavLink>
-              </li>
-
-              <li className="nav-item">
-                <NavLink
-                  to="/pic/guru/status-pengajuan"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link sidebar-active" : "nav-link text-dark"
-                  }
-                >
-                  <i className="bi bi-clipboard2-pulse"></i>
-                  Status Pengajuan
                 </NavLink>
               </li>
             </ul>

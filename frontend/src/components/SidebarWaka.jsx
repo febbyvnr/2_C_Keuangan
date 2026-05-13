@@ -142,32 +142,24 @@ export default function SidebarWaka() {
                                     <i className="bi bi-columns-gap"></i>Dashboard
                                 </NavLink>
                             </li>
-
-                            <li className="nav-item">
+                            {/* <li className="nav-item">
                                 <NavLink to="/waka/rka" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-cash-coin"></i>Verifikasi RKA
                                 </NavLink>
-                            </li>
-
+                            </li> */}
                             {/* <li className="nav-item">
                                 <NavLink to="/waka/fpd" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-cash-stack"></i>FPD
                                 </NavLink>
                             </li> */}
-
-                            <li className="nav-item">
+                            {/* <li className="nav-item">
                                 <NavLink to="/waka/evaluasi-rkt" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-clipboard-data"></i>Evaluasi RKT
                                 </NavLink>
-                            </li>
+                            </li> */}
                             <li className="nav-item">
                                 <NavLink to="/waka/approval-center" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
                                     <i className="bi bi-check2-square"></i>Verifikasi FPD
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/waka/monitoring" className={({isActive}) => isActive ? "nav-link sidebar-active" : "nav-link text-dark"}>
-                                    <i className="bi bi-binoculars"></i>Monitoring
                                 </NavLink>
                             </li>
                         </ul>

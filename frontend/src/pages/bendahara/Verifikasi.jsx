@@ -140,6 +140,48 @@ export default function Verifikasi() {
         }
     };
 
+    const handleReject = async () => {
+        if (!selected) return;
+
+        const confirmReject = window.confirm(
+            "Yakin ingin menolak pembayaran ini?"
+        );
+
+        if (!confirmReject) return;
+
+        try {
+            const response = await fetch(
+                `http://localhost:8000/api/tr-pembayaran/update/${selected.ID_PEMBAYARAN}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ...selected,
+                        NIP_VALIDATOR_PEMBAYARAN: null,
+                        STATUS_PEMBAYARAN: "Ditolak"
+                    }),
+                }
+            );
+
+            if (response.ok) {
+                alert("Pembayaran berhasil ditolak!");
+                fetchData();
+                setSelected(null);
+            } else {
+                const errorData = await response.json();
+                alert(
+                    "Gagal menolak pembayaran: " +
+                        (errorData.message || "Terjadi kesalahan")
+                );
+            }
+        } catch (err) {
+            console.error("Error reject:", err);
+            alert("Terjadi kesalahan koneksi ke server.");
+        }
+    };
+
     const isVerified = selected?.NIP_VALIDATOR_PEMBAYARAN;
 
     return (
@@ -308,13 +350,31 @@ export default function Verifikasi() {
                             <div className="detail-item">
                                 <b>Status:</b> {isVerified ? "Sudah Diverifikasi" : "Belum Diverifikasi"}
                             </div>
-                            <button
+                            {/* <button
                                 className="btn-approve"
                                 onClick={handleApprove}
                                 disabled={isVerified}
                             >
                                 <i className="check-circle"></i> Setujui
-                            </button>
+                            </button> */}
+                            <div className="fpd-detail-footer">
+                                <div className="button-group">
+                                    <button
+                                        className="approve-btn"
+                                        onClick={handleApprove}
+                                        disabled={isVerified}
+                                    >
+                                        Setujui
+                                    </button>
+                                    <button
+                                        className="reject-btn"
+                                        onClick={handleReject}
+                                        disabled={isVerified}
+                                    >
+                                        Tolak
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <div className="empty-state">

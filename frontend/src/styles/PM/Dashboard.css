@@ -597,23 +597,16 @@
 /* ========================= */
 
 .success-chart {
-  background: conic-gradient(
-    #265f9c 0deg,
-    #265f9c 300deg,
-    #e5e7eb 300deg,
-    #e5e7eb 360deg
-  );
+  background: conic-gradient(#265f9c 0deg, #265f9c 360deg, #e5e7eb 360deg);
 }
 
 .warning-chart {
-  background: conic-gradient(
-    #265f9c 0deg,
-    #265f9c 260deg,
-    #e5e7eb 260deg,
-    #e5e7eb 360deg
-  );
+  background: conic-gradient(#265f9c 0deg, #265f9c 360deg, #e5e7eb 360deg);
 }
 
+.info-chart {
+  background: conic-gradient(#265f9c 0deg, #265f9c 360deg, #e5e7eb 360deg);
+}
 .info-chart {
   background: conic-gradient(#265f9c 0deg, #265f9c 360deg, #e5e7eb 360deg);
 }

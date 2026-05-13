@@ -110,7 +110,6 @@ export default function KepsekDashboard() {
             setBkuList(bkuResult.value.bku || bkuResult.value.data || []);
           } else {
             setBkuList([]);
-            nextWarnings.push(`BKU: ${formatDashboardError(bkuResult.reason)}`);
           }
 
           setWarning(nextWarnings.join(" | "));

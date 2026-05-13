@@ -170,6 +170,7 @@ Route::prefix('rkt')->group(function () {
     Route::delete('/delete/{id}', [MstProgramKerjaController::class, 'destroy'])->whereNumber('id');
     Route::post('/ajukan/{id}', [MstProgramKerjaController::class, 'ajukan'])->whereNumber('id');
     Route::get('/{id}', [MstProgramKerjaController::class, 'show'])->whereNumber('id');
+    Route::get('/ready-approval', [MstProgramKerjaController::class, 'readyForApproval']);
 });
 
 Route::prefix('dtl-fpd')->group(function () {
@@ -184,7 +185,10 @@ Route::prefix('dtl-fpd')->group(function () {
 Route::prefix('fpd-anggaran')->group(function () {
     Route::get('/', [FpdAnggaranController::class, 'index']);
     Route::get('/search', [FpdAnggaranController::class, 'search']);
-    Route::get('/export/{id}', [FpdAnggaranController::class, 'export']);
+    Route::get('/export', [FpdAnggaranController::class, 'export']);
+    Route::get('/export/excel', [FpdAnggaranController::class, 'exportListExcel']);
+    Route::get('/export/pdf', [FpdAnggaranController::class, 'exportListPdf']);
+    Route::get('/export/{id}', [FpdAnggaranController::class, 'export'])->whereNumber('id');
     Route::get('/{id}', [FpdAnggaranController::class, 'show']);
     Route::post('/store', [FpdAnggaranController::class, 'store']);
     Route::put('/update/{id}', [FpdAnggaranController::class, 'update']);
@@ -248,7 +252,7 @@ Route::prefix('jenis-tarif')->group(function () {
 //     Route::get('/detail/{id}', [RefTarifController::class, 'showById']);
 //     Route::get('/{idJenis}/{idTahun}', [RefTarifController::class, 'show']);
 //     Route::post('/store', [RefTarifController::class, 'store']);
-//     Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+//     Route::put('/update/{idJeniFs}/{idTahun}', [RefTarifController::class, 'update']);
 //     Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
 // });
 
@@ -272,6 +276,8 @@ Route::prefix('evaluasi-rkt')->group(function () {
     Route::post('/store', [EvaluasiRktController::class, 'store']);
     Route::put('/update/{id}', [EvaluasiRktController::class, 'update']);
     Route::delete('/delete/{id}', [EvaluasiRktController::class, 'destroy']);
+    Route::put('/approve/{id}', [EvaluasiRktController::class, 'approve']);
+    Route::put('/reject/{id}', [EvaluasiRktController::class, 'reject']);
 });
 
 Route::get('/ref-jenis-tagihan', [RefJenisTagihanController::class, 'index']);

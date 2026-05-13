@@ -52,6 +52,11 @@ class MstKaryawan extends Model
         return $this->hasMany(TrPenerimaan::class, 'NIP_PENERIMA', 'NIP_KARYAWAN');
     }
 
+    public function jabatan()
+    {
+        return $this->hasOne(TrJabatan::class, 'NIP_KARYAWAN', 'NIP_KARYAWAN');
+    }
+
     // ── Catatan RBAC ──────────────────────────────────────────────
     /* Bagian relasi trJabatans() dan fungsi hasRole() dihapus sementara 
        karena ketergantungan pada tabel ref_jabatan yang ada di branch lain.

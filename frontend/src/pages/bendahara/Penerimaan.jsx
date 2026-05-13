@@ -26,6 +26,53 @@ const getAuthHeaders = () => {
   };
 };
 
+function useSort() {
+  const [sort, setSort] = useState({ col: null, dir: "asc" });
+
+  const toggle = (col) =>
+    setSort((prev) =>
+      prev.col === col
+        ? { col, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { col, dir: "asc" }
+    );
+
+  return [sort, toggle];
+}
+
+function SortTh({ col, sort, onSort, children, className = "" }) {
+  const active = sort.col === col;
+
+  return (
+    <th
+      className={`penerimaan-th-sortable ${className}`}
+      onClick={() => onSort(col)}
+    >
+      {children}
+      <span
+        className={`penerimaan-sort-icon ${active ? "active" : "neutral"}`}
+      >
+        {active ? (sort.dir === "asc" ? " ↑" : " ↓") : " ⇅"}
+      </span>
+    </th>
+  );
+}
+
+function applySort(list, sort, getValue) {
+  if (!sort.col) return list;
+
+  return [...list].sort((a, b) => {
+    const va = getValue(a, sort.col) ?? "";
+    const vb = getValue(b, sort.col) ?? "";
+
+    const cmp =
+      typeof va === "number" && typeof vb === "number"
+        ? va - vb
+        : String(va).localeCompare(String(vb), "id");
+
+    return sort.dir === "asc" ? cmp : -cmp;
+  });
+}
+
 export default function Penerimaan() {
   const [dataPenerimaan, setDataPenerimaan] = useState([]);
   const [refPenerimaan, setRefPenerimaan] = useState([]);
@@ -45,6 +92,11 @@ export default function Penerimaan() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  const [sortConfig, handleSort] = useSort();
 
   const initialForm = {
     ID_REF_PENERIMAAN: "",
@@ -180,11 +232,13 @@ export default function Penerimaan() {
 
   const handleSearch = () => {
     setSearchTerm(searchInput.trim().toLowerCase());
+    setCurrentPage(1);
   };
 
   const handleResetSearch = () => {
     setSearchInput("");
     setSearchTerm("");
+    setCurrentPage(1);
   };
 
   const downloadFile = async (url, filename) => {
@@ -224,6 +278,7 @@ export default function Penerimaan() {
       }, 1000);
     } catch (err) {
       console.error("Gagal download file:", err);
+      setError("Gagal mengunduh file.");
     }
   };
 
@@ -240,27 +295,6 @@ export default function Penerimaan() {
       "laporan_penerimaan.pdf"
     );
   };
-
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return dataPenerimaan;
-
-    return dataPenerimaan.filter((item) => {
-      const joined = [
-        item.ID_TR_PENERIMAAN,
-        item.DESKRIPSI_TR_PENERIMAAN,
-        item.JUMLAH_TR_PENERIMAAN,
-        item.TANGGAL_TR_PENERIMAAN,
-        item.nama_ref_penerimaan,
-        item.DESKRIPSI_REF_PENERIMAAN,
-        item.ID_REF_DANA,
-        item.NIP_PENERIMA,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return joined.includes(searchTerm);
-    });
-  }, [dataPenerimaan, searchTerm]);
 
   const formatTanggal = (value) => {
     if (!value) return "-";
@@ -381,6 +415,46 @@ export default function Penerimaan() {
     }
   };
 
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return dataPenerimaan;
+
+    return dataPenerimaan.filter((item) => {
+      const joined = [
+        item.ID_TR_PENERIMAAN,
+        item.DESKRIPSI_TR_PENERIMAAN,
+        item.JUMLAH_TR_PENERIMAAN,
+        item.TANGGAL_TR_PENERIMAAN,
+        item.nama_ref_penerimaan,
+        item.DESKRIPSI_REF_PENERIMAAN,
+        item.ID_REF_DANA,
+        item.NIP_PENERIMA,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return joined.includes(searchTerm);
+    });
+  }, [dataPenerimaan, searchTerm]);
+
+  const sortedData = useMemo(() => {
+    return applySort(filteredData, sortConfig, (item, col) => {
+      if (col === "id") return Number(item.ID_TR_PENERIMAAN || 0);
+      if (col === "jenis") return getNamaRefPenerimaan(item);
+      if (col === "tanggal") return item.TANGGAL_TR_PENERIMAAN || "";
+      if (col === "jumlah") return Number(item.JUMLAH_TR_PENERIMAAN || 0);
+      if (col === "deskripsi") return item.DESKRIPSI_TR_PENERIMAAN || "";
+      return "";
+    });
+  }, [filteredData, sortConfig, refPenerimaan]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  const paginatedData = useMemo(() => {
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, startIndex, endIndex]);
+
   return (
     <div className="penerimaan-container">
       <div className="penerimaan-header">
@@ -397,6 +471,7 @@ export default function Penerimaan() {
             placeholder="Cari penerimaan..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
 
           <button className="search-btn" onClick={handleSearch}>
@@ -418,13 +493,21 @@ export default function Penerimaan() {
           <thead>
             <tr>
               <th>No</th>
-              <th>
-                ID <Filter size={14} className="th-icon" />
-              </th>
-              <th>Jenis Penerimaan</th>
-              <th>Tanggal</th>
-              <th>Jumlah</th>
-              <th>Deskripsi</th>
+              <SortTh col="id" sort={sortConfig} onSort={handleSort}>
+                ID
+              </SortTh>
+              <SortTh col="jenis" sort={sortConfig} onSort={handleSort}>
+                Jenis Penerimaan
+              </SortTh>
+              <SortTh col="tanggal" sort={sortConfig} onSort={handleSort}>
+                Tanggal
+              </SortTh>
+              <SortTh col="jumlah" sort={sortConfig} onSort={handleSort}>
+                Jumlah
+              </SortTh>
+              <SortTh col="deskripsi" sort={sortConfig} onSort={handleSort}>
+                Deskripsi
+              </SortTh>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -435,16 +518,16 @@ export default function Penerimaan() {
                   Memuat data penerimaan...
                 </td>
               </tr>
-            ) : filteredData.length === 0 ? (
+            ) : paginatedData.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center">
                   Tidak ada data penerimaan
                 </td>
               </tr>
             ) : (
-              filteredData.map((item, index) => (
+              paginatedData.map((item, index) => (
                 <tr key={item.ID_TR_PENERIMAAN || index}>
-                  <td>{index + 1}</td>
+                  <td>{startIndex + index + 1}</td>
                   <td>{item.ID_TR_PENERIMAAN || "-"}</td>
                   <td>{getNamaRefPenerimaan(item)}</td>
                   <td>{formatTanggal(item.TANGGAL_TR_PENERIMAAN)}</td>
@@ -483,16 +566,47 @@ export default function Penerimaan() {
 
         <div className="table-footer">
           <div className="pagination-info">
-            Menampilkan {filteredData.length} data
+            Menampilkan {sortedData.length === 0 ? 0 : startIndex + 1} -{" "}
+            {Math.min(endIndex, sortedData.length)} dari {sortedData.length} data
           </div>
 
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button className="btn-export" onClick={handleExportExcel}>
+          <div className="pagination-controls">
+            <button
+              className="btn-pagination"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            <span className="page-number">
+              Halaman {currentPage} / {totalPages}
+            </span>
+
+            <button
+              className="btn-pagination"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+
+          <div className="export-wrapper">
+            <button
+              className="btn-export btn-export-excel"
+              onClick={handleExportExcel}
+            >
               <FileSpreadsheet size={16} />
               Export Excel
             </button>
 
-            <button className="btn-export" onClick={handleExportPdf}>
+            <button
+              className="btn-export btn-export-pdf"
+              onClick={handleExportPdf}
+            >
               <FileText size={16} />
               Export PDF
             </button>
@@ -584,7 +698,6 @@ export default function Penerimaan() {
               </select>
 
               <br />
-
 
               <label>NIP Penerima</label>
               <input

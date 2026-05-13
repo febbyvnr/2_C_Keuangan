@@ -3,11 +3,12 @@ import { Navigate } from "react-router-dom";
 
 import SidebarBendahara from "./components/SidebarBendahara";
 import SidebarWaka from "./components/SidebarWaka";
+import SidebarPic from "./components/SidebarPic";
 import Login from "./pages/Login";
 
 import Dashboard from "./pages/bendahara/Dashboard";
 import Dana from "./pages/bendahara/Dana";
-import RKA from "./pages/bendahara/RKA";
+// import RKA from "./pages/bendahara/RKA";
 import BKU from "./pages/bendahara/BKU";
 import BKM from "./pages/bendahara/BKM";
 import BKK from "./pages/bendahara/BKK";
@@ -16,6 +17,7 @@ import Tarif from "./pages/bendahara/Tarif";
 import Laporan from "./pages/bendahara/Laporan";
 
 import Verifikasi from "./pages/bendahara/Verifikasi";
+import VerifikasiFPD from "./pages/bendahara/VerifikasiFPD";
 import Penerimaan from "./pages/bendahara/Penerimaan";
 import Log from "./pages/bendahara/ActivityLogDashboard";
 
@@ -55,17 +57,49 @@ import CreateRKT from "./pages/pic/guru/CreateRKT.jsx";
 import SidebarKepsek from "./components/SidebarKepsek";
 import SidebarPm from "./components/SidebarPm";
 import KepsekDashboard from "./pages/kepsek/Dashboard.jsx";
-// import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
+import RKA from "./pages/pic/guru/RKA.jsx";
 import KepsekApproval from "./pages/kepsek/ApprovalCenter.jsx";
-//import RKAPicGuru from "./pages/pic/guru/RKA.jsx";
 import DashboardPIC from "./pages/pic/guru/Dashboard";
 
 import DashboardPM from "./pages/pm/Dashboard";
 import ReferensiPm from "./pages/pm/ReferensiPm";
+import PMRKT from "./pages/pm/RKTPage";
+import VerifikasiEvaluasiPm from "./pages/PM/VerifikasiEvaluasiPm";
 
 import KepsekMonitoring from "./pages/kepsek/Monitoring.jsx";
+import KepsekMasterCOA from "./pages/kepsek/master/MasterCOA.jsx";
+import KepsekMasterKegiatan from "./pages/kepsek/master/MasterKegiatan.jsx";
+import KepsekMasterTahunAnggaran from "./pages/kepsek/master/MasterTahunAnggaran.jsx";
+import KepsekMasterSumberDana from "./pages/kepsek/master/MasterSumberDana.jsx";
+import KepsekMasterRefPenerimaan from "./pages/kepsek/master/MasterRefPenerimaan.jsx";
+import KepsekMasterRefPM from "./pages/kepsek/master/MasterRefPM.jsx";
+import KepsekMasterTarif from "./pages/kepsek/master/MasterTarif.jsx";
 import "./index.css";
 import EvaluasiRKTPage from "./pages/kepsek/approve/EvaluasiRKTPage.jsx";
+import LaporanKepsek from "./pages/kepsek/Laporan.jsx";
+
+// Menyisipkan header Authorization otomatis ke semua request fetch lokal
+const originalFetch = window.fetch;
+
+window.fetch = async (...args) => {
+  let [resource, config] = args;
+
+  if (typeof resource === "string" && resource.includes("api")) {
+    config = config || {};
+    config.headers = config.headers || {};
+
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+  }
+
+  return originalFetch(resource, config);
+};
 
 function BendaharaLayout() {
   return (
@@ -130,6 +164,17 @@ function PmLayout() {
   );
 }
 
+function PicGuruLayout() {
+  return (
+    <div className="layout" style={{ display: "flex" }}>
+      <SidebarPic />
+      <div className="content-wrapper" style={{ flex: 1 }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -139,9 +184,10 @@ export default function App() {
 
         {/* BENDHARA LAYOUT */}
         <Route path="/bendahara" element={<BendaharaLayout />}>
+          <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dana" element={<Dana />} />
-          <Route path="rka" element={<RKA />} />
+          {/* <Route path="rka" element={<RKA />} /> */}
           <Route path="bku" element={<BKU />} />
           <Route path="bkm" element={<BKM />} />
           <Route path="bkk" element={<BKK />} />
@@ -149,6 +195,7 @@ export default function App() {
           <Route path="tarif" element={<Tarif />} />
           <Route path="laporan" element={<Laporan />} />
           <Route path="verifikasi" element={<Verifikasi />} />
+          <Route path="verifikasi-fpd" element={<VerifikasiFPD />} />
           <Route path="penerimaan" element={<Penerimaan />} />
           <Route path="log" element={<Log />} />
 
@@ -186,14 +233,15 @@ export default function App() {
         <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
 
         {/* PIC GURU */}
-        <Route path="/pic/guru" element={<DashboardPIC />} />
-        <Route path="/pic/guru/fpd" element={<PicGuruFPD />} />
-        <Route path="/pic/guru/rkt" element={<RKT />} />
-        <Route path="/pic/guru/rka" element={<RKA />} />
-        <Route path="/pic/guru/rkt/create" element={<CreateRKT />} />
-        <Route path="/pic/guru/rkt/edit/:id" element={<CreateRKT />} />
-        {/* <Route path="/pic/guru/status-pengajuan" element={<StatusPengajuan />} /> */}
-        {/* <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKTPage />} /> */}
+        <Route path="/pic/guru" element={<PicGuruLayout />}>
+          <Route index element={<DashboardPIC />} />
+          <Route path="dashboard" element={<DashboardPIC />} />
+          <Route path="fpd" element={<PicGuruFPD />} />
+          <Route path="rkt" element={<RKT />} />
+          <Route path="rka" element={<RKA />} />
+          <Route path="rkt/create" element={<CreateRKT />} />
+          <Route path="rkt/edit/:id" element={<CreateRKT />} />
+        </Route>
 
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
@@ -201,6 +249,23 @@ export default function App() {
           <Route path="dashboard" element={<KepsekDashboard />} />
           <Route path="monitoring" element={<KepsekMonitoring />} />
           <Route path="approval-center" element={<KepsekApproval />} />
+          <Route path="master/coa" element={<KepsekMasterCOA />} />
+          <Route path="master/kegiatan" element={<KepsekMasterKegiatan />} />
+          <Route
+            path="master/tahun-anggaran"
+            element={<KepsekMasterTahunAnggaran />}
+          />
+          <Route
+            path="master/sumber-dana"
+            element={<KepsekMasterSumberDana />}
+          />
+          <Route
+            path="master/ref-penerimaan"
+            element={<KepsekMasterRefPenerimaan />}
+          />
+          <Route path="master/ref-pm" element={<KepsekMasterRefPM />} />
+          <Route path="master/tarif" element={<KepsekMasterTarif />} />
+          <Route path="laporan" element={<LaporanKepsek />} />
         </Route>
 
         {/* WAKA */}
@@ -237,6 +302,8 @@ export default function App() {
               </div>
             }
           />
+          <Route path="kegiatan" element={<KepsekMasterKegiatan />} />
+          <Route path="rkt" element={<PMRKT />} />
           <Route
             path="evaluasi-rkt"
             element={
@@ -244,6 +311,10 @@ export default function App() {
                 <h1>Evaluasi RKT</h1>
               </div>
             }
+          />
+          <Route
+            path="verifikasi-evaluasi"
+            element={<VerifikasiEvaluasiPm />}
           />
         </Route>
       </Routes>

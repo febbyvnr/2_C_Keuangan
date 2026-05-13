@@ -145,6 +145,28 @@
     background: #fee2e2;
 }
 
+.kepsek-btn.export-excel {
+    background: transparent;
+    color: #2E7D32;
+    border-color: #2E7D32;
+}
+
+.kepsek-btn.export-excel:hover:not(:disabled) {
+    background: #2E7D32;
+    color: #f6f7f9;
+}
+
+.kepsek-btn.export-pdf {
+    background: transparent;
+    color: #C62828;
+    border-color: #C62828;
+}
+
+.kepsek-btn.export-pdf:hover:not(:disabled) {
+    background: #C62828;
+    color: #f6f7f9;
+}
+
 .kepsek-btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
@@ -209,6 +231,30 @@
     background: #fafbff;
 }
 
+.kepsek-th-sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.kepsek-th-sortable:hover {
+    background: #eef2ff;
+}
+
+.kepsek-sort-icon {
+    font-style: normal;
+    font-size: 0.75rem;
+}
+
+.kepsek-sort-icon.neutral {
+    color: #c4c9d4;
+}
+
+.kepsek-sort-icon.active {
+    color: #4338ca;
+    font-weight: 700;
+}
+
 .kepsek-empty {
     text-align: center;
     color: #9ca3af;
@@ -254,6 +300,77 @@
     color: #6b7280;
     padding: 40px;
     font-size: 0.9rem;
+}
+
+/* Filter row in thead */
+.kepsek-filter-row th {
+    padding: 4px 8px;
+    background: #f0f4ff;
+}
+
+.kepsek-col-filter {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: #fff;
+    color: #1f2937;
+    outline: none;
+    min-width: 80px;
+}
+
+.kepsek-col-filter:focus {
+    border-color: #4338ca;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #7d7d7e;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.page-btn {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #f6f7f9;
+    border-color: #265f9c;
+    color: #265f9c;
+}
+
+.page-btn.active {
+    background-color: #265f9c;
+    color: #ffffff;
+    border-color: #265f9c;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

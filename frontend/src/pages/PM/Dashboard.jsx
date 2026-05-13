@@ -9,7 +9,10 @@ export default function DashboardPM() {
     fetch("http://localhost:8000/api/dashboardtimpenjaminanmutu")
       .then((res) => res.json())
       .then((data) => {
-        setDashboard(data.data);
+        setDashboard({
+          summary: data.summary,
+          data: data.data,
+        });
       })
       .catch((err) => {
         console.error("Gagal mengambil dashboard:", err);
@@ -75,13 +78,17 @@ export default function DashboardPM() {
   /* PERSENTASE */
   /* ========================= */
 
-  const totalRkt = dashboard.total_rkt || 0;
+  const totalRkt = dashboard.summary.total_rkt || 0;
 
   const realisasiPercentage =
-    totalRkt > 0 ? Math.round((dashboard.realisasi / totalRkt) * 100) : 0;
+    totalRkt > 0
+      ? Math.round((dashboard.summary.total_realisasi / totalRkt) * 100)
+      : 0;
 
   const deviasiPercentage =
-    totalRkt > 0 ? Math.round((dashboard.deviasi / totalRkt) * 100) : 0;
+    totalRkt > 0
+      ? Math.round((dashboard.summary.total_deviasi / totalRkt) * 100)
+      : 0;
 
   return (
     <div className="pm-container">
@@ -108,25 +115,25 @@ export default function DashboardPM() {
         <div className="card primary">
           <p>Total Program RKT</p>
 
-          <h3>{dashboard.total_rkt}</h3>
+          <h3>{dashboard.summary.total_rkt}</h3>
         </div>
 
         <div className="card success">
           <p>Realisasi Evaluasi</p>
 
-          <h3>{dashboard.realisasi}</h3>
+          <h3>{dashboard.summary.total_realisasi}</h3>
         </div>
 
         <div className="card warning">
           <p>Total Deviasi</p>
 
-          <h3>{dashboard.deviasi}</h3>
+          <h3>{dashboard.summary.total_deviasi}</h3>
         </div>
 
         <div className="card info">
           <p>Persentase Capaian</p>
 
-          <h3>{dashboard.persentase_capaian}%</h3>
+          <h3>{dashboard.summary.persentase_capaian}%</h3>
         </div>
       </div>
 
@@ -137,17 +144,13 @@ export default function DashboardPM() {
         </div>
 
         <div className="pm-progress-wrapper">
-          {dashboard.program_rkt && dashboard.program_rkt.length > 0 ? (
-            dashboard.program_rkt.map((item, index) => {
-              const percentage =
-                totalRkt > 0
-                  ? Math.round((item.realisasi / totalRkt) * 100)
-                  : 0;
-
+          {dashboard.data && dashboard.data.length > 0 ? (
+            dashboard.data.map((item, index) => {
+              const percentage = item.status.sudah_realisasi ? 100 : 0;
               return (
                 <div className="progress-card" key={index}>
                   <div className="progress-header">
-                    <h4>{item.PROGRAM_KERJA}</h4>
+                    <h4>{item.program_kerja}</h4>
 
                     <span className="progress-status">
                       {percentage >= 100 ? "Selesai" : "Monitoring"}
