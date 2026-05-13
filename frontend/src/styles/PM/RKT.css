@@ -64,7 +64,9 @@
 }
 
 .pmrkt-reset-btn {
-    background: #585858;
+    background: transparent;
+    color: #265f9c;
+    border: 2px solid #265f9c;
 }
 
 .pmrkt-table-section {
@@ -244,8 +246,9 @@
 
 .pmrkt-detail-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .pmrkt-detail-item {

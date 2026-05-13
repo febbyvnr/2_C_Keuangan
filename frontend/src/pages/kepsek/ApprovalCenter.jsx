@@ -3,7 +3,6 @@ import "../../styles/waka/ApprovalCenter.css";
 
 import FPDPage from "./approve/FPDPengajuanDanaPage";
 import RKTPage from "./approve/RKTPage";
-import RKAPage from "./approve/RKAPage";
 import EvaluasiRKTPage from "./approve/EvaluasiRKTPage";
 
 export default function ApprovalCenter() {
@@ -19,8 +18,6 @@ export default function ApprovalCenter() {
                 return <RKTPage setHasPending={setRktHasPending} />;
             case "fpd":
                 return <FPDPage setHasPending={setFpdHasPending} />;
-            case "rka":
-                return <RKAPage setHasPending={setRkaHasPending} />;
             case "lpj":
                 return <EvaluasiRKTPage setHasPending={setEvalHasPending} />;
             default:
@@ -35,17 +32,12 @@ export default function ApprovalCenter() {
                 <button className={activeTab === "rkt" ? "active" : ""} onClick={() => setActiveTab("rkt")} >
                     RKT{rktHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
                 </button>
-                <button className={activeTab === "rka" ? "active" : ""} onClick={() => setActiveTab("rka")} >
-                    RKA{rkaHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
-                </button>
                 <button className={activeTab === "fpd" ? "active" : ""} onClick={() => setActiveTab("fpd")}>
                     FPD{fpdHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
                 </button>
                 <button className={activeTab === "lpj" ? "active" : ""} onClick={() => setActiveTab("lpj")} >
                     Evaluasi RKT{evalHasPending && (<i className="bi bi-exclamation-circle-fill tab-warning"></i>)}
                 </button>
-                {/* <FPDPage setHasPending={setFpdHasPending} />
-                <RKTPage setHasPending={setRktHasPending} /> */}
             </div>
             <div className="tab-content">
                 {renderContent()}

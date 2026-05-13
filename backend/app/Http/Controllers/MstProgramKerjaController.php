@@ -833,4 +833,53 @@ class MstProgramKerjaController extends Controller
 
         return null;
     }
+
+    public function readyForApproval(Request $request): JsonResponse
+    {
+        try {
+            $data = MstProgramKerja::with([
+                'tahunAnggaran',
+                'unit',
+                'tan',
+                'coa',
+                'kegiatan',
+                'trPm',
+                'detailProgramKerja',
+            ])
+            ->where('IS_DELETE', 0)
+            ->get()
+            ->filter(function ($item) {
+                $totalRkt = (float) $item->TOTAL_PROGKER;
+                $totalRka = collect($item->detailProgramKerja)->sum(function ($detail) {
+                    $qty = $detail->QTY
+                        ?? $detail->KUANTITAS
+                        ?? $detail->JUMLAH
+                        ?? 0;
+                    $harga = $detail->HARGA
+                        ?? $detail->HARGA_SATUAN
+                        ?? $detail->NOMINAL
+                        ?? 0;
+                    return $detail->TOTAL
+                        ?? $detail->TOTAL_RINCIAN
+                        ?? $detail->SUBTOTAL
+                        ?? ($qty * $harga);
+                });
+                $minimalRka = $totalRkt * 0.95;
+                return $totalRka >= $minimalRka
+                    && $totalRka <= $totalRkt;
+            })
+            ->values();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data RKT siap approval berhasil diambil',
+                'data' => $data,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
