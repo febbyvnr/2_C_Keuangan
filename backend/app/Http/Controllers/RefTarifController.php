@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\RefTarif;
+use App\Exports\TarifExport;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RefTarifController extends Controller
@@ -122,5 +127,74 @@ class RefTarifController extends Controller
         return RefTarif::with(['jenisTarif', 'tahunAnggaran'])
             ->where('ID_TA_ANGGARAN', $idTahun)
             ->get();
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $role         = Auth::check() ? (Auth::user()->role ?? 'Bendahara') : 'Bendahara';
+        $idJenisTarif = $request->query('id_jenis_tarif');
+        $idTaAnggaran = $request->query('id_ta_anggaran');
+
+        $filename = 'Data_Tarif_' . date('Ymd_His') . '.xlsx';
+
+        return Excel::download(
+            new TarifExport($role, $idJenisTarif, $idTaAnggaran),
+            $filename
+        );
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $idJenisTarif = $request->query('id_jenis_tarif');
+        $idTaAnggaran = $request->query('id_ta_anggaran');
+
+        $query = RefTarif::with(['jenisTarif', 'tahunAnggaran'])
+            ->orderBy('TGL_PENETAPAN', 'desc');
+
+        if ($idJenisTarif) {
+            $query->where('ID_JENIS_TARIF', $idJenisTarif);
+        }
+        if ($idTaAnggaran) {
+            $query->where('ID_TA_ANGGARAN', $idTaAnggaran);
+        }
+
+        $data = $query->get()->map(function ($item) {
+    
+            return [
+                'id'            => $item->ID_REF_TARIF,
+                'jenis_tarif'   => $item->jenisTarif?->DESKRIPSI_JENIS_TARIF
+                    ?? ($item->ID_JENIS_TARIF ? "ID: {$item->ID_JENIS_TARIF}" : '-'),
+                'tahun_anggaran'=> $item->tahunAnggaran?->DESKRIPSI_TAHUN_ANGGARAN
+                    ?? ($item->ID_TA_ANGGARAN ? "ID: {$item->ID_TA_ANGGARAN}" : '-'),
+                'deskripsi'     => $item->DESKRIPSI_TARIF ?? '-',
+                'nominal'       => $item->NOMINAL ?? 0,
+                'tgl_penetapan' => $this->formatTanggal($item->TGL_PENETAPAN),
+            ];
+        });
+
+        $role       = Auth::check() ? (Auth::user()->role ?? 'Bendahara') : 'Bendahara';
+        $tanggalCetak = Carbon::now()->translatedFormat('d F Y');
+
+        $pdf = Pdf::loadView('exports.tarif_pdf', [
+            'data'         => $data,
+            'role'         => $role,
+            'tanggalCetak' => $tanggalCetak,
+        ])->setPaper('a4', 'landscape');
+
+        $filename = 'Data_Tarif_' . date('Ymd_His') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    private function formatTanggal($tanggal): string
+    {
+        if (empty($tanggal)) {
+            return '-';
+        }
+        try {
+            return Carbon::parse($tanggal)->translatedFormat('d F Y');
+        } catch (\Exception $e) {
+            return (string) $tanggal;
+        }
     }
 }

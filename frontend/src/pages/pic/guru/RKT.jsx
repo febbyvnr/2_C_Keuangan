@@ -436,7 +436,13 @@ export default function RKT() {
 
       await fetchRkt(search, nextPage);
     } catch (error) {
-      alert(error.response?.data?.message || "Data gagal dihapus");
+      showToast(
+        "error",
+        error.response?.data?.message || "Data gagal dihapus."
+      );
+      setTimeout(() => {
+        setDeleteTarget(null);
+      }, 300);
     } finally {
       setDeleting(false);
     }

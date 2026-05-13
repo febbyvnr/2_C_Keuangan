@@ -141,6 +141,16 @@ export default function RKA() {
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [savingDetail, setSavingDetail] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [detailForm, setDetailForm] = useState({
@@ -267,14 +277,14 @@ export default function RKA() {
 
 const handleOpenDetailModal = () => {
   if (!selectedItem) {
-    alert("Pilih program kerja terlebih dahulu.");
+    showToast("error", "Pilih program kerja terlebih dahulu.");
     return;
   }
 
   if (isRkaActionDisabled(selectedItem)) {
-  alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
-  return;
-}
+    showToast("error", getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
+    return;
+  }
 
   setEditingDetail(null);
 
@@ -293,7 +303,7 @@ const handleOpenDetailModal = () => {
 
 const handleEdit = (detail) => {
   if (isRkaActionDisabled(selectedItem)) {
-    alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
+    showToast("error", getRkaLockMessage(selectedItem) || "RKA tidak bisa diubah.");
     return;
   }
 
@@ -321,7 +331,7 @@ const handleEdit = (detail) => {
 
 const handleDelete = async (idDetail) => {
   if (isRkaActionDisabled(selectedItem)) {
-    alert(getRkaLockMessage(selectedItem) || "RKA tidak bisa dihapus.");
+    showToast("error", getRkaLockMessage(selectedItem) || "RKA tidak bisa dihapus.");
     return;
   }
   const confirmDelete = window.confirm(
@@ -334,10 +344,13 @@ const handleDelete = async (idDetail) => {
     await axios.delete(
       `http://127.0.0.1:8000/api/rka/delete/${idDetail}`
     );
-
+    showToast("success", "Detail RKA berhasil dihapus.");
     await fetchRka();
   } catch (error) {
-    alert(error.response?.data?.message || "Gagal menghapus detail RKA");
+    showToast(
+      "error",
+      error.response?.data?.message || "Gagal menghapus detail RKA."
+    );
   }
 };
 
@@ -368,7 +381,7 @@ const handleSubmitDetail = async (e) => {
   const totalSetelahUpdate = totalSekarang - totalLama + detailTotal;
 
   if (totalSetelahUpdate > anggaranRkt) {
-    alert("Total rincian melebihi anggaran RKT.");
+    showToast("error", "Total rincian melebihi pagu RKT.");
     return;
   }
 
@@ -383,17 +396,36 @@ const handleSubmitDetail = async (e) => {
 
   try {
     setSavingDetail(true);
+
     if (editingDetail) {
-      await axios.put(`http://127.0.0.1:8000/api/rka/update/${editingDetail}`, payload);
+      await axios.put(
+        `http://127.0.0.1:8000/api/rka/update/${editingDetail}`,
+        payload
+      );
+
+      showToast("success", "Detail RKA berhasil diperbarui.");
     } else {
       await axios.post("http://127.0.0.1:8000/api/rka/store", payload);
+
+      showToast("success", "Detail RKA berhasil ditambahkan.");
     }
-    setDetailForm({ ID_REF_DANA: "", QTY: "", VOLUME: "", SATUAN: "", HARGA_SATUAN: "" });
+
+    setDetailForm({
+      ID_REF_DANA: "",
+      QTY: "",
+      VOLUME: "",
+      SATUAN: "",
+      HARGA_SATUAN: "",
+    });
     setSumberDanaKeyword("");
     setShowDetailModal(false);
+
     await fetchRka();
   } catch (error) {
-    alert(error.response?.data?.message || "Gagal menyimpan detail RKA");
+    showToast(
+      "error",
+      error.response?.data?.message || "Gagal menyimpan detail RKA."
+    );
   } finally {
     setSavingDetail(false);
   }
@@ -950,6 +982,13 @@ function getSumberDanaSummary(item) {
             </form>
             </div>
         </div>
+        )}
+        {toast && (
+          <div className={`toast-container ${visible ? "show" : "hide"}`}>
+            <div className={`toast-box ${toast.type}`}>
+              <span className="toast-text">{toast.message}</span>
+            </div>
+          </div>
         )}
       </main>
     </div>

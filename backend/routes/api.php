@@ -28,10 +28,10 @@ use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\RefJenisPembayaranExportController;
 use App\Http\Controllers\JenisTarifExportController;
-use App\Http\Controllers\LaporanRkasController;
-use App\Http\Controllers\LaporanKeuanganYayasanController;
+use App\Http\Controllers\TarifExportController;
 use App\Http\Controllers\MstUnitController;
 use App\Http\Controllers\MstKaryawanController;
+
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -257,10 +257,25 @@ Route::prefix('jenis-tarif')->group(function () {
 // });
 
 Route::prefix('tarif')->group(function () {
+
+    Route::get('/export/excel', [RefTarifController::class, 'exportExcel']);
+    Route::get('/export/pdf',   [RefTarifController::class, 'exportPdf']);
+
     Route::get('/', [RefTarifController::class, 'index']);
     Route::post('/store', [RefTarifController::class, 'store']);
+
+    Route::put('/update/{idJenis}/{idTahun}', [RefTarifController::class, 'update']);
+    Route::delete('/delete/{idJenis}/{idTahun}', [RefTarifController::class, 'destroy']);
+
+
+    Route::get('/tarif', [RefTarifController::class, 'index']);
+    Route::post('/tarif/store', [RefTarifController::class, 'store']);
+    Route::put('/tarif/update/{id}', [RefTarifController::class, 'update']);
+    Route::delete('/tarif/delete/{id}', [RefTarifController::class, 'destroy']);
+    
     Route::put('/update/{id}', [RefTarifController::class, 'update']);
     Route::delete('/delete/{id}', [RefTarifController::class, 'destroy']);
+
 });
 
 Route::prefix('evaluasi-rkt/export')->group(function () {
