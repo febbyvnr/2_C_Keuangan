@@ -23,7 +23,9 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
             const json = await res.json();
             const result = json.data || [];
             setData(result);
-            const hasPending = result.some(item => !item.NIP_VALIDATOR_FPD);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
             setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
@@ -34,9 +36,16 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
         setSearch(value);
         setCurrentPage(1);
         try {
-            const res = await fetch(`http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`);
+            const res = await fetch(
+                `http://localhost:8000/api/fpd-anggaran/search?keyword=${value}`
+            );
             const json = await res.json();
-            setData(json.data || []);
+            const result = json.data || [];
+            setData(result);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
+            setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
         }
@@ -369,10 +378,10 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                             </button>
                         </div>
                         <div className="export-wrapper">
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn">
+                            <a href={`http://localhost:8000/api/fpd-anggaran/export${selected?.ID_FPD ? `/${selected.ID_FPD}` : ""}`} className="btn-outline-success custom-btn">
                                 <i className="bi bi-filetype-xlsx"></i> Export Excel
                             </a>
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-danger custom-btn">
+                            <a href="http://localhost:8000/api/fpd-anggaran/export/pdf" className="btn-outline-danger custom-btn">
                                 <i className="bi bi-filetype-pdf"></i> Export PDF
                             </a>
                         </div>

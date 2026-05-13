@@ -205,6 +205,20 @@ export default function SidebarPm() {
 
               <li className="nav-item">
                 <NavLink
+                  to="/pm/monitoring-mutu"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "nav-link sidebar-active"
+                      : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-graph-up-arrow"></i>
+                  Monitoring Mutu
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
                   to="/pm/kegiatan"
                   className={({ isActive }) =>
                     isActive
@@ -242,6 +256,20 @@ export default function SidebarPm() {
                 >
                   <i className="bi bi-clipboard-check"></i>
                   Evaluasi RKT
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink
+                  to="/pm/verifikasi-evaluasi"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "nav-link sidebar-active"
+                      : "nav-link text-dark"
+                  }
+                >
+                  <i className="bi bi-patch-check"></i>
+                  Verifikasi Evaluasi
                 </NavLink>
               </li>
             </ul>

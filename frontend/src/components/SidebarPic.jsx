@@ -4,6 +4,19 @@ import profile from "../assets/user-profile.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+const MOBILE_BREAKPOINT = 640;
+
+const MENU_ITEMS = [
+  { label: "Dashboard", to: "/pic/guru", icon: "bi bi-columns-gap", end: true },
+  { label: "Page RKT", to: "/pic/guru/rkt", icon: "bi bi-journal-check" },
+  { label: "Page Realisasi RKT", icon: "bi bi-bar-chart-steps" },
+  { label: "Page Bridging RKT", icon: "bi bi-diagram-2" },
+  { label: "Page Pengajuan Dana", to: "/pic/guru/fpd", icon: "bi bi-cash-coin" },
+  { label: "Status Pengajuan", to: "/pic/guru/status-pengajuan", icon: "bi bi-hourglass-split" },
+  { label: "Page LPJ", icon: "bi bi-file-earmark-text" },
+  { label: "Page Evaluasi RKT", icon: "bi bi-clipboard2-pulse" },
+];
+
 export default function SidebarPic() {
   const navigate = useNavigate();
 

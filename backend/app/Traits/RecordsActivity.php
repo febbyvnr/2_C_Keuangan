@@ -4,84 +4,83 @@ namespace App\Traits;
 
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Crypt;
-use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 trait RecordsActivity
 {
     public static function bootRecordsActivity()
     {
         foreach (['created', 'updated', 'deleted'] as $event) {
+            // WAJIB PAKAI TANDA DOLAR ($event) AGAR DINAMIS:
             static::$event(function ($model) use ($event) {
                 $model->recordActivity($event);
             });
         }
     }
 
-    protected function recordActivity($event)
+protected function recordActivity($event)
     {
-        $username = 'System';
-        $role = 'Unknown';
+        // 1. Blokir pencatatan ganda saat data pertama kali dibuat
+        if ($event === 'updated' && $this->wasRecentlyCreated) {
+            return; 
+        }
+
+        // 2. Pembajakan status Soft Delete agar antarmuka menampilkan label 'DELETED'
+        $perubahan = $this->getChanges();
+        if ($event === 'updated' && isset($perubahan['IS_DELETE']) && $perubahan['IS_DELETE'] == 1) {
+            $event = 'deleted';
+        }
+
+        // 3. Ekstraksi Token Kebal Error (Bulletproof)
+        $username    = 'Sistem / Tidak Ditemukan';
+        $role        = 'Unknown';
         $accessLogId = null;
 
-        // 1. Ambil & Decrypt token dari request header
-        $token = request()->bearerToken();
+        // Membaca token otorisasi melalui fungsi bawaan atau pengaksesan header mentah
+        $token = request()->bearerToken() ?? request()->header('Authorization');
 
         if ($token) {
             try {
-                $decrypted = Crypt::decryptString($token);
-                $tokenData = json_decode($decrypted);
-
-                $username = $tokenData->nip ?? 'System';
-                $role = $tokenData->role ?? 'Unknown';
-                $accessLogId = $tokenData->id_access_log ?? null;
-            } catch (Exception $e) {
-                // Jika token tidak valid/bisa didecrypt, abaikan atau biarkan tercatat sebagai System
+                // Hapus prefiks 'Bearer ' serta pangkas sisa tanda kutip/spasi
+                $cleanToken = trim(str_replace('Bearer ', '', $token), '"\' ');
+                $payload = json_decode(\Illuminate\Support\Facades\Crypt::decryptString($cleanToken));
+                
+                if ($payload) {
+                    $username    = $payload->nip ?? $username;
+                    $role        = $payload->role ?? $role;
+                    $accessLogId = $payload->id_access_log ?? null;
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('RecordsActivity gagal mengurai token: ' . $e->getMessage());
             }
         }
 
-        // 2. Nama Aktivitas
+        // 4. Peracikan Nama Aktivitas
         $activityName = strtoupper($event) . ' ' . class_basename($this);
 
-        // 3. Data yang Terkait
-        $relatedData = 'PK ID: ' . $this->getKey();
-
-        // 4. Deskripsi Perubahan (Bahasa Manusia)
+        // 5. Peracikan Deskripsi Riwayat
+        $relatedData = 'ID Record: ' . $this->getKey();
         $description = '';
-        
+
         if ($event === 'created') {
-            $description = "Menambah data baru (ID: " . $this->getKey() . ")";
+            $description = "Berhasil menginput data baru ke dalam sistem.";
         } elseif ($event === 'deleted') {
-            $description = "Menghapus data (ID: " . $this->getKey() . ")";
+            $description = "Data telah dihapus dari sistem.";
         } elseif ($event === 'updated') {
-            $changes = $this->getChanges();
-            $original = $this->getOriginal();
-            $teksPerubahan = [];
-
-            foreach ($changes as $kolom => $nilaiBaru) {
-                // Abaikan jika yang berubah cuma timestamp
-                if ($kolom === 'updated_at' || $kolom === 'created_at') continue;
-
-                $nilaiLama = $original[$kolom] ?? 'kosong';
-                
-                // Pastikan nilainya string supaya tidak error saat digabung
-                $nilaiLamaStr = is_scalar($nilaiLama) ? $nilaiLama : json_encode($nilaiLama);
-                $nilaiBaruStr = is_scalar($nilaiBaru) ? $nilaiBaru : json_encode($nilaiBaru);
-
-                $teksPerubahan[] = "kolom {$kolom} dari '{$nilaiLamaStr}' menjadi '{$nilaiBaruStr}'";
+            $listPerubahan = [];
+            foreach ($perubahan as $kolom => $nilaiBaru) {
+                if ($kolom === 'IS_DELETE') continue;
+                $nilaiLama = $this->getOriginal($kolom) ?? '(kosong)';
+                $listPerubahan[] = "$kolom dari '$nilaiLama' menjadi '$nilaiBaru'";
             }
-
-            if (count($teksPerubahan) > 0) {
-                $description = "Mengubah " . implode(', ', $teksPerubahan);
-            } else {
-                $description = "Memperbarui data";
-            }
+            $description = !empty($listPerubahan) ? "Mengubah nilai " . implode(', ', $listPerubahan) : "Melakukan pembaruan data.";
         }
 
-        // Potong string agar tidak error batas varchar(255) di database
-        $description = substr($description, 0, 250);
+        $description = Str::limit($description, 245);
 
-        // 5. Simpan Log
-        ActivityLog::create([
+        // 6. Penyimpanan Riwayat
+        \App\Models\ActivityLog::create([
             'ID_ACCESS_LOG'        => $accessLogId,
             'EVENT_TIME'           => now(),
             'ACTOR_USERNAME'       => $username,

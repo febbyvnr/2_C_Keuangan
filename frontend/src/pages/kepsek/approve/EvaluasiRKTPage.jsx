@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../../styles/waka/ApprovalCenter.css";
 
-export default function VerifikasiEvaluasiRKT() {
+export default function VerifikasiEvaluasiRKT({ setHasPending }) {
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [search, setSearch] = useState("");
@@ -18,7 +18,12 @@ export default function VerifikasiEvaluasiRKT() {
         try {
             const res = await fetch("http://localhost:8000/api/evaluasi-rkt");
             const json = await res.json();
-            setData(json.data || []);
+            const result = json.data || [];
+            setData(result);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
+            setHasPending && setHasPending(hasPending);
         } catch (err) {
             console.error(err);
         }
@@ -31,19 +36,23 @@ export default function VerifikasiEvaluasiRKT() {
                 `http://localhost:8000/api/evaluasi-rkt/search?keyword=${value}`
             );
             const json = await res.json();
-            setData(json.data || []);
+            const result = json.data || [];
+            setData(result);
+            const hasPending = result.some(
+                (item) => getStatus(item).type === "pending"
+            );
+            setHasPending && setHasPending(hasPending);
             setCurrentPage(1);
         } catch (err) {
             console.error(err);
         }
     };
-
     const getStatus = (item) => {
         const validator = item.NIP_VALIDATOR_PM;
         if (!validator) {
             return {
                 type: "waiting-bendahara",
-                label: "Menunggu Bendahara"
+                label: "Menunggu PM"
             };
         }
         if (validator === "Ditolak") {
@@ -130,14 +139,13 @@ export default function VerifikasiEvaluasiRKT() {
                         <button className="dropdown-btn">
                             {statusFilter === "default" && "Semua"}
                             {statusFilter === "waiting-bendahara" &&
-                                "Menunggu Bendahara"}
+                                "Menunggu Tim PM"}
                             {statusFilter === "pending" &&
                                 "Pending Kepsek"}
                             {statusFilter === "approved" &&
                                 "Disetujui"}
                             {statusFilter === "rejected" &&
                                 "Ditolak"}
-
                             <i className="bi bi-chevron-down"></i>
                         </button>
                         <div className="dropdown-menu">
@@ -149,7 +157,7 @@ export default function VerifikasiEvaluasiRKT() {
                                     setStatusFilter("waiting-bendahara")
                                 }
                             >
-                                Menunggu Bendahara
+                                Menunggu Tim PM
                             </div>
                             <div onClick={() => setStatusFilter("pending")}>
                                 Pending Kepsek
@@ -232,11 +240,13 @@ export default function VerifikasiEvaluasiRKT() {
                                                 ).toLocaleDateString("id-ID")}
                                             </td>
                                             <td>
-                                                <span
-                                                    className={`status ${status.type}`}
-                                                >
-                                                    {status.label}
-                                                </span>
+                                                {status.type === "pending" ? (
+                                                    <i className="bi bi-exclamation-circle-fill icon-danger icon-warning-animate"></i>
+                                                ) : (
+                                                    <span className={`status ${status.type}`}>
+                                                        {status.label}
+                                                    </span>
+                                                )}
                                             </td>
                                         </tr>
                                     );
@@ -329,9 +339,9 @@ export default function VerifikasiEvaluasiRKT() {
                                     </span>
                                 </div>
                                 <div className="detail-row">
-                                    <span>Validatpr</span>
+                                    <span>Validator</span>
                                     <span>
-                                        {selected.NIP_VALIDATOR_PM || "Menunggu Validasi Bendahara"}
+                                        {selected.NIP_VALIDATOR_PM || "Menunggu Validasi Tim PM"}
                                     </span>
                                 </div>
                             </div>

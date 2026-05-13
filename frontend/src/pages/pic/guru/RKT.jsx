@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/bendahara/SidebarBendahara.css";
 import "../../../styles/pic/guru/RKT.css";
 import { Plus} from "lucide-react";
@@ -29,6 +28,28 @@ function formatLongDate(value) {
   });
 }
 
+function getLatestReviewNote(item) {
+  const trPmList = item?.trPm || item?.tr_pm || [];
+  const lastTrPm = trPmList.length > 0 ? trPmList[trPmList.length - 1] : null;
+
+  const rawNote =
+    lastTrPm?.DESKRIPSI_TR_PM ||
+    lastTrPm?.deskripsi_tr_pm ||
+    item?.DESKRIPSI_TR_PM ||
+    item?.CATATAN_REVISI ||
+    item?.catatan_revisi ||
+    "";
+
+  if (!rawNote) return "Belum ada catatan.";
+
+  const parts = String(rawNote)
+    .split(/\s:\s(?=Draft|Diajukan|Revisi|Ditolak|Disetujui)/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts.length ? parts[parts.length - 1] : rawNote;
+}
+
 function getStatusInfo(item) {
   if (!item) {
     return {
@@ -42,10 +63,28 @@ function getStatusInfo(item) {
   const validator = item?.NIP_VALIDATOR_PROGKER;
 
   const trPmList = item?.trPm || item?.tr_pm || [];
-  const lastNote = trPmList[trPmList.length - 1]?.DESKRIPSI_TR_PM || "";
-  const note = lastNote.toLowerCase().trim();
+  const lastTrPm = trPmList.length > 0 ? trPmList[trPmList.length - 1] : null;
 
-  if (note.startsWith("draft")) {
+  const aksi = String(
+    lastTrPm?.AKSI ||
+      lastTrPm?.aksi ||
+      item?.AKSI ||
+      item?.aksi ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+
+  const note = String(
+    lastTrPm?.DESKRIPSI_TR_PM ||
+      lastTrPm?.deskripsi_tr_pm ||
+      item?.DESKRIPSI_TR_PM ||
+      ""
+  )
+    .toLowerCase()
+    .trim();
+
+  if (aksi === "DRAFT" || note.startsWith("draft")) {
     return {
       value: "draft",
       label: "Draft",
@@ -54,16 +93,27 @@ function getStatusInfo(item) {
     };
   }
 
-  if (note.startsWith("ditolak")) {
+  if (
+    aksi === "TOLAK" ||
+    aksi === "DITOLAK" ||
+    aksi === "REJECT" ||
+    note.includes("ditolak") ||
+    note.includes("tolak")
+  ) {
     return {
       value: "ditolak",
       label: "Ditolak",
-      detailLabel: "Ditolak",
+      detailLabel: "Ditolak Kepala Sekolah",
       className: "rkt-status-badge rejected",
     };
   }
 
-  if (note.startsWith("revisi")) {
+  if (
+    aksi === "REVISI" ||
+    aksi === "REVISION" ||
+    note.startsWith("revisi") ||
+    note.includes(": revisi")
+  ) {
     return {
       value: "revisi",
       label: "Revisi",
@@ -72,7 +122,26 @@ function getStatusInfo(item) {
     };
   }
 
-  if (validator) {
+  if (
+    aksi === "DIAJUKAN" ||
+    note.startsWith("diajukan") ||
+    note.includes(": diajukan")
+  ) {
+    return {
+      value: "diajukan",
+      label: "Diajukan",
+      detailLabel: "Menunggu Approval Kepala Sekolah",
+      className: "rkt-status-badge submitted",
+    };
+  }
+
+  if (
+    aksi === "SETUJUI" ||
+    aksi === "DISETUJUI" ||
+    aksi === "APPROVE" ||
+    aksi === "APPROVED" ||
+    validator
+  ) {
     return {
       value: "disetujui",
       label: "Disetujui",
@@ -86,6 +155,60 @@ function getStatusInfo(item) {
     label: "Diajukan",
     detailLabel: "Menunggu Approval Kepala Sekolah",
     className: "rkt-status-badge submitted",
+  };
+}
+
+function getRkaDetails(item) {
+  return (
+    item?.detailProgramKerja ||
+    item?.detail_program_kerja ||
+    item?.Rka ||
+    item?.rka ||
+    []
+  );
+}
+
+function getTotalRka(item) {
+  return getRkaDetails(item).reduce((total, detail) => {
+    return total + Number(detail.NOMINAL || 0);
+  }, 0);
+}
+
+function getRkaValidationInfo(item) {
+  const pagu = Number(item?.TOTAL_PROGKER || 0);
+  const totalRka = getTotalRka(item);
+  const minimalRka = pagu * 0.95;
+  if (!item) {
+    return {
+      valid: false,
+      label: "Pilih RKT terlebih dahulu.",
+    };
+  }
+
+  if (totalRka <= 0) {
+    return {
+      valid: false,
+      label: "Lengkapi rincian RKA terlebih dahulu sebelum mengajukan RKT",
+    };
+  }
+
+  if (totalRka > pagu) {
+    return {
+      valid: false,
+      label: "Total RKA melebihi pagu",
+    };
+  }
+
+  if (totalRka < minimalRka) {
+    return {
+      valid: false,
+      label: "Total RKA belum mencapai 95% pagu",
+    };
+  }
+
+  return {
+    valid: true,
+    label: "RKA sesuai anggaran",
   };
 }
 
@@ -108,6 +231,17 @@ export default function RKT() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const selectedItem = useMemo(() => {
     return data.find((item) => item.ID_PROGRAM_KERJA === selectedId) || null;
@@ -224,8 +358,12 @@ export default function RKT() {
   const canDelete =
     isOwner && (selectedStatusValue === "draft");
 
+  const selectedRkaInfo = getRkaValidationInfo(selectedItem);
+
   const canSubmit =
-    isOwner && selectedStatusValue === "draft";
+    isOwner &&
+    selectedStatusValue === "draft" &&
+    selectedRkaInfo.valid;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -267,7 +405,7 @@ export default function RKT() {
       await axios.post(`http://127.0.0.1:8000/api/rkt/ajukan/${id}`, {
         NIP_LOGIN: nipLogin,
       });
-
+      showToast("success", "RKT berhasil diajukan ke Kepala Sekolah.");
       await fetchRkt(search, pagination.currentPage);
     } catch (error) {
       alert(error.response?.data?.message || "Gagal mengajukan RKT");
@@ -288,7 +426,7 @@ export default function RKT() {
           },
         }
       );
-
+      showToast("success", "RKT berhasil dihapus.");
       setDeleteTarget(null);
 
       const nextPage =
@@ -298,7 +436,13 @@ export default function RKT() {
 
       await fetchRkt(search, nextPage);
     } catch (error) {
-      alert(error.response?.data?.message || "Data gagal dihapus");
+      showToast(
+        "error",
+        error.response?.data?.message || "Data gagal dihapus."
+      );
+      setTimeout(() => {
+        setDeleteTarget(null);
+      }, 300);
     } finally {
       setDeleting(false);
     }
@@ -346,7 +490,6 @@ export default function RKT() {
 
   return (
     <div className="rkt-shell">
-      <SidebarPic />
 
       <main className="rkt-main">
         <div className="rkt-wrapper">
@@ -677,15 +820,32 @@ export default function RKT() {
                     </div>
 
                     <div className="rkt-note-box">
-                      <div className="rkt-note-title">Catatan Revisi / Review</div>
+                      <div className="rkt-note-title">
+                        {selectedStatusValue === "draft"
+                          ? "Catatan Draft"
+                          : selectedStatusValue === "diajukan"
+                          ? "Catatan Pengajuan"
+                          : selectedStatusValue === "revisi"
+                          ? "Catatan Revisi"
+                          : selectedStatusValue === "ditolak"
+                          ? "Catatan Penolakan"
+                          : selectedStatusValue === "disetujui"
+                          ? "Catatan Persetujuan"
+                          : "Catatan Revisi / Review"}
+                      </div>
+
                       <div className="rkt-note-content">
-                        {selectedItem.tr_pm?.[selectedItem.tr_pm.length - 1]?.DESKRIPSI_TR_PM ||
-                          selectedItem.trPm?.[selectedItem.trPm.length - 1]?.DESKRIPSI_TR_PM ||
-                          selectedItem.CATATAN_REVISI ||
-                          selectedItem.catatan_revisi ||
-                          "Belum ada catatan revisi."}
+                        {getLatestReviewNote(selectedItem)}
                       </div>
                     </div>
+                    {(selectedStatusValue === "draft" || selectedStatusValue === "revisi") && (
+                      <div className="rkt-note-box">
+                        <div className="rkt-note-title">Status RKA</div>
+                        <div className="rkt-note-content">
+                          {selectedRkaInfo.label}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="rkt-detail-actions">
@@ -746,6 +906,7 @@ export default function RKT() {
                         <button
                           className="btn-primary-custom rkt-detail-btn"
                           disabled={!canSubmit}
+                          title={!selectedRkaInfo.valid ? selectedRkaInfo.label : "Ajukan RKT"}
                           onClick={() => handleAjukan(selectedItem.ID_PROGRAM_KERJA)}
                         >
                           Ajukan
@@ -817,7 +978,13 @@ export default function RKT() {
           </div>
         )}
 
-
+        {toast && (
+          <div className={`toast-container ${visible ? "show" : "hide"}`}>
+            <div className={`toast-box ${toast.type}`}>
+              <span className="toast-text">{toast.message}</span>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

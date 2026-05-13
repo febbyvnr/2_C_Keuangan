@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import SidebarPic from "../../../components/SidebarPic";
 import "../../../styles/pic/guru/CreateRKT.css";
 
 const API_BASE_URL =
@@ -38,6 +37,29 @@ const normalizeDate = (value) => {
   if (!value) return "";
   return String(value).slice(0, 10);
 };
+
+function getLatestReviewNote(rawNote = "") {
+  if (!rawNote) return "";
+
+  const note = String(rawNote).trim();
+
+  const revisiIndex = note.toLowerCase().lastIndexOf("revisi:");
+  if (revisiIndex !== -1) {
+    return note.slice(revisiIndex).trim();
+  }
+
+  const ditolakIndex = note.toLowerCase().lastIndexOf("ditolak:");
+  if (ditolakIndex !== -1) {
+    return note.slice(ditolakIndex).trim();
+  }
+
+  const tolakIndex = note.toLowerCase().lastIndexOf("tolak:");
+  if (tolakIndex !== -1) {
+    return note.slice(tolakIndex).trim();
+  }
+
+  return note;
+}
 
 // const normalizeUnitLabel = (item) =>
 //   item?.NAMA_UNIT ??
@@ -117,7 +139,8 @@ export default function CreateRKT() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [catatanReview, setCatatanReview] = useState("");
-
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
   const waktuAwalRef = useRef(null);
   const waktuAkhirRef = useRef(null);
 
@@ -129,6 +152,14 @@ export default function CreateRKT() {
   ]
     .filter(Boolean)
     .join(" - ");
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const loadMasterData = async () => {
     // const [unitJson, taJson, tanJson, coaJson, kegiatanJson] =
@@ -176,7 +207,7 @@ export default function CreateRKT() {
         );
       })?.DESKRIPSI_TR_PM;
 
-    setCatatanReview(reviewNote || "" );
+    setCatatanReview(getLatestReviewNote(reviewNote || ""));
 
     setForm({
       ID_TA_ANGGARAN: String(data?.ID_TA_ANGGARAN ?? ""),
@@ -248,7 +279,7 @@ export default function CreateRKT() {
     }
   };
 
-  const handleSubmit = async (event, aksi = "AJUKAN") => {
+  const handleSubmit = async (event, aksi = "DRAFT") => {
     event.preventDefault();
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -288,15 +319,15 @@ export default function CreateRKT() {
         body: JSON.stringify(payload),
       });
 
-      setMessage(
-        isEditMode
-          ? "RKT berhasil diperbarui."
-          : aksi === "DRAFT"
-          ? "RKT berhasil disimpan sebagai draft."
-          : "RKT berhasil diajukan."
-      );
+      const successMessage = isEditMode
+        ? "Perbaikan RKT berhasil disimpan."
+        : "RKT berhasil disimpan sebagai draft.";
 
-      navigate("/pic/guru/rkt");
+      showToast("success", successMessage);
+
+      setTimeout(() => {
+        navigate("/pic/guru/rkt");
+      }, 1200);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -306,8 +337,6 @@ export default function CreateRKT() {
 
   return (
     <div className="create-rkt-shell">
-      <SidebarPic />
-
       <main className="create-rkt-main">
         <section className="create-rkt-card">
           <div className="create-rkt-card-head">
@@ -316,7 +345,7 @@ export default function CreateRKT() {
               <p>
                 {isEditMode
                   ? "Perbarui data RKT sesuai catatan review."
-                  : "Simpan sebagai draft atau ajukan RKT untuk direview."}
+                  : "Simpan sebagai draft. Setelah itu lengkapi RKA sebelum diajukan ke Kepala Sekolah."}
               </p>
             </div>
 
@@ -342,7 +371,8 @@ export default function CreateRKT() {
 
           {isEditMode && catatanReview ? (
             <div className="create-rkt-feedback error">
-              <strong>Catatan Review:</strong> {catatanReview}
+              <strong>Catatan Revisi: </strong>
+              <p>{catatanReview.replace(/^revisi:\s*/i, "")}</p>
             </div>
           ) : null}
 
@@ -359,7 +389,7 @@ export default function CreateRKT() {
           ) : (
             <form
               className="create-rkt-form"
-              onSubmit={(event) => handleSubmit(event, "AJUKAN")}
+              onSubmit={(event) => handleSubmit(event, "DRAFT")}
             >
               <div className="create-rkt-master-grid">
                 <label className="create-rkt-field">
@@ -577,39 +607,40 @@ export default function CreateRKT() {
                 {!isEditMode && (
                   <button
                     type="button"
-                    className="create-rkt-button secondary"
+                    className="create-rkt-button primary"
                     disabled={Boolean(submittingAction)}
                     onClick={(event) => handleSubmit(event, "DRAFT")}
                   >
-                    {submittingAction === "DRAFT"
-                      ? "Menyimpan..."
-                      : "Simpan Draft"}
+                    {submittingAction === "DRAFT" ? "Menyimpan..." : "Simpan Draft"}
                   </button>
                 )}
 
-                <button
-                  type="submit"
-                  className="create-rkt-button primary"
-                  disabled={Boolean(submittingAction)}
-                >
-                  {submittingAction === "AJUKAN"
-                    ? isEditMode
-                      ? "Menyimpan..."
-                      : "Mengajukan..."
-                    : isEditMode
-                    ? "Simpan Perbaikan"
-                    : "Ajukan RKT"}
-                </button>
+                {isEditMode && (
+                  <button
+                    type="submit"
+                    className="create-rkt-button primary"
+                    disabled={Boolean(submittingAction)}
+                  >
+                    {submittingAction ? "Menyimpan..." : "Simpan Perbaikan"}
+                  </button>
+                )}
 
                 {!isEditMode && (
                   <p className="create-rkt-hint">
-                    Draft bisa diedit kapan saja sebelum diajukan.
+                    RKT akan disimpan sebagai draft. Lengkapi RKA terlebih dahulu sebelum mengajukan ke Kepala Sekolah.
                   </p>
                 )}
               </div>
             </form>
           )}
         </section>
+        {toast && (
+          <div className={`toast-container ${visible ? "show" : "hide"}`}>
+            <div className={`toast-box ${toast.type}`}>
+              <span className="toast-text">{toast.message}</span>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
