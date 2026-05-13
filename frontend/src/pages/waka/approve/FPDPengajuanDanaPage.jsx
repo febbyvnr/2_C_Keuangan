@@ -370,7 +370,7 @@ export default function FPDPengajuanDanaPage({ setHasPending }) {
                             </button>
                         </div>
                         <div className="export-wrapper">
-                            <a href={`http://localhost:8000/api/fpd-anggaran/export/${selected?.ID_FPD || ""}`} className="btn-outline-success custom-btn">
+                            <a href={`http://localhost:8000/api/fpd-anggaran/export${selected?.ID_FPD ? `/${selected.ID_FPD}` : ""}`} className="btn-outline-success custom-btn">
                                 <i className="bi bi-filetype-xlsx"></i> Export Excel
                             </a>
                             {/* <a href={`http://localhost:8000/api/fpd-anggaran/export/pdf/${selected?.ID_FPD || ""}`} className="btn-outline-danger custom-btn">
