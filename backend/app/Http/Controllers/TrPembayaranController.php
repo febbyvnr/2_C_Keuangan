@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\TrPembayaran;
 use App\Models\TagihanSiswa;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class TrPembayaranController extends Controller
 {
@@ -88,7 +89,7 @@ class TrPembayaranController extends Controller
             'REF_ID_JENIS_PEMBAYARAN' => 'nullable|integer',
             'TGL_BAYAR' => 'nullable|date',
             'JUMLAH_BAYAR' => 'required|numeric|min:1',
-            'LINK_BUKTI_BAYAR' => 'required|string|max:255',
+            'LINK_BUKTI_BAYAR' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'NIP_VALIDATOR_PEMBAYARAN' => 'nullable|string|max:20',
         ]);
 
@@ -140,6 +141,20 @@ class TrPembayaranController extends Controller
             ], 422);
         }
 
+        $linkBuktiBayar = 'pembayaran-tunai';
+
+        if ($request->hasFile('LINK_BUKTI_BAYAR')) {
+
+            $path = $request
+                ->file('LINK_BUKTI_BAYAR')
+                ->store(
+                    'bukti-pembayaran',
+                    'public'
+                );
+
+            $linkBuktiBayar = $path;
+        }
+
         $data = TrPembayaran::create([
             'ID_SISWA_TETAP' => $tagihan->ID_SISWA_TETAP,
             'KODE_TA' => optional($tagihan->siswa)->KODE_TA ?? ($validated['KODE_TA'] ?? null),
@@ -148,7 +163,7 @@ class TrPembayaranController extends Controller
             'REF_ID_JENIS_PEMBAYARAN' => $validated['REF_ID_JENIS_PEMBAYARAN'] ?? $idMetodePembayaran,
             'TGL_BAYAR' => $validated['TGL_BAYAR'] ?? now(),
             'JUMLAH_BAYAR' => $validated['JUMLAH_BAYAR'],
-            'LINK_BUKTI_BAYAR' => $validated['LINK_BUKTI_BAYAR'],
+            'LINK_BUKTI_BAYAR' => $linkBuktiBayar,
             'NIP_VALIDATOR_PEMBAYARAN' => $validated['NIP_VALIDATOR_PEMBAYARAN'] ?? null,
         ]);
 
