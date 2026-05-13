@@ -270,7 +270,7 @@ export default function CreateRKT() {
     }
   };
 
-  const handleSubmit = async (event, aksi = "AJUKAN") => {
+  const handleSubmit = async (event, aksi = "DRAFT") => {
     event.preventDefault();
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -310,13 +310,12 @@ export default function CreateRKT() {
         body: JSON.stringify(payload),
       });
 
-      setMessage(
-        isEditMode
-          ? "RKT berhasil diperbarui."
-          : aksi === "DRAFT"
-          ? "RKT berhasil disimpan sebagai draft."
-          : "RKT berhasil diajukan."
-      );
+      const successMessage = isEditMode
+        ? "Perbaikan RKT berhasil disimpan."
+        : "RKT berhasil disimpan sebagai draft.";
+
+      setMessage(successMessage);
+      alert(successMessage);
 
       navigate("/pic/guru/rkt");
     } catch (err) {
@@ -336,7 +335,7 @@ export default function CreateRKT() {
               <p>
                 {isEditMode
                   ? "Perbarui data RKT sesuai catatan review."
-                  : "Simpan sebagai draft atau ajukan RKT untuk direview."}
+                  : "Simpan sebagai draft. Setelah itu lengkapi RKA sebelum diajukan ke Kepala Sekolah."}
               </p>
             </div>
 
@@ -380,7 +379,7 @@ export default function CreateRKT() {
           ) : (
             <form
               className="create-rkt-form"
-              onSubmit={(event) => handleSubmit(event, "AJUKAN")}
+              onSubmit={(event) => handleSubmit(event, "DRAFT")}
             >
               <div className="create-rkt-master-grid">
                 <label className="create-rkt-field">
@@ -598,33 +597,27 @@ export default function CreateRKT() {
                 {!isEditMode && (
                   <button
                     type="button"
-                    className="create-rkt-button secondary"
+                    className="create-rkt-button primary"
                     disabled={Boolean(submittingAction)}
                     onClick={(event) => handleSubmit(event, "DRAFT")}
                   >
-                    {submittingAction === "DRAFT"
-                      ? "Menyimpan..."
-                      : "Simpan Draft"}
+                    {submittingAction === "DRAFT" ? "Menyimpan..." : "Simpan Draft"}
                   </button>
                 )}
 
-                <button
-                  type="submit"
-                  className="create-rkt-button primary"
-                  disabled={Boolean(submittingAction)}
-                >
-                  {submittingAction === "AJUKAN"
-                    ? isEditMode
-                      ? "Menyimpan..."
-                      : "Mengajukan..."
-                    : isEditMode
-                    ? "Simpan Perbaikan"
-                    : "Ajukan RKT"}
-                </button>
+                {isEditMode && (
+                  <button
+                    type="submit"
+                    className="create-rkt-button primary"
+                    disabled={Boolean(submittingAction)}
+                  >
+                    {submittingAction ? "Menyimpan..." : "Simpan Perbaikan"}
+                  </button>
+                )}
 
                 {!isEditMode && (
                   <p className="create-rkt-hint">
-                    Draft bisa diedit kapan saja sebelum diajukan.
+                    RKT akan disimpan sebagai draft. Lengkapi RKA terlebih dahulu sebelum mengajukan ke Kepala Sekolah.
                   </p>
                 )}
               </div>
