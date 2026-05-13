@@ -631,3 +631,86 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========================= */
+/* FILTER TAHUN HEADER */
+/* ========================= */
+
+.pm-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pm-header-filter {
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  gap: 6px;
+}
+
+.pm-header-filter label {
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #ffffff;
+}
+
+.pm-filter-select {
+  min-width: 120px;
+
+  padding: 7px 12px;
+
+  border-radius: 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  outline: none;
+
+  backdrop-filter: blur(4px);
+
+  transition: all 0.2s ease;
+}
+
+.pm-filter-select:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.pm-filter-select:focus {
+  border-color: #ffffff;
+}
+
+.pm-filter-select option {
+  color: #111827;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  .pm-header-card {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 18px;
+  }
+
+  .pm-header-filter {
+    width: 100%;
+
+    align-items: flex-start;
+  }
+
+  .pm-filter-select {
+    width: 100%;
+  }
+}
