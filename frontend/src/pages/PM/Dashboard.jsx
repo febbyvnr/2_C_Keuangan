@@ -50,7 +50,7 @@ export default function DashboardPM() {
 
           {/* FILTER TAHUN */}
           <div className="pm-header-filter">
-            <label>Tahun</label>
+            <label>Tahun (ID)</label>
 
             <select
               value={tahun}
@@ -102,7 +102,7 @@ export default function DashboardPM() {
 
           {/* FILTER TAHUN */}
           <div className="pm-header-filter">
-            <label>Tahun</label>
+            <label>Tahun (ID)</label>
 
             <select
               value={tahun}
@@ -165,7 +165,7 @@ export default function DashboardPM() {
 
         {/* FILTER TAHUN */}
         <div className="pm-header-filter">
-          <label>Tahun</label>
+          <label>Tahun (ID)</label>
 
           <select
             value={tahun}
