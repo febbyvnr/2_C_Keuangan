@@ -299,11 +299,7 @@ export default function App() {
           <Route path="referensi" element={<ReferensiPm />} />
           <Route path="kegiatan" element={<KepsekMasterKegiatan />} />
           <Route path="rkt" element={<PMRKT />} />
-          <Route path="evaluasi-rkt" element={
-              <div>
-                <h1>Evaluasi RKT</h1>
-              </div>
-            }
+          <Route path="evaluasi-rkt" element={<VerifikasiEvaluasiPm />}
           />
         </Route>
       </Routes>

@@ -147,6 +147,8 @@
   color: #1a1a1a;
   font-size: 12px;
   vertical-align: middle;
+
+  line-height: 1;
 }
 
 .verifikasi-pm-table tr:hover {
@@ -207,11 +209,16 @@
   color: #7d7d7e;
 }
 
+.aksi button {
+  margin: 0;
+}
+
 .aksi {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 3px;
+  height: 32px;
 }
 
 .btn-view,
@@ -221,7 +228,7 @@
   border-radius: 8px;
   cursor: pointer;
   color: #ffffff;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -237,9 +244,22 @@
 .btn-reject svg {
   font-size: 14px !important;
   color: #ffffff !important;
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+}
+
+.btn-approve svg {
+  transform: translateY(-2px);
+}
+
+.btn-view,
+.btn-approve,
+.btn-reject {
+  vertical-align: middle;
 }
 
 .btn-view {
@@ -265,6 +285,15 @@
 .btn-reject:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .status-badge {

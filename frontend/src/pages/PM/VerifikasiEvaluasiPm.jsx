@@ -6,6 +6,7 @@ import {
   FaEye,
   FaCheck,
   FaTimes,
+  FaCheckCircle,
 } from "react-icons/fa";
 import "../../styles/PM/VerifikasiEvaluasiPm.css";
 
@@ -74,7 +75,7 @@ export default function VerifikasiEvaluasiPm() {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   const currentUser = (() => {
     try {
@@ -226,7 +227,7 @@ export default function VerifikasiEvaluasiPm() {
   return (
     <div className="verifikasi-pm-container">
       <div className="verifikasi-pm-header">
-        <h2>Verifikasi Evaluasi PM</h2>
+        <h2>Verifikasi & Evaluasi PM</h2>
 
         <div className="verifikasi-pm-toolbar">
           <button className="btn-reset" onClick={handleReset}>
