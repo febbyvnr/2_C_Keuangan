@@ -64,8 +64,11 @@ Route::middleware('auth:sanctum')->prefix('admin/account')->group(function () {
     Route::post('/siswa/bulk-generate-password', [AccountController::class, 'bulkGenerateStudentCredentials']);
     
     // Kelola Akun Staf/Karyawan
+    Route::get('/roles', [AccountController::class, 'listRoleOptions']);
     Route::get('/karyawan', [AccountController::class, 'listStaffAccounts']);
     Route::post('/karyawan', [AccountController::class, 'storeStaffAccount']);
+    Route::put('/karyawan/{nip}/role', [AccountController::class, 'assignStaffRole']);
+    Route::delete('/karyawan/{nip}/role', [AccountController::class, 'revokeStaffRole']);
     Route::put('/karyawan/{nip}/password', [AccountController::class, 'resetStaffPassword']);
 });
 
