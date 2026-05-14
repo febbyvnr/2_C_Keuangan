@@ -944,3 +944,47 @@ body:has(.sidebar-container.collapsed) .tagihan-page {
 body:has(.sidebar-container.collapsed) .tagihan-header {
   padding-left: 68px;
 }
+
+.tagihan-toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  z-index: 10000;
+  opacity: 0;
+  transform: translate(-50%, -20px);
+  transition: all 0.3s ease;
+}
+
+.tagihan-toast-container.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.tagihan-toast-container.hide {
+  opacity: 0;
+  transform: translate(-50%, -20px);
+}
+
+.tagihan-toast-box {
+  min-width: 280px;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 5px solid #265f9c;
+}
+
+.tagihan-toast-box.success {
+  border-left-color: #16a34a;
+}
+
+.tagihan-toast-box.error {
+  border-left-color: #c62828;
+}
+
+.tagihan-toast-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}

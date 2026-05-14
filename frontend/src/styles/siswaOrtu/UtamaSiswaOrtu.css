@@ -322,7 +322,7 @@
 
 /* ===== TABEL TAGIHAN AKTIF ===== */
 .bill-table {
-  min-width: 700px;
+  min-width: 800px;
 }
 
 .bill-table th:nth-child(1),
@@ -338,25 +338,28 @@
 .bill-table th:nth-child(3),
 .bill-table td:nth-child(3),
 .bill-table th:nth-child(4),
-.bill-table td:nth-child(4) {
-  width: 130px;
-}
-
+.bill-table td:nth-child(4),
 .bill-table th:nth-child(5),
 .bill-table td:nth-child(5) {
-  width: 80px;
+  width: 130px;
 }
 
 .bill-table th:nth-child(6),
 .bill-table td:nth-child(6) {
-  width: 105px;
+  width: 115px;
   text-align: center;
 }
 
 .bill-table th:nth-child(7),
 .bill-table td:nth-child(7) {
-  width: 115px;
+  width: 105px;
   text-align: center;
+}
+
+.bill-table td:nth-child(3),
+.bill-table td:nth-child(4),
+.bill-table td:nth-child(5) {
+  white-space: nowrap;
 }
 
 /* ===== TABEL RIWAYAT PEMBAYARAN ===== */
@@ -389,48 +392,66 @@
   width: 90px;
   text-align: center;
 }
+
 .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 0 12px;
+
+  width: 92px;
+  height: 30px;
+  padding: 0 10px;
+
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 20px;
+  text-align: center;
   white-space: nowrap;
   box-sizing: border-box;
 }
 
 .status-badge.success {
-  background: rgba(46, 125, 50, 0.12);
-  color: #2e7d32;
+  background: #dcfce7;
+  color: #15803d;
 }
 
 .status-badge.danger {
-  background: rgba(198, 40, 40, 0.12);
-  color: #c62828;
-}
-
-.status-badge.warning {
-  background: rgba(237, 166, 15, 0.18);
-  color: #9a6b00;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .status-badge.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* .status-badge.info {
   background: rgba(38, 95, 156, 0.12);
   color: #265f9c;
-}
+} */
 
 
 .action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 34px;
+  padding: 0 12px;
   border: none;
   border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  min-width: 120px;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .action-btn-pay {
@@ -848,12 +869,13 @@
     padding: 0 9px;
   }
 
-  .action-btn {
-    min-width: 82px;
-    padding: 7px 9px;
-    font-size: 11px;
-    border-radius: 8px;
-  }
+  /* .status-badge {
+    width: 88px;
+    height: 28px;
+    padding: 0 px;
+    font-size: 10px;
+    line-height: 20px;
+  } */
 
   .portal-pagination {
     margin-top: 12px;
