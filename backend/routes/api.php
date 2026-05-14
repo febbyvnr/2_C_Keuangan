@@ -382,4 +382,5 @@ Route::get('/dashboard-kepsekrkt', [DashboardKepsekRKTController::class, 'index'
 
 Route::prefix('inventaris')->group(function () {
     Route::get('/', [InventarisController::class, 'index']);
+    Route::get('/{id}', [InventarisController::class, 'show'])->whereNumber('id');
 });
