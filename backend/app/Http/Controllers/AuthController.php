@@ -6,7 +6,6 @@ use App\Models\MstKaryawan;
 use App\Models\MstSiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -44,25 +43,29 @@ class AuthController extends Controller
         // =====================================================================
         // --- SKENARIO 1: CEK SEBAGAI KARYAWAN ---
         // =====================================================================
-        $karyawan = MstKaryawan::where('NIP_KARYAWAN', $identifier)->first();
+        $karyawan = MstKaryawan::with('jabatans')
+            ->where('NIP_KARYAWAN', $identifier)
+            ->first();
 
         // Cek password (mendukung Plain Text untuk data lama atau Hash Bcrypt)
         if ($karyawan && ($password === $karyawan->PASSWORD_KARYAWAN || Hash::check($password, $karyawan->PASSWORD_KARYAWAN))) {
             
             // Ambil roles dari relasi jabatan (jika ada)
-            $roles = [];
-            if ($karyawan->relationLoaded('jabatan') || $karyawan->jabatan) {
-                $roles = array_filter([
-                    optional($karyawan->jabatan)->DESKRIPSI_JABATAN
-                ]);
-            }
+            $roles = $karyawan->jabatans
+                ? $karyawan->jabatans->pluck('DESKRIPSI_JABATAN')->filter()->values()->all()
+                : [];
             
             // Jika array roles kosong, masukkan jabatan fungsional sebagai default
             if (empty($roles)) {
                 $roles = [$karyawan->JABATAN_FUNGSIONAL ?? 'Karyawan'];
             }
 
-            $token = $karyawan->createToken('karyawan-token', ['role:karyawan'])->plainTextToken;
+            $abilities = ['role:karyawan'];
+            foreach ($roles as $role) {
+                $abilities[] = 'role:' . strtolower(trim($role));
+            }
+
+            $token = $karyawan->createToken('karyawan-token', $abilities)->plainTextToken;
 
             return response()->json([
                 'success' => true,

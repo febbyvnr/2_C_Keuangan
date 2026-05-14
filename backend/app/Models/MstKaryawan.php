@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // 2. Wajib import ini
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MstKaryawan extends Authenticatable // 3. Ganti extends-nya
 {
@@ -60,5 +61,17 @@ class MstKaryawan extends Authenticatable // 3. Ganti extends-nya
     public function jabatan()
     {
         return $this->hasOne(TrJabatan::class, 'NIP_KARYAWAN', 'NIP_KARYAWAN');
+    }
+
+    public function jabatans(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            RefJabatanStr::class,
+            'tr_jabatan',
+            'NIP_KARYAWAN',
+            'ID_JABATAN',
+            'NIP_KARYAWAN',
+            'ID_JABATAN'
+        );
     }
 }
