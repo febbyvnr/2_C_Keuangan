@@ -219,8 +219,13 @@ class TagihanSiswaController extends Controller
             );
 
             $jumlahPembayaran = $tagihan->pembayaran->count();
-            $totalPembayaran = (float) $tagihan->pembayaran->sum('JUMLAH_BAYAR');
-
+            // $totalPembayaran = (float) $tagihan->pembayaran->sum('JUMLAH_BAYAR');
+            $totalPembayaran = $tagihan->pembayaran
+                ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+                ->sum('JUMLAH_BAYAR');
+            $adaPembayaranPending = $tagihan->pembayaran
+                ->whereNull('NIP_VALIDATOR_PEMBAYARAN')
+                ->count() > 0;
             if ($jumlahPembayaran > 0) {
                 if ((int) $validated['ID_SISWA_TETAP'] !== (int) $tagihan->ID_SISWA_TETAP) {
                     return response()->json([
@@ -244,11 +249,15 @@ class TagihanSiswaController extends Controller
                 }
             }
 
-            $statusFinal = $validated['STATUS_TAGIHAN_SISWA'];
-
-            if ($totalPembayaran >= (float) $validated['JUMLAH_TAGIHAN_SISWA'] && (float) $validated['JUMLAH_TAGIHAN_SISWA'] > 0) {
+            $statusFinal = 'Belum Bayar';
+            if ($adaPembayaranPending) {
+                $statusFinal = 'Menunggu Verifikasi';
+            } elseif (
+                $totalPembayaran >= (float) $validated['JUMLAH_TAGIHAN_SISWA'] &&
+                (float) $validated['JUMLAH_TAGIHAN_SISWA'] > 0
+            ) {
                 $statusFinal = 'Sudah Bayar';
-            } elseif ($totalPembayaran > 0 && $totalPembayaran < (float) $validated['JUMLAH_TAGIHAN_SISWA']) {
+            } elseif ($totalPembayaran > 0) {
                 $statusFinal = 'Cicilan';
             }
 
@@ -377,9 +386,24 @@ class TagihanSiswaController extends Controller
 
     private function formatTagihan(TagihanSiswa $tagihan, bool $includeHistori = false): array
     {
-        $totalPembayaran = (float) $tagihan->pembayaran->sum('JUMLAH_BAYAR');
+        // $totalPembayaran = (float) $tagihan->pembayaran->sum('JUMLAH_BAYAR');
+        $totalPembayaran = (float) $tagihan->pembayaran
+            ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+            ->sum('JUMLAH_BAYAR');
         $sisaTagihan = max(0, (float) $tagihan->JUMLAH_TAGIHAN_SISWA - $totalPembayaran);
+        $adaPembayaranPending = $tagihan->pembayaran
+            ->whereNull('NIP_VALIDATOR_PEMBAYARAN')
+            ->count() > 0;
 
+        $statusTagihan = 'Belum Bayar';
+
+        if ($adaPembayaranPending) {
+            $statusTagihan = 'Menunggu Verifikasi';
+        } elseif ($sisaTagihan <= 0 && (float) $tagihan->JUMLAH_TAGIHAN_SISWA > 0) {
+            $statusTagihan = 'Sudah Bayar';
+        } elseif ($totalPembayaran > 0) {
+            $statusTagihan = 'Cicilan';
+        }
         $result = [
             'ID_TAGIHAN_SISWA' => (int) $tagihan->ID_TAGIHAN_SISWA,
             'ID_SISWA_TETAP' => (int) $tagihan->ID_SISWA_TETAP,
@@ -387,8 +411,9 @@ class TagihanSiswaController extends Controller
             'BULAN_TAGIHAN_SISWA' => $tagihan->BULAN_TAGIHAN_SISWA,
             'TAHUN_TAGIHAN_SISWA' => $tagihan->TAHUN_TAGIHAN_SISWA,
             'JUMLAH_TAGIHAN_SISWA' => (float) $tagihan->JUMLAH_TAGIHAN_SISWA,
-            'STATUS_TAGIHAN_SISWA' => $tagihan->STATUS_TAGIHAN_SISWA,
+            'STATUS_TAGIHAN_SISWA' => $statusTagihan,
             'DUEDATETIME_TAGIHAN_SISWA' => $tagihan->DUEDATETIME_TAGIHAN_SISWA,
+            'ADA_PEMBAYARAN_PENDING' => $adaPembayaranPending,
 
             'SISWA' => [
                 'ID_SISWA_TETAP' => optional($tagihan->siswa)->ID_SISWA_TETAP,

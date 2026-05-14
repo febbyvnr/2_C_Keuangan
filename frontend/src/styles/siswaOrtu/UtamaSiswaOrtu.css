@@ -364,7 +364,7 @@
 
 /* ===== TABEL RIWAYAT PEMBAYARAN ===== */
 .history-table {
-  min-width: 540px;
+  min-width: 680px;
 }
 
 .history-table th:nth-child(1),
@@ -390,6 +390,12 @@
 .history-table th:nth-child(5),
 .history-table td:nth-child(5) {
   width: 90px;
+  text-align: center;
+}
+
+.history-table th:nth-child(6),
+.history-table td:nth-child(6) {
+  width: 110px;
   text-align: center;
 }
 
