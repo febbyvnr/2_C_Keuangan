@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import SidebarBendahara from "./components/SidebarBendahara";
 import SidebarWaka from "./components/SidebarWaka";
@@ -44,6 +45,7 @@ import DashboardWaka from "./pages/waka/Dashboard";
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
 import ProfileSiswaOrtu from "./pages/siswaOrtu/ProfileSiswaOrtu";
+import AccountMonitor from "./pages/admin/AccountMonitor";
 
 import SidebarYayasan from "./components/SidebarYayasan";
 import DashboardYayasan from "./pages/yayasan/Dashboard.jsx";
@@ -110,6 +112,79 @@ axios.interceptors.request.use((config) => {
 }, (error) => Promise.reject(error));
 
 import EvaluasiRKT from "./pages/pic/guru/EvaluasiRKT.jsx";
+import { useLocation } from "react-router-dom";
+
+function getHomeByRoles(roles = []) {
+  const text = roles.join(" ").toLowerCase();
+  if (text.includes("super admin")) return "/admin/account-monitor";
+  if (text.includes("siswa") || text.includes("ortu")) return "/siswa-ortu/utama";
+  if (text.includes("yayasan")) return "/yayasan/dashboard";
+  if (text.includes("penjaminan mutu") || text.includes("pm")) return "/pm/dashboard";
+  if (text.includes("bendahara") || text.includes("keuangan")) return "/bendahara/dashboard";
+  if (text.includes("kepala sekolah") || text.includes("kepsek")) return "/kepsek/dashboard";
+  if (text.includes("waka")) return "/waka/dashboard";
+  if (text.includes("guru") || text.includes("pic")) return "/pic/guru/dashboard";
+  return "/login";
+}
+
+function RequireRole({ allow, children }) {
+  const location = useLocation();
+  const token = localStorage.getItem("token");
+  const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+  const roleText = roles.join(" ").toLowerCase();
+  const canAccess = allow.some((r) => roleText.includes(r));
+
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (!canAccess) {
+    return <AccessDeniedRedirect target={getHomeByRoles(roles)} />;
+  }
+
+  return children;
+}
+
+function AccessDeniedRedirect({ target }) {
+  const [seconds, setSeconds] = useState(4);
+  const [goNow, setGoNow] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (seconds <= 0) {
+      setGoNow(true);
+      return;
+    }
+
+    const timer = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [seconds]);
+
+  if (goNow) {
+    return <Navigate to={target} replace />;
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", background: "#f6f7f9" }}>
+      <div style={{ maxWidth: "520px", width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "24px", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+        <h2 style={{ marginTop: 0, marginBottom: "8px", color: "#1f2937" }}>Akses Ditolak</h2>
+        <p style={{ marginTop: 0, marginBottom: "14px", color: "#374151" }}>
+          Kamu tidak punya akses ke halaman <strong>{location.pathname}</strong>.
+        </p>
+        <p style={{ marginTop: 0, marginBottom: "18px", color: "#6b7280" }}>
+          Dialihkan ke halaman yang sesuai dalam <strong>{seconds}</strong> detik.
+        </p>
+        <button
+          type="button"
+          onClick={() => setGoNow(true)}
+          style={{ padding: "10px 14px", border: "none", borderRadius: "8px", background: "#2563eb", color: "#fff", cursor: "pointer", fontWeight: 600 }}
+        >
+          Kembali Sekarang
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function BendaharaLayout() {
   return (
@@ -193,7 +268,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* BENDHARA LAYOUT */}
-        <Route path="/bendahara" element={<BendaharaLayout />}>
+        <Route path="/bendahara" element={<RequireRole allow={["bendahara", "keuangan"]}><BendaharaLayout /></RequireRole>}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dana" element={<Dana />} />
@@ -235,16 +310,25 @@ export default function App() {
         </Route>
 
         {/* SISWA ORTU TANPA SIDEBAR */}
-        <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
+        {/* <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
         <Route
           path="/siswa-ortu/pembayaran/:id"
           element={<PembayaranTagihanSiswaOrtu />}
         />
-        <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
+        <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} /> */}
+        {/* SEBELUMNYA: path="/siswa-ortu/utama/:id" */}
+        <Route path="/siswa-ortu/utama" element={<RequireRole allow={["siswa", "ortu"]}><UtamaSiswaOrtu /></RequireRole>} />
+
+        {/* SEBELUMNYA: path="/siswa-ortu/profile/:id" */}
+        <Route path="/siswa-ortu/profile" element={<RequireRole allow={["siswa", "ortu"]}><ProfileSiswaOrtu /></RequireRole>} />
+
+        {/* TETAP DIPERTAHANKAN: :id di bawah ini adalah ID Tagihan spesifik */}
+        <Route path="/siswa-ortu/pembayaran/:id" element={<RequireRole allow={["siswa", "ortu"]}><PembayaranTagihanSiswaOrtu /></RequireRole>} />
+        <Route path="/admin/account-monitor" element={<RequireRole allow={["super admin"]}><AccountMonitor /></RequireRole>} />
 
         {/* PIC GURU */}
 
-        <Route path="/pic/guru" element={<PicGuruLayout />}>
+        <Route path="/pic/guru" element={<RequireRole allow={["guru", "pic"]}><PicGuruLayout /></RequireRole>}>
           <Route index element={<DashboardPIC />} />
           <Route path="dashboard" element={<DashboardPIC />} />
           <Route path="fpd" element={<PicGuruFPD />} />
@@ -257,7 +341,7 @@ export default function App() {
         <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKT />} />
 
         {/* KEPSEK */}
-        <Route path="/kepsek" element={<KepsekLayout />}>
+        <Route path="/kepsek" element={<RequireRole allow={["kepala sekolah", "kepsek"]}><KepsekLayout /></RequireRole>}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<KepsekDashboard />} />
           <Route path="monitoring" element={<KepsekMonitoring />} />
@@ -282,7 +366,7 @@ export default function App() {
         </Route>
 
         {/* WAKA */}
-        <Route path="/waka" element={<WakaLayout />}>
+        <Route path="/waka" element={<RequireRole allow={["waka"]}><WakaLayout /></RequireRole>}>
           <Route path="" element={<DashboardWaka />} />
           <Route path="dashboard" element={<DashboardWaka />} />
           <Route path="rkt" element={<WakaRKT />} />
@@ -295,7 +379,7 @@ export default function App() {
         </Route>
 
         {/* YAYASAN */}
-        <Route path="/yayasan" element={<YayasanLayout />}>
+        <Route path="/yayasan" element={<RequireRole allow={["yayasan"]}><YayasanLayout /></RequireRole>}>
           <Route path="dashboard" element={<DashboardYayasan />} />
           <Route path="approval" element={<ApprovalYayasan />} />
           <Route path="laporan" element={<LaporanYayasan />} />
@@ -303,7 +387,7 @@ export default function App() {
         </Route>
 
         {/* PM */}
-        <Route path="/pm" element={<PmLayout />}>
+        <Route path="/pm" element={<RequireRole allow={["penjaminan mutu", "pm"]}><PmLayout /></RequireRole>}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardPM />} />
           <Route path="referensi" element={<ReferensiPm />} />

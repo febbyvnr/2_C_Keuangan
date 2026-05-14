@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
@@ -15,7 +15,6 @@ function UtamaSiswaOrtu() {
   const [historyPage, setHistoryPage] = useState(1);
 
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const formatRupiah = (value) =>
     new Intl.NumberFormat("id-ID", {
@@ -44,24 +43,24 @@ function UtamaSiswaOrtu() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const userStorage = JSON.parse(localStorage.getItem("user") || "{}");
+        setSiswaData(userStorage);
 
-        const [tagihanRes, pembayaranRes] = await Promise.all([
-          fetch(`http://localhost:8000/api/tagihan-siswa?ID_SISWA_TETAP=${id}`),
-          fetch(`http://localhost:8000/api/tr-pembayaran?ID_SISWA_TETAP=${id}`),
-        ]);
+        const tagihanRes = await fetch("http://localhost:8000/api/siswa-ortu/tagihan", {
+          headers: {
+            Accept: "application/json",
+          },
+        });
 
         const tagihanJson = await tagihanRes.json();
-        const pembayaranJson = await pembayaranRes.json();
 
         const tagihan = Array.isArray(tagihanJson.data)
           ? tagihanJson.data
           : [];
+        const pembayaran = tagihan.flatMap((item) =>
+          Array.isArray(item.HISTORI_PEMBAYARAN) ? item.HISTORI_PEMBAYARAN : []
+        );
 
-        const pembayaran = Array.isArray(pembayaranJson.data)
-          ? pembayaranJson.data
-          : [];
-
-        setSiswaData(tagihanJson.siswa || null);
         setTagihanData(tagihan);
         setPaymentHistory(pembayaran);
       } catch (error) {
@@ -74,10 +73,8 @@ function UtamaSiswaOrtu() {
       }
     };
 
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
+    fetchData();
+  }, []);
 
   const activeBills = useMemo(() => {
     return tagihanData.map((item) => {
@@ -312,7 +309,7 @@ function UtamaSiswaOrtu() {
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileOpen(false);
-                    navigate(`/siswa-ortu/profile/${id}`);
+                    navigate("/siswa-ortu/profile");
                   }}
                 >
                   Lihat Profile

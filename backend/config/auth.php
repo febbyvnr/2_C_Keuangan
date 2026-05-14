@@ -69,6 +69,10 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+        'siswa' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\MstSiswa::class,
+        ],
     ],
 
     /*

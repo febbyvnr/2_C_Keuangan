@@ -207,9 +207,7 @@ function PembayaranTagihanSiswaOrtu() {
       );
 
       setTimeout(() => {
-        navigate(
-          `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
-        );
+        navigate("/siswa-ortu/utama");
       }, 3000);
     } catch (error) {
       console.error(error);
@@ -248,9 +246,7 @@ function PembayaranTagihanSiswaOrtu() {
             type="button"
             className="back-button"
             onClick={() =>
-              navigate(
-                `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
-              )
+              navigate("/siswa-ortu/utama")
             }
           >
             <span className="back-icon">
