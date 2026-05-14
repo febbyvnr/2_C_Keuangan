@@ -120,10 +120,9 @@ class TrPembayaranController extends Controller
 
         $totalTagihan = (float) $tagihan->JUMLAH_TAGIHAN_SISWA;
 
-        $totalSudahBayar = (float) TrPembayaran::where(
-            'ID_TAGIHAN_SISWA',
-            $validated['ID_TAGIHAN_SISWA']
-        )->sum('JUMLAH_BAYAR');
+        $totalSudahBayar = (float) TrPembayaran::where('ID_TAGIHAN_SISWA', $validated['ID_TAGIHAN_SISWA'])
+            ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+            ->sum('JUMLAH_BAYAR');
 
         $jumlahBayarBaru = (float) $validated['JUMLAH_BAYAR'];
         $sisaTagihan = $totalTagihan - $totalSudahBayar;
@@ -382,30 +381,35 @@ class TrPembayaranController extends Controller
     }
 
     private function updateStatusTagihan($idTagihanSiswa): void
-    {
-        $tagihan = TagihanSiswa::find($idTagihanSiswa);
+{
+    $tagihan = TagihanSiswa::find($idTagihanSiswa);
 
-        if (!$tagihan) {
-            return;
-        }
-
-        $totalTagihan = (float) $tagihan->JUMLAH_TAGIHAN_SISWA;
-
-        $totalBayar = (float) TrPembayaran::where(
-            'ID_TAGIHAN_SISWA',
-            $idTagihanSiswa
-        )->sum('JUMLAH_BAYAR');
-
-        if ($totalBayar >= $totalTagihan && $totalTagihan > 0) {
-            $status = 'Sudah Bayar';
-        } elseif ($totalBayar > 0) {
-            $status = 'Cicilan';
-        } else {
-            $status = 'Belum Bayar';
-        }
-
-        $tagihan->update([
-            'STATUS_TAGIHAN_SISWA' => $status
-        ]);
+    if (!$tagihan) {
+        return;
     }
+
+    $totalTagihan = (float) $tagihan->JUMLAH_TAGIHAN_SISWA;
+
+    $totalBayarTerverifikasi = (float) TrPembayaran::where('ID_TAGIHAN_SISWA', $idTagihanSiswa)
+        ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+        ->sum('JUMLAH_BAYAR');
+
+    $adaPembayaranPending = TrPembayaran::where('ID_TAGIHAN_SISWA', $idTagihanSiswa)
+        ->whereNull('NIP_VALIDATOR_PEMBAYARAN')
+        ->exists();
+
+    if ($adaPembayaranPending) {
+        $status = 'Menunggu Verifikasi';
+    } elseif ($totalBayarTerverifikasi >= $totalTagihan && $totalTagihan > 0) {
+        $status = 'Sudah Bayar';
+    } elseif ($totalBayarTerverifikasi > 0) {
+        $status = 'Cicilan';
+    } else {
+        $status = 'Belum Bayar';
+    }
+
+    $tagihan->update([
+        'STATUS_TAGIHAN_SISWA' => $status
+    ]);
+}
 }
