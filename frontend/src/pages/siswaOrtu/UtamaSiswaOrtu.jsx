@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
@@ -15,7 +15,7 @@ function UtamaSiswaOrtu() {
   const [historyPage, setHistoryPage] = useState(1);
 
   const navigate = useNavigate();
-  const { id } = useParams();
+  // Catatan: useParams() dan { id } dihapus karena mengambil data murni dari Token Login
 
   const formatRupiah = (value) =>
     new Intl.NumberFormat("id-ID", {
@@ -40,497 +40,235 @@ function UtamaSiswaOrtu() {
     }).format(date);
   };
 
+  const announcements = [
+    {
+      id: 1,
+      title: "Jadwal Ujian Akhir Semester",
+      content: "Ujian akan dimulai pada minggu pertama bulan depan. Pastikan seluruh administrasi keuangan telah diselesaikan.",
+    },
+    {
+      id: 2,
+      title: "Pembayaran Daftar Ulang",
+      content: "Bagi siswa yang memiliki tunggakan, mohon segera mengonfirmasi ke bagian bendahara sekolah.",
+    },
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       try {
         setLoading(true);
+        const response = await fetch("http://localhost:8000/api/siswa-ortu/tagihan", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          },
+        });
 
-        const [tagihanRes, pembayaranRes] = await Promise.all([
-          fetch(`http://localhost:8000/api/tagihan-siswa?ID_SISWA_TETAP=${id}`),
-          fetch(`http://localhost:8000/api/tr-pembayaran?ID_SISWA_TETAP=${id}`),
-        ]);
+        const resData = await response.json();
 
-        const tagihanJson = await tagihanRes.json();
-        const pembayaranJson = await pembayaranRes.json();
+        if (response.ok && resData.success) {
+          // Menyimpan rincian data siswa dari respons API atau fallback dari localStorage
+          const userStorage = JSON.parse(localStorage.getItem("user") || "{}");
+          setSiswaData(resData.info_siswa || resData.siswa || userStorage);
+          setTagihanData(resData.data || []);
 
-        const tagihan = Array.isArray(tagihanJson.data)
-          ? tagihanJson.data
-          : [];
-
-        const pembayaran = Array.isArray(pembayaranJson.data)
-          ? pembayaranJson.data
-          : [];
-
-        setSiswaData(tagihanJson.siswa || null);
-        setTagihanData(tagihan);
-        setPaymentHistory(pembayaran);
+          // Ekstrak dan petakan histori pembayaran jika disematkan dalam relasi data tagihan
+          const history = [];
+          (resData.data || []).forEach((item) => {
+            if (item.HISTORI_PEMBAYARAN && Array.isArray(item.HISTORI_PEMBAYARAN)) {
+              item.HISTORI_PEMBAYARAN.forEach((h) => {
+                history.push({
+                  ...h,
+                  DESKRIPSI_TAGIHAN: item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN || "Tagihan",
+                });
+              });
+            }
+          });
+          setPaymentHistory(history);
+        } else {
+          console.error("Gagal memuat rincian:", resData.message);
+        }
       } catch (error) {
-        console.error("Gagal mengambil data:", error);
-        setSiswaData(null);
-        setTagihanData([]);
-        setPaymentHistory([]);
+        console.error("Kesalahan jaringan:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
+    fetchData();
+  }, [navigate]);
 
+  // Paginasi Tagihan Aktif
   const activeBills = useMemo(() => {
-    return tagihanData.map((item) => {
-      const totalTagihan = Number(item.JUMLAH_TAGIHAN_SISWA || 0);
-      const totalBayar = Number(item.TOTAL_PEMBAYARAN || 0);
-
-      const sisaAsli =
-        item.SISA_TAGIHAN !== undefined && item.SISA_TAGIHAN !== null
-          ? Number(item.SISA_TAGIHAN)
-          : totalTagihan - totalBayar;
-
-      const sisa = Math.max(0, sisaAsli);
-
-      let status = item.STATUS_TAGIHAN_SISWA || "Belum Bayar";
-
-      if (sisa <= 0) {
-        status = "Sudah Bayar";
-      } else if (totalBayar > 0) {
-        status = "Cicilan";
-      }
-
-      return {
-        id: item.ID_TAGIHAN_SISWA,
-        tagihan:
-          item?.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN ||
-          item?.jenis_tagihan?.DESKRIPSI_JENIS_TAGIHAN ||
-          "Tagihan",
-        totalTagihan,
-        totalBayar,
-        sisa,
-        status,
-      };
-    });
+    return tagihanData.filter((item) => item.SISA_TAGIHAN > 0);
   }, [tagihanData]);
 
-  const activeBillTotalPages = Math.max(
-    1,
-    Math.ceil(activeBills.length / ITEMS_PER_PAGE)
-  );
-
-  const paginatedActiveBills = useMemo(() => {
-    const startIndex = (activeBillPage - 1) * ITEMS_PER_PAGE;
-    return activeBills.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const billTotalPages = Math.ceil(activeBills.length / ITEMS_PER_PAGE) || 1;
+  const currentBills = useMemo(() => {
+    const start = (activeBillPage - 1) * ITEMS_PER_PAGE;
+    return activeBills.slice(start, start + ITEMS_PER_PAGE);
   }, [activeBills, activeBillPage]);
 
-  const historyTotalPages = Math.max(
-    1,
-    Math.ceil(paymentHistory.length / ITEMS_PER_PAGE)
-  );
-
-  const paginatedPaymentHistory = useMemo(() => {
-    const startIndex = (historyPage - 1) * ITEMS_PER_PAGE;
-    return paymentHistory.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // Paginasi Histori
+  const historyTotalPages = Math.ceil(paymentHistory.length / ITEMS_PER_PAGE) || 1;
+  const currentHistory = useMemo(() => {
+    const start = (historyPage - 1) * ITEMS_PER_PAGE;
+    return paymentHistory.slice(start, start + ITEMS_PER_PAGE);
   }, [paymentHistory, historyPage]);
 
-  useEffect(() => {
-    setActiveBillPage(1);
-  }, [activeBills.length]);
-
-  useEffect(() => {
-    setHistoryPage(1);
-  }, [paymentHistory.length]);
-
-  const summaryCards = useMemo(() => {
-    const totalTagihan = activeBills.reduce(
-      (sum, item) => sum + Number(item.totalTagihan || 0),
-      0
-    );
-
-    const sudahDibayar = activeBills.reduce(
-      (sum, item) => sum + Number(item.totalBayar || 0),
-      0
-    );
-
-    const sisaTagihan = activeBills.reduce(
-      (sum, item) => sum + Number(item.sisa || 0),
-      0
-    );
-
-    return [
-      { title: "Total Tagihan", value: totalTagihan },
-      { title: "Sudah Dibayar", value: sudahDibayar },
-      { title: "Sisa Tagihan", value: sisaTagihan },
-    ];
-  }, [activeBills]);
-
-  const sisaTagihanBulanIni = useMemo(() => {
-    const belumLunas = activeBills.filter(
-      (item) => item.status !== "Sudah Bayar" && item.status !== "Lunas"
-    );
-
-    return belumLunas.reduce((sum, item) => sum + Number(item.sisa || 0), 0);
-  }, [activeBills]);
-
-  const hasUnpaidBill = useMemo(() => {
-    return activeBills.some(
-      (item) =>
-        (item.status === "Belum Bayar" ||
-          item.status === "Cicilan" ||
-          item.status === "Belum Lunas") &&
-        Number(item.sisa || 0) > 0
-    );
-  }, [activeBills]);
-
-  const announcements = [
-    {
-      id: 1,
-      title: "Batas Pembayaran SPP",
-      content:
-        "Mohon melunasi SPP paling lambat tanggal 10 setiap bulannya agar dapat mengikuti kegiatan belajar dengan lancar.",
-    },
-  ];
-
-  const renderStatusBadge = (status) => {
-    let className = "status-badge";
-
-    if (
-      status === "Sudah Bayar" ||
-      status === "Lunas" ||
-      status === "Terverifikasi"
-    ) {
-      className += " success";
-    } else if (status === "Belum Bayar") {
-      className += " danger";
-    } else if (status === "Cicilan" || status === "Belum Lunas") {
-      className += " info";
-    } else if (status === "Menunggu Verifikasi") {
-      className += " warning";
-    }
-
-    const label = status === "Sudah Bayar" ? "Lunas" : status;
-
-    return <span className={className}>{label}</span>;
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
-
-  const renderActionButton = (status, billId) => {
-    if (status === "Lunas" || status === "Sudah Bayar") {
-      return (
-        <button className="action-btn action-btn-disabled" disabled>
-          Lunas
-        </button>
-      );
-    }
-
-    if (status === "Menunggu Verifikasi") {
-      return (
-        <button className="action-btn action-btn-waiting" disabled>
-          Menunggu Verifikasi
-        </button>
-      );
-    }
-
-    return (
-      <button
-        className="action-btn action-btn-pay"
-        onClick={() => navigate(`/siswa-ortu/pembayaran/${billId}`)}
-      >
-        Bayar
-      </button>
-    );
-  };
-
-  const handlePayNow = () => {
-    const unpaidBill = activeBills.find(
-      (item) =>
-        (item.status === "Belum Bayar" ||
-          item.status === "Cicilan" ||
-          item.status === "Belum Lunas") &&
-        Number(item.sisa || 0) > 0
-    );
-
-    if (unpaidBill) {
-      navigate(`/siswa-ortu/pembayaran/${unpaidBill.id}`);
-    }
-  };
-
-  if (loading) {
-    return <div className="portal-page">Loading...</div>;
-  }
 
   return (
-    <div className="portal-page">
-      <div className="portal-container">
-        <header className="portal-header">
-          <div className="portal-header-left">
-            <p className="portal-label">Portal Siswa / Ortu</p>
-
-            <h1 className="portal-title">
-              Halo, {siswaData?.NAMA_SISWA_TETAP || "Siswa"}!
-            </h1>
-
-            <p className="portal-subtitle">
-              Pantau tagihan administrasi sekolah dan riwayat pembayaran Anda di
-              sini.
+    <div className="portal-container">
+      <header className="portal-header">
+        <div className="portal-header-left">
+          <h1>Portal Informasi Keuangan Siswa</h1>
+          {siswaData && (
+            <p>
+              Siswa: <strong>{siswaData.NAMA_SISWA_TETAP || siswaData.nama_siswa || "-"}</strong> | NISN: {siswaData.NISN_SISWA || siswaData.nisn || "-"}
             </p>
-          </div>
-
-          <div className="profile-menu">
-            <button
-              className="profile-button"
-              type="button"
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-            >
-              <div className="profile-avatar">
-                {(siswaData?.NAMA_SISWA_TETAP || "S")
-                  .split(" ")
-                  .map((word) => word[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
-              </div>
-
-              <div className="profile-text">
-                <span className="profile-name">
-                  {siswaData?.NAMA_SISWA_TETAP || "Siswa"}
-                </span>
-
-                <span className="profile-class">Siswa</span>
-              </div>
-
-              <i
-                className={`bi ${
-                  isProfileOpen ? "bi-chevron-up" : "bi-chevron-down"
-                } profile-caret`}
-              ></i>
-            </button>
-
-            {isProfileOpen && (
-              <div className="profile-dropdown">
-                <button
-                  type="button"
-                  className="dropdown-item"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    navigate(`/siswa-ortu/profile/${id}`);
-                  }}
-                >
-                  Lihat Profile
-                </button>
-
-                <button
-                  type="button"
-                  className="dropdown-item logout-item"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    navigate("/");
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        <section className="hero-card">
-          <div>
-            <p className="hero-label">Total Sisa Tagihan</p>
-            <h2 className="hero-value">{formatRupiah(sisaTagihanBulanIni)}</h2>
-          </div>
-
-          <button
-            className={`hero-button ${
-              !hasUnpaidBill ? "hero-button-disabled" : ""
-            }`}
-            onClick={handlePayNow}
-            disabled={!hasUnpaidBill}
-          >
-            {hasUnpaidBill ? "Bayar Sekarang" : "Tidak Ada Tagihan"}
+          )}
+        </div>
+        <div className="portal-header-right">
+          <button onClick={() => navigate("/siswa-ortu/profile")} className="portal-btn profile-btn">
+            Profil Saya
           </button>
-        </section>
+          <button onClick={handleLogout} className="portal-btn logout-btn">
+            Keluar
+          </button>
+        </div>
+      </header>
 
-        <section className="summary-grid">
-          {summaryCards.map((card) => (
-            <div className="summary-card" key={card.title}>
-              <p className="summary-title">{card.title}</p>
-              <h3 className="summary-value">{formatRupiah(card.value)}</h3>
-            </div>
-          ))}
-        </section>
-
+      <div className="portal-content-wrapper">
         <div className="portal-main-grid">
           <div className="portal-main-left">
+            {/* Bagian Tagihan Aktif */}
             <section className="content-card">
               <div className="section-header">
                 <h2>Tagihan Aktif</h2>
-                <p>Daftar tagihan yang masih perlu diperhatikan.</p>
+                <p>Kewajiban administrasi yang belum diselesaikan.</p>
               </div>
 
-              <div className="table-wrapper">
-                <table className="custom-table bill-table">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Jenis Tagihan</th>
-                      <th>Total Tagihan</th>
-                      <th>Total Bayar</th>
-                      <th>Sisa</th>
-                      <th>Status</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
+              {loading ? (
+                <p className="loading-text">Memuat rincian tagihan...</p>
+              ) : currentBills.length === 0 ? (
+                <p className="empty-text">Tidak ada tagihan aktif saat ini.</p>
+              ) : (
+                <div className="bill-list">
+                  {currentBills.map((item) => (
+                    <div className="bill-card" key={item.ID_TAGIHAN_SISWA}>
+                      <div className="bill-card-header">
+                        <h3>{item.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN || "Tagihan Biaya"}</h3>
+                        <span className="status-badge warning">{item.STATUS_TAGIHAN_SISWA}</span>
+                      </div>
+                      <div className="bill-details">
+                        <p>Periode: {item.BULAN_TAGIHAN_SISWA} {item.TAHUN_TAGIHAN_SISWA}</p>
+                        <p className="amount">Total Tagihan: {formatRupiah(item.JUMLAH_TAGIHAN_SISWA)}</p>
+                        <p className="remaining">Sisa Bayar: <strong>{formatRupiah(item.SISA_TAGIHAN)}</strong></p>
+                        {item.DUEDATETIME_TAGIHAN_SISWA && (
+                          <p className="duedate">Jatuh Tempo: {formatTanggal(item.DUEDATETIME_TAGIHAN_SISWA)}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => navigate(`/siswa-ortu/pembayaran/${item.ID_TAGIHAN_SISWA}`)}
+                        className="pay-btn"
+                      >
+                        Bayar Tagihan
+                      </button>
+                    </div>
+                  ))}
 
-                  <tbody>
-                    {paginatedActiveBills.length > 0 ? (
-                      paginatedActiveBills.map((item, index) => (
-                        <tr key={item.id}>
-                          <td>
-                            {(activeBillPage - 1) * ITEMS_PER_PAGE + index + 1}
-                          </td>
-                          <td>{item.tagihan}</td>
-                          <td>{formatRupiah(item.totalTagihan)}</td>
-                          <td>{formatRupiah(item.totalBayar)}</td>
-                          <td>{formatRupiah(item.sisa)}</td>
-                          <td>{renderStatusBadge(item.status)}</td>
-                          <td>{renderActionButton(item.status, item.id)}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7">Tidak ada data tagihan</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {activeBills.length > 0 && (
-                <div className="portal-pagination">
-                  <span className="portal-pagination-info">
-                    Menampilkan {(activeBillPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
-                    {Math.min(
-                      activeBillPage * ITEMS_PER_PAGE,
-                      activeBills.length
-                    )}{" "}
-                    dari {activeBills.length} data
-                  </span>
-
-                  <div className="portal-pagination-actions">
-                    <button
-                      type="button"
-                      className="portal-page-btn"
-                      disabled={activeBillPage === 1}
-                      onClick={() =>
-                        setActiveBillPage((prev) => Math.max(1, prev - 1))
-                      }
-                    >
-                      ‹
-                    </button>
-
-                    <span className="portal-page-number">{activeBillPage}</span>
-
-                    <button
-                      type="button"
-                      className="portal-page-btn"
-                      disabled={activeBillPage === activeBillTotalPages}
-                      onClick={() =>
-                        setActiveBillPage((prev) =>
-                          Math.min(activeBillTotalPages, prev + 1)
-                        )
-                      }
-                    >
-                      ›
-                    </button>
-                  </div>
+                  {/* Kontrol Paginasi Tagihan */}
+                  {billTotalPages > 1 && (
+                    <div className="portal-pagination">
+                      <button
+                        type="button"
+                        className="portal-page-btn"
+                        disabled={activeBillPage === 1}
+                        onClick={() => setActiveBillPage((prev) => Math.max(1, prev - 1))}
+                      >
+                        ‹
+                      </button>
+                      <span className="portal-page-number">{activeBillPage}</span>
+                      <button
+                        type="button"
+                        className="portal-page-btn"
+                        disabled={activeBillPage === billTotalPages}
+                        onClick={() => setActiveBillPage((prev) => Math.min(billTotalPages, prev + 1))}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
 
-            <section className="content-card">
+            {/* Bagian Riwayat Pembayaran */}
+            <section className="content-card history-section">
               <div className="section-header">
                 <h2>Riwayat Pembayaran</h2>
-                <p>Riwayat pembayaran terbaru yang telah dilakukan.</p>
+                <p>Histori transaksi yang telah tervalidasi.</p>
               </div>
 
-              <div className="table-wrapper">
-                <table className="custom-table history-table">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Tanggal</th>
-                      <th>Nominal</th>
-                      <th>Metode</th>
-                      <th>ID Tagihan</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {paginatedPaymentHistory.length > 0 ? (
-                      paginatedPaymentHistory.map((item, index) => (
-                        <tr key={item.ID_PEMBAYARAN}>
-                          <td>
-                            {(historyPage - 1) * ITEMS_PER_PAGE + index + 1}
-                          </td>
-                          <td>{formatTanggal(item.TGL_BAYAR)}</td>
-                          <td>{formatRupiah(item.JUMLAH_BAYAR)}</td>
-                          <td>
-                            {item?.metode_pembayaran
-                              ?.DESKRIPSI_METODE_PEMBAYARAN ||
-                              item?.metodePembayaran
-                                ?.DESKRIPSI_METODE_PEMBAYARAN ||
-                              "-"}
-                          </td>
-                          <td>{item.ID_TAGIHAN_SISWA || "-"}</td>
-                        </tr>
-                      ))
-                    ) : (
+              {loading ? (
+                <p className="loading-text">Memuat histori...</p>
+              ) : currentHistory.length === 0 ? (
+                <p className="empty-text">Belum ada riwayat pembayaran.</p>
+              ) : (
+                <div className="history-table-wrapper">
+                  <table className="history-table">
+                    <thead>
                       <tr>
-                        <td colSpan="5">Tidak ada riwayat pembayaran</td>
+                        <th>Tanggal Bayar</th>
+                        <th>Tagihan</th>
+                        <th>Metode</th>
+                        <th>Nominal</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {currentHistory.map((h, idx) => (
+                        <tr key={h.ID_PEMBAYARAN || idx}>
+                          <td>{formatTanggal(h.TGL_BAYAR)}</td>
+                          <td>{h.DESKRIPSI_TAGIHAN}</td>
+                          <td>{h.METODE_PEMBAYARAN?.DESKRIPSI_METODE_PEMBAYARAN || "Tunai"}</td>
+                          <td className="amount-cell">{formatRupiah(h.JUMLAH_BAYAR)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
-              {paymentHistory.length > 0 && (
-                <div className="portal-pagination">
-                  <span className="portal-pagination-info">
-                    Menampilkan {(historyPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
-                    {Math.min(
-                      historyPage * ITEMS_PER_PAGE,
-                      paymentHistory.length
-                    )}{" "}
-                    dari {paymentHistory.length} data
-                  </span>
-
-                  <div className="portal-pagination-actions">
-                    <button
-                      type="button"
-                      className="portal-page-btn"
-                      disabled={historyPage === 1}
-                      onClick={() =>
-                        setHistoryPage((prev) => Math.max(1, prev - 1))
-                      }
-                    >
-                      ‹
-                    </button>
-
-                    <span className="portal-page-number">{historyPage}</span>
-
-                    <button
-                      type="button"
-                      className="portal-page-btn"
-                      disabled={historyPage === historyTotalPages}
-                      onClick={() =>
-                        setHistoryPage((prev) =>
-                          Math.min(historyTotalPages, prev + 1)
-                        )
-                      }
-                    >
-                      ›
-                    </button>
-                  </div>
+                  {/* Kontrol Paginasi Histori */}
+                  {historyTotalPages > 1 && (
+                    <div className="portal-pagination">
+                      <button
+                        type="button"
+                        className="portal-page-btn"
+                        disabled={historyPage === 1}
+                        onClick={() => setHistoryPage((prev) => Math.max(1, prev - 1))}
+                      >
+                        ‹
+                      </button>
+                      <span className="portal-page-number">{historyPage}</span>
+                      <button
+                        type="button"
+                        className="portal-page-btn"
+                        disabled={historyPage === historyTotalPages}
+                        onClick={() => setHistoryPage((prev) => Math.min(historyTotalPages, prev + 1))}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </section>

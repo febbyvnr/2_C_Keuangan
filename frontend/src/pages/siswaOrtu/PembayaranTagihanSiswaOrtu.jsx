@@ -1,35 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
 import logoSekolah from "../../assets/logo.png";
-
 import "../../styles/siswaOrtu/PembayaranTagihanSiswaOrtu.css";
 
 function PembayaranTagihanSiswaOrtu() {
+  // Variabel id merujuk pada ID_TAGIHAN_SISWA yang akan dibayar
   const { id } = useParams();
-
   const navigate = useNavigate();
 
   const [metode, setMetode] = useState(null);
-
   const [metodeList, setMetodeList] = useState([]);
-
   const [isOpen, setIsOpen] = useState(false);
-
   const [loading, setLoading] = useState(true);
-
   const [submitting, setSubmitting] = useState(false);
-
   const [tagihan, setTagihan] = useState(null);
-
   const [toast, setToast] = useState(null);
 
-  const showToast = (
-    type = "success",
-    message = ""
-  ) => {
+  const showToast = (type = "success", message = "") => {
     setToast({ type, message });
-
     setTimeout(() => {
       setToast(null);
     }, 3000);
@@ -37,476 +25,174 @@ function PembayaranTagihanSiswaOrtu() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       try {
         setLoading(true);
+        const [tagihanResponse, metodeResponse] = await Promise.all([
+          fetch(`http://localhost:8000/api/tagihan-siswa/${id}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/json",
+            },
+          }),
+          fetch("http://localhost:8000/api/ref-metode-pembayaran", {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/json",
+            },
+          }),
+        ]);
 
-        const [tagihanResponse, metodeResponse] =
-          await Promise.all([
-            fetch(
-              `http://localhost:8000/api/tagihan-siswa/${id}`
-            ),
+        const tagihanData = await tagihanResponse.json();
+        const metodeData = await metodeResponse.json();
 
-            fetch(
-              "http://localhost:8000/api/ref-metode-pembayaran"
-            ),
-          ]);
-
-        const tagihanResult =
-          await tagihanResponse.json();
-
-        const metodeResult =
-          await metodeResponse.json();
-
-        if (!tagihanResponse.ok) {
-          throw new Error(
-            tagihanResult.message ||
-              "Gagal mengambil data tagihan"
-          );
+        if (tagihanResponse.ok && tagihanData.success) {
+          setTagihan(tagihanData.data);
+        } else {
+          showToast("error", "Gagal memuat rincian tagihan.");
         }
 
-        setTagihan(tagihanResult.data);
-
-        setMetodeList(
-          metodeResult.data || []
-        );
+        if (metodeResponse.ok && (metodeData.success || Array.isArray(metodeData.data))) {
+          const list = Array.isArray(metodeData) ? metodeData : metodeData.data || [];
+          setMetodeList(list);
+          if (list.length > 0) setMetode(list[0]);
+        }
       } catch (error) {
-        console.error(error);
-
-        showToast(
-          "error",
-          error.message ||
-            "Gagal mengambil data"
-        );
+        showToast("error", "Kesalahan koneksi ke server.");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
-
-  const formatRupiah = (value) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(Number(value || 0));
+    fetchData();
+  }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!tagihan) return;
-
-    const nominal = Number(
-      e.target.nominalBayar.value
-    );
-
-    const file =
-      e.target.buktiTransfer?.files?.[0];
-
-    if (!metode) {
-      showToast(
-        "error",
-        "Pilih metode pembayaran terlebih dahulu."
-      );
-
-      return;
-    }
-
-    if (!nominal || nominal <= 0) {
-      showToast(
-        "error",
-        "Nominal pembayaran harus lebih dari 0."
-      );
-
-      return;
-    }
-
-    if (
-      nominal >
-      Number(tagihan.SISA_TAGIHAN || 0)
-    ) {
-      showToast(
-        "error",
-        "Nominal pembayaran tidak boleh melebihi sisa tagihan."
-      );
-
-      return;
-    }
-
-    const namaMetode =
-      metode.DESKRIPSI_METODE_PEMBAYARAN?.toLowerCase();
-
-    const isBank =
-      namaMetode?.includes("bank") ||
-      namaMetode?.includes("transfer");
-
-    if (isBank && !file) {
-      showToast(
-        "error",
-        "Untuk pembayaran bank, bukti pembayaran wajib diunggah."
-      );
-
-      return;
-    }
+    setSubmitting(true);
+    const token = localStorage.getItem("token");
+    const catatan = e.target.catatan?.value || "";
 
     try {
-      setSubmitting(true);
+      const response = await fetch("http://localhost:8000/api/tr-pembayaran/store", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          ID_TAGIHAN_SISWA: id,
+          ID_METODE_PEMBAYARAN: metode?.ID_METODE_PEMBAYARAN || 1,
+          JUMLAH_BAYAR: tagihan?.SISA_TAGIHAN || 0,
+          CATATAN: catatan,
+        }),
+      });
 
-      const formData = new FormData();
+      const resData = await response.json();
 
-      formData.append(
-        "ID_TAGIHAN_SISWA",
-        tagihan.ID_TAGIHAN_SISWA
-      );
-
-      formData.append(
-        "ID_METODE_PEMBAYARAN",
-        metode.ID_METODE_PEMBAYARAN
-      );
-
-      formData.append(
-        "JUMLAH_BAYAR",
-        nominal
-      );
-
-      formData.append(
-        "catatan",
-        e.target.catatan.value || ""
-      );
-
-      if (isBank && file) {
-        formData.append(
-          "LINK_BUKTI_BAYAR",
-          file
-        );
+      if (response.ok && resData.success) {
+        showToast("success", "Konfirmasi pembayaran berhasil dikirim!");
+        setTimeout(() => {
+          navigate("/siswa-ortu/utama");
+        }, 1500);
+      } else {
+        showToast("error", resData.message || "Gagal memproses pembayaran.");
       }
-
-      const response = await fetch(
-        "http://localhost:8000/api/tr-pembayaran/store",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.message ||
-            "Gagal mengirim pembayaran"
-        );
-      }
-
-      showToast(
-        "success",
-        "Pembayaran berhasil dikirim"
-      );
-
-      setTimeout(() => {
-        navigate(
-          `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
-        );
-      }, 3000);
     } catch (error) {
-      console.error(error);
-
-      showToast(
-        "error",
-        error.message ||
-          "Terjadi kesalahan saat pembayaran"
-      );
+      showToast("error", "Terjadi galat pada jaringan.");
     } finally {
       setSubmitting(false);
     }
   };
 
+  const formatRupiah = (val) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val || 0);
+
   if (loading) {
-    return (
-      <div className="payment-page">
-        Loading...
-      </div>
-    );
+    return <div className="payment-loading">Menyiapkan gerbang pembayaran...</div>;
   }
 
   if (!tagihan) {
     return (
-      <div className="payment-page">
-        Data tagihan tidak ditemukan
+      <div className="payment-container">
+        <p className="error-text">Informasi tagihan tidak ditemukan atau akses ditolak.</p>
+        <button onClick={() => navigate("/siswa-ortu/utama")} className="back-button">Kembali</button>
       </div>
     );
   }
 
   return (
-    <main className="payment-page">
-      <div className="payment-center">
-        <div className="payment-shell">
-          <button
-            type="button"
-            className="back-button"
-            onClick={() =>
-              navigate(
-                `/siswa-ortu/utama/${tagihan.ID_SISWA_TETAP}`
-              )
-            }
-          >
-            <span className="back-icon">
-              ←
-            </span>
+    <main className="payment-page-container">
+      <div className="payment-wrapper">
+        <header className="payment-header">
+          <img src={logoSekolah} alt="Logo Sekolah" className="school-logo" />
+          <h2>Konfirmasi Pembayaran Administrasi</h2>
+        </header>
 
-            <span>Kembali</span>
-          </button>
+        <div className="payment-card">
+          <div className="payment-info-box">
+            <h3>Rincian Pembayaran</h3>
+            <div className="info-row">
+              <span>Jenis Tagihan</span>
+              <strong>{tagihan.JENIS_TAGIHAN?.DESKRIPSI_JENIS_TAGIHAN || "Tagihan Sekolah"}</strong>
+            </div>
+            <div className="info-row">
+              <span>Periode</span>
+              <span>{tagihan.BULAN_TAGIHAN_SISWA} {tagihan.TAHUN_TAGIHAN_SISWA}</span>
+            </div>
+            <div className="info-row total-row">
+              <span>Nominal Harus Dibayar</span>
+              <strong className="amount-highlight">{formatRupiah(tagihan.SISA_TAGIHAN)}</strong>
+            </div>
+          </div>
 
-          <div className="payment-card">
-            <header className="payment-header">
-              <div className="payment-brand">
-                <img
-                  src={logoSekolah}
-                  alt="Logo Sekolah"
-                  className="school-logo"
-                />
-
-                <div className="school-text">
-                  <p className="school-system">
-                    Sistem Pembayaran
-                    Sekolah
-                  </p>
-
-                  <h2 className="school-name">
-                    SMK BOPKRI 2
-                    YOGYAKARTA
-                  </h2>
-                </div>
-              </div>
-
-              <div className="payment-heading">
-                <h1 className="payment-title">
-                  Pembayaran Tagihan
-                </h1>
-
-                <p className="payment-subtitle">
-                  Lengkapi form berikut
-                  untuk mengajukan
-                  pembayaran tagihan.
-                </p>
-              </div>
-            </header>
-
-            <section className="payment-detail-grid">
-              <div className="payment-detail-item">
-                <label>Tagihan</label>
-
-                <p>
-                  {tagihan?.JENIS_TAGIHAN
-                    ?.DESKRIPSI_JENIS_TAGIHAN ||
-                    "-"}
-                </p>
-              </div>
-
-              <div className="payment-detail-item">
-                <label>Status</label>
-
-                <p>
-                  {
-                    tagihan.STATUS_TAGIHAN_SISWA
-                  }
-                </p>
-              </div>
-
-              <div className="payment-detail-item">
-                <label>
-                  Total Tagihan
-                </label>
-
-                <p>
-                  {formatRupiah(
-                    tagihan.JUMLAH_TAGIHAN_SISWA
-                  )}
-                </p>
-              </div>
-
-              <div className="payment-detail-item">
-                <label>
-                  Sudah Dibayar
-                </label>
-
-                <p>
-                  {formatRupiah(
-                    tagihan.TOTAL_PEMBAYARAN
-                  )}
-                </p>
-              </div>
-
-              <div className="payment-detail-item payment-detail-item-full">
-                <label>
-                  Sisa Tagihan
-                </label>
-
-                <p>
-                  {formatRupiah(
-                    tagihan.SISA_TAGIHAN
-                  )}
-                </p>
-              </div>
-            </section>
-
-            <form
-              className="payment-form"
-              onSubmit={handleSubmit}
-            >
+          <div className="payment-form-box">
+            <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="nominalBayar">
-                  Nominal Bayar
-                </label>
-
-                <input
-                  type="number"
-                  min="1"
-                  id="nominalBayar"
-                  name="nominalBayar"
-                  placeholder="Masukkan nominal pembayaran"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>
-                  Metode Pembayaran
-                </label>
-
-                <div className="custom-select">
+                <label>Pilih Metode Pembayaran</label>
+                <div className="dropdown-container">
                   <button
                     type="button"
-                    className={`custom-select-trigger ${
-                      !metode
-                        ? "is-placeholder"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setIsOpen(!isOpen)
-                    }
+                    className="dropdown-button"
+                    onClick={() => setIsOpen(!isOpen)}
                   >
-                    <span>
-                      {!metode
-                        ? "Pilih metode pembayaran"
-                        : metode.DESKRIPSI_METODE_PEMBAYARAN}
-                    </span>
-
-                    <span className="custom-select-arrow">
-                      ▾
-                    </span>
+                    {metode ? metode.DESKRIPSI_METODE_PEMBAYARAN || metode.nama_metode : "Pilih Metode"}
+                    <span className="arrow">{isOpen ? "▲" : "▼"}</span>
                   </button>
 
-                  {isOpen && (
-                    <div className="custom-select-menu">
-                      {metodeList.map(
-                        (item) => (
-                          <button
-                            key={
-                              item.ID_METODE_PEMBAYARAN
-                            }
-                            type="button"
-                            className="custom-select-option"
-                            onClick={() => {
-                              setMetode(
-                                item
-                              );
-
-                              setIsOpen(
-                                false
-                              );
-                            }}
-                          >
-                            {
-                              item.DESKRIPSI_METODE_PEMBAYARAN
-                            }
-                          </button>
-                        )
-                      )}
-                    </div>
+                  {isOpen && metodeList.length > 0 && (
+                    <ul className="dropdown-list">
+                      {metodeList.map((m) => (
+                        <li
+                          key={m.ID_METODE_PEMBAYARAN || m.id}
+                          onClick={() => {
+                            setMetode(m);
+                            setIsOpen(false);
+                          }}
+                        >
+                          {m.DESKRIPSI_METODE_PEMBAYARAN || m.nama_metode}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-              </div>
 
-              <div className="payment-method-content">
-                {metode &&
-                  (metode.DESKRIPSI_METODE_PEMBAYARAN
-                    ?.toLowerCase()
-                    ?.includes(
-                      "bank"
-                    ) ||
-                    metode.DESKRIPSI_METODE_PEMBAYARAN
-                      ?.toLowerCase()
-                      ?.includes(
-                        "transfer"
-                      )) && (
-                    <>
-                      <div className="payment-info">
-                        <p className="payment-info-title">
-                          Informasi
-                          Rekening
-                        </p>
-
-                        <p>
-                          Bank BRI -
-                          1234567890
-                        </p>
-
-                        <p>
-                          a.n. SMK
-                          BOPKRI 2
-                          Yogyakarta
-                        </p>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="buktiTransfer">
-                          Upload Bukti
-                          Pembayaran
-                        </label>
-
-                        <input
-                          type="file"
-                          id="buktiTransfer"
-                          name="buktiTransfer"
-                          accept=".jpg,.jpeg,.png,.pdf"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                {metode &&
-                  metode.DESKRIPSI_METODE_PEMBAYARAN
-                    ?.toLowerCase()
-                    ?.includes(
-                      "tunai"
-                    ) && (
-                    <div className="payment-info payment-info-tunai">
-                      <p className="payment-info-title">
-                        Instruksi
-                        Pembayaran
-                        Tunai
-                      </p>
-
-                      <p>
-                        Silakan
-                        melakukan
-                        pembayaran
-                        langsung ke
-                        bendahara
-                        sekolah.
-                      </p>
-                    </div>
-                  )}
+                {metode && (
+                  <div className="method-instruction">
+                    <p className="instruction-title">Instruksi Pembayaran {metode.DESKRIPSI_METODE_PEMBAYARAN}</p>
+                    <p>Silakan melakukan pembayaran langsung ke bendahara sekolah atau mentransfer ke rekening resmi yang terdaftar.</p>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
-                <label htmlFor="catatan">
-                  Catatan
-                </label>
-
+                <label htmlFor="catatan">Catatan</label>
                 <textarea
                   id="catatan"
                   name="catatan"
@@ -515,31 +201,21 @@ function PembayaranTagihanSiswaOrtu() {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="submit-button"
-                disabled={submitting}
-              >
-                {submitting
-                  ? "Mengirim..."
-                  : "Kirim Pembayaran"}
+              <button type="submit" className="submit-button" disabled={submitting}>
+                {submitting ? "Mengirim..." : "Kirim Pembayaran"}
               </button>
             </form>
           </div>
         </div>
       </div>
 
-    {toast && (
-      <div className="payment-toast-container">
-        <div
-          className={`payment-toast-box ${toast.type}`}
-        >
-          <span className="payment-toast-text">
-            {toast.message}
-          </span>
+      {toast && (
+        <div className="payment-toast-container">
+          <div className={`payment-toast-box ${toast.type}`}>
+            <span className="payment-toast-text">{toast.message}</span>
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </main>
   );
 }

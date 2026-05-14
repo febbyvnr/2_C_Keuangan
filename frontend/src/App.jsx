@@ -44,6 +44,7 @@ import DashboardWaka from "./pages/waka/Dashboard";
 import UtamaSiswaOrtu from "./pages/siswaOrtu/UtamaSiswaOrtu";
 import PembayaranTagihanSiswaOrtu from "./pages/siswaOrtu/PembayaranTagihanSiswaOrtu";
 import ProfileSiswaOrtu from "./pages/siswaOrtu/ProfileSiswaOrtu";
+import AccountMonitor from "./pages/admin/AccountMonitor";
 
 import SidebarYayasan from "./components/SidebarYayasan";
 import DashboardYayasan from "./pages/yayasan/Dashboard.jsx";
@@ -235,12 +236,21 @@ export default function App() {
         </Route>
 
         {/* SISWA ORTU TANPA SIDEBAR */}
-        <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
+        {/* <Route path="/siswa-ortu/utama/:id" element={<UtamaSiswaOrtu />} />
         <Route
           path="/siswa-ortu/pembayaran/:id"
           element={<PembayaranTagihanSiswaOrtu />}
         />
-        <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} />
+        <Route path="/siswa-ortu/profile/:id" element={<ProfileSiswaOrtu />} /> */}
+        {/* SEBELUMNYA: path="/siswa-ortu/utama/:id" */}
+        <Route path="/siswa-ortu/utama" element={<UtamaSiswaOrtu />} />
+
+        {/* SEBELUMNYA: path="/siswa-ortu/profile/:id" */}
+        <Route path="/siswa-ortu/profile" element={<ProfileSiswaOrtu />} />
+
+        {/* TETAP DIPERTAHANKAN: :id di bawah ini adalah ID Tagihan spesifik */}
+        <Route path="/siswa-ortu/pembayaran/:id" element={<PembayaranTagihanSiswaOrtu />} />
+        <Route path="/admin/account-monitor" element={<AccountMonitor />} />
 
         {/* PIC GURU */}
 

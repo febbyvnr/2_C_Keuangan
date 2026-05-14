@@ -4,7 +4,8 @@ import { apiFetch } from '../api/api';
 import logoSekolah from '../assets/logo.png'; 
 
 export default function Login() {
-    const [nip, setNip] = useState('');
+    // Mengubah state ke 'identifier' untuk menampung NIP (Karyawan) atau NISN (Siswa)
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +18,15 @@ export default function Login() {
         setErrorMsg('');
 
         try {
+            // Mengirim key 'nip' dan 'identifier' sekaligus agar 100% aman 
+            // tanpa memedulikan versi validasi request di backend saat ini
             const response = await apiFetch('/login', {
                 method: 'POST',
-                body: JSON.stringify({ nip, password })
+                body: JSON.stringify({ 
+                    nip: identifier, 
+                    identifier: identifier, 
+                    password 
+                })
             });
 
             localStorage.setItem('token', response.data.access_token);
@@ -42,7 +49,15 @@ export default function Login() {
             console.log("ROLES:", roles);
             console.log("USER:", user);
             console.log("ROLE TEXT:", roleText);
-            if (roleText.includes("yayasan")) {
+
+            // --- PERCABANGAN ROUTING BERDASARKAN ROLE ---
+            if (roleText.includes("super admin")) {
+                navigate("/admin/account-monitor");
+            }
+            else if (roleText.includes("siswa") || roleText.includes("ortu")) {
+                navigate("/siswa-ortu/utama");
+            }
+            else if (roleText.includes("yayasan")) {
                 navigate("/yayasan");
             }
             else if (roleText.includes("penjaminan mutu") || roleText.includes("pm")) {
@@ -64,7 +79,7 @@ export default function Login() {
                 setErrorMsg("Maaf, Role akun Anda belum terdaftar di sistem.");
             }
         } catch (error) {
-            setErrorMsg(error.status === 401 ? 'NIP atau Password salah!' : (error.message || 'Gagal terhubung ke server.'));
+            setErrorMsg(error.status === 401 ? 'NIP/NISN atau Password salah!' : (error.message || 'Gagal terhubung ke server.'));
         } finally {
             setIsLoading(false);
         }
@@ -92,14 +107,14 @@ export default function Login() {
                     
                     <form onSubmit={handleLogin}>
                         <div style={styles.inputGroup}>
-                            <label style={styles.label}>NIP</label>
+                            <label style={styles.label}>NIP / NISN</label>
                             <input 
                                 type="text" 
-                                value={nip} 
-                                onChange={(e) => setNip(e.target.value)} 
+                                value={identifier} 
+                                onChange={(e) => setIdentifier(e.target.value)} 
                                 required 
                                 style={styles.input}
-                                placeholder="Masukkan NIP Anda"
+                                placeholder="Masukkan NIP atau NISN"
                             />
                         </div>
                         
@@ -142,7 +157,7 @@ export default function Login() {
     );
 }
 
-// --- CSS IN JS (Supaya styling langsung nempel dan kebal Dark Mode Chrome) ---
+// --- CSS IN JS ---
 const styles = {
     container: {
         display: 'flex',
