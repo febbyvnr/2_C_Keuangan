@@ -252,8 +252,9 @@ export default function App() {
           <Route path="rka" element={<RKA />} />
           <Route path="rkt/create" element={<CreateRKT />} />
           <Route path="rkt/edit/:id" element={<CreateRKT />} />
-          <Route path="evaluasi-rkt" element={<EvaluasiRKT />} />
         </Route>
+
+        <Route path="/pic/guru/evaluasi-rkt" element={<EvaluasiRKT />} />
 
         {/* KEPSEK */}
         <Route path="/kepsek" element={<KepsekLayout />}>
