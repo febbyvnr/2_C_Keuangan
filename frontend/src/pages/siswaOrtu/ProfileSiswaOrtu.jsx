@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/siswaOrtu/ProfileSiswaOrtu.css";
 
 function ProfileSiswaOrtu() {
   const navigate = useNavigate();
-  // Catatan: useParams() dihapus karena identitas sudah diurus secara otomatis oleh Token backend
 
   const [isEdit, setIsEdit] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     namaSiswa: "",
@@ -42,209 +40,279 @@ function ProfileSiswaOrtu() {
 
   const formatAlamat = (siswa) => {
     const parts = [];
-    if (siswa?.ALAMAT) parts.push(siswa.ALAMAT);
-    return parts.join(", ") || "-";
+
+    if (siswa.ALAMAT_JALAN_SISWA) parts.push(siswa.ALAMAT_JALAN_SISWA);
+
+    const rtRw = [];
+    if (siswa.RT_SISWA) rtRw.push(`RT ${siswa.RT_SISWA}`);
+    if (siswa.RW_SISWA) rtRw.push(`RW ${siswa.RW_SISWA}`);
+    if (rtRw.length) parts.push(rtRw.join(" "));
+
+    if (siswa.KELURAHAN_SISWA) parts.push(siswa.KELURAHAN_SISWA);
+    if (siswa.KECAMATAN_SISWA) parts.push(siswa.KECAMATAN_SISWA);
+    if (siswa.KOTA_KAB_SISWA) parts.push(siswa.KOTA_KAB_SISWA);
+    if (siswa.PROVINSI_SISWA) parts.push(siswa.PROVINSI_SISWA);
+    if (siswa.KODE_POS_SISWA) parts.push(siswa.KODE_POS_SISWA);
+
+    return parts.join(", ");
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-        const resData = await response.json();
-
-        if (response.ok && resData.success) {
-          const s = resData.data;
-          setFormData({
-            namaSiswa: s.NAMA_SISWA_TETAP || s.nama_siswa || "",
-            nis: s.ID_SISWA_TETAP || "",
-            nisn: s.NISN_SISWA || s.nisn || "",
-            kelas: s.KODE_TA || s.kelas || "",
-            jenisKelamin: s.JENIS_KELAMIN || "-",
-            tempatLahir: s.TEMPAT_LAHIR || "-",
-            tanggalLahir: s.TANGGAL_LAHIR || "",
-            alamat: formatAlamat(s),
-            noHp: s.NO_HP_SISWA || "",
-            tahunLulus: s.TAHUN_LULUS || "-",
-            namaAyah: s.NAMA_AYAH || "-",
-            pekerjaanAyah: s.PEKERJAAN_AYAH_SISWA || "",
-            namaIbu: s.NAMA_IBU || "-",
-            pekerjaanIbu: s.PEKERJAAN_IBU_SISWA || "",
-            namaWali: s.NAMA_WALI_SISWA || "",
-          });
-        }
-      } catch (error) {
-        console.error("Gagal memuat profil:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, [navigate]);
+  }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = async () => {
-    const token = localStorage.getItem("token");
-    setSaving(true);
+  const fetchProfile = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({
-          NO_HP_SISWA: formData.noHp,
-          PEKERJAAN_AYAH_SISWA: formData.pekerjaanAyah,
-          PEKERJAAN_IBU_SISWA: formData.pekerjaanIbu,
-          NAMA_WALI_SISWA: formData.namaWali,
-        }),
-      });
+      setLoading(true);
 
-      const resData = await response.json();
-      if (response.ok && resData.success) {
-        alert("Profil berhasil diperbarui!");
-        setIsEdit(false);
-      } else {
-        alert(resData.message || "Gagal memperbarui profil.");
+      const res = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      const json = await res.json();
+
+      console.log("PROFILE RESPONSE:", json);
+
+      const siswa = json?.data || null;
+
+      if (siswa) {
+        setFormData({
+          namaSiswa: siswa.NAMA_SISWA_TETAP || "",
+          nis: siswa.ID_PENDAFTARAN || "",
+          nisn: siswa.NISN_SISWA || "",
+          kelas: "-",
+          jenisKelamin:
+            siswa.GENDER_SISWA === "L"
+              ? "Laki-laki"
+              : siswa.GENDER_SISWA === "P"
+              ? "Perempuan"
+              : siswa.GENDER_SISWA || "",
+          tempatLahir: siswa.TEMPAT_LAHIR_SISWA || "",
+          tanggalLahir: formatTanggalIndonesia(siswa.TGL_LAHIR_SISWA),
+          alamat: formatAlamat(siswa),
+          noHp: siswa.NO_HP_SISWA || "",
+          tahunLulus: siswa.TAHUN_LULUS || "",
+          namaAyah: siswa.NAMA_AYAH_SISWA || "",
+          pekerjaanAyah: siswa.PEKERJAAN_AYAH_SISWA || "",
+          namaIbu: siswa.NAMA_IBU_SISWA || "",
+          pekerjaanIbu: siswa.PEKERJAAN_IBU_SISWA || "",
+          namaWali: siswa.NAMA_WALI_SISWA || "-",
+        });
       }
     } catch (error) {
-      alert("Terjadi kesalahan jaringan.");
+      console.error("Gagal mengambil profile:", error);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCancel = async () => {
+    await fetchProfile();
+    setIsEdit(false);
+  };
+
+  const handleSave = async () => {
+    try {
+      const payload = {
+        NO_HP_SISWA: formData.noHp,
+        PEKERJAAN_AYAH_SISWA: formData.pekerjaanAyah,
+        PEKERJAAN_IBU_SISWA: formData.pekerjaanIbu,
+        NAMA_WALI_SISWA: formData.namaWali,
+      };
+
+      const res = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal menyimpan profile");
+      }
+
+      await fetchProfile();
+      alert("Profile berhasil disimpan");
+      setIsEdit(false);
+    } catch (error) {
+      console.error("Gagal menyimpan profile:", error);
+      alert(error.message || "Terjadi kesalahan saat menyimpan");
+    }
+  };
+
+  const avatarText = useMemo(() => {
+    return (formData.namaSiswa || "S")
+      .split(" ")
+      .map((word) => word[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  }, [formData.namaSiswa]);
+
   if (loading) {
-    return <div className="loading-container">Memuat rincian profil...</div>;
+    return <div className="profile-page">Loading...</div>;
   }
 
   return (
-    <div className="profile-container">
-      <header className="profile-top-bar">
-        <button onClick={() => navigate("/siswa-ortu/utama")} className="back-btn">
-          ‹ Kembali ke Beranda
-        </button>
-        <h2>Profil Siswa & Data Orang Tua</h2>
-        <div className="action-buttons">
-          {isEdit ? (
-            <>
-              <button onClick={handleSave} disabled={saving} className="save-btn">
-                {saving ? "Menyimpan..." : "Simpan Perubahan"}
-              </button>
-              <button onClick={() => setIsEdit(false)} className="cancel-btn">
+    <div className="profile-page">
+      <div className="profile-container">
+        <div className="profile-topbar">
+          <button
+            className="back-btn"
+            onClick={() => navigate("/siswa-ortu/utama")}
+          >
+            ← Kembali
+          </button>
+
+          {!isEdit ? (
+            <button className="edit-btn" onClick={() => setIsEdit(true)}>
+              Edit Profile
+            </button>
+          ) : (
+            <div className="topbar-actions">
+              <button className="cancel-btn" onClick={handleCancel}>
                 Batal
               </button>
-            </>
-          ) : (
-            <button onClick={() => setIsEdit(true)} className="edit-btn">
-              Edit Data Wali/Ortu
-            </button>
+              <button className="save-btn" onClick={handleSave}>
+                Simpan
+              </button>
+            </div>
           )}
         </div>
-      </header>
 
-      <div className="profile-card-wrapper">
-        {/* Seksi Data Diri Siswa (Disabled) */}
-        <div className="profile-section">
-          <h3>Data Diri Siswa</h3>
-          <div className="profile-form-grid">
-            <div className="form-group">
-              <label>Nama Lengkap</label>
-              <input value={formData.namaSiswa} disabled />
-            </div>
-            <div className="form-group">
-              <label>NISN</label>
-              <input value={formData.nisn} disabled />
-            </div>
-            <div className="form-group">
-              <label>ID Siswa / No Induk</label>
-              <input value={formData.nis} disabled />
-            </div>
-            <div className="form-group">
-              <label>Kelas</label>
-              <input value={formData.kelas} disabled />
-            </div>
-            <div className="form-group">
-              <label>Tempat Lahir</label>
-              <input value={formData.tempatLahir} disabled />
-            </div>
-            <div className="form-group">
-              <label>Tanggal Lahir</label>
-              <input value={formatTanggalIndonesia(formData.tanggalLahir)} disabled />
-            </div>
-            <div className="form-group full-width">
-              <label>Alamat Tinggal</label>
-              <input value={formData.alamat} disabled />
-            </div>
-            <div className="form-group">
-              <label>Nomor HP Siswa</label>
-              <input
-                name="noHp"
-                value={formData.noHp}
-                onChange={handleChange}
-                disabled={!isEdit}
-                placeholder="Masukkan No HP aktif"
-              />
-            </div>
+        <div className="profile-card profile-header-card">
+          <div className="profile-avatar-large">{avatarText}</div>
+          <div className="profile-header-info">
+            <h1>{formData.namaSiswa || "Siswa"}</h1>
+            <p>{formData.kelas || "-"}</p>
+            <span className="profile-chip">Siswa / Orang Tua</span>
           </div>
         </div>
 
-        {/* Seksi Data Wali / Orang Tua */}
-        <div className="profile-section">
-          <h3>Data Orang Tua / Wali</h3>
-          <div className="profile-form-grid">
-            <div className="form-group">
-              <label>Nama Ayah</label>
-              <input value={formData.namaAyah} disabled />
+        <div className="profile-grid">
+          <div className="profile-card">
+            <h2>Data Siswa</h2>
+
+            <div className="profile-form-grid">
+              <div className="form-group">
+                <label>Nama Siswa</label>
+                <input value={formData.namaSiswa} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>NIS</label>
+                <input value={formData.nis} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>NISN</label>
+                <input value={formData.nisn} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Kelas</label>
+                <input value={formData.kelas} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Jenis Kelamin</label>
+                <input value={formData.jenisKelamin} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Tempat Lahir</label>
+                <input value={formData.tempatLahir} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Tanggal Lahir</label>
+                <input value={formData.tanggalLahir} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>No HP</label>
+                <input
+                  name="noHp"
+                  value={formData.noHp}
+                  onChange={handleChange}
+                  disabled={!isEdit}
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label>Alamat</label>
+                <textarea
+                  name="alamat"
+                  value={formData.alamat}
+                  onChange={handleChange}
+                  disabled
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Tahun Lulus</label>
+                <input value={formData.tahunLulus} disabled />
+              </div>
             </div>
-            <div className="form-group">
-              <label>Pekerjaan Ayah</label>
-              <input
-                name="pekerjaanAyah"
-                value={formData.pekerjaanAyah}
-                onChange={handleChange}
-                disabled={!isEdit}
-              />
-            </div>
-            <div className="form-group">
-              <label>Nama Ibu</label>
-              <input value={formData.namaIbu} disabled />
-            </div>
-            <div className="form-group">
-              <label>Pekerjaan Ibu</label>
-              <input
-                name="pekerjaanIbu"
-                value={formData.pekerjaanIbu}
-                onChange={handleChange}
-                disabled={!isEdit}
-              />
-            </div>
-            <div className="form-group full-width">
-              <label>Nama Wali</label>
-              <input
-                name="namaWali"
-                value={formData.namaWali}
-                onChange={handleChange}
-                disabled={!isEdit}
-              />
+          </div>
+
+          <div className="profile-card">
+            <h2>Data Orang Tua / Wali</h2>
+
+            <div className="profile-form-grid">
+              <div className="form-group">
+                <label>Nama Ayah</label>
+                <input value={formData.namaAyah} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Pekerjaan Ayah</label>
+                <input
+                  name="pekerjaanAyah"
+                  value={formData.pekerjaanAyah}
+                  onChange={handleChange}
+                  disabled={!isEdit}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Nama Ibu</label>
+                <input value={formData.namaIbu} disabled />
+              </div>
+
+              <div className="form-group">
+                <label>Pekerjaan Ibu</label>
+                <input
+                  name="pekerjaanIbu"
+                  value={formData.pekerjaanIbu}
+                  onChange={handleChange}
+                  disabled={!isEdit}
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label>Nama Wali</label>
+                <input
+                  name="namaWali"
+                  value={formData.namaWali}
+                  onChange={handleChange}
+                  disabled={!isEdit}
+                />
+              </div>
             </div>
           </div>
         </div>
