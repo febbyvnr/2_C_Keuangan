@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./../../styles/siswaOrtu/UtamaSiswaOrtu.css";
 
 function UtamaSiswaOrtu() {
@@ -15,7 +15,6 @@ function UtamaSiswaOrtu() {
   const [historyPage, setHistoryPage] = useState(1);
 
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const formatRupiah = (value) =>
     new Intl.NumberFormat("id-ID", {
@@ -44,24 +43,24 @@ function UtamaSiswaOrtu() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const userStorage = JSON.parse(localStorage.getItem("user") || "{}");
+        setSiswaData(userStorage);
 
-        const [tagihanRes, pembayaranRes] = await Promise.all([
-          fetch(`http://localhost:8000/api/tagihan-siswa?ID_SISWA_TETAP=${id}`),
-          fetch(`http://localhost:8000/api/tr-pembayaran?ID_SISWA_TETAP=${id}`),
-        ]);
+        const tagihanRes = await fetch("http://localhost:8000/api/siswa-ortu/tagihan", {
+          headers: {
+            Accept: "application/json",
+          },
+        });
 
         const tagihanJson = await tagihanRes.json();
-        const pembayaranJson = await pembayaranRes.json();
 
         const tagihan = Array.isArray(tagihanJson.data)
           ? tagihanJson.data
           : [];
+        const pembayaran = tagihan.flatMap((item) =>
+          Array.isArray(item.HISTORI_PEMBAYARAN) ? item.HISTORI_PEMBAYARAN : []
+        );
 
-        const pembayaran = Array.isArray(pembayaranJson.data)
-          ? pembayaranJson.data
-          : [];
-
-        setSiswaData(tagihanJson.siswa || null);
         setTagihanData(tagihan);
         setPaymentHistory(pembayaran);
       } catch (error) {
@@ -74,13 +73,12 @@ function UtamaSiswaOrtu() {
       }
     };
 
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
+    fetchData();
+  }, []);
 
   const activeBills = useMemo(() => {
-    return tagihanData.map((item) => {
+  return tagihanData
+    .map((item) => {
       const totalTagihan = Number(item.JUMLAH_TAGIHAN_SISWA || 0);
       const totalBayar = Number(item.TOTAL_PEMBAYARAN || 0);
 
@@ -93,7 +91,13 @@ function UtamaSiswaOrtu() {
 
       let status = item.STATUS_TAGIHAN_SISWA || "Belum Bayar";
 
-      if (sisa <= 0) {
+      const adaPending =
+        item.ADA_PEMBAYARAN_PENDING ||
+        status === "Menunggu Verifikasi";
+
+      if (adaPending) {
+        status = "Menunggu Verifikasi";
+      } else if (sisa <= 0) {
         status = "Sudah Bayar";
       } else if (totalBayar > 0) {
         status = "Cicilan";
@@ -110,8 +114,9 @@ function UtamaSiswaOrtu() {
         sisa,
         status,
       };
-    });
-  }, [tagihanData]);
+    })
+    .filter((item) => item.status !== "Sudah Bayar" && item.status !== "Lunas");
+}, [tagihanData]);
 
   const activeBillTotalPages = Math.max(
     1,
@@ -191,13 +196,48 @@ function UtamaSiswaOrtu() {
     },
   ];
 
+  const getPaymentStatus = (item) => {
+    const rawStatus = String(
+      item.STATUS_PEMBAYARAN ||
+        item.STATUS_VERIFIKASI ||
+        item.STATUS_TR_PEMBAYARAN ||
+        ""
+    ).toLowerCase();
+
+    if (
+      rawStatus.includes("tolak") ||
+      rawStatus.includes("ditolak")
+    ) {
+      return "Ditolak";
+    }
+
+    if (
+      rawStatus.includes("menunggu") ||
+      rawStatus.includes("pending")
+    ) {
+      return "Menunggu Verifikasi";
+    }
+
+    if (
+      item.NIP_VALIDATOR_PEMBAYARAN ||
+      rawStatus.includes("setuju") ||
+      rawStatus.includes("disetujui") ||
+      rawStatus.includes("terverifikasi")
+    ) {
+      return "Disetujui";
+    }
+
+    return "Menunggu Verifikasi";
+  };
+
   const renderStatusBadge = (status) => {
     let className = "status-badge";
 
     if (
       status === "Sudah Bayar" ||
       status === "Lunas" ||
-      status === "Terverifikasi"
+      status === "Terverifikasi" ||
+      status === "Disetujui"
     ) {
       className += " success";
     } else if (status === "Belum Bayar") {
@@ -208,7 +248,12 @@ function UtamaSiswaOrtu() {
       className += " warning";
     }
 
-    const label = status === "Sudah Bayar" ? "Lunas" : status;
+    const label =
+      status === "Sudah Bayar"
+        ? "Lunas"
+        : status === "Menunggu Verifikasi"
+        ? "Menunggu"
+        : status;
 
     return <span className={className}>{label}</span>;
   };
@@ -225,7 +270,7 @@ function UtamaSiswaOrtu() {
     if (status === "Menunggu Verifikasi") {
       return (
         <button className="action-btn action-btn-waiting" disabled>
-          Menunggu Verifikasi
+          Diproses
         </button>
       );
     }
@@ -312,7 +357,7 @@ function UtamaSiswaOrtu() {
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileOpen(false);
-                    navigate(`/siswa-ortu/profile/${id}`);
+                    navigate("/siswa-ortu/profile");
                   }}
                 >
                   Lihat Profile
@@ -346,7 +391,11 @@ function UtamaSiswaOrtu() {
             onClick={handlePayNow}
             disabled={!hasUnpaidBill}
           >
-            {hasUnpaidBill ? "Bayar Sekarang" : "Tidak Ada Tagihan"}
+            {hasUnpaidBill
+              ? "Bayar Sekarang"
+              : activeBills.length > 0
+              ? "Sedang Diproses"
+              : "Tidak Ada Tagihan"}
           </button>
         </section>
 
@@ -462,6 +511,7 @@ function UtamaSiswaOrtu() {
                       <th>Nominal</th>
                       <th>Metode</th>
                       <th>ID Tagihan</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
 
@@ -475,18 +525,17 @@ function UtamaSiswaOrtu() {
                           <td>{formatTanggal(item.TGL_BAYAR)}</td>
                           <td>{formatRupiah(item.JUMLAH_BAYAR)}</td>
                           <td>
-                            {item?.metode_pembayaran
-                              ?.DESKRIPSI_METODE_PEMBAYARAN ||
-                              item?.metodePembayaran
-                                ?.DESKRIPSI_METODE_PEMBAYARAN ||
+                            {item?.metode_pembayaran?.DESKRIPSI_METODE_PEMBAYARAN ||
+                              item?.metodePembayaran?.DESKRIPSI_METODE_PEMBAYARAN ||
                               "-"}
                           </td>
                           <td>{item.ID_TAGIHAN_SISWA || "-"}</td>
+                          <td>{renderStatusBadge(getPaymentStatus(item))}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5">Tidak ada riwayat pembayaran</td>
+                        <td colSpan="6">Tidak ada riwayat pembayaran</td>
                       </tr>
                     )}
                   </tbody>
