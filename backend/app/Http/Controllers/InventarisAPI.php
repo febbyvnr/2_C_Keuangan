@@ -6,7 +6,7 @@ use App\Models\FpdAnggaran;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class InventarisController extends Controller
+class InventarisAPI extends Controller
 {
     public function index(Request $request): JsonResponse
     {

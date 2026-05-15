@@ -33,7 +33,7 @@ use App\Http\Controllers\JenisTarifExportController;
 use App\Http\Controllers\TarifExportController;
 use App\Http\Controllers\MstUnitController;
 use App\Http\Controllers\MstKaryawanController;
-use App\Http\Controllers\InventarisController;
+use App\Http\Controllers\InventarisAPI;
 
 use Termwind\Components\Raw;
 use App\Http\Controllers\RkaController;
@@ -421,5 +421,5 @@ Route::get('/dashboardtimpenjaminanmutu', [DashboardTimPenjaminanMutuController:
 Route::get('/dashboard-kepsekrkt', [DashboardKepsekRKTController::class, 'index']);
 
 Route::prefix('inventaris')->group(function () {
-    Route::get('/', [InventarisController::class, 'index']);
+    Route::get('/', [InventarisAPI::class, 'index']);
 });
