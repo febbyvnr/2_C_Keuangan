@@ -24,6 +24,8 @@ use App\Http\Controllers\TrPembayaranController;
 use App\Http\Controllers\EvaluasiRktController;
 use App\Http\Controllers\TagihanSiswaController;
 use App\Http\Controllers\LaporanPenerimaanController;
+use App\Http\Controllers\LaporanRkasController;
+use App\Http\Controllers\LaporanKeuanganYayasanController;
 use App\Http\Controllers\TrPenerimaanController;
 use App\Http\Controllers\RefJenisPembayaranController;
 use App\Http\Controllers\RefJenisPembayaranExportController;
@@ -44,6 +46,8 @@ use App\Http\Controllers\RefJenisTagihanController;
 use App\Http\Controllers\RefMetodePembayaranController;
 use App\Http\Controllers\DashboardTimPenjaminanMutuController;
 use App\Http\Controllers\DashboardKepsekRKTController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\MstSiswaController;
 
 
 Route::get('/user', function (Request $request) {
@@ -52,12 +56,48 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 
+// =============================================================================
+// 2. KONTROL SUPER ADMIN (Eksklusif Token Dewa)
+// =============================================================================
+// Dibungkus auth:sanctum DAN dicegat inline filter khusus mendeteksi ability token
+Route::middleware('auth:sanctum')->prefix('admin/account')->group(function () {
+    // Kelola Akun Siswa
+    Route::put('/siswa/{id}/password', [AccountController::class, 'setStudentPassword']);
+    Route::post('/siswa/bulk-generate-password', [AccountController::class, 'bulkGenerateStudentCredentials']);
+    
+    // Kelola Akun Staf/Karyawan
+    Route::get('/roles', [AccountController::class, 'listRoleOptions']);
+    Route::get('/karyawan', [AccountController::class, 'listStaffAccounts']);
+    Route::post('/karyawan', [AccountController::class, 'storeStaffAccount']);
+    Route::put('/karyawan/{nip}/role', [AccountController::class, 'assignStaffRole']);
+    Route::delete('/karyawan/{nip}/role', [AccountController::class, 'revokeStaffRole']);
+    Route::put('/karyawan/{nip}/password', [AccountController::class, 'resetStaffPassword']);
+});
+
 // ==========================
 // ROUTE PENERIMAAN
 // ==========================
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);
 Route::get('/access-logs', [AccessLogController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Logout untuk semua tipe user
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+});
+
+// =============================================================================
+// PIPELINE EKSTERNAl: PORTAL ORTU & SISWA (Aman dari IDOR)
+// =============================================================================
+Route::middleware('auth:sanctum')->prefix('siswa-ortu')->group(function () {
+    // Menggunakan MstSiswaController baru (Tanpa parameter {id} di URL)
+    Route::get('/profile', [MstSiswaController::class, 'myProfile']);
+    Route::put('/profile', [MstSiswaController::class, 'updateMyProfile']);
+    Route::get('/tagihan', [MstSiswaController::class, 'myTagihan']);
+});
+
 
 // F82, F83, F84 -> Create, Update, Delete
 Route::middleware(['role:Bendahara'])->group(function () {
@@ -382,5 +422,4 @@ Route::get('/dashboard-kepsekrkt', [DashboardKepsekRKTController::class, 'index'
 
 Route::prefix('inventaris')->group(function () {
     Route::get('/', [InventarisController::class, 'index']);
-    Route::get('/{id}', [InventarisController::class, 'show'])->whereNumber('id');
 });

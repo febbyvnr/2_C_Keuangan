@@ -1,0 +1,273 @@
+.am-page * {
+  box-sizing: border-box;
+}
+
+.am-page {
+  width: 100%;
+  padding: 32px 40px;
+}
+
+.am-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.am-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.am-alert {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #9f1239;
+  font-size: 14px;
+}
+
+.am-tabs {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.am-tab {
+  padding: 12px 20px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.am-tab.active {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+}
+
+.am-content {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+
+.am-controls {
+  margin-bottom: 12px;
+}
+
+.am-input,
+.am-select,
+.am-input-sm {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.am-input {
+  width: 340px;
+}
+
+.am-input-sm {
+  width: 160px;
+}
+
+.am-table-wrap {
+  overflow-x: auto;
+}
+
+.am-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.am-table th {
+  text-align: left;
+  font-size: 12px;
+  color: #374151;
+  text-transform: uppercase;
+  padding: 12px 10px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.am-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+  font-size: 14px;
+}
+
+.am-inline {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.am-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.am-badge-none {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.am-badge-bend {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.am-badge-kepsek {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.am-badge-default {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.am-btn-primary,
+.am-btn-muted,
+.am-btn-warning,
+.am-btn-warning-strong,
+.am-btn-danger {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.am-btn-primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.am-btn-muted {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.am-btn-warning {
+  background: #f59e0b;
+  color: #111827;
+}
+
+.am-btn-warning-strong {
+  background: #b45309;
+  color: #ffffff;
+}
+
+.am-btn-danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.am-btn-danger-soft {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.am-loading {
+  margin-top: 10px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.am-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.am-modal {
+  width: 92%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+}
+
+.am-modal h3 {
+  margin: 0 0 8px 0;
+  color: #111827;
+}
+
+.am-modal p {
+  margin: 0 0 14px 0;
+  color: #4b5563;
+}
+
+.am-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.am-toast {
+  position: fixed;
+  left: 50%;
+  top: 24px;
+  transform: translateX(-50%);
+  z-index: 1200;
+  min-width: 360px;
+  max-width: 560px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.am-toast.success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.am-toast.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+@media (max-width: 900px) {
+  .am-page {
+    padding: 20px;
+  }
+
+  .am-input {
+    width: 100%;
+  }
+}

@@ -31,6 +31,17 @@ function Tagihan() {
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
+  const [toast, setToast] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  const showToast = (type = "success", message = "") => {
+    setToast({ type, message });
+    setVisible(true);
+
+    setTimeout(() => setVisible(false), 2500);
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const [siswaKeyword, setSiswaKeyword] = useState("");
   const [showSiswaDropdown, setShowSiswaDropdown] = useState(false);
   const siswaDropdownRef = useRef(null);
@@ -351,12 +362,12 @@ function Tagihan() {
       !formData.JUMLAH_TAGIHAN_SISWA ||
       !formData.DUEDATETIME_TAGIHAN_SISWA
     ) {
-      alert("Semua field wajib diisi.");
+      showToast("error", "Semua field wajib diisi.");
       return;
     }
 
     if (Number(formData.JUMLAH_TAGIHAN_SISWA) <= 0) {
-      alert("Jumlah tagihan harus lebih dari 0.");
+      showToast("error", "Jumlah tagihan harus lebih dari 0.");
       return;
     }
 
@@ -368,23 +379,28 @@ function Tagihan() {
     try {
       setSubmitLoading(true);
 
-      // Sesuaikan endpoint ini kalau backend kamu sudah RESTful penuh
+      // Sesuaikan endpoint ini kalau backend udah RESTful penuh
       if (isEdit && selectedId) {
         await axios.put(
           `${API_BASE_URL}/tagihan-siswa/update/${selectedId}`,
           payload
         );
-        alert("Tagihan berhasil diperbarui.");
+
+        showToast("success", "Tagihan berhasil diperbarui.");
       } else {
         await axios.post(`${API_BASE_URL}/tagihan-siswa/store`, payload);
-        alert("Tagihan berhasil ditambahkan.");
+
+        showToast("success", "Tagihan berhasil ditambahkan.");
       }
 
       await fetchTagihan();
       resetForm();
     } catch (error) {
       console.error("Gagal menyimpan tagihan:", error);
-      alert(error.response?.data?.message || "Gagal menyimpan data tagihan.");
+      showToast(
+        "error",
+        error.response?.data?.message || "Gagal menyimpan data tagihan."
+      );
     } finally {
       setSubmitLoading(false);
     }
@@ -921,6 +937,13 @@ function Tagihan() {
           </div>
         </div>
       </section>
+      {toast && (
+        <div className={`tagihan-toast-container ${visible ? "show" : "hide"}`}>
+          <div className={`tagihan-toast-box ${toast.type}`}>
+            <span className="tagihan-toast-text">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

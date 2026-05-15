@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../styles/siswaOrtu/ProfileSiswaOrtu.css";
 
 function ProfileSiswaOrtu() {
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const [isEdit, setIsEdit] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,16 +58,18 @@ function ProfileSiswaOrtu() {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchProfile();
-    }
-  }, [id]);
+    fetchProfile();
+  }, []);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`);
+      const res = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
+        headers: {
+          Accept: "application/json",
+        },
+      });
       const json = await res.json();
 
       console.log("PROFILE RESPONSE:", json);
@@ -128,10 +129,11 @@ function ProfileSiswaOrtu() {
         NAMA_WALI_SISWA: formData.namaWali,
       };
 
-      const res = await fetch(`http://localhost:8000/api/siswa-ortu/profile/${id}`, {
+      const res = await fetch("http://localhost:8000/api/siswa-ortu/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -170,7 +172,7 @@ function ProfileSiswaOrtu() {
         <div className="profile-topbar">
           <button
             className="back-btn"
-            onClick={() => navigate(`/siswa-ortu/utama/${id}`)}
+            onClick={() => navigate("/siswa-ortu/utama")}
           >
             ← Kembali
           </button>

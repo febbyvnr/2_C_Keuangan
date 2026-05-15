@@ -82,13 +82,27 @@ function getLatestRktStatus(item) {
     return Number(b.ID_PM || 0) - Number(a.ID_PM || 0);
   })[0];
 
-  const note = String(latest?.DESKRIPSI_TR_PM || "").toLowerCase();
+  const note = String(latest?.DESKRIPSI_TR_PM || "").toLowerCase().trim();
 
-  if (note.includes("ditolak") || note.includes("tolak")) return "ditolak";
-  if (note.includes("revisi")) return "revisi";
-  if (note.includes("disetujui") || note.includes("setujui")) return "disetujui";
-  if (note.includes("diajukan")) return "diajukan";
-  if (note.includes("draft")) return "draft";
+  if (note.startsWith("draft") || note.includes("perbaikan rkt disimpan")) {
+    return "draft";
+  }
+
+  if (note.includes("ditolak") || note.includes("tolak")) {
+    return "ditolak";
+  }
+
+  if (note.includes("revisi")) {
+    return "revisi";
+  }
+
+  if (note.includes("disetujui") || note.includes("setujui")) {
+    return "disetujui";
+  }
+
+  if (note.startsWith("diajukan")) {
+    return "diajukan";
+  }
 
   return "draft";
 }
@@ -125,6 +139,7 @@ function getRkaLockMessage(item) {
 
   return "";
 }
+
 
 export default function RKA() {
   const [data, setData] = useState([]);
