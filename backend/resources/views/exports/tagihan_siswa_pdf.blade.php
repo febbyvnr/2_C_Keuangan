@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -137,6 +137,16 @@
             $totalTagihan = 0;
             $totalBayar = 0;
             $totalSisa = 0;
+
+            function statusTagihanLabel($status) {
+                return match ($status) {
+                    'Sudah Bayar' => 'Lunas',
+                    'Menunggu Verifikasi' => 'Menunggu Verifikasi',
+                    'Cicilan' => 'Cicilan',
+                    'Belum Bayar' => 'Belum Bayar',
+                    default => $status ?? '-',
+                };
+            }
         @endphp
 
         @forelse($data as $item)
@@ -145,7 +155,9 @@
 
                 $sudahBayar = isset($item['TOTAL_PEMBAYARAN'])
                     ? (float) $item['TOTAL_PEMBAYARAN']
-                    : (float) collect($item['PEMBAYARAN'] ?? [])->sum('JUMLAH_BAYAR');
+                    : (float) collect($item['PEMBAYARAN'] ?? [])
+                        ->filter(fn ($pembayaran) => !empty($pembayaran['NIP_VALIDATOR_PEMBAYARAN'] ?? null))
+                        ->sum('JUMLAH_BAYAR');
 
                 $sisa = isset($item['SISA_TAGIHAN'])
                     ? (float) $item['SISA_TAGIHAN']
@@ -189,7 +201,7 @@
                     {{ number_format($sisa, 0, ',', '.') }}
                 </td>
                 <td>
-                    {{ $item['STATUS_TAGIHAN_SISWA'] ?? '-' }}
+                    {{ statusTagihanLabel($item['STATUS_TAGIHAN_SISWA'] ?? '-') }}
                 </td>
             </tr>
         @empty

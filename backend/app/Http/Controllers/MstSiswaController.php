@@ -87,34 +87,78 @@ class MstSiswaController extends Controller
             'jenisTagihan',
             'pembayaran.metodePembayaran',
         ])
-        ->where('ID_SISWA_TETAP', $siswaSession->ID_SISWA_TETAP)
-        ->orderByDesc('TAHUN_TAGIHAN_SISWA')
-        ->orderByDesc('ID_TAGIHAN_SISWA')
-        ->get()
-        ->map(function ($item) {
-            $totalPembayaran = (float) $item->pembayaran->sum('JUMLAH_BAYAR');
-            $sisaTagihan = max(0, (float) $item->JUMLAH_TAGIHAN_SISWA - $totalPembayaran);
+            ->where('ID_SISWA_TETAP', $siswaSession->ID_SISWA_TETAP)
+            ->orderByDesc('TAHUN_TAGIHAN_SISWA')
+            ->orderByDesc('ID_TAGIHAN_SISWA')
+            ->get()
+            ->map(function ($item) {
+                $jumlahTagihan = (float) ($item->JUMLAH_TAGIHAN_SISWA ?? 0);
 
-            return [
-                'ID_TAGIHAN_SISWA'     => (int) $item->ID_TAGIHAN_SISWA,
-                'JENIS_TAGIHAN'        => [
-                    'ID_JENIS_TAGIHAN'        => optional($item->jenisTagihan)->ID_JENIS_TAGIHAN,
-                    'DESKRIPSI_JENIS_TAGIHAN' => optional($item->jenisTagihan)->DESKRIPSI_JENIS_TAGIHAN,
-                ],
-                'BULAN_TAGIHAN_SISWA'       => $item->BULAN_TAGIHAN_SISWA,
-                'TAHUN_TAGIHAN_SISWA'       => $item->TAHUN_TAGIHAN_SISWA,
-                'JUMLAH_TAGIHAN_SISWA'      => (float) $item->JUMLAH_TAGIHAN_SISWA,
-                'TOTAL_PEMBAYARAN'          => $totalPembayaran,
-                'SISA_TAGIHAN'              => $sisaTagihan,
-                'STATUS_TAGIHAN_SISWA'      => $item->STATUS_TAGIHAN_SISWA,
-                'DUEDATETIME_TAGIHAN_SISWA' => $item->DUEDATETIME_TAGIHAN_SISWA,
-            ];
-        });
+                $totalPembayaranTerverifikasi = (float) $item->pembayaran
+                    ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+                    ->sum('JUMLAH_BAYAR');
+
+                $adaPembayaranPending = $item->pembayaran
+                    ->whereNull('NIP_VALIDATOR_PEMBAYARAN')
+                    ->count() > 0;
+
+                $sisaTagihan = max(0, $jumlahTagihan - $totalPembayaranTerverifikasi);
+
+                $statusTagihan = $item->STATUS_TAGIHAN_SISWA;
+
+                if ($adaPembayaranPending) {
+                    $statusTagihan = 'Menunggu Verifikasi';
+                } elseif ($totalPembayaranTerverifikasi <= 0) {
+                    $statusTagihan = 'Belum Bayar';
+                } elseif ($totalPembayaranTerverifikasi < $jumlahTagihan) {
+                    $statusTagihan = 'Cicilan';
+                } else {
+                    $statusTagihan = 'Sudah Bayar';
+                }
+
+                return [
+                    'ID_TAGIHAN_SISWA' => (int) $item->ID_TAGIHAN_SISWA,
+
+                    'JENIS_TAGIHAN' => [
+                        'ID_JENIS_TAGIHAN' => optional($item->jenisTagihan)->ID_JENIS_TAGIHAN,
+                        'DESKRIPSI_JENIS_TAGIHAN' => optional($item->jenisTagihan)->DESKRIPSI_JENIS_TAGIHAN,
+                    ],
+
+                    'BULAN_TAGIHAN_SISWA' => $item->BULAN_TAGIHAN_SISWA,
+                    'TAHUN_TAGIHAN_SISWA' => $item->TAHUN_TAGIHAN_SISWA,
+                    'JUMLAH_TAGIHAN_SISWA' => $jumlahTagihan,
+
+                    'TOTAL_PEMBAYARAN' => $totalPembayaranTerverifikasi,
+                    'SISA_TAGIHAN' => $sisaTagihan,
+                    'STATUS_TAGIHAN_SISWA' => $statusTagihan,
+                    'ADA_PEMBAYARAN_PENDING' => $adaPembayaranPending,
+
+                    'DUEDATETIME_TAGIHAN_SISWA' => $item->DUEDATETIME_TAGIHAN_SISWA,
+
+                    'HISTORI_PEMBAYARAN' => $item->pembayaran
+                        ->map(function ($pembayaran) {
+                            return [
+                                'ID_PEMBAYARAN' => $pembayaran->ID_PEMBAYARAN,
+                                'ID_TAGIHAN_SISWA' => $pembayaran->ID_TAGIHAN_SISWA,
+                                'TGL_BAYAR' => $pembayaran->TGL_BAYAR,
+                                'JUMLAH_BAYAR' => (float) $pembayaran->JUMLAH_BAYAR,
+                                'NIP_VALIDATOR_PEMBAYARAN' => $pembayaran->NIP_VALIDATOR_PEMBAYARAN,
+
+                                'metode_pembayaran' => $pembayaran->metodePembayaran ? [
+                                    'ID_METODE_PEMBAYARAN' => $pembayaran->metodePembayaran->ID_METODE_PEMBAYARAN,
+                                    'DESKRIPSI_METODE_PEMBAYARAN' => $pembayaran->metodePembayaran->DESKRIPSI_METODE_PEMBAYARAN,
+                                ] : null,
+                            ];
+                        })
+                        ->values(),
+                ];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
             'message' => 'Daftar tagihan Anda berhasil diambil.',
-            'data'    => $tagihan,
+            'data' => $tagihan,
         ]);
     }
 }

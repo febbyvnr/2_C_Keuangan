@@ -470,7 +470,13 @@ function Tagihan() {
   const buildExportParams = () => {
     const params = new URLSearchParams();
 
-    if (search) params.append("search", search);
+    if (search.trim()) {
+      params.append("search", search.trim());
+    }
+
+    if (filterStatus && filterStatus !== "Semua") {
+      params.append("STATUS_TAGIHAN_SISWA", filterStatus);
+    }
 
     return params.toString();
   };
@@ -485,8 +491,9 @@ function Tagihan() {
     try {
       const token = localStorage.getItem("token");
 
+      const query = buildExportParams();
       const response = await axios.get(
-        "http://127.0.0.1:8000/api/tagihan-siswa/export/pdf",
+        `${API_BASE_URL}/tagihan-siswa/export/pdf${query ? `?${query}` : ""}`,
         {
           responseType: "blob",
           headers: {
@@ -739,6 +746,7 @@ function Tagihan() {
               <option value="Belum Bayar">Belum Bayar</option>
               <option value="Cicilan">Cicilan</option>
               <option value="Lunas">Lunas</option>
+              <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
             </select>
           </div>
 

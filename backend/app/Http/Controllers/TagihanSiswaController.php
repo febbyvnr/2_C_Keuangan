@@ -613,7 +613,14 @@ class TagihanSiswaController extends Controller
         }
 
         if (!empty($filters['STATUS_TAGIHAN_SISWA'])) {
-            $query->where('STATUS_TAGIHAN_SISWA', $filters['STATUS_TAGIHAN_SISWA']);
+            $status = $filters['STATUS_TAGIHAN_SISWA'];
+
+            $statusDatabase = match ($status) {
+                'Lunas' => 'Sudah Bayar',
+                default => $status,
+            };
+
+            $query->where('STATUS_TAGIHAN_SISWA', $statusDatabase);
         }
 
         if (!empty($filters['search'])) {

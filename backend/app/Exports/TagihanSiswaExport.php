@@ -104,7 +104,10 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
         }
 
         if (!empty($this->filters['STATUS_TAGIHAN_SISWA'])) {
-            $query->where('STATUS_TAGIHAN_SISWA', $this->filters['STATUS_TAGIHAN_SISWA']);
+            $query->where(
+                'STATUS_TAGIHAN_SISWA',
+                $this->getStatusDatabaseValue($this->filters['STATUS_TAGIHAN_SISWA'])
+            );
         }
 
         if (!empty($this->filters['search'])) {
@@ -123,7 +126,9 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         $rows = $data->map(function ($tagihan, $index) {
             $jumlahTagihan = (float) ($tagihan->JUMLAH_TAGIHAN_SISWA ?? 0);
-            $totalPembayaran = (float) ($tagihan->pembayaran->sum('JUMLAH_BAYAR') ?? 0);
+            $totalPembayaran = (float) $tagihan->pembayaran
+                ->whereNotNull('NIP_VALIDATOR_PEMBAYARAN')
+                ->sum('JUMLAH_BAYAR');
             $sisaTagihan = max(0, $jumlahTagihan - $totalPembayaran);
 
             return [
@@ -140,7 +145,7 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'JUMLAH_TAGIHAN_SISWA' => $jumlahTagihan,
                 'TOTAL_PEMBAYARAN' => $totalPembayaran,
                 'SISA_TAGIHAN' => $sisaTagihan, // ini akan tetap 0 kalau lunas
-                'STATUS_TAGIHAN_SISWA' => $tagihan->STATUS_TAGIHAN_SISWA,
+                'STATUS_TAGIHAN_SISWA' => $this->getStatusLabel($tagihan->STATUS_TAGIHAN_SISWA),
             ];
         });
 
@@ -354,5 +359,24 @@ class TagihanSiswaExport implements FromCollection, WithHeadings, ShouldAutoSize
         }
 
         return '-';
+    }
+
+    private function getStatusLabel($status): string
+    {
+        return match ($status) {
+            'Sudah Bayar' => 'Lunas',
+            'Menunggu Verifikasi' => 'Menunggu Verifikasi',
+            'Cicilan' => 'Cicilan',
+            'Belum Bayar' => 'Belum Bayar',
+            default => $status ?? '-',
+        };
+    }
+
+    private function getStatusDatabaseValue($status): string
+    {
+        return match ($status) {
+            'Lunas' => 'Sudah Bayar',
+            default => $status,
+        };
     }
 }
